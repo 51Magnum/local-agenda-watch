@@ -1,17 +1,24 @@
 "use client";
 import { useState } from "react";
 
-export default function ShareProject() {
+export default function ShareProject({ title, summary }: { title?: string; summary?: string }) {
   const [message, setMessage] = useState("");
   async function copyLink() {
+    const url = new URL(window.location.href);
+    url.hash = "";
+    url.search = "";
+    const share = { title: title ?? document.title, text: summary ?? "", url: url.href };
     try {
-      const url = new URL(window.location.href);
-      url.hash = "";
-      url.search = "";
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share(share);
+        setMessage("Share options opened");
+        return;
+      }
       await navigator.clipboard.writeText(url.href);
       setMessage("Link copied");
-    } catch {
-      setMessage("Copy the page address from your browser to share this project.");
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setMessage("Copy the page address from your browser to share this page.");
     }
   }
   return <div className="flex flex-wrap items-center gap-3">

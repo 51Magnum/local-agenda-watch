@@ -1,27 +1,21 @@
 import type { Metadata } from "next";
-import { getCaseNextHearing, caseSummary, staffReportLinks } from "@/lib/case-details";
+import { CaseVisuals } from "@/app/components/case-visuals";
+import { CASE_EVIDENCE } from "@/lib/case-evidence";
+import { getCaseNextHearing, caseSummary, staffReportLinks, displayTitle, uniqueAttachments } from "@/lib/case-details";
 import { ProjectNextStep } from "@/app/components/project-next-step";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCaseStage } from "@/lib/localities/stages";
 import { getProjectForCase } from "@/lib/projects";
 import { getLocalityContext, localityHref } from "@/lib/locality";
-import { findHearing, getLocality } from "@/lib/localities";
+import { getCaseRecord } from "@/lib/case-record";
+import { SITE_ORIGIN } from "@/lib/site-config";
+import ShareProject from "@/app/components/share-project";
+import { ProjectStatus } from "@/app/components/project-status";
 import type { Hearing } from "@/lib/localities";
 import type { EnerGovAttachment, EnerGovPlan } from "@/lib/sources/energov";
 
 type RouteParams = { planNumber: string };
-
-async function resolveHearing(planNumber: string): Promise<Hearing | null> {
-  const nampa = getLocality("nampa");
-  if (!nampa?.getHearings) return null;
-  const feed = await nampa.getHearings();
-  return (
-    findHearing(feed.active, planNumber) ??
-    findHearing(feed.completed, planNumber) ??
-    findHearing(feed.upcomingOnly ?? [], planNumber)
-  );
-}
 
 export async function generateMetadata({
   params,
@@ -29,14 +23,17 @@ export async function generateMetadata({
   params: Promise<RouteParams>;
 }): Promise<Metadata> {
   const { planNumber } = await params;
-  const hearing = await resolveHearing(planNumber);
-  if (!hearing) return { title: planNumber };
-  const title = hearing.appScope
-    ? `${hearing.appScope} (${hearing.appId})`
-    : `${hearing.appId} \u2014 ${hearing.appTypeLabel}`;
-  return {
-    title,
-    description: `${hearing.appTypeLabel} \u00b7 ${getCaseStage(hearing)} \u2014 filed with the City of Nampa.`,
+  const record = await getCaseRecord(planNumber);
+  if (!record) return { title: planNumber, robots: { index: false } };
+  const { hearing, plan, attachments } = record;
+  const title = displayTitle(hearing.appScope || plan?.Description || hearing.appTypeLabel) + " (" + hearing.appId + ")";
+  const summary = caseSummary(hearing, plan, attachments);
+  const canonical = SITE_ORIGIN + "/nampa/plan/" + encodeURIComponent(hearing.appId);
+  const project = getProjectForCase(hearing.appId);
+  const images = [SITE_ORIGIN + (project?.image ?? "/opengraph-image")];
+  return { title, description: summary, alternates: { canonical },
+    openGraph: { type: "website", title, description: summary, url: canonical, images },
+    twitter: { card: "summary_large_image", title, description: summary, images },
   };
 }
 
@@ -46,31 +43,14 @@ export default async function PlanPage({
   params: Promise<RouteParams>;
 }) {
   const { planNumber } = await params;
-  const nampa = getLocality("nampa");
-  if (!nampa || !nampa.energov) notFound();
-
-  const feed = await nampa.getHearings?.();
-  const hearing = feed && (findHearing(feed.active, planNumber) ?? findHearing(feed.completed, planNumber) ?? findHearing(feed.upcomingOnly ?? [], planNumber));
-  if (!hearing) notFound();
+  const record = await getCaseRecord(planNumber);
+  if (!record) notFound();
+  const { locality: nampa, feed, hearing, plan, attachments, attachmentsUnavailable } = record;
+  const stage = getCaseStage(hearing);
   const next = getCaseNextHearing(hearing, feed);
-  let attachmentsUnavailable = false;
-
+  const summary = caseSummary(hearing, plan, attachments);
   const project = getProjectForCase(hearing.appId);
   const planId = hearing.energovPlanId;
-  const client = nampa.energov;
-  const [plan, attachments]: [EnerGovPlan | null, EnerGovAttachment[]] = planId
-    ? await Promise.all([
-        client.getPlan(planId).catch((err: unknown) => {
-          console.error(`[nampa/plan] getPlan(${planId}) failed:`, err);
-          return null;
-        }),
-        client.getPlanAttachments(planId).catch((err: unknown) => {
-          attachmentsUnavailable = true;
-          console.error(`[nampa/plan] getPlanAttachments(${planId}) failed:`, err);
-          return [] as EnerGovAttachment[];
-        }),
-      ])
-    : [null, []];
 
   const ctx = await getLocalityContext();
   const onNampaSubdomain = ctx.onSubdomain && ctx.subdomainSlug === "nampa";
@@ -78,10 +58,10 @@ export default async function PlanPage({
   const fallbackPortal =
     nampa.portalUrl ?? "https://nampaid-energovpub.tylerhost.net/Apps/SelfService";
   const portalUrl = planId
-    ? nampa.energov.planPortalUrl(planId)
+    ? nampa.energov!.planPortalUrl(planId)
     : hearing.externalUrl ?? fallbackPortal;
   const attachmentsUrl = planId
-    ? nampa.energov.planPortalUrl(planId, "attachments")
+    ? nampa.energov!.planPortalUrl(planId, "attachments")
     : hearing.externalUrl ?? fallbackPortal;
 
   return (
@@ -101,8 +81,12 @@ export default async function PlanPage({
           <p className="text-sm text-zinc-600 dark:text-zinc-400">This case is part of one development proposal.</p>
           <Link href={localityHref("nampa", "/" + project.slug, ctx)} className="mt-2 inline-block font-semibold underline underline-offset-4">View {project.title}</Link>
         </aside>}
-        <PlanHeader hearing={hearing} plan={plan} />
-        <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />
+        <PlanHeader hearing={hearing} plan={plan} summary={summary} />
+        <ShareProject title={displayTitle(hearing.appScope || plan?.Description || hearing.appTypeLabel) + " (" + hearing.appId + ")"} summary={summary} />
+        <ProjectStatus stage={stage} links={{ "Under review": "#case-documents", "P&Z hearing": localityHref("nampa", "/meetings?case=" + hearing.appId + "&body=P%26Z", ctx), "Council hearing": localityHref("nampa", "/meetings?case=" + hearing.appId + "&body=City%20Council", ctx), "Decided": localityHref("nampa", "/meetings?case=" + hearing.appId, ctx) }} />
+        <Link href={localityHref("nampa", "/meetings?case=" + hearing.appId, ctx)} prefetch={false} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results for this case</Link>
+        {stage !== "Decided" && <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />}
+        <CaseVisuals visuals={CASE_EVIDENCE[hearing.appId]?.visuals} reportUrl={CASE_EVIDENCE[hearing.appId]?.reportUrl} />
         <PlanDocuments
           attachments={attachments}
           attachmentsUrl={attachmentsUrl}
@@ -138,15 +122,18 @@ export default async function PlanPage({
 function PlanHeader({
   hearing,
   plan,
+  summary,
 }: {
   hearing: Hearing;
   plan: EnerGovPlan | null;
+  summary: string;
 }) {
   const derived = plan
     ? [plan.PlanType, plan.Description].filter(Boolean).join(" \u2014 ") ||
       plan.PlanNumber
     : hearing.appTypeLabel;
-  const title = hearing.appScope || derived;
+  const officialTitle = hearing.appScope || derived;
+  const title = displayTitle(officialTitle);
   const planNumber = plan?.PlanNumber ?? hearing.appId;
   const status = getCaseStage(hearing);
   const address = plan?.MainAddress ?? null;
@@ -165,8 +152,9 @@ function PlanHeader({
       <h1 className="text-3xl font-semibold leading-tight tracking-tight text-black dark:text-zinc-50 sm:text-4xl">
         {title}
       </h1>
-      <p className="text-base leading-7 text-zinc-600 dark:text-zinc-400">{caseSummary(hearing, plan)}</p>
+      <p className="text-base leading-7 text-zinc-600 dark:text-zinc-400">{summary}</p>
       {status !== "Decided" && <p className="w-fit rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-200">Developer proposal, not yet approved.</p>}
+      <p className="text-sm text-zinc-500 dark:text-zinc-400"><span className="font-medium">Official title:</span> {officialTitle}</p>
       {address && (
         <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
           {address.replace(/\r?\n/g, " \u00b7 ")}
@@ -209,9 +197,6 @@ function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
               {m.agendaUrl && (
                 <a href={m.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-2 text-sm underline underline-offset-2">View agenda item &rarr;</a>
               )}
-              {m.staffReports?.map((report) => (
-                <a key={report.url} href={report.url} target="_blank" rel="noopener noreferrer" className="text-sm underline underline-offset-2">Staff report: {report.label}</a>
-              ))}
               {m.continuedNote && (
                 <span className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
                   {m.continuedNote}
@@ -340,7 +325,7 @@ function PlanDocuments({
   reports: { label: string; url: string }[];
 }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <section id="case-documents" className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Documents
@@ -368,14 +353,14 @@ function PlanDocuments({
         </p>
       ) : (
         <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          {attachments.filter((a) => !a.IsFileSecure && !/staff[\s_-]*report/i.test((a.Notes ?? "") + " " + a.FileName)).map((a) => (
+          {uniqueAttachments(attachments).filter((a) => !a.IsFileSecure && !/staff[\s_-]*report/i.test((a.Notes ?? "") + " " + a.FileName)).map((a) => (
             <li key={a.AttachmentID} className="flex flex-col gap-0.5 px-6 py-4">
               <span className="text-sm font-medium text-black dark:text-zinc-50">
                 {a.Notes || a.FileName}
               </span>
-              <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
+              {a.Notes && a.Notes.trim() !== a.FileName.trim() && <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
                 {a.FileName}
-              </span>
+              </span>}
             </li>
           ))}
         </ul>

@@ -47,6 +47,7 @@ export function parsePrimeGovMeetings(payload: unknown): AgendaMeeting[] {
     const docs: PrimeGovDocument[] = Array.isArray(row.documentList) ? row.documentList : [];
     const html = docs.find((d) => d.compileOutputType === 3 && /agenda/i.test(d.templateName));
     const agenda = html ?? docs.find((d) => /agenda/i.test(d.templateName));
+    const minutes = docs.find((d) => /minutes/i.test(d.templateName));
     const packet = docs.find((d) => /packet/i.test(d.templateName));
     const date = row.dateTime.slice(0, 10); // PrimeGov publishes Nampa wall time without an offset.
     return [{
@@ -62,6 +63,8 @@ export function parsePrimeGovMeetings(payload: unknown): AgendaMeeting[] {
       agendaUrl: agenda && documentUrl(agenda),
       htmlAgendaUrl: html && documentUrl(html),
       packetUrl: packet && documentUrl(packet),
+      minutesUrl: minutes && documentUrl(minutes),
+      videoUrl: recordingUrl(row.videoUrl),
       items: [],
     }];
   });
@@ -124,5 +127,50 @@ export async function getNampaPrimeGovMeetings(options: { revalidate?: number } 
   } catch (err) {
     console.error("[nampa:primegov] Upcoming meetings failed", err);
     return [];
+  }
+}
+
+
+function recordingUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  try { const url = new URL(value); return url.protocol === "https:" ? url.href : undefined; }
+  catch { return undefined; }
+}
+
+/** Archive failures are explicit; a missing agenda must not mean a case never appeared. */
+export async function getNampaMeetingArchive(year: number, filter: { caseId?: string; body?: string } = {}) {
+  const request = async (url: string) => {
+    const response = await fetch(url, { headers: { Accept: "application/json,text/html" },
+      signal: AbortSignal.timeout(15000), next: { revalidate: 3600, tags: ["nampa:archive"] } });
+    if (!response.ok) throw new Error("PrimeGov archive HTTP " + response.status);
+    return response;
+  };
+  try {
+    let meetings = parsePrimeGovMeetings(await (await request(NAMPA_PRIMEGOV_ORIGIN + "/api/v2/PublicPortal/ListArchivedMeetings?year=" + year)).json());
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+    meetings = meetings.filter((m) => m.date <= today && (!filter.body || m.body === filter.body) && !/attendance|state of the city/i.test(m.title));
+    let unsearched = 0;
+    if (filter.caseId) {
+      const matched: AgendaMeeting[] = [];
+      // Bound concurrency, while caching each official agenda across case searches.
+      for (let i = 0; i < meetings.length; i += 6) {
+        await Promise.all(meetings.slice(i, i + 6).map(async (meeting) => {
+          if (!meeting.htmlAgendaUrl) { unsearched++; return; }
+          try {
+            const items = parsePrimeGovAgenda(await (await request(meeting.htmlAgendaUrl)).text(), meeting.htmlAgendaUrl)
+              .filter((item) => item.caseIds.includes(filter.caseId!.toUpperCase()));
+            if (items.length) matched.push({ ...meeting, items });
+          } catch (err) {
+            unsearched++;
+            console.error("[nampa:archive] Agenda unavailable: " + meeting.id, err);
+          }
+        }));
+      }
+      meetings = matched;
+    }
+    return { meetings: meetings.sort((a, b) => b.date.localeCompare(a.date)), unavailable: false, unsearched };
+  } catch (err) {
+    console.error("[nampa:archive] Archive unavailable", err);
+    return { meetings: [], unavailable: true, unsearched: 0 };
   }
 }

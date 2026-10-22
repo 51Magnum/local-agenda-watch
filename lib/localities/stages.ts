@@ -8,7 +8,7 @@ export function getCaseStage(hearing: Hearing, completed = false, now = new Date
   const knownNext = project && getProjectNextHearing(project, { active: completed ? [] : [hearing], completed: completed ? [hearing] : [] }, now);
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
   const next = hearing.meetings.filter((m) => !m.continuedNote && m.date >= today).sort((a,b) => a.date.localeCompare(b.date))[0];
-  if (!completed && (next || knownNext)) return /council/i.test(next?.body ?? knownNext!.body) ? "Council hearing" : "P&Z hearing";
+  if (!completed && (next || knownNext)) return hearing.appPhase === "City Council" || /council/i.test(knownNext?.body ?? next?.body ?? "") ? "Council hearing" : "P&Z hearing";
   if (completed || /^(approved|denied|withdrawn|closed|completed)$/i.test(hearing.appStatus.trim()) || hearing.appPhase === "Recording") return "Decided";
   if (hearing.appPhase === "City Council") return "Council hearing";
   if (hearing.appPhase === "PZ Commission") return "P&Z hearing";

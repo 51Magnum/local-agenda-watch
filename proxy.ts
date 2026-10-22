@@ -17,6 +17,7 @@ export function proxy(request: NextRequest) {
   if (!LOCALITIES.has(subdomain)) return;
 
   const { pathname } = request.nextUrl;
+  if (["/robots.txt", "/sitemap.xml", "/about", "/contact", "/privacy"].includes(pathname)) return;
   const prefix = `/${subdomain}`;
 
   // Normalise `nampa.localagendawatch.com/nampa[/...]` to the clean subdomain

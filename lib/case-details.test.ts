@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { caseSummary, denverInstant, getCaseNextHearing, staffReportLinks } from "./case-details";
+import { caseSummary, denverInstant, getCaseNextHearing, staffReportLinks, displayTitle, projectNameFromFiles, uniqueAttachments, uniqueDocumentLinks } from "./case-details";
 import type { Hearing } from "./localities/types";
 import type { EnerGovAttachment, EnerGovPlan } from "./sources/energov";
 import { braeburnCreek, hearingCalendar } from "./projects";
@@ -35,7 +35,7 @@ describe("automatic case next step", () => {
   });
 
   it("supports PrimeGov-only cases and does not apply Council deadlines to other bodies", () => {
-    const primeCase = { ...hearing, meetings: [{ ...hearing.meetings[0], body: "P&Z", bodyLabel: "Planning & Zoning Commission", date: "2026-10-27", time: "18:00", sourceUrl: "https://nampa.primegov.com/public/portal", agendaUrl: "https://nampa.primegov.com/agenda", packetUrl: "https://nampa.primegov.com/packet" }] };
+    const primeCase = { ...hearing, appPhase: "PZ Commission" as const, meetings: [{ ...hearing.meetings[0], body: "P&Z", bodyLabel: "Planning & Zoning Commission", date: "2026-10-27", time: "18:00", sourceUrl: "https://nampa.primegov.com/public/portal", agendaUrl: "https://nampa.primegov.com/agenda", packetUrl: "https://nampa.primegov.com/packet" }] };
     const next = getCaseNextHearing(primeCase, undefined, now)!;
     expect(next.startsAt).toBe("2026-10-28T00:00:00.000Z");
     expect(next.commentDeadline).toBeUndefined();
@@ -59,7 +59,7 @@ describe("automatic case next step", () => {
 
 describe("case summaries and reports", () => {
   it("uses supplied name, type, acres, address and zoning without an AI-generated description", () => {
-    expect(caseSummary(hearing, null)).toBe("Nampa Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd to IL (light industrial).");
+    expect(caseSummary(hearing, null)).toBe("Northside Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd, Nampa, ID 83687 to IL (light industrial).");
     expect(caseSummary(hearing, { ProjectName: "Portal project", MainAddress: "17501 Northside Blvd\nNampa, ID" } as EnerGovPlan)).toContain("Portal project: annexation");
   });
 
@@ -73,6 +73,27 @@ describe("case summaries and reports", () => {
       { AttachmentID: "2", Notes: "Staff report", FileName: "Private.pdf", IsFileSecure: true },
       { AttachmentID: "3", Notes: "Site plan", FileName: "Site.pdf", IsFileSecure: false },
     ] as EnerGovAttachment[];
-    expect(staffReportLinks(hearing, attachments, "https://portal/attachments")).toEqual([{ label: "Staff report", url: "https://portal/attachments" }]);
+    expect(staffReportLinks({ ...hearing, appId: "ANN-99999-2026" }, attachments, "https://portal/attachments")).toEqual([{ label: "Staff report", url: "https://portal/attachments" }]);
+  });
+});
+
+
+describe("source-only naming and clean display titles", () => {
+  it("uses filenames rather than extracting a name from narrative text", () => {
+    expect(projectNameFromFiles("ANN-00369-2026", ["ANN-00369-2026_Northside Logistics Center_Application.pdf"])).toBe("Northside Logistics Center");
+    const unnamed = { ...hearing, appId: "ANN-99999-2026", appScope: "Annexation for Some Guessed Name" };
+    expect(caseSummary(unnamed, null)).toMatch(/^annexation of 1.69 acres/);
+    expect(caseSummary(unnamed, null)).not.toContain("Some Guessed Name:");
+  });
+  it("drops the city's acreage qualifier from the case type", () => {
+    expect(caseSummary(hearing, { PlanType: "Annexation (more than 1 acre)" } as EnerGovPlan)).toContain(": annexation of 1.69 acres");
+  });
+  it("repairs a small explicit typo list and whitespace", () => {
+    expect(displayTitle("Varience  and  Annexaation for zoniong in a Communit")).toBe("Variance and Annexation for zoning in a Community");
+  });
+  it("deduplicates equivalent filenames and report download/view URLs", () => {
+    const files = [{ FileName: "Staff Report.pdf", IsFileSecure: false }, { FileName: "staff report.PDF", IsFileSecure: false }] as EnerGovAttachment[];
+    expect(uniqueAttachments(files)).toHaveLength(1);
+    expect(uniqueDocumentLinks([{ label: "Download report", url: "https://nampa.primegov.com/file?historyId=123" }, { label: "View report", url: "https://nampa.primegov.com/view?uid=123" }])).toHaveLength(1);
   });
 });

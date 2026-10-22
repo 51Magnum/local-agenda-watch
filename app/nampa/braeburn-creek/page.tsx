@@ -3,10 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { getLocality } from "@/lib/localities";
 import { getLocalityContext, localityHref } from "@/lib/locality";
-import { braeburnCreek, getProjectNextHearing, getProjectStage, PROJECT_STAGES, PUBLIC_COMMENT_URL } from "@/lib/projects";
+import { braeburnCreek, getProjectNextHearing, getProjectStage, PUBLIC_COMMENT_URL } from "@/lib/projects";
 import { getProjectDocuments } from "@/lib/project-documents";
 import { ProjectNextStep } from "@/app/components/project-next-step";
 import { Glossary } from "@/app/components/glossary";
+import { ProjectStatus } from "@/app/components/project-status";
 import ShareProject from "@/app/components/share-project";
 
 const project = braeburnCreek;
@@ -40,19 +41,13 @@ export default async function BraeburnCreekPage() {
       <p className="text-lg text-zinc-600 dark:text-zinc-300">{project.location}</p>
       <p className="max-w-3xl text-base leading-8 text-zinc-600 dark:text-zinc-300">{project.summary}</p>
       <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-200">Developer proposal, not yet approved.</p>
-      <ShareProject />
+      <ShareProject title={project.title} summary={project.summary} />
     </header>
 
-    <section aria-labelledby="status-title">
-      <h2 id="status-title" className="text-xl font-semibold">Project status</h2>
-      <p className="mt-2 text-lg font-medium text-sky-700 dark:text-sky-300">{stage}</p>
-      <ol aria-label="Project stages" className="mt-4 flex flex-wrap gap-2 text-sm">
-        {PROJECT_STAGES.map((label) => <li key={label} aria-current={label === stage ? "step" : undefined} className={"rounded-full border px-3 py-1.5 " + (label === stage ? "border-sky-500 bg-sky-100 text-sky-950 dark:bg-sky-900 dark:text-sky-100" : "border-zinc-200 text-zinc-500 dark:border-zinc-800 dark:text-zinc-400")}>{label}</li>)}
-      </ol>
-      <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">A <Glossary term="P&Z" /> recommendation is separate from a Council decision. The city’s official records control.</p>
-    </section>
+    <ProjectStatus stage={stage} links={{ "Under review": "#cases-title", "P&Z hearing": localityHref("nampa", "/meetings?case=ANN-00371-2026&body=P%26Z", ctx), "Council hearing": localityHref("nampa", "/meetings?case=ANN-00371-2026&body=City%20Council", ctx) }} />
+    <Link href={localityHref("nampa", "/meetings?case=ANN-00371-2026", ctx)} prefetch={false} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results for Braeburn Creek</Link>
 
-    <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/braeburn-creek/hearing.ics", ctx)} />
+    {stage !== "Decided" && <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/braeburn-creek/hearing.ics", ctx)} />}
 
     <section aria-labelledby="location-title" className="flex flex-col gap-4">
       <h2 id="location-title" className="text-xl font-semibold">Where this is</h2>

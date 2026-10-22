@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
+import { SITE_ORIGIN } from "@/lib/site-config";
 import Link from "next/link";
 import { listLocalities, getTrackedCaseCount } from "@/lib/localities";
+
+export const metadata: Metadata = {
+  title: { absolute: "Nampa Rezoning, Annexation & Public Hearing Tracker | Local Agenda Watch" },
+  alternates: { canonical: SITE_ORIGIN + "/" },
+};
 
 export default async function Home() {
   const localities = await Promise.all(listLocalities().map(async (locality) => {

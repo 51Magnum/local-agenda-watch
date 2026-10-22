@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PENDING_AGENDA_MESSAGE } from "@/lib/case-details";
+import { PENDING_AGENDA_MESSAGE, displayTitle, getCaseNextHearing } from "@/lib/case-details";
 import { projectPathForCase, type ProjectStage } from "@/lib/projects";
 import { getCaseStage } from "@/lib/localities/stages";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import type {
 
 export const metadata: Metadata = {
   title: "Nampa, Idaho",
+  alternates: { canonical: "https://www.localagendawatch.com/nampa" },
   description:
     "Proposed developments and municipal items we're tracking in Nampa, Idaho.",
 };
@@ -26,6 +27,7 @@ type Entry = {
   blurb?: string;
   meta?: string;
   caseIds?: string[];
+  caseLinks?: { id: string; href: string }[];
 };
 
 function editorialEntry(item: TrackedItem, ctx: LocalityCtx): Entry {
@@ -39,13 +41,14 @@ function editorialEntry(item: TrackedItem, ctx: LocalityCtx): Entry {
 }
 
 function hearingEntry(h: Hearing, ctx: LocalityCtx, completed = false): Entry {
-  const label = h.appScope?.trim() || `${h.appTypeLabel} (${h.appId})`;
+  const label = displayTitle(h.appScope?.trim() || `${h.appTypeLabel} (${h.appId})`);
   const blurbParts: string[] = [];
-  // Meetings are sorted ascending; the last one is the currently-scheduled
-  // date (earlier entries may be continued/superseded).
-  const nextMeeting = h.meetings[h.meetings.length - 1];
-  if (nextMeeting) {
-    blurbParts.push(`${nextMeeting.bodyLabel} \u2014 ${nextMeeting.dateLabel}`);
+  const stage = getCaseStage(h, completed);
+  const nextMeeting = getCaseNextHearing(h);
+  if (stage === "Council hearing" && (!nextMeeting || !/council/i.test(nextMeeting.body))) {
+    blurbParts.push("Council date not set");
+  } else if (nextMeeting) {
+    blurbParts.push(nextMeeting.body + " — " + new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", year: "numeric", month: "long", day: "numeric" }).format(new Date(nextMeeting.startsAt.length === 10 ? nextMeeting.startsAt + "T12:00:00Z" : nextMeeting.startsAt)));
   }
   blurbParts.push(h.appTypeLabel);
   if (h.appAcres != null) blurbParts.push(`${h.appAcres.toFixed(2)} acres`);
@@ -56,7 +59,33 @@ function hearingEntry(h: Hearing, ctx: LocalityCtx, completed = false): Entry {
     label,
     blurb: blurbParts.join(" \u00b7 "),
     meta: h.appId,
+    caseLinks: [{ id: h.appId, href: localityHref("nampa", "/plan/" + encodeURIComponent(h.appId), ctx) }],
   };
+}
+
+function collapseEntries(entries: Entry[]): Entry[] {
+  const groups = new Map<string, Entry>();
+  for (const entry of entries) {
+    const key = entry.label.toLowerCase().replace(/\s+/g, " ").trim();
+    const existing = groups.get(key);
+    if (!existing) { groups.set(key, { ...entry }); continue; }
+    existing.caseLinks = [...new Map([...(existing.caseLinks ?? []), ...(entry.caseLinks ?? [])].map((c) => [c.id, c])).values()];
+    existing.blurb = [...new Set([...(existing.blurb?.split(" · ") ?? []), ...(entry.blurb?.split(" · ") ?? [])])].join(" · ");
+    existing.meta = undefined;
+  }
+  return [...groups.values()];
+}
+
+function groupMeetingCases(cases: Hearing[]) {
+  const groups = new Map<string, { label: string; cases: Hearing[] }>();
+  for (const hearing of cases) {
+    const label = displayTitle(hearing.appScope?.trim() || hearing.appTypeLabel);
+    const key = label.toLowerCase();
+    const group = groups.get(key) ?? { label, cases: [] };
+    group.cases.push(hearing);
+    groups.set(key, group);
+  }
+  return [...groups.values()];
 }
 
 const PHASE_ORDER: ProjectStage[] = ["Council hearing", "P&Z hearing", "Under review", "Submitted", "Decided"];
@@ -133,6 +162,7 @@ export default async function NampaHub() {
             </p>
           )}
 
+          <Link href={localityHref("nampa", "/meetings", ctx)} className="text-sm font-medium underline underline-offset-4">Browse past meetings, agendas &amp; results →</Link>
           {/* Upcoming meeting hero cards */}
           {upcoming.length > 0 && (
             <section>
@@ -265,22 +295,14 @@ function MeetingCard({
           </p>
         </div>
         <ul className="flex-1 divide-y divide-zinc-100 dark:divide-zinc-800">
-          {meeting.hearings.map((h) => {
-            const label = h.appScope?.trim() || `${h.appTypeLabel} (${h.appId})`;
-            return (
-              <li key={h.appId}>
-                <Link
-                  href={localityHref("nampa", projectPathForCase(h.appId), ctx)}
-                  className="group flex flex-col gap-0.5 py-2.5"
-                >
-                  <span className="line-clamp-2 text-sm font-medium text-black group-hover:text-zinc-600 dark:text-zinc-50 dark:group-hover:text-zinc-300">
-                    {label}
-                  </span>
-                  <span className="font-mono text-xs text-zinc-400">{h.appId}</span>
-                </Link>
-              </li>
-            );
-          })}
+          {groupMeetingCases(meeting.hearings).map((group) => (
+            <li key={group.cases[0].appId} className="py-2.5">
+              <p className="text-sm font-medium">{group.label}</p>
+              <div className="mt-1 flex flex-wrap gap-3">
+                {group.cases.map((h) => <Link key={h.appId} href={localityHref("nampa", projectPathForCase(h.appId), ctx)} className="font-mono text-xs text-zinc-500 underline underline-offset-2 dark:text-zinc-400">{h.appId}</Link>)}
+              </div>
+            </li>
+          ))}
         </ul>
         {meeting.agendaUrl && (
           <a href={meeting.agendaUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium underline underline-offset-2">View agenda &rarr;</a>
@@ -327,7 +349,7 @@ function PhaseAccordion({
         </span>
       </summary>
       <ul className="divide-y divide-zinc-100 border-t border-zinc-100 dark:divide-zinc-800/60 dark:border-zinc-800">
-        {entries.map((e) => (
+        {collapseEntries(entries).map((e) => (
           <li key={e.key}>
             <Link
               href={e.href}
@@ -349,6 +371,7 @@ function PhaseAccordion({
                 </span>
               )}
             </Link>
+            {(e.caseLinks?.length ?? 0) > 1 && <div className="flex flex-wrap gap-4 px-5 pb-4">{e.caseLinks!.map((c) => <Link key={c.id} href={c.href} className="font-mono text-xs underline underline-offset-2">{c.id}</Link>)}</div>}
           </li>
         ))}
       </ul>
@@ -375,7 +398,7 @@ function EntryList({
           : "divide-zinc-200 border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
       } ${className}`}
     >
-      {entries.map((e) => (
+      {collapseEntries(entries).map((e) => (
         <li key={e.key}>
           <Link
             href={e.href}
@@ -408,6 +431,7 @@ function EntryList({
               &rarr;
             </span>
           </Link>
+          {(e.caseLinks?.length ?? 0) > 1 && <div className="mb-4 flex flex-wrap gap-4">{e.caseLinks!.map((c) => <Link key={c.id} href={c.href} className="font-mono text-xs underline underline-offset-2">{c.id}</Link>)}</div>}
           {e.caseIds && ctx && (
             <div className="mb-4 flex flex-wrap gap-4">
               {e.caseIds.map((id) => (

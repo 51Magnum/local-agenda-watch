@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getNampaPrimeGovMeetings, NAMPA_PRIMEGOV_MEETINGS_URL, parsePrimeGovAgenda, parsePrimeGovMeetings } from "./primegov";
+import { getNampaMeetingArchive, getNampaPrimeGovMeetings, NAMPA_PRIMEGOV_MEETINGS_URL, parsePrimeGovAgenda, parsePrimeGovMeetings } from "./primegov";
 
 // Same fields and item markup as the public portal's October 27, 2026 agenda.
 const meeting = (over = {}) => ({
@@ -103,5 +103,53 @@ describe("getNampaPrimeGovMeetings", () => {
     expect(result[0].items).toEqual([]);
     expect(result[1].body).toBe("Arts & Historic Preservation");
     expect(log).toHaveBeenCalledTimes(1);
+  });
+});
+
+
+describe("meeting archive", () => {
+  const archived = (over = {}) => meeting({ dateTime: "2026-01-05T17:00:00", ...over });
+  it("links published minutes and recordings without treating recommendations as results", () => {
+    const result = parsePrimeGovMeetings([archived({ videoUrl: "https://youtube.com/watch?v=recording", documentList: [
+      { id: 23933, templateId: 8767, templateName: "Minutes", compileOutputType: 1, link: null },
+    ] })])[0];
+    expect(result.minutesUrl).toBe("https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=8767&compileOutputType=1");
+    expect(result.videoUrl).toBe("https://youtube.com/watch?v=recording");
+    expect(result.agendaUrl).toBeUndefined();
+    expect(parsePrimeGovMeetings([archived({ videoUrl: "javascript:alert(1)" })])[0].videoUrl).toBeUndefined();
+  });
+  it("returns past meetings newest first and excludes attendance notices", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json([
+      archived({ id: 1 }), archived({ id: 2, dateTime: "2026-02-03T18:00:00" }),
+      archived({ id: 3, title: "Notice of Possible Attendance" }),
+      archived({ id: 4, dateTime: "2099-01-05T18:00:00" }),
+    ])));
+    const result = await getNampaMeetingArchive(2026);
+    expect(result.meetings.map((m) => m.id)).toEqual(["2", "1"]);
+    expect(result.unavailable).toBe(false);
+  });
+  it("finds case appearances with agenda item and staff report links", async () => {
+    const fetcher = vi.fn().mockResolvedValueOnce(Response.json([archived()])).mockResolvedValueOnce(new Response(html));
+    vi.stubGlobal("fetch", fetcher);
+    const result = await getNampaMeetingArchive(2026, { caseId: "ANN-00361-2026", body: "P&Z" });
+    expect(fetcher.mock.calls[0][0]).toContain("ListArchivedMeetings?year=2026");
+    expect(result.meetings[0].items[0].agendaUrl).toContain("#AgendaItem_35685");
+    expect(result.meetings[0].items[0].staffReports[0].url).toContain("historyId=whitewater");
+    expect(result.meetings[0].minutesUrl).toBeUndefined();
+  });
+  it("reports incomplete searches and retains matches when another agenda fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(Response.json([
+      archived(), archived({ id: 2, documentList: [] }), archived({ id: 3 }),
+    ])).mockResolvedValueOnce(new Response(html)).mockResolvedValueOnce(new Response("bad", { status: 403 })));
+    const result = await getNampaMeetingArchive(2026, { caseId: "ANN-00361-2026" });
+    expect(result.meetings).toHaveLength(1);
+    expect(result.unsearched).toBe(2);
+    expect(result.unavailable).toBe(false);
+  });
+  it("reports archive outages explicitly", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    expect(await getNampaMeetingArchive(2026)).toEqual({ meetings: [], unavailable: true, unsearched: 0 });
   });
 });

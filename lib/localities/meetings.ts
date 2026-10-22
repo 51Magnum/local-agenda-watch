@@ -88,7 +88,7 @@ export function getUpcomingMeetings(
     }
   }
 
-  const out = Array.from(groups.values()).sort((a, b) =>
+  const out = Array.from(groups.values()).filter((m) => m.hearings.length > 0 || (!/attendance notice|state of the city|ceremony|reception/i.test(m.title ?? "") && (m.body === "P&Z" || m.body === "Arts & Historic Preservation" || /land[\s-]*use|annexation|rezone|rezoning|subdivision|zoning/i.test(m.title ?? "")))).sort((a, b) =>
     a.date.localeCompare(b.date),
   );
   return limit != null ? out.slice(0, limit) : out;

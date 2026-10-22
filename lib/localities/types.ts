@@ -57,6 +57,8 @@ export type AgendaMeeting = {
   sourceUrl: string;
   agendaUrl?: string;
   htmlAgendaUrl?: string;
+  minutesUrl?: string;
+  videoUrl?: string;
   packetUrl?: string;
   items: AgendaItem[];
 };

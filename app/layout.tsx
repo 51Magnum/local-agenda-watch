@@ -48,6 +48,11 @@ export default function RootLayout({
               &copy; {new Date().getFullYear()} Local Agenda Watch. Independent
               public-awareness project.
             </p>
+            <nav aria-label="Site information" className="mt-4 flex gap-5">
+              <Link href="/about" className="underline underline-offset-4">About</Link>
+              <Link href="/contact" className="underline underline-offset-4">Contact</Link>
+              <Link href="/privacy" className="underline underline-offset-4">Privacy</Link>
+            </nav>
           </div>
         </footer>
       </body>

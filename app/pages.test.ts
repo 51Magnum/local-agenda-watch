@@ -13,7 +13,7 @@ vi.mock("@/lib/locality", () => ({
 import { nampa } from "@/lib/localities/nampa";
 import Home from "./page";
 import NampaHub from "./nampa/page";
-import PlanPage from "./nampa/plan/[planNumber]/page";
+import PlanPage, { generateMetadata as caseMetadata } from "./nampa/plan/[planNumber]/page";
 import { getUpcomingMeetings } from "@/lib/localities/meetings";
 
 const feed: HearingFeed = {
@@ -220,6 +220,90 @@ describe("automatic case next step", () => {
     setup({ ...logistics, decisionRecorded: true });
     const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: logistics.appId }) }));
     expect(html).not.toContain("Developer proposal, not yet approved.");
-    expect(html).toContain("No hearing scheduled yet.");
+    expect(html).not.toContain('id="next-step-title"');
+  });
+});
+
+
+import sitemap from "./sitemap";
+import robots from "./robots";
+import ContactPage from "./contact/page";
+
+describe("case parity, hub cleanup and SEO", () => {
+  const record: Hearing = {
+    appId: "ANN-00369-2026", appType: "ANN", appTypeLabel: "Annexation", appStatus: "Pending", appPhase: "City Council", appPhaseRaw: "City Council",
+    appScope: "Annexaation to IL", appAcres: 1.69, externalUrl: null, energovPlanId: "bece9867-3585-444b-b9bc-f5702f95b5cc",
+    meetings: [{ body: "City Council", bodyLabel: "City Council", date: "2026-11-02", dateLabel: "November 2, 2026", time: "18:00", continuedNote: null, sourceUrl: "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings" }],
+  };
+  afterEach(() => vi.useRealTimers());
+  function setup(active: Hearing[] = [record], completed: Hearing[] = []) {
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-22T18:00:00Z"));
+    vi.spyOn(nampa, "getHearings").mockResolvedValue({ active, completed });
+    vi.spyOn(nampa.energov!, "getPlan").mockResolvedValue({ PlanType: "Annexation (more than 1 acre)", MainAddress: "17501 Northside Blvd, Nampa, ID 83687", PlanNumber: record.appId } as EnerGovPlan);
+    vi.spyOn(nampa.energov!, "getPlanAttachments").mockResolvedValue([
+      { AttachmentID: "1", FileName: "ANN-00369-2026_Northside Logistics Center_Application.pdf", IsFileSecure: false },
+      { AttachmentID: "2", FileName: "Site plan.pdf", IsFileSecure: false },
+      { AttachmentID: "3", FileName: "Site plan.pdf", IsFileSecure: false },
+    ] as EnerGovAttachment[]);
+  }
+
+  it("shows the exact sourced summary, shared controls, case metadata and original title", async () => {
+    setup();
+    const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: record.appId }) }));
+    const summary = "Northside Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd, Nampa, ID 83687 to IL (light industrial).";
+    expect(html).toContain(summary);
+    expect(html).toContain("Share with a neighbor");
+    expect(html).toMatch(/aria-current="step"[^>]*><a[^>]*>Council hearing/);
+    expect(html.indexOf("Share with a neighbor")).toBeLessThan(html.indexOf("Project status"));
+    expect(html.indexOf("Project status")).toBeLessThan(html.indexOf("Next step"));
+    expect(html).toContain("Official title:</span> Annexaation to IL");
+    expect(html).toContain(">Annexation to IL</h1>");
+    expect((html.match(/>Site plan.pdf</g) ?? [])).toHaveLength(1);
+    const meta = await caseMetadata({ params: Promise.resolve({ planNumber: record.appId }) });
+    expect(meta.description).toBe(summary);
+    expect(meta.alternates?.canonical).toBe("https://www.localagendawatch.com/nampa/plan/ANN-00369-2026");
+    expect(meta.openGraph).toMatchObject({ title: "Annexation to IL (ANN-00369-2026)", description: summary });
+  });
+
+  it("CUP-00411-2026 highlights Decided and hides Next step", async () => {
+    const decided = { ...record, appId: "CUP-00411-2026", appStatus: "Approved", appPhase: "PZ Commission" as const, meetings: [] };
+    setup([], [decided]);
+    const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: decided.appId }) }));
+    expect(html).toMatch(/aria-current="step"[^>]*><a[^>]*>Decided/);
+    expect(html).not.toContain('id="next-step-title"');
+    expect(html).not.toContain("Developer proposal, not yet approved.");
+  });
+
+  it("uses the project image while preserving a case's own title and canonical URL", async () => {
+    setup([{ ...record, appId: "ANN-00371-2026", appScope: "Braeburn annexation" }]);
+    const meta = await caseMetadata({ params: Promise.resolve({ planNumber: "ANN-00371-2026" }) });
+    expect(meta.openGraph).toMatchObject({ title: "Braeburn annexation (ANN-00371-2026)", images: ["https://www.localagendawatch.com/nampa/toll-brothers-site-map.webp"] });
+  });
+
+  it("hides irrelevant zero-case meetings, groups descriptions, and explains missing Council dates", async () => {
+    const shared = { ...record, appId: "ANN-00001-2026", appScope: "Identical proposal text", meetings: [{ ...record.meetings[0], body: "P&Z", bodyLabel: "Planning & Zoning Commission", date: "2026-09-29", dateLabel: "September 29, 2026" }] };
+    setup([shared, { ...shared, appId: "SPP-00001-2026" }]);
+    vi.mocked(nampa.getHearings!).mockResolvedValue({ active: [shared, { ...shared, appId: "SPP-00001-2026" }], completed: [], agendaMeetings: [{ id: "1", body: "City Council", bodyLabel: "City Council", title: "State of the City", date: "2026-10-22", dateLabel: "October 22, 2026", sourceUrl: "https://nampa.primegov.com", items: [] }] });
+    const html = renderToStaticMarkup(await NampaHub());
+    expect(html).not.toContain("State of the City");
+    expect(html).toContain("Council date not set");
+    expect(html).not.toContain("September 29, 2026");
+    expect((html.match(/>Identical proposal text</g) ?? [])).toHaveLength(1);
+    expect(html).toContain("ANN-00001-2026"); expect(html).toContain("SPP-00001-2026");
+  });
+
+  it("sitemap lists every project and active, completed and upcoming-only case", async () => {
+    setup();
+    vi.mocked(nampa.getHearings!).mockResolvedValue({ active: [record], completed: [{ ...record, appId: "CUP-00411-2026" }], upcomingOnly: [{ ...record, appId: "SPP-12345-2026" }] });
+    const urls = (await sitemap()).map((e) => e.url);
+    for (const path of ["/", "/nampa", "/nampa/braeburn-creek", "/nampa/plan/ANN-00369-2026", "/nampa/plan/CUP-00411-2026", "/nampa/plan/SPP-12345-2026", "/nampa/plan/ANN-00371-2026", "/nampa/plan/SPP-00184-2026"]) expect(urls).toContain("https://www.localagendawatch.com" + path);
+    expect(new Set(urls).size).toBe(urls.length);
+    expect(robots().sitemap).toBe("https://www.localagendawatch.com/sitemap.xml");
+  });
+
+  it("Contact uses the configured placeholder with no personal email or GitHub link", () => {
+    const html = renderToStaticMarkup(createElement(ContactPage));
+    expect(html).toContain("Contact details coming soon.");
+    expect(html).not.toContain("mailto:"); expect(html).not.toContain("github.com");
   });
 });
