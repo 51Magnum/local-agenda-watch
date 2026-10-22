@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { parseNampaScheduledHearings } from "./cityofnampa";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  getNampaScheduledHearings,
+  NAMPA_CIVICPLUS_HEARINGS_URL,
+  NAMPA_PUBLIC_HEARINGS_URL,
+  parseNampaScheduledHearings,
+} from "./cityofnampa";
 
 // Trimmed fixture of the live "Upcoming Public Hearings" section. Exercises:
 //  - single APPID per bullet
@@ -127,5 +132,72 @@ describe("parseNampaScheduledHearings", () => {
         "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings",
       );
     }
+  });
+});
+
+
+describe("getNampaScheduledHearings", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("uses CivicPlus first with browser headers and preserves public source URLs", async () => {
+    const fetcher = vi.fn().mockResolvedValue(new Response(FIXTURE));
+    vi.stubGlobal("fetch", fetcher);
+    const result = await getNampaScheduledHearings();
+    expect(result).toHaveLength(rows.length);
+    expect(result.every((r) => r.sourceUrl === NAMPA_PUBLIC_HEARINGS_URL)).toBe(true);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher).toHaveBeenCalledWith(NAMPA_CIVICPLUS_HEARINGS_URL, expect.objectContaining({
+      headers: expect.objectContaining({
+        "User-Agent": expect.stringContaining("Mozilla/5.0"),
+        Accept: expect.stringContaining("text/html"),
+        "Accept-Language": "en-US,en;q=0.9",
+      }),
+    }));
+  });
+
+  it.each([
+    ["403", () => new Response("Forbidden", { status: 403 })],
+    ["challenge HTML", () => new Response("<title>Just a moment...</title><script src='/cdn-cgi/challenge-platform/a'></script>")],
+    ["challenge header", () => new Response(FIXTURE, { headers: { "cf-mitigated": "challenge" } })],
+    ["unexpected page", () => new Response("<html>Service unavailable</html>")],
+  ])("logs %s as a failure and tries the public host", async (_name, response) => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetcher = vi.fn().mockResolvedValueOnce(response()).mockResolvedValueOnce(new Response(FIXTURE));
+    vi.stubGlobal("fetch", fetcher);
+    expect(await getNampaScheduledHearings()).toHaveLength(rows.length);
+    expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
+      NAMPA_CIVICPLUS_HEARINGS_URL, NAMPA_PUBLIC_HEARINGS_URL,
+    ]);
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log.mock.calls[0][0]).toContain(NAMPA_CIVICPLUS_HEARINGS_URL);
+    expect(log.mock.calls[0][1]).toBeInstanceOf(Error);
+  });
+
+  it("rejects rather than returning an empty list when both hosts fail", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response("Forbidden", { status: 403 }))
+      .mockResolvedValueOnce(new Response("<title>Just a moment...</title>")));
+    await expect(getNampaScheduledHearings()).rejects.toThrow("Meeting schedule temporarily unavailable");
+    expect(log).toHaveBeenCalledTimes(2);
+  });
+
+  it("falls back after a network error", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetcher = vi.fn().mockRejectedValueOnce(new Error("Network error"))
+      .mockResolvedValueOnce(new Response(FIXTURE));
+    vi.stubGlobal("fetch", fetcher);
+    expect(await getNampaScheduledHearings()).toHaveLength(rows.length);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it("accepts a valid schedule section with no listed cases", async () => {
+    const fetcher = vi.fn().mockResolvedValue(new Response("<h2>Upcoming Public Hearings</h2><p>None scheduled.</p>"));
+    vi.stubGlobal("fetch", fetcher);
+    expect(await getNampaScheduledHearings()).toEqual([]);
+    expect(fetcher).toHaveBeenCalledTimes(1);
   });
 });

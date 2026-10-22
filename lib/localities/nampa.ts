@@ -1,3 +1,5 @@
+import { getNampaPrimeGovMeetings } from "@/lib/sources/primegov";
+import { unstable_cache } from "next/cache";
 import { createEnerGovClient } from "@/lib/sources/energov";
 import { queryFeatures, type ArcGISLayerConfig } from "@/lib/sources/arcgis";
 import {
@@ -149,21 +151,26 @@ async function getNampaHearings(): Promise<HearingFeed> {
     "APPACRES",
     "APPLINK",
   ];
-  const [activeRaw, completedRaw, scheduledRaw] = await Promise.all([
+  let scheduleUnavailable = false;
+  const [activeRaw, completedRaw, scheduledRaw, agendaMeetings] = await Promise.all([
     queryFeatures<PZAttributes>(PZ_ACTIVE, {
       outFields,
       orderByFields: "APPID DESC",
       tag: "nampa:pz:active",
+      revalidate: 0,
     }),
     queryFeatures<PZAttributes>(PZ_COMPLETED, {
       outFields: [...outFields, "EFFCTDATE"],
       orderByFields: "EFFCTDATE DESC",
       tag: "nampa:pz:completed",
+      revalidate: 0,
     }),
-    getNampaScheduledHearings().catch((err: unknown) => {
+    getNampaScheduledHearings({ revalidate: 0 }).catch((err: unknown) => {
+      scheduleUnavailable = true;
       console.error("[nampa] getNampaScheduledHearings failed:", err);
       return [] as NampaScheduledHearing[];
     }),
+    getNampaPrimeGovMeetings({ revalidate: 0 }),
   ]);
   const byAppId = indexScheduledMeetings(scheduledRaw);
 
@@ -172,6 +179,32 @@ async function getNampaHearings(): Promise<HearingFeed> {
   const firstScheduled = new Map<string, NampaScheduledHearing>();
   for (const r of scheduledRaw) {
     if (!firstScheduled.has(r.appId)) firstScheduled.set(r.appId, r);
+  }
+
+  // Enrich matching hearings, merging the same body/date across the two sources.
+  // Preserve a CivicPlus continuance note when PrimeGov still lists the old item.
+  const agendaDescriptions = new Map<string, string>();
+  for (const meeting of agendaMeetings) {
+    for (const item of meeting.items) {
+      for (const appId of item.caseIds) {
+        agendaDescriptions.set(appId, item.title);
+        const meetings = byAppId.get(appId) ?? [];
+        const existing = meetings.find((m) => m.body === meeting.body && m.date === meeting.date);
+        if (existing) {
+          existing.agendaUrl = item.agendaUrl;
+          existing.staffReports = [...new Map([...(existing.staffReports ?? []), ...item.staffReports].map((r) => [r.url, r])).values()];
+        } else {
+          meetings.push({
+            body: meeting.body, bodyLabel: meeting.bodyLabel,
+            date: meeting.date, dateLabel: meeting.dateLabel,
+            continuedNote: null, sourceUrl: meeting.sourceUrl,
+            agendaUrl: item.agendaUrl, staffReports: item.staffReports,
+          });
+        }
+        meetings.sort((a, b) => a.date.localeCompare(b.date));
+        byAppId.set(appId, meetings);
+      }
+    }
   }
 
   const attach = (h: Hearing): Hearing => {
@@ -198,7 +231,7 @@ async function getNampaHearings(): Promise<HearingFeed> {
       appStatus: "Scheduled",
       appPhase: "Other",
       appPhaseRaw: "",
-      appScope: first?.description ?? null,
+      appScope: first?.description ?? agendaDescriptions.get(appId) ?? null,
       appAcres: null,
       externalUrl: null,
       energovPlanId: first?.energovPlanId ?? null,
@@ -207,8 +240,11 @@ async function getNampaHearings(): Promise<HearingFeed> {
   }
 
   return {
+    refreshedAt: new Date().toISOString(),
+    scheduleUnavailable,
+    agendaMeetings,
     active: activeRaw.map(mapAttrs).map(attach),
-    completed: completedRaw.map(mapAttrs).map(attach),
+    completed: completedRaw.map(mapAttrs).map(attach).map((h) => ({ ...h, decisionRecorded: true })),
     upcomingOnly,
   };
 }
@@ -223,11 +259,17 @@ export const nampa: Locality = {
   tracked: [
     {
       kind: "editorial",
-      slug: "toll-brothers-amity-happy-valley",
-      label: "Toll Brothers \u2014 500 homes at Amity & Happy Valley",
+      slug: "braeburn-creek",
+      label: "Braeburn Creek (Toll Brothers) — Amity & Happy Valley",
+      caseIds: ["ANN-00371-2026", "SPP-00184-2026"],
       blurb:
-        "Neighborhood meeting March 24, 2026 \u00b7 137 acres \u00b7 detached single-family",
+        "City Council November 2, 2026 · Proposed 487-home development",
     },
   ],
-  getHearings: getNampaHearings,
+  // Cache the snapshot and its timestamp together; underlying requests bypass
+  // their own cache so a new timestamp always represents a fresh retrieval.
+  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v3"], {
+    revalidate: 1800,
+    tags: ["nampa:pz:active", "nampa:pz:completed", "nampa:scheduled", "nampa:primegov"],
+  }),
 };

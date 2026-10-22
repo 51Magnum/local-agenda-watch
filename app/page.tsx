@@ -1,6 +1,16 @@
 import Link from "next/link";
+import { listLocalities, getTrackedCaseCount } from "@/lib/localities";
 
-export default function Home() {
+export default async function Home() {
+  const localities = await Promise.all(listLocalities().map(async (locality) => {
+    try {
+      const feed = await locality.getHearings?.();
+      return { locality, count: getTrackedCaseCount(locality, feed) };
+    } catch (err) {
+      console.error("[home] Could not load tracked cases for " + locality.slug, err);
+      return { locality, count: null };
+    }
+  }));
   return (
     <div className="flex flex-1 bg-zinc-50 font-sans dark:bg-black">
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-12 px-6 py-16 sm:py-24">
@@ -23,19 +33,21 @@ export default function Home() {
             Localities
           </h2>
           <ul className="divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-            <li>
-              <Link
-                href="/nampa"
-                className="flex items-center justify-between py-5 hover:text-black dark:hover:text-zinc-50"
-              >
-                <span className="font-medium text-black dark:text-zinc-50">
-                  Nampa, Idaho
-                </span>
-                <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                  1 item tracked &rarr;
-                </span>
-              </Link>
-            </li>
+            {localities.map(({ locality, count }) => (
+              <li key={locality.slug}>
+                <Link
+                  href={`/${locality.slug}`}
+                  className="flex items-center justify-between py-5 hover:text-black dark:hover:text-zinc-50"
+                >
+                  <span className="font-medium text-black dark:text-zinc-50">
+                    {locality.fullName}
+                  </span>
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {count === null ? "View tracked cases" : `${count} ${count === 1 ? "item" : "items"} tracked`} &rarr;
+                  </span>
+                </Link>
+              </li>
+            ))}
           </ul>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             More localities coming as we grow.

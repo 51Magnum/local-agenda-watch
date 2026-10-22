@@ -12,6 +12,8 @@ export type EditorialItem = {
   slug: string;
   label: string;
   blurb?: string;
+  /** Related city application numbers, linked from the hub. */
+  caseIds?: string[];
 };
 
 export type TrackedItem = EditorialItem;
@@ -34,7 +36,32 @@ export type HearingPhase =
  * may have several — e.g. an item continued from P&Z to a later P&Z, or that
  * passes P&Z and then goes on to City Council.
  */
+export type AgendaItem = {
+  title: string;
+  caseIds: string[];
+  agendaUrl: string;
+  staffReports: { label: string; url: string }[];
+};
+
+export type AgendaMeeting = {
+  id: string;
+  body: string;
+  bodyLabel: string;
+  title: string;
+  date: string;
+  dateLabel: string;
+  timeLabel?: string;
+  location?: string;
+  sourceUrl: string;
+  agendaUrl?: string;
+  htmlAgendaUrl?: string;
+  packetUrl?: string;
+  items: AgendaItem[];
+};
+
 export type ScheduledMeeting = {
+  agendaUrl?: string;
+  staffReports?: AgendaItem["staffReports"];
   /** Canonical body identifier, e.g. "P&Z" or "City Council". */
   body: string;
   /** Human label for the body, e.g. "Planning & Zoning Commission". */
@@ -50,6 +77,8 @@ export type ScheduledMeeting = {
 };
 
 export type Hearing = {
+  /** True when supplied by the city’s completed-applications layer. */
+  decisionRecorded?: boolean;
   /** Stable application id as displayed by the jurisdiction, e.g. "ANN-00352-2026". */
   appId: string;
   /** Short type code ("ZMA"). */
@@ -75,6 +104,10 @@ export type Hearing = {
 };
 
 export type HearingFeed = {
+  /** Timestamp of this cached application-data snapshot. */
+  refreshedAt?: string;
+  scheduleUnavailable?: boolean;
+  agendaMeetings?: AgendaMeeting[];
   active: Hearing[];
   completed: Hearing[];
   /**

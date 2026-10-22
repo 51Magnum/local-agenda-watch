@@ -11,6 +11,9 @@
 export const NAMPA_PUBLIC_HEARINGS_URL =
   "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings";
 
+export const NAMPA_CIVICPLUS_HEARINGS_URL =
+  "https://id-nampa2.civicplus.com/1433/Upcoming-Public-Hearings";
+
 const ENERGOV_GUID_RE =
   /\/plan\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 
@@ -139,9 +142,31 @@ export async function getNampaScheduledHearings(
   options: { revalidate?: number; tag?: string } = {},
 ): Promise<NampaScheduledHearing[]> {
   const { revalidate = 1800, tag = "nampa:scheduled" } = options;
-  const res = await fetch(NAMPA_PUBLIC_HEARINGS_URL, {
-    next: { revalidate, tags: [tag] },
-  });
-  if (!res.ok) throw new Error(`cityofnampa.us ${res.status}`);
-  return parseNampaScheduledHearings(await res.text());
+  const failures: unknown[] = [];
+  for (const url of [NAMPA_CIVICPLUS_HEARINGS_URL, NAMPA_PUBLIC_HEARINGS_URL]) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+        signal: AbortSignal.timeout(15000),
+        next: { revalidate, tags: [tag] },
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const html = await res.text();
+      if (/challenge/i.test(res.headers.get("cf-mitigated") ?? "") ||
+          /<title[^>]*>\s*(?:Just a moment|Attention Required)|cf-chl-|challenge-platform|Checking your browser|Performing security verification|Enable JavaScript and cookies to continue/i.test(html)) {
+        throw new Error("Cloudflare challenge page");
+      }
+      // A changed template or an interstitial is not a valid empty schedule.
+      if (!SECTION_RE.test(html)) throw new Error("Upcoming Public Hearings section missing");
+      return parseNampaScheduledHearings(html);
+    } catch (err) {
+      console.error("[nampa:scheduled] Failed to fetch " + url, err);
+      failures.push(err);
+    }
+  }
+  throw new AggregateError(failures, "Meeting schedule temporarily unavailable");
 }

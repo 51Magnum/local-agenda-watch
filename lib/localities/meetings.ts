@@ -6,6 +6,11 @@ import type { Hearing, HearingFeed } from "./types";
  * routes can iterate by meeting rather than by application.
  */
 export type UpcomingMeeting = {
+  title?: string;
+  agendaUrl?: string;
+  packetUrl?: string;
+  timeLabel?: string;
+  location?: string;
   /** Canonical body identifier, e.g. "P&Z" or "City Council". */
   body: string;
   /** Human label for the body, e.g. "Planning & Zoning Commission". */
@@ -49,6 +54,16 @@ export function getUpcomingMeetings(
   const cutoff = todayIso(now);
 
   const groups = new Map<string, UpcomingMeeting>();
+  for (const m of feed.agendaMeetings ?? []) {
+    if (m.date < cutoff) continue;
+    const key = m.body + "|" + m.date;
+    if (!groups.has(key)) groups.set(key, {
+      body: m.body, bodyLabel: m.bodyLabel, date: m.date, dateLabel: m.dateLabel,
+      title: m.title, sourceUrl: m.sourceUrl, agendaUrl: m.agendaUrl,
+      packetUrl: m.packetUrl, timeLabel: m.timeLabel, location: m.location,
+      hearings: [],
+    });
+  }
   const sources = [...feed.active, ...(feed.upcomingOnly ?? [])];
   for (const hearing of sources) {
     for (const m of hearing.meetings) {
@@ -67,7 +82,7 @@ export function getUpcomingMeetings(
         };
         groups.set(key, group);
       }
-      group.hearings.push(hearing);
+      if (!group.hearings.some((h) => h.appId === hearing.appId)) group.hearings.push(hearing);
     }
   }
 

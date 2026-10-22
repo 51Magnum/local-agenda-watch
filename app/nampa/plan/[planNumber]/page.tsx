@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getCaseStage } from "@/lib/localities/stages";
+import { getProjectForCase } from "@/lib/projects";
 import { getLocalityContext, localityHref } from "@/lib/locality";
 import { findHearing, getLocality } from "@/lib/localities";
 import type { Hearing } from "@/lib/localities";
@@ -32,7 +34,7 @@ export async function generateMetadata({
     : `${hearing.appId} \u2014 ${hearing.appTypeLabel}`;
   return {
     title,
-    description: `${hearing.appTypeLabel} \u00b7 ${hearing.appStatus} \u2014 filed with the City of Nampa.`,
+    description: `${hearing.appTypeLabel} \u00b7 ${getCaseStage(hearing)} \u2014 filed with the City of Nampa.`,
   };
 }
 
@@ -48,6 +50,7 @@ export default async function PlanPage({
   const hearing = await resolveHearing(planNumber);
   if (!hearing) notFound();
 
+  const project = getProjectForCase(hearing.appId);
   const planId = hearing.energovPlanId;
   const client = nampa.energov;
   const [plan, attachments]: [EnerGovPlan | null, EnerGovAttachment[]] = planId
@@ -88,6 +91,10 @@ export default async function PlanPage({
           <Link href={nampaHref} className="hover:text-black dark:hover:text-zinc-50">Nampa</Link>
         </nav>
 
+        {project && <aside className="rounded-xl border border-sky-200 bg-sky-50 p-5 dark:border-sky-800 dark:bg-sky-950/30">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">This case is part of one development proposal.</p>
+          <Link href={localityHref("nampa", "/" + project.slug, ctx)} className="mt-2 inline-block font-semibold underline underline-offset-4">View {project.title}</Link>
+        </aside>}
         <PlanHeader hearing={hearing} plan={plan} />
         {hearing.meetings.length > 0 && <OnTheAgendaCard hearing={hearing} />}
         {plan ? <PlanStatusCard plan={plan} /> : <HearingStatusCard hearing={hearing} />}
@@ -132,7 +139,7 @@ function PlanHeader({
     : hearing.appTypeLabel;
   const title = hearing.appScope || derived;
   const planNumber = plan?.PlanNumber ?? hearing.appId;
-  const status = plan?.PlanStatus ?? hearing.appStatus;
+  const status = getCaseStage(hearing);
   const address = plan?.MainAddress ?? null;
   return (
     <header className="flex flex-col gap-4">
@@ -143,11 +150,6 @@ function PlanHeader({
         {status && (
           <span className="inline-flex items-center rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-sky-900 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300">
             {status}
-          </span>
-        )}
-        {hearing.appPhase !== "Other" && (
-          <span className="inline-flex items-center rounded-full border border-zinc-300 bg-zinc-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-            {hearing.appPhase}
           </span>
         )}
       </div>
@@ -179,7 +181,7 @@ function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
             rel="noopener noreferrer"
             className="text-xs font-medium text-amber-700 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-200"
           >
-            City hearings page &rarr;
+            Meeting source &rarr;
           </a>
         )}
       </div>
@@ -193,6 +195,12 @@ function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
               <span className="text-sm text-amber-800 dark:text-amber-300">
                 {m.bodyLabel}
               </span>
+              {m.agendaUrl && (
+                <a href={m.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-2 text-sm underline underline-offset-2">View agenda item &rarr;</a>
+              )}
+              {m.staffReports?.map((report) => (
+                <a key={report.url} href={report.url} target="_blank" rel="noopener noreferrer" className="text-sm underline underline-offset-2">Staff report: {report.label}</a>
+              ))}
               {m.continuedNote && (
                 <span className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
                   {m.continuedNote}
@@ -214,8 +222,7 @@ function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
 function HearingStatusCard({ hearing }: { hearing: Hearing }) {
   const candidates: Array<[string, string | null]> = [
     ["Type", hearing.appTypeLabel],
-    ["Status", hearing.appStatus],
-    ["Phase", hearing.appPhase === "Other" ? hearing.appPhaseRaw : hearing.appPhase],
+    ["Stage", getCaseStage(hearing)],
     ["Acres", hearing.appAcres != null ? hearing.appAcres.toFixed(2) : null],
   ];
   const items = candidates.filter(

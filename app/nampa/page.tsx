@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { projectPathForCase, type ProjectStage } from "@/lib/projects";
+import { getCaseStage } from "@/lib/localities/stages";
 import Link from "next/link";
 import { getLocalityContext, localityHref } from "@/lib/locality";
 import { getLocality, getUpcomingMeetings } from "@/lib/localities";
 import type {
   Hearing,
-  HearingPhase,
   TrackedItem,
   UpcomingMeeting,
 } from "@/lib/localities";
@@ -23,6 +24,7 @@ type Entry = {
   label: string;
   blurb?: string;
   meta?: string;
+  caseIds?: string[];
 };
 
 function editorialEntry(item: TrackedItem, ctx: LocalityCtx): Entry {
@@ -31,10 +33,11 @@ function editorialEntry(item: TrackedItem, ctx: LocalityCtx): Entry {
     href: localityHref("nampa", `/${item.slug}`, ctx),
     label: item.label,
     blurb: item.blurb,
+    caseIds: item.caseIds,
   };
 }
 
-function hearingEntry(h: Hearing, ctx: LocalityCtx): Entry {
+function hearingEntry(h: Hearing, ctx: LocalityCtx, completed = false): Entry {
   const label = h.appScope?.trim() || `${h.appTypeLabel} (${h.appId})`;
   const blurbParts: string[] = [];
   // Meetings are sorted ascending; the last one is the currently-scheduled
@@ -45,45 +48,26 @@ function hearingEntry(h: Hearing, ctx: LocalityCtx): Entry {
   }
   blurbParts.push(h.appTypeLabel);
   if (h.appAcres != null) blurbParts.push(`${h.appAcres.toFixed(2)} acres`);
-  if (h.appStatus) blurbParts.push(h.appStatus);
+  blurbParts.push(getCaseStage(h, completed));
   return {
     key: `hearing:${h.appId}`,
-    href: localityHref("nampa", `/plan/${encodeURIComponent(h.appId)}`, ctx),
+    href: localityHref("nampa", projectPathForCase(h.appId), ctx),
     label,
     blurb: blurbParts.join(" \u00b7 "),
     meta: h.appId,
   };
 }
 
-/**
- * Active hearings are bucketed by phase for the hub. PZ Commission / City
- * Council are shown first (closest to a public hearing), then Notification,
- * Review, and finally anything unrecognised.
- */
-const PHASE_ORDER: HearingPhase[] = [
-  "City Council",
-  "PZ Commission",
-  "Notification",
-  "Review",
-  "Recording",
-  "Other",
-];
+const PHASE_ORDER: ProjectStage[] = ["Council hearing", "P&Z hearing", "Under review", "Submitted", "Decided"];
+const PHASE_HEADINGS = Object.fromEntries(PHASE_ORDER.map((stage) => [stage, stage])) as Record<ProjectStage, string>;
 
-const PHASE_HEADINGS: Record<HearingPhase, string> = {
-  "City Council": "At City Council",
-  "PZ Commission": "At P&Z Commission",
-  Notification: "Public notification",
-  Review: "In staff review",
-  Recording: "Awaiting recording",
-  Other: "Other",
-};
-
-function groupByPhase(hearings: Hearing[]): Map<HearingPhase, Hearing[]> {
-  const buckets = new Map<HearingPhase, Hearing[]>();
+function groupByPhase(hearings: Hearing[]): Map<ProjectStage, Hearing[]> {
+  const buckets = new Map<ProjectStage, Hearing[]>();
   for (const h of hearings) {
-    const list = buckets.get(h.appPhase) ?? [];
+    const stage = getCaseStage(h);
+    const list = buckets.get(stage) ?? [];
     list.push(h);
-    buckets.set(h.appPhase, list);
+    buckets.set(stage, list);
   }
   return buckets;
 }
@@ -98,13 +82,13 @@ export default async function NampaHub() {
   );
 
   const feed = nampa?.getHearings ? await nampa.getHearings() : null;
-  const upcoming = feed ? getUpcomingMeetings(feed, { limit: 3 }) : [];
+  const upcoming = feed ? getUpcomingMeetings(feed) : [];
   const activeBuckets = feed ? groupByPhase(feed.active) : null;
   const populatedPhases = activeBuckets
     ? PHASE_ORDER.filter((p) => (activeBuckets.get(p)?.length ?? 0) > 0)
     : [];
   const completedEntries: Entry[] = feed
-    ? feed.completed.slice(0, 10).map((h) => hearingEntry(h, ctx))
+    ? feed.completed.slice(0, 10).map((h) => hearingEntry(h, ctx, true))
     : [];
 
   return (
@@ -138,10 +122,20 @@ export default async function NampaHub() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
         <div className="flex flex-col gap-16">
 
+          {feed?.scheduleUnavailable && (
+            <p role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+              Meeting schedule temporarily unavailable. Check the{" "}
+              <a href="https://www.cityofnampa.us/1433/Upcoming-Public-Hearings" className="underline underline-offset-2">
+                City of Nampa public hearings page
+              </a>{" "}
+              for the latest hearing schedule. Available PrimeGov meetings are shown below.
+            </p>
+          )}
+
           {/* Upcoming meeting hero cards */}
           {upcoming.length > 0 && (
             <section>
-              <SectionLabel>Next public hearings</SectionLabel>
+              <SectionLabel>Upcoming meetings &amp; public hearings</SectionLabel>
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {upcoming.map((m) => (
                   <MeetingCard key={`${m.body}|${m.date}`} meeting={m} ctx={ctx} />
@@ -154,7 +148,7 @@ export default async function NampaHub() {
           {editorialEntries.length > 0 && (
             <section>
               <SectionLabel>We&rsquo;re watching</SectionLabel>
-              <EntryList entries={editorialEntries} className="mt-6" />
+              <EntryList entries={editorialEntries} className="mt-6" ctx={ctx} />
             </section>
           )}
 
@@ -196,6 +190,19 @@ export default async function NampaHub() {
           )}
 
           <footer className="border-t border-zinc-200 pt-6 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+            {feed?.refreshedAt && (
+              <p className="mb-2">
+                Data last refreshed:{" "}
+                <time dateTime={feed.refreshedAt}>
+                  {new Intl.DateTimeFormat("en-US", {
+                    timeZone: "America/Denver",
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }).format(new Date(feed.refreshedAt))}
+                </time>{" "}(America/Denver)
+                {feed.scheduleUnavailable && " · Application data only; meeting schedule unavailable."}
+              </p>
+            )}
             {nampa?.dataAttribution ?? null}
             {nampa?.dataAttribution && " \u00b7 "}
             Data refreshes automatically. Local Agenda Watch is an independent
@@ -248,9 +255,12 @@ function MeetingCard({
           <time className="block text-2xl font-bold tracking-tight text-black dark:text-zinc-50">
             {meeting.dateLabel}
           </time>
+          {meeting.title && <p className="mt-2 text-sm font-medium">{meeting.title}</p>}
+          {meeting.timeLabel && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{meeting.timeLabel} (America/Denver)</p>}
+          {meeting.location && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{meeting.location}</p>}
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             {meeting.hearings.length}{" "}
-            {meeting.hearings.length === 1 ? "item" : "items"} up for public hearing
+            {meeting.hearings.length === 1 ? "linked case" : "linked cases"}
           </p>
         </div>
         <ul className="flex-1 divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -259,7 +269,7 @@ function MeetingCard({
             return (
               <li key={h.appId}>
                 <Link
-                  href={localityHref("nampa", `/plan/${encodeURIComponent(h.appId)}`, ctx)}
+                  href={localityHref("nampa", projectPathForCase(h.appId), ctx)}
                   className="group flex flex-col gap-0.5 py-2.5"
                 >
                   <span className="line-clamp-2 text-sm font-medium text-black group-hover:text-zinc-600 dark:text-zinc-50 dark:group-hover:text-zinc-300">
@@ -271,6 +281,12 @@ function MeetingCard({
             );
           })}
         </ul>
+        {meeting.agendaUrl && (
+          <a href={meeting.agendaUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium underline underline-offset-2">View agenda &rarr;</a>
+        )}
+        {meeting.packetUrl && (
+          <a href={meeting.packetUrl} target="_blank" rel="noopener noreferrer" className="text-sm underline underline-offset-2">Meeting packet &rarr;</a>
+        )}
         <a
           href={meeting.sourceUrl}
           target="_blank"
@@ -342,10 +358,12 @@ function EntryList({
   entries,
   muted,
   className = "",
+  ctx,
 }: {
   entries: Entry[];
   muted?: boolean;
   className?: string;
+  ctx?: LocalityCtx;
 }) {
   return (
     <ul
@@ -388,6 +406,15 @@ function EntryList({
               &rarr;
             </span>
           </Link>
+          {e.caseIds && ctx && (
+            <div className="mb-4 flex flex-wrap gap-4">
+              {e.caseIds.map((id) => (
+                <Link key={id} href={localityHref("nampa", `/plan/${encodeURIComponent(id)}`, ctx)} className="font-mono text-sm underline underline-offset-2">
+                  {id}
+                </Link>
+              ))}
+            </div>
+          )}
         </li>
       ))}
     </ul>
