@@ -164,3 +164,62 @@ describe("Braeburn Creek project page", () => {
     expect(await response.text()).toContain("DTSTART:20261103T010000Z");
   });
 });
+
+
+import { GET as caseCalendarGET } from "./nampa/plan/[planNumber]/hearing.ics/route";
+import type { Hearing } from "@/lib/localities/types";
+import type { EnerGovAttachment, EnerGovPlan } from "@/lib/sources/energov";
+
+describe("automatic case next step", () => {
+  const logistics: Hearing = {
+    appId: "ANN-00369-2026", appType: "ANN", appTypeLabel: "Annexation", appStatus: "Pending", appPhase: "City Council", appPhaseRaw: "City Council",
+    appScope: "Nampa Logistics Center", appAcres: 1.69, externalUrl: null, energovPlanId: "bece9867-3585-444b-b9bc-f5702f95b5cc",
+    meetings: [{ body: "City Council", bodyLabel: "City Council", date: "2026-11-02", dateLabel: "November 2, 2026", time: "18:00", continuedNote: null, sourceUrl: "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings" }],
+  };
+  afterEach(() => vi.useRealTimers());
+  function setup(record = logistics) {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-22T18:00:00Z"));
+    vi.spyOn(nampa, "getHearings").mockResolvedValue({ active: [record], completed: [] });
+    vi.spyOn(nampa.energov!, "getPlan").mockResolvedValue({ ProjectName: "Nampa Logistics Center", PlanNumber: record.appId, PlanType: "Annexation", MainAddress: "17501 Northside Blvd", Description: "Annexation to IL" } as EnerGovPlan);
+    vi.spyOn(nampa.energov!, "getPlanAttachments").mockResolvedValue([
+      { AttachmentID: "site", Notes: "Site plan", FileName: "Site.pdf", IsFileSecure: false },
+      { AttachmentID: "staff", Notes: "Staff report", FileName: "Staff.pdf", IsFileSecure: false },
+    ] as EnerGovAttachment[]);
+  }
+
+  it("shows ANN-00369-2026's Nov 2 next step, pending agenda, comment deadline, and calendar", async () => {
+    setup();
+    const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: logistics.appId }) }));
+    expect(html).toContain("Next step");
+    expect(html).toContain("Monday, November 2, 2026");
+    expect(html).toContain("6:00 PM MST (America/Denver)");
+    expect(html).toContain("12:00 PM MST");
+    expect(html).toContain("confirm with the published agenda");
+    expect(html).toContain("Agenda usually posted the Thursday before the meeting");
+    expect(html).toContain('href="/nampa/plan/ANN-00369-2026/hearing.ics"');
+    expect(html).toContain("Developer proposal, not yet approved.");
+    expect(html).toContain("Nampa Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd to IL (light industrial).");
+    expect(html.indexOf("Staff report:")).toBeLessThan(html.indexOf("Site plan"));
+    expect(html.indexOf("Documents")).toBeLessThan(html.indexOf("Case status"));
+    const response = await caseCalendarGET(new Request("http://localhost/calendar"), { params: Promise.resolve({ planNumber: logistics.appId }) });
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain("DTSTART:20261103T010000Z");
+    expect(renderToStaticMarkup(await NampaHub())).toContain("Agenda usually posted the Thursday before the meeting");
+  });
+
+  it("shows official agenda and packet links when published", async () => {
+    setup({ ...logistics, meetings: [{ ...logistics.meetings[0], agendaUrl: "https://nampa.primegov.com/agenda", packetUrl: "https://nampa.primegov.com/packet" }] });
+    const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: logistics.appId }) }));
+    expect(html).toContain('href="https://nampa.primegov.com/agenda"');
+    expect(html).toContain('href="https://nampa.primegov.com/packet"');
+    expect(html).not.toContain("Agenda usually posted the Thursday before the meeting");
+  });
+
+  it("does not label a decided case as an unapproved proposal", async () => {
+    setup({ ...logistics, decisionRecorded: true });
+    const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: logistics.appId }) }));
+    expect(html).not.toContain("Developer proposal, not yet approved.");
+    expect(html).toContain("No hearing scheduled yet.");
+  });
+});

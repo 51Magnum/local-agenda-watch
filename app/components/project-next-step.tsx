@@ -1,3 +1,4 @@
+import { PENDING_AGENDA_MESSAGE } from "@/lib/case-details";
 import { formatDenverDate, formatDenverTime, PUBLIC_COMMENT_URL, type ProjectHearing } from "@/lib/projects";
 
 export function ProjectNextStep({ hearing, calendarHref }: { hearing?: ProjectHearing; calendarHref: string }) {
@@ -19,6 +20,9 @@ export function ProjectNextStep({ hearing, calendarHref }: { hearing?: ProjectHe
         {hearing.startsAt.length > 10 && <a href={calendarHref} className="underline underline-offset-4">Add hearing to calendar (.ics)</a>}
         <a href={hearing.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Official hearing schedule</a>
       </div>
+      {hearing.agendaUrl && <a href={hearing.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">View official agenda</a>}
+      {hearing.packetUrl && <a href={hearing.packetUrl} target="_blank" rel="noopener noreferrer" className="ml-4 mt-4 inline-block text-sm font-medium underline underline-offset-4">View official meeting packet</a>}
+      {!hearing.agendaUrl && <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">{PENDING_AGENDA_MESSAGE}</p>}
       <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-400">Individual items may be heard after the public hearing start time. Dates and agendas can change.</p>
     </> : <>
       <p className="mt-3 font-medium">No hearing scheduled yet.</p>

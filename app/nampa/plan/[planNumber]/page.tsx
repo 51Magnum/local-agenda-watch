@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getCaseNextHearing, caseSummary, staffReportLinks } from "@/lib/case-details";
+import { ProjectNextStep } from "@/app/components/project-next-step";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCaseStage } from "@/lib/localities/stages";
@@ -47,8 +49,11 @@ export default async function PlanPage({
   const nampa = getLocality("nampa");
   if (!nampa || !nampa.energov) notFound();
 
-  const hearing = await resolveHearing(planNumber);
+  const feed = await nampa.getHearings?.();
+  const hearing = feed && (findHearing(feed.active, planNumber) ?? findHearing(feed.completed, planNumber) ?? findHearing(feed.upcomingOnly ?? [], planNumber));
   if (!hearing) notFound();
+  const next = getCaseNextHearing(hearing, feed);
+  let attachmentsUnavailable = false;
 
   const project = getProjectForCase(hearing.appId);
   const planId = hearing.energovPlanId;
@@ -60,6 +65,7 @@ export default async function PlanPage({
           return null;
         }),
         client.getPlanAttachments(planId).catch((err: unknown) => {
+          attachmentsUnavailable = true;
           console.error(`[nampa/plan] getPlanAttachments(${planId}) failed:`, err);
           return [] as EnerGovAttachment[];
         }),
@@ -96,14 +102,17 @@ export default async function PlanPage({
           <Link href={localityHref("nampa", "/" + project.slug, ctx)} className="mt-2 inline-block font-semibold underline underline-offset-4">View {project.title}</Link>
         </aside>}
         <PlanHeader hearing={hearing} plan={plan} />
-        {hearing.meetings.length > 0 && <OnTheAgendaCard hearing={hearing} />}
-        {plan ? <PlanStatusCard plan={plan} /> : <HearingStatusCard hearing={hearing} />}
-        {plan && <PlanLocation plan={plan} />}
+        <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />
         <PlanDocuments
           attachments={attachments}
           attachmentsUrl={attachmentsUrl}
-          hasPlan={Boolean(plan)}
+          hasPlan={Boolean(planId)}
+          unavailable={attachmentsUnavailable}
+          reports={staffReportLinks(hearing, attachments, attachmentsUrl)}
         />
+        {hearing.meetings.length > 0 && <OnTheAgendaCard hearing={hearing} />}
+        {plan ? <PlanStatusCard plan={plan} /> : <HearingStatusCard hearing={hearing} />}
+        {plan && <PlanLocation plan={plan} />}
 
         <footer className="border-t border-zinc-200 pt-6 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
           <p>
@@ -156,6 +165,8 @@ function PlanHeader({
       <h1 className="text-3xl font-semibold leading-tight tracking-tight text-black dark:text-zinc-50 sm:text-4xl">
         {title}
       </h1>
+      <p className="text-base leading-7 text-zinc-600 dark:text-zinc-400">{caseSummary(hearing, plan)}</p>
+      {status !== "Decided" && <p className="w-fit rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-200">Developer proposal, not yet approved.</p>}
       {address && (
         <p className="text-lg leading-8 text-zinc-600 dark:text-zinc-400">
           {address.replace(/\r?\n/g, " \u00b7 ")}
@@ -319,10 +330,14 @@ function PlanDocuments({
   attachments,
   attachmentsUrl,
   hasPlan,
+  unavailable,
+  reports,
 }: {
   attachments: EnerGovAttachment[];
   attachmentsUrl: string;
   hasPlan: boolean;
+  unavailable: boolean;
+  reports: { label: string; url: string }[];
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
@@ -339,7 +354,10 @@ function PlanDocuments({
           Open in portal &rarr;
         </a>
       </div>
-      {!hasPlan ? (
+      {reports.length > 0 && <ul aria-label="Staff reports" className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        {reports.map((report) => <li key={report.label + report.url} className="px-6 py-4"><a href={report.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium underline underline-offset-4">Staff report: {report.label}</a></li>)}
+      </ul>}
+      {unavailable ? <p className="px-6 py-5 text-sm text-zinc-500 dark:text-zinc-400">Case documents temporarily unavailable here. Open the official portal for the latest files.</p> : !hasPlan ? (
         <p className="px-6 py-5 text-sm text-zinc-500 dark:text-zinc-400">
           No linked case record in the City of Nampa portal yet. Follow the
           portal link above for the latest documents.
@@ -350,7 +368,7 @@ function PlanDocuments({
         </p>
       ) : (
         <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          {attachments.map((a) => (
+          {attachments.filter((a) => !a.IsFileSecure && !/staff[\s_-]*report/i.test((a.Notes ?? "") + " " + a.FileName)).map((a) => (
             <li key={a.AttachmentID} className="flex flex-col gap-0.5 px-6 py-4">
               <span className="text-sm font-medium text-black dark:text-zinc-50">
                 {a.Notes || a.FileName}

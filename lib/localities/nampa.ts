@@ -130,6 +130,7 @@ export function indexScheduledMeetings(
       date: r.date,
       dateLabel: r.dateLabel,
       continuedNote: r.continuedNote,
+      ...(r.time ? { time: r.time } : {}),
       sourceUrl: r.sourceUrl,
     });
     byAppId.set(r.appId, list);
@@ -192,6 +193,9 @@ async function getNampaHearings(): Promise<HearingFeed> {
         const existing = meetings.find((m) => m.body === meeting.body && m.date === meeting.date);
         if (existing) {
           existing.agendaUrl = item.agendaUrl;
+          existing.packetUrl = meeting.packetUrl;
+          existing.location = meeting.location || undefined;
+          existing.time ??= meeting.localStartTime;
           existing.staffReports = [...new Map([...(existing.staffReports ?? []), ...item.staffReports].map((r) => [r.url, r])).values()];
         } else {
           meetings.push({
@@ -199,6 +203,7 @@ async function getNampaHearings(): Promise<HearingFeed> {
             date: meeting.date, dateLabel: meeting.dateLabel,
             continuedNote: null, sourceUrl: meeting.sourceUrl,
             agendaUrl: item.agendaUrl, staffReports: item.staffReports,
+            time: meeting.localStartTime, location: meeting.location || undefined, packetUrl: meeting.packetUrl,
           });
         }
         meetings.sort((a, b) => a.date.localeCompare(b.date));
@@ -209,7 +214,8 @@ async function getNampaHearings(): Promise<HearingFeed> {
 
   const attach = (h: Hearing): Hearing => {
     const meetings = byAppId.get(h.appId);
-    return meetings ? { ...h, meetings } : h;
+    const description = firstScheduled.get(h.appId)?.description ?? agendaDescriptions.get(h.appId);
+    return { ...h, ...(meetings ? { meetings } : {}), ...(description ? { description } : {}) };
   };
 
   // APPIDs already accounted for in ArcGIS (active or completed).
@@ -232,6 +238,7 @@ async function getNampaHearings(): Promise<HearingFeed> {
       appPhase: "Other",
       appPhaseRaw: "",
       appScope: first?.description ?? agendaDescriptions.get(appId) ?? null,
+      description: first?.description ?? agendaDescriptions.get(appId),
       appAcres: null,
       externalUrl: null,
       energovPlanId: first?.energovPlanId ?? null,
@@ -268,7 +275,7 @@ export const nampa: Locality = {
   ],
   // Cache the snapshot and its timestamp together; underlying requests bypass
   // their own cache so a new timestamp always represents a fresh retrieval.
-  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v3"], {
+  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v4"], {
     revalidate: 1800,
     tags: ["nampa:pz:active", "nampa:pz:completed", "nampa:scheduled", "nampa:primegov"],
   }),

@@ -55,6 +55,7 @@ export function parsePrimeGovMeetings(payload: unknown): AgendaMeeting[] {
       title: row.title,
       date,
       dateLabel: new Intl.DateTimeFormat("en-US", { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" }).format(new Date(date + "T12:00:00Z")),
+      localStartTime: row.dateTime.slice(11, 16),
       timeLabel: typeof row.time === "string" ? row.time : undefined,
       location: typeof row.location === "string" ? row.location : undefined,
       sourceUrl: NAMPA_PRIMEGOV_ORIGIN + "/public/portal",

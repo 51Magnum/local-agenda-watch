@@ -51,6 +51,8 @@ export type AgendaMeeting = {
   date: string;
   dateLabel: string;
   timeLabel?: string;
+  /** Local Nampa meeting start, HH:mm (public hearing time may differ). */
+  localStartTime?: string;
   location?: string;
   sourceUrl: string;
   agendaUrl?: string;
@@ -60,6 +62,10 @@ export type AgendaMeeting = {
 };
 
 export type ScheduledMeeting = {
+  /** Published public-hearing time, HH:mm in America/Denver. */
+  time?: string;
+  location?: string;
+  packetUrl?: string;
   agendaUrl?: string;
   staffReports?: AgendaItem["staffReports"];
   /** Canonical body identifier, e.g. "P&Z" or "City Council". */
@@ -93,6 +99,8 @@ export type Hearing = {
   appPhaseRaw: string;
   /** Project / subdivision / scope description. */
   appScope: string | null;
+  /** Fuller official notice/agenda description, used for factual summaries. */
+  description?: string;
   /** Parcel area in acres, if known. */
   appAcres: number | null;
   /** External detail URL (typically the EnerGov portal). */

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PENDING_AGENDA_MESSAGE } from "@/lib/case-details";
 import { projectPathForCase, type ProjectStage } from "@/lib/projects";
 import { getCaseStage } from "@/lib/localities/stages";
 import Link from "next/link";
@@ -284,6 +285,7 @@ function MeetingCard({
         {meeting.agendaUrl && (
           <a href={meeting.agendaUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium underline underline-offset-2">View agenda &rarr;</a>
         )}
+        {!meeting.agendaUrl && <p className="text-sm text-zinc-500 dark:text-zinc-400">{PENDING_AGENDA_MESSAGE}</p>}
         {meeting.packetUrl && (
           <a href={meeting.packetUrl} target="_blank" rel="noopener noreferrer" className="text-sm underline underline-offset-2">Meeting packet &rarr;</a>
         )}

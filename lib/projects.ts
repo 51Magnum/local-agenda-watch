@@ -5,6 +5,8 @@ export const HEARINGS_URL = "https://www.cityofnampa.us/1433/Upcoming-Public-Hea
 export const PROJECT_STAGES = ["Submitted", "Under review", "P&Z hearing", "Council hearing", "Decided"] as const;
 export type ProjectStage = typeof PROJECT_STAGES[number];
 export type ProjectHearing = {
+  agendaUrl?: string;
+  packetUrl?: string;
   startsAt: string;
   body: string;
   location: string;
@@ -82,7 +84,7 @@ export function getProjectNextHearing(project: Project, feed?: HearingFeed, now 
   if (scheduled) {
     // The verified project notice supplies the hearing time (Council business
     // can start before public hearings). Never substitute a meeting's start time.
-    if (known && known.startsAt.slice(0, 10) === scheduled.date && known.body === scheduled.body) return known;
+    if (known && known.startsAt.slice(0, 10) === scheduled.date && known.body === scheduled.body) return { ...known, agendaUrl: scheduled.agendaUrl, packetUrl: scheduled.packetUrl };
     return {
       startsAt: scheduled.date,
       body: scheduled.bodyLabel,
@@ -115,7 +117,7 @@ export function formatDenverTime(value: string): string {
 }
 
 /** RFC 5545 calendar event in UTC; offsets on source dates account for DST. */
-export function hearingCalendar(project: Project, hearing: ProjectHearing): string | undefined {
+export function hearingCalendar(project: Pick<Project, "slug" | "title"> & { path?: string }, hearing: ProjectHearing): string | undefined {
   if (hearing.startsAt.length === 10) return undefined; // Time not confirmed.
   const escape = (s: string) => s.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
   const utc = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
@@ -124,7 +126,7 @@ export function hearingCalendar(project: Project, hearing: ProjectHearing): stri
     "DTSTAMP:" + utc(new Date()), "DTSTART:" + utc(new Date(hearing.startsAt)),
     "SUMMARY:" + escape(project.title + " — " + hearing.body + " hearing"), "LOCATION:" + escape(hearing.location),
     "DESCRIPTION:" + escape("Public hearing start time; individual items may be heard later. Confirm details with the city. " + PUBLIC_COMMENT_URL),
-    "URL:https://www.localagendawatch.com/nampa/" + project.slug, "END:VEVENT", "END:VCALENDAR"];
+    "URL:https://www.localagendawatch.com/nampa/" + (project.path ?? project.slug), "END:VEVENT", "END:VCALENDAR"];
   // Fold by UTF-8 octets, not JS characters, to preserve Unicode titles.
   return lines.map((line) => {
     let result = "", segment = "";

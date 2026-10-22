@@ -201,3 +201,11 @@ describe("getNampaScheduledHearings", () => {
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
 });
+
+
+describe("published public hearing time", () => {
+  it("extracts the hearing time rather than the earlier Council meeting start", () => {
+    const council = parseNampaScheduledHearings(FIXTURE).find((r) => r.body === "City Council")!;
+    expect(council.time).toBe("18:00");
+  });
+});

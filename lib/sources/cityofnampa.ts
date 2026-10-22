@@ -22,6 +22,8 @@ const APPID_RE = /^[A-Z]{2,6}-[0-9]{5}-[0-9]{4}$/;
 export type NampaScheduledBody = "P&Z" | "City Council";
 
 export type NampaScheduledHearing = {
+  /** Published public-hearing time in Nampa wall time, HH:mm. */
+  time?: string;
   /** ISO date, e.g. "2026-04-28" */
   date: string;
   /** Human-facing date, e.g. "April 28, 2026" */
@@ -71,7 +73,7 @@ const HEADING_RE =
 
 function parseHeading(headingText: string): Pick<
   NampaScheduledHearing,
-  "date" | "dateLabel" | "body" | "bodyLabel"
+  "date" | "dateLabel" | "body" | "bodyLabel" | "time"
 > | null {
   const m = headingText.match(HEADING_RE);
   if (!m) return null;
@@ -84,7 +86,9 @@ function parseHeading(headingText: string): Pick<
   const bodyLabel =
     body === "P&Z" ? "Planning & Zoning Commission" : "City Council";
   const cap = month[0].toUpperCase() + month.slice(1).toLowerCase();
-  return { date: iso, dateLabel: `${cap} ${day}, ${year}`, body, bodyLabel };
+  const clock = headingText.match(/Public Hearings?\s+(?:at|begin(?:s)?(?:\s+at)?)\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  const time = clock ? String((Number(clock[1]) % 12) + (/PM/i.test(clock[3]) ? 12 : 0)).padStart(2, "0") + ":" + clock[2] : undefined;
+  return { date: iso, dateLabel: `${cap} ${day}, ${year}`, body, bodyLabel, ...(time ? { time } : {}) };
 }
 
 const PAIR_RE =
