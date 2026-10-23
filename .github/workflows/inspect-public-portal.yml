@@ -1,0 +1,22 @@
+name: Inspect official public portal client
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Download the city's public attachment client
+        shell: bash
+        run: |
+          mkdir -p portal-source
+          curl --fail --silent --show-error --connect-timeout 15 --max-time 60 --max-filesize 20000000 \
+            'https://nampaid-energovpub.tylerhost.net/apps/selfservice/app/energov' \
+            --output portal-source/energov.js
+      - name: Retain the incoming public source briefly for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: nampa-public-client
+          path: portal-source/energov.js
+          retention-days: 1
