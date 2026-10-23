@@ -17,7 +17,12 @@ export async function structuredResponse(name: string, schema: object, content: 
     body: JSON.stringify({ model: process.env.OPENAI_EXTRACTION_MODEL ?? "gpt-4.1-mini", store: false,
       instructions, input: [{ role: "user", content }], text: { format: { type: "json_schema", name, strict: true, schema } }, max_output_tokens: 16000 }),
   });
-  if (!response.ok) throw new Error("Extraction API HTTP " + response.status);
+  if (!response.ok) {
+    const details = await response.json().catch(() => null);
+    const code = details?.error?.code;
+    const safeCode = typeof code === "string" && /^[a-z0-9_]+$/i.test(code) ? " (" + code + ")" : "";
+    throw new Error("Extraction API HTTP " + response.status + safeCode);
+  }
   const result = await response.json();
   if (result.status !== "completed") throw new Error("Extraction did not complete");
   const text = (result.output ?? []).flatMap((item: { content?: { type: string; text?: string }[] }) => item.content ?? []).filter((item: { type: string }) => item.type === "output_text").map((item: { text: string }) => item.text).join("");
