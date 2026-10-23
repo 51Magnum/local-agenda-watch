@@ -366,7 +366,7 @@ describe("site-review regressions", () => {
     const hub = renderToStaticMarkup(await NampaHub());
     const home = renderToStaticMarkup(await Home());
     expect(hub).toContain("Recently decided");
-    expect(hub).toContain("18 items tracked"); expect(home).toContain("18 items tracked");
+    expect(hub).toContain("(18)"); expect(home).toContain("18 items tracked");
     for (const url of (await sitemap()).map((e) => e.url).filter((u) => u.includes("/plan/"))) expect(hub).toContain('href="' + new URL(url).pathname + '"');
   });
   it("shows missing Council dates and stale unlinked Wilson Landing honestly", async () => {
@@ -392,4 +392,25 @@ describe("site-review regressions", () => {
     expect(html).toContain("Site Plan.pdf");
     expect(html).toContain("(listed by the city as Nampa Logistics Center)");
   });
+});
+
+it("replaces editorial watching with personal watches and keeps the full catalog collapsed by default", async () => {
+  vi.spyOn(nampa, "getHearings").mockResolvedValue(feed);
+  const html = renderToStaticMarkup(await NampaHub());
+  expect(html).toContain("You are watching"); expect(html).toContain("Saved in this browser");
+  expect(html).not.toContain("We’re watching");
+  expect(html).toMatch(/<details id="all-cases" class=/);
+  expect(html).not.toMatch(/<details id="all-cases" open/);
+  expect(html).toContain("Project guides");
+});
+
+it("uses the full map as Nampa's main view and removes the separate map URL from its sitemap", async () => {
+  vi.spyOn(nampa,"getHearings").mockResolvedValue(feed);
+  const html=renderToStaticMarkup(await NampaHub());
+  expect(html).toContain("What’s coming to Nampa, Idaho"); expect(html).toContain("law-map-full");
+  expect(html).not.toContain("bg-slate-900 text-white"); expect(html).not.toContain("Open map →");
+  expect(html).toContain('href="#you-are-watching-title"');
+  const urls=(await sitemap()).map((entry)=>entry.url);
+  expect(urls).toContain("https://www.localagendawatch.com/nampa");
+  expect(urls).not.toContain("https://www.localagendawatch.com/nampa/map");
 });

@@ -1,3 +1,6 @@
+import WatchedProjects from "@/app/components/watched-projects";
+import { getProjectForCase } from "@/lib/projects";
+import CaseMap from "@/app/components/maps/case-map";
 import { caseCatalog } from "@/lib/case-catalog";
 import { StageNavigation } from "@/app/components/project-status";
 import { PROJECT_STAGES } from "@/lib/projects";
@@ -15,10 +18,10 @@ import type {
 } from "@/lib/localities";
 
 export const metadata: Metadata = {
-  title: "Nampa, Idaho",
+  title: "What’s coming to Nampa, Idaho",
   alternates: { canonical: "https://www.localagendawatch.com/nampa" },
   description:
-    "Proposed developments and municipal items we're tracking in Nampa, Idaho.",
+    "Explore proposed developments on the Nampa map, upcoming public hearings, and projects you watch.",
 };
 
 type LocalityCtx = Awaited<ReturnType<typeof getLocalityContext>>;
@@ -109,7 +112,6 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
   const query = await searchParams;
   const selectedStage = PROJECT_STAGES.find((stage) => stage === query?.stage);
   const ctx = await getLocalityContext();
-  const onNampaSubdomain = ctx.onSubdomain && ctx.subdomainSlug === "nampa";
   const nampa = getLocality("nampa");
 
   const editorialEntries: Entry[] = (nampa?.tracked ?? []).map((t) =>
@@ -131,44 +133,22 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
 
   return (
     <div className="flex flex-1 flex-col">
-      {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <div className="bg-slate-900 text-white">
-        <div className="mx-auto w-full max-w-5xl px-6 pb-14 pt-10">
-          {!onNampaSubdomain && (
-            <nav className="mb-8 flex items-center gap-2 text-sm text-slate-400">
-              <Link href="/" className="hover:text-white">Home</Link>
-              <span>/</span>
-              <span className="text-slate-300">Nampa</span>
-            </nav>
-          )}
-          <header>
-            <p className="mb-3 text-sm text-slate-300">{count} {count === 1 ? "item" : "items"} tracked</p>
-            <p className="font-mono text-xs uppercase tracking-widest text-slate-400">
-              Nampa, Idaho
-            </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              What&rsquo;s coming to Nampa
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-300">
-              Planning &amp; Zoning applications live from the City of Nampa,
-              plus developments we&rsquo;re tracking editorially.
-            </p>
-          </header>
-        </div>
-      </div>
-
       {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
-        <div className="flex flex-col gap-16">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-4">
+        <div className="flex flex-col gap-10">
 
-          <section aria-labelledby="browse-stages-title">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <h2 id="browse-stages-title" className="text-xl font-semibold">Browse by stage</h2>
-              <Link href={localityHref("nampa", "", ctx)} aria-current={!selectedStage ? "page" : undefined} className="text-sm underline underline-offset-4">All stages</Link>
-            </div>
-            <StageNavigation viewing={selectedStage} links={Object.fromEntries(PROJECT_STAGES.map((stage) => [stage, localityHref("nampa", "/?stage=" + encodeURIComponent(stage), ctx)]))} />
-            {selectedStage && !populatedPhases.length && !(selectedStage === "Decided" && completedEntries.length) && <p className="mt-4 text-sm text-zinc-500">No cases currently listed at this stage.</p>}
-          </section>
+          <div className="flex flex-col gap-3">
+            <header className="flex flex-wrap items-center justify-between gap-3">
+              <h1 className="text-xl font-semibold">What’s coming to Nampa, Idaho</h1>
+              <nav aria-label="Nampa sections" className="flex flex-wrap gap-2">
+                <a href="#you-are-watching-title" className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">Watching</a>
+                <a href="#upcoming-meetings" className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">Meetings</a>
+                <a href="#all-cases" className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">All cases</a>
+              </nav>
+            </header>
+            <CaseMap jurisdiction="nampa" fullPage />
+          </div>
+
           {feed?.scheduleUnavailable && (
             <p role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
               Meeting schedule temporarily unavailable. Check the{" "}
@@ -179,10 +159,9 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
             </p>
           )}
 
-          <Link href={localityHref("nampa", "/meetings", ctx)} className="text-sm font-medium underline underline-offset-4">Browse past meetings, agendas &amp; results →</Link>
           {/* Upcoming meeting hero cards */}
           {!selectedStage && upcoming.length > 0 && (
-            <section>
+            <section id="upcoming-meetings">
               <SectionLabel>Upcoming meetings &amp; public hearings</SectionLabel>
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {upcoming.map((m) => (
@@ -192,10 +171,28 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
             </section>
           )}
 
+          <Link href={localityHref("nampa", "/meetings", ctx)} className="text-sm font-medium underline underline-offset-4">Browse past meetings, agendas &amp; results →</Link>
+
+          <WatchedProjects jurisdiction="nampa" catalog={catalog.map((hearing) => {
+            const entry = hearingEntry(hearing, ctx);
+            const next = getCaseNextHearing(hearing);
+            return { href: "/nampa" + projectPathForCase(hearing.appId), title: getProjectForCase(hearing.appId)?.name ?? entry.label, caseIds: [hearing.appId], status: getCaseStatus(hearing), hearing: next && getCaseStage(hearing) !== "Decided" ? next.body + " — " + new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", month: "long", day: "numeric", year: "numeric" }).format(new Date(next.startsAt.length === 10 ? next.startsAt + "T12:00:00Z" : next.startsAt)) : undefined };
+          })} />
+          <details id="all-cases" open={Boolean(selectedStage)} className="rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
+            <summary className="cursor-pointer text-lg font-semibold">All cases <span className="ml-2 text-sm font-normal text-zinc-500">({count})</span></summary>
+            <div className="mt-6 flex flex-col gap-8">
+          <section aria-labelledby="browse-stages-title">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 id="browse-stages-title" className="text-xl font-semibold">Browse by stage</h2>
+              <Link href={localityHref("nampa", "", ctx)} aria-current={!selectedStage ? "page" : undefined} className="text-sm underline underline-offset-4">All stages</Link>
+            </div>
+            <StageNavigation viewing={selectedStage} links={Object.fromEntries(PROJECT_STAGES.map((stage) => [stage, localityHref("nampa", "/?stage=" + encodeURIComponent(stage), ctx)]))} />
+            {selectedStage && !populatedPhases.length && !(selectedStage === "Decided" && completedEntries.length) && <p className="mt-4 text-sm text-zinc-500">No cases currently listed at this stage.</p>}
+          </section>
           {/* Editorial */}
           {!selectedStage && editorialEntries.length > 0 && (
             <section>
-              <SectionLabel>We&rsquo;re watching</SectionLabel>
+              <SectionLabel>Project guides</SectionLabel>
               <EntryList entries={editorialEntries} className="mt-6" ctx={ctx} />
             </section>
           )}
@@ -203,7 +200,7 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
           {/* Pipeline accordion */}
           {populatedPhases.length > 0 && activeBuckets && (
             <section>
-              <SectionLabel>In the pipeline</SectionLabel>
+              <SectionLabel>Active cases</SectionLabel>
               <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
                 {populatedPhases.map((phase, i) => (
                   <PhaseAccordion
@@ -238,6 +235,9 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
               <EntryList entries={completedEntries} muted className="mt-4" />
             </details>
           )}
+
+            </div>
+          </details>
 
           <footer className="border-t border-zinc-200 pt-6 text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
             {feed?.refreshedAt && (

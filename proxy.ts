@@ -14,7 +14,7 @@ export function proxy(request: NextRequest) {
     if (!authorizedReviewer(request.headers.get("authorization"))) return new NextResponse("Authentication required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Case evidence review", charset="UTF-8"', "Cache-Control": "no-store" } });
     return NextResponse.next({ headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" } });
   }
-  if (request.nextUrl.pathname.startsWith("/api/")) return;
+  if (request.nextUrl.pathname.startsWith("/api/") || request.nextUrl.pathname.startsWith("/maplibre/")) return;
   const host = (request.headers.get("host") ?? "").toLowerCase().split(":")[0];
   const parts = host.split(".");
   if (parts.length < 3) return;

@@ -1,3 +1,4 @@
+import { JURISDICTIONS } from "@/lib/maps/jurisdictions";
 import { caseCatalog } from "@/lib/case-catalog";
 import type { MetadataRoute } from "next";
 import { listLocalities } from "@/lib/localities";
@@ -6,7 +7,7 @@ import { SITE_ORIGIN } from "@/lib/site-config";
 export const revalidate = 1800;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const urls = new Set(["/", "/nampa", "/nampa/meetings", "/about", "/contact", "/privacy", ...projects.map((p) => "/nampa/" + p.slug)]);
+  const urls = new Set([...Object.values(JURISDICTIONS).map((config) => "/" + config.id + (config.mapOnHub ? "" : "/map")), "/", "/nampa", "/nampa/meetings", "/about", "/contact", "/privacy", ...projects.map((p) => "/nampa/" + p.slug)]);
   for (const locality of listLocalities()) {
     const feed = await locality.getHearings?.();
     for (const h of caseCatalog(feed)) {

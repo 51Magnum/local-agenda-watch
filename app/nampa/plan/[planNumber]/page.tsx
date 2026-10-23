@@ -1,3 +1,4 @@
+import CaseMap from "@/app/components/maps/case-map";
 import { CaseTimeline, WhatsProposed } from "@/app/components/case-timeline";
 import { buildTimeline, readTimelineState, timelineEnabled } from "@/lib/timeline/public";
 import { stageNavigationLinks } from "@/lib/stage-navigation";
@@ -93,6 +94,7 @@ export default async function PlanPage({
         {timeline && <WhatsProposed data={timeline} />}
         <Link href={localityHref("nampa", "/meetings?case=" + hearing.appId, ctx)} prefetch={false} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results for this case</Link>
         {stage !== "Decided" && <ProjectNextStep emptyMessage={isStatusUnclear(hearing) ? getCaseStatus(hearing) : stage === "Council hearing" ? "Council date not set" : undefined} hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />}
+        <CaseMap jurisdiction="nampa" caseIds={[hearing.appId]} compact />
         <CaseVisuals visuals={CASE_EVIDENCE[hearing.appId]?.visuals} reportUrl={CASE_EVIDENCE[hearing.appId]?.reportUrl} />
         <PlanDocuments
           sources={(project?.sourceDocuments ?? []).filter((d) => d.caseIds.includes(hearing.appId) && /decision|findings/i.test(d.label))}

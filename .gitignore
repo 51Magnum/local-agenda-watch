@@ -44,3 +44,6 @@ next-env.d.ts
 /.data/
 
 !.env.example
+
+# Generated MapLibre assets (copied from the installed package before dev/build)
+/public/maplibre/

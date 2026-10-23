@@ -35,7 +35,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-zinc-50 text-black dark:bg-black dark:text-zinc-50">
         <header className="border-b border-zinc-200 bg-white/70 backdrop-blur dark:border-zinc-800 dark:bg-black/60">
-          <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4">
             <Link href="/" className="font-semibold tracking-tight">
               Local Agenda Watch
             </Link>

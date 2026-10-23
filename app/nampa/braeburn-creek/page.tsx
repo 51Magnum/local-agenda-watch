@@ -1,3 +1,4 @@
+import CaseMap from "@/app/components/maps/case-map";
 import { CaseTimeline, WhatsProposed } from "@/app/components/case-timeline";
 import { buildTimeline, readTimelineState } from "@/lib/timeline/public";
 import { stageNavigationLinks } from "@/lib/stage-navigation";
@@ -60,6 +61,7 @@ export default async function BraeburnCreekPage() {
     <WhatsProposed data={timeline} />
     {stage !== "Decided" && <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/braeburn-creek/hearing.ics", ctx)} />}
 
+    <CaseMap jurisdiction="nampa" caseIds={project.caseIds} compact />
     <section aria-labelledby="location-title" className="flex flex-col gap-4">
       <h2 id="location-title" className="text-xl font-semibold">Where this is</h2>
       <p className="text-sm leading-7 text-zinc-600 dark:text-zinc-400">Parcels R3066500000 and R3066301000. The March developer notice describes 137 acres; the city’s application feed lists approximately 138 acres.</p>
