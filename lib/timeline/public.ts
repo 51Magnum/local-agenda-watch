@@ -30,6 +30,11 @@ export function latestField(fields: EvidenceField[], key: FieldKey): EvidenceFie
 export function buildTimeline(state: EvidenceState, input: { caseIds: string[]; stage: ProjectStage; next?: ProjectHearing; plans?: { caseId: string; plan: EnerGovPlan; sourceUrl: string }[]; hearings?: Hearing[] }): TimelineData {
   const fields = publicFields(state, input.caseIds);
   for (const record of input.plans ?? []) {
+    const reviewDate = record.plan.ReviewDate ?? record.plan.ReviewStartDate;
+    if (reviewDate && /^\d{4}-\d{2}-\d{2}/.test(reviewDate) && !fields.some((field) => field.caseId === record.caseId && field.key === "reviewDate")) fields.push({
+      id: "live-review-" + record.caseId, caseId: record.caseId, key: "reviewDate", value: reviewDate.slice(0, 10), sourceUrl: record.sourceUrl, page: null,
+      quote: (record.plan.ReviewDate ? "ReviewDate: " : "ReviewStartDate: ") + reviewDate, confidence: 1, sourceKind: "case-record", status: "auto_published", documentId: "live-record", documentHash: "live-record", createdAt: "",
+    });
     if (record.plan.ApplyDate && /^\d{4}-\d{2}-\d{2}/.test(record.plan.ApplyDate) && !fields.some((field) => field.caseId === record.caseId && field.key === "appliedDate")) fields.push({
       id: "live-applied-" + record.caseId, caseId: record.caseId, key: "appliedDate", value: record.plan.ApplyDate.slice(0, 10), sourceUrl: record.sourceUrl, page: null,
       quote: "ApplyDate: " + record.plan.ApplyDate, confidence: 1, sourceKind: "case-record", status: "auto_published", documentId: "live-record", documentHash: "live-record", createdAt: "",

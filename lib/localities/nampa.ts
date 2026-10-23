@@ -130,6 +130,7 @@ export function indexScheduledMeetings(
       date: r.date,
       dateLabel: r.dateLabel,
       continuedNote: r.continuedNote,
+      ...(r.result ? { result: r.result } : {}),
       ...(r.time ? { time: r.time } : {}),
       sourceUrl: r.sourceUrl,
     });
@@ -275,7 +276,7 @@ export const nampa: Locality = {
   ],
   // Cache the snapshot and its timestamp together; underlying requests bypass
   // their own cache so a new timestamp always represents a fresh retrieval.
-  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v4"], {
+  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v5"], {
     revalidate: 1800,
     tags: ["nampa:pz:active", "nampa:pz:completed", "nampa:scheduled", "nampa:primegov"],
   }),

@@ -64,6 +64,8 @@ export type AgendaMeeting = {
 };
 
 export type ScheduledMeeting = {
+  /** Published hearing outcome; distinct from a continuance. */
+  result?: string;
   /** Published public-hearing time, HH:mm in America/Denver. */
   time?: string;
   location?: string;

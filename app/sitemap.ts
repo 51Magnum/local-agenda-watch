@@ -1,3 +1,4 @@
+import { caseCatalog } from "@/lib/case-catalog";
 import type { MetadataRoute } from "next";
 import { listLocalities } from "@/lib/localities";
 import { projects } from "@/lib/projects";
@@ -8,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const urls = new Set(["/", "/nampa", "/nampa/meetings", "/about", "/contact", "/privacy", ...projects.map((p) => "/nampa/" + p.slug)]);
   for (const locality of listLocalities()) {
     const feed = await locality.getHearings?.();
-    for (const h of [...(feed?.active ?? []), ...(feed?.completed ?? []), ...(feed?.upcomingOnly ?? [])]) {
+    for (const h of caseCatalog(feed)) {
       urls.add("/" + locality.slug + "/plan/" + encodeURIComponent(h.appId));
     }
     for (const p of projects) for (const id of p.caseIds) urls.add("/nampa/plan/" + id);

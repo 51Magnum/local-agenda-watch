@@ -1,3 +1,4 @@
+import { reviewRunSummary } from "@/lib/timeline/run-summary";
 import { secretMatches } from "@/lib/timeline/auth";
 import { acquireLease, getEvidenceStore, releaseLease } from "@/lib/timeline/store";
 import { discoverCaseDocuments } from "@/lib/timeline/discover";
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
     const discovery = await discoverCaseDocuments({ store, deadline: Date.now() + 120000 });
     const run = await ingestDocuments(store, discovery.documents, { budgetMs: Math.max(0, deadline - Date.now()), text: async (bytes) => discovery.extractedPages.get(digest(bytes)) ?? extractNativePdfPages(bytes) });
     if (discovery.warnings.length) await store.mutate((state) => { state.runs[state.runs.length - 1].errors.push(...discovery.warnings); });
-    return Response.json({ checked: run.checked, processed: run.processed, skipped: run.skipped, errors: run.errors.length + discovery.warnings.length,
+    const review = reviewRunSummary(await store.read(), discovery.caseIds);
+    return Response.json({ review, checked: run.checked, processed: run.processed, skipped: run.skipped, errors: run.errors.length + discovery.warnings.length,
       issues: run.errors.map((message) => message.match(/Extraction API HTTP \d+(?: \([a-z0-9_]+\))?|OCR missing page \d+|Source quote not found on cited page for [a-zA-Z]+|Invalid confidence for [a-zA-Z]+|Missing evidence for [a-zA-Z]+|Document HTTP \d+|Extraction did not complete|Extraction returned no structured text|PDF exceeds [0-9]+-page processing limit|Document exceeds [0-9]+ MB limit|Expected PDF[^;.]*/)?.[0] ?? "Source or processing failure; details are in the protected review queue") }, { headers: { "Cache-Control": "no-store" } });
   } finally { await releaseLease(store, "ingest", lease); }
 }

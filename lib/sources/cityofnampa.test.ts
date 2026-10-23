@@ -209,3 +209,11 @@ describe("published public hearing time", () => {
     expect(council.time).toBe("18:00");
   });
 });
+
+
+it("parses Council approval/denial separately from continuances and P&Z recommendations", () => {
+  const html = '<h2>Upcoming Public Hearings</h2><h3>October 19, 2026 - City Council</h3><ul><li>Lonestar (<a href="https://example.com">ANN-00358-2026</a>) <em>* Denied</em></li><li>Emberwood (<a href="https://example.com">SPP-00182-2026</a>) <em>* Approved</em></li></ul>';
+  const rows = parseNampaScheduledHearings(html);
+  expect(rows.map((r) => r.result)).toEqual(["Denied", "Approved"]);
+  expect(rows.every((r) => r.continuedNote === null)).toBe(true);
+});

@@ -1,3 +1,4 @@
+import { latestCouncilDecision } from "./stages";
 import type { Hearing, HearingFeed } from "./types";
 
 /**
@@ -63,6 +64,7 @@ export function getUpcomingMeetings(
   }
   const sources = [...feed.active, ...(feed.upcomingOnly ?? [])];
   for (const hearing of sources) {
+    if (hearing.decisionRecorded || latestCouncilDecision(hearing)) continue;
     for (const m of hearing.meetings) {
       if (m.continuedNote != null) continue;
       if (m.date < cutoff) continue;

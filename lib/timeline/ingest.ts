@@ -1,3 +1,4 @@
+import { explicitReportFacts } from "./report-facts";
 import { createHash } from "node:crypto";
 import { DECISION_KEYS, type EvidenceField, type IngestionRun, type PageText, type SourceDocument } from "./types";
 import type { EvidenceStore } from "./store";
@@ -42,10 +43,13 @@ export type IngestDependencies = {
   ocr?: typeof ocrMissingPages;
   extract?: (document: SourceDocument, caseId: string, pages: PageText[]) => Promise<Extraction>;
   budgetMs?: number;
+  /** Separate checkpoint for native-only previews; never suppresses full extraction. */
+  extractionVersion?: string;
 };
 export async function ingestDocuments(store: EvidenceStore, documents: SourceDocument[], dependencies: IngestDependencies = {}): Promise<IngestionRun> {
   const run: IngestionRun = { startedAt: new Date().toISOString(), checked: 0, processed: 0, skipped: 0, errors: [] };
   const deadline = Date.now() + (dependencies.budgetMs ?? 190000);
+  const extractionVersion = dependencies.extractionVersion ?? EXTRACTION_VERSION;
   const unique = [...new Map(documents.map((d) => [d.url, d])).values()];
   for (const document of unique) {
     if (Date.now() > deadline) { run.errors.push("Processing budget reached; remaining documents will be retried on the next run."); break; }
@@ -56,17 +60,17 @@ export async function ingestDocuments(store: EvidenceStore, documents: SourceDoc
       const bytes = document.content === undefined ? await (dependencies.download ?? downloadDocument)(document.url) : new TextEncoder().encode(document.content);
       const hash = digest(bytes);
       const before = (await store.read()).documents[id];
-      const same = before?.hash === hash && before.extractionVersion === EXTRACTION_VERSION;
+      const same = before?.hash === hash && before.extractionVersion === extractionVersion;
       if (same && before.state === "complete" && document.caseIds.every((caseId) => before.caseIds.includes(caseId))) {
         await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].checkedAt = new Date().toISOString(); });
         run.skipped++; continue;
       }
       // Invalidate previous evidence before extracting changed bytes, even if extraction later fails.
-      await store.mutate((state) => { state.documents[id] = { ...document, id, hash, pages: same ? before.pages : [], checkedAt: new Date().toISOString(), extractionVersion: EXTRACTION_VERSION, processedCaseIds: same ? before.processedCaseIds ?? [] : [], state: "processing" }; });
+      await store.mutate((state) => { state.documents[id] = { ...document, id, hash, pages: before?.hash === hash ? before.pages : [], checkedAt: new Date().toISOString(), extractionVersion, processedCaseIds: same ? before.processedCaseIds ?? [] : [], state: "processing" }; });
       replaced = true;
       let pages: PageText[] = document.content !== undefined
         ? [{ page: 1, text: document.content, method: "structured" }]
-        : same && before.pages.length ? before.pages : await (dependencies.text ?? extractNativePdfPages)(bytes);
+        : before?.hash === hash && before.pages.length ? before.pages : await (dependencies.text ?? extractNativePdfPages)(bytes);
       await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
       if (document.content === undefined) {
         if (pages.some((page) => page.method === "native" && page.text.trim().length < 30) && deadline - Date.now() < 50000) throw new Error("OCR deferred to next run: processing budget reached");
@@ -85,7 +89,15 @@ export async function ingestDocuments(store: EvidenceStore, documents: SourceDoc
         } else if (document.kind !== "agenda" && document.kind !== "case-record") {
           if (deadline - Date.now() < 50000) throw new Error("Case extraction deferred to next run: processing budget reached");
           const warnings: string[] = [];
-          const extracted = validateExtraction(await (dependencies.extract ?? extractFields)(document, caseId, pages), pages, { warnings });
+          const candidates = await (dependencies.extract ?? extractFields)(document, caseId, pages);
+          const extracted = validateExtraction(candidates, pages, { warnings });
+          const explicit = validateExtraction(explicitReportFacts(document, caseId, pages), pages);
+          for (const key of Object.keys(explicit) as (keyof Extraction)[]) {
+            if (explicit[key].value !== null && extracted[key].value === null) {
+              extracted[key] = explicit[key];
+              for (let i = warnings.length - 1; i >= 0; i--) if (warnings[i].endsWith(" for " + key)) warnings.splice(i, 1);
+            }
+          }
           if (warnings.length) {
             console.warn("[timeline:ingest] Omitted unsupported fields for " + caseId, warnings);
             await store.mutate((state) => {

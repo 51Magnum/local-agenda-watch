@@ -60,7 +60,7 @@ describe("automatic case next step", () => {
 describe("case summaries and reports", () => {
   it("uses supplied name, type, acres, address and zoning without an AI-generated description", () => {
     expect(caseSummary(hearing, null)).toBe("Northside Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd, Nampa, ID 83687 to IL (light industrial).");
-    expect(caseSummary(hearing, { ProjectName: "Portal project", MainAddress: "17501 Northside Blvd\nNampa, ID" } as EnerGovPlan)).toContain("Portal project: annexation");
+    expect(caseSummary(hearing, { ProjectName: "Portal project", MainAddress: "17501 Northside Blvd\nNampa, ID" } as EnerGovPlan)).toContain("Northside Logistics Center: annexation");
   });
 
   it("preserves the hand-written Braeburn Creek summary", () => {
@@ -96,4 +96,19 @@ describe("source-only naming and clean display titles", () => {
     expect(uniqueAttachments(files)).toHaveLength(1);
     expect(uniqueDocumentLinks([{ label: "Download report", url: "https://nampa.primegov.com/file?historyId=123" }, { label: "View report", url: "https://nampa.primegov.com/view?uid=123" }])).toHaveLength(1);
   });
+});
+
+
+import { caseDisplayTitle } from "./case-details";
+it.each([
+  ["ANN-00358-2026", "Lonestar annexation and master plan"],
+  ["MPC-00006-2026", "Lonestar annexation and master plan"],
+  ["SPP-00182-2026", "Emberwood preliminary plat"],
+  ["CTA-00026-2026", "SH16 Specific Area Plan comprehensive plan text amendment"],
+  ["CMA-00074-2026", "SH16 future land-use map comprehensive plan map amendment"],
+  ["MPC-00007-2026", "Whitewater master plan"],
+  ["ZTA-00050-2026", "Group homes and GB district zoning text amendment"],
+  ["SPF-00294-2025", "Silverland Park final plat"],
+])("gives %s a short sourced title rather than its raw narrative or filename", (appId, expected) => {
+  expect(caseDisplayTitle({ ...hearing, appId, appType: appId.split("-")[0], appScope: "Raw city narrative", description: "Raw official description" }, { ProjectName: "ANN-99999-2026_Application.pdf" } as EnerGovPlan)).toBe(expected);
 });

@@ -38,6 +38,7 @@ export type NampaScheduledHearing = {
   description: string;
   /** "Continued to ..." note attached to this (appId, date) row, if present */
   continuedNote: string | null;
+  result?: string;
   /** EnerGov plan GUID extracted from the anchor href, if any */
   energovPlanId: string | null;
   /** Absolute source URL (always the Upcoming Public Hearings page) */
@@ -121,7 +122,9 @@ export function parseNampaScheduledHearings(
       if (anchors.length === 0) continue;
       const emMatch = liInner.match(EM_RE);
       const rawNote = emMatch ? text(emMatch[1]) : "";
-      const continuedNote = rawNote.replace(/^\*+|\*+$/g, "").trim() || null;
+      const note = rawNote.replace(/^\*+|\*+$/g, "").trim();
+      const continuedNote = /\bcontinu(?:ed|ance)\b/i.test(note) ? note : null;
+      const result = note && !continuedNote ? note : undefined;
       const description = text(
         liInner.replace(/<a\b[\s\S]*?<\/a>/g, "").replace(/<em\b[\s\S]*?<\/em>/g, ""),
       )
@@ -133,6 +136,7 @@ export function parseNampaScheduledHearings(
           appId,
           description,
           continuedNote,
+          ...(result ? { result } : {}),
           energovPlanId: href.match(ENERGOV_GUID_RE)?.[1]?.toLowerCase() ?? null,
           sourceUrl: NAMPA_PUBLIC_HEARINGS_URL,
         });

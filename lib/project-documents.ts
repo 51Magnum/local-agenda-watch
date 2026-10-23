@@ -1,3 +1,4 @@
+import { uniqueAttachments, uniqueDocumentLinks } from "./case-details";
 import type { HearingFeed, Locality } from "@/lib/localities/types";
 import { projectHearings, type Project } from "@/lib/projects";
 
@@ -24,9 +25,10 @@ export async function getProjectDocuments(project: Project, locality: Locality, 
     if (hearing?.energovPlanId && locality.energov) {
       try {
         const attachments = await locality.energov.getPlanAttachments(hearing.energovPlanId);
-        for (const attachment of attachments) {
-          const label = attachment.Notes || attachment.FileName;
-          if (/staff[\s_-]*report|site[\s_-]*plan|prelim(?:inary)?[\s_-]*plat|concept[\s_-]*plan/i.test(label + " " + attachment.FileName)) {
+        for (const attachment of uniqueAttachments(attachments)) {
+          const label = attachment.FileName;
+          if (documents.some((d) => d.label === label)) continue;
+          if (/decision[\s_-]*letter|reasoned|findings|staff[\s_-]*report|site[\s_-]*plan|prelim(?:inary)?[\s_-]*plat|concept[\s_-]*plan/i.test(label + " " + attachment.FileName)) {
             // EnerGov downloads are portal-mediated; do not invent a file endpoint.
             documents.push({ label, url: portalUrl + "?tab=attachments", sourceUrl: portalUrl });
           }
@@ -37,6 +39,6 @@ export async function getProjectDocuments(project: Project, locality: Locality, 
       }
     }
     return { ...projectCase, portalUrl, retrievalFailed,
-      documents: [...new Map(documents.map((d) => [d.label + d.url, d])).values()] };
+      documents: uniqueDocumentLinks(documents) };
   }));
 }

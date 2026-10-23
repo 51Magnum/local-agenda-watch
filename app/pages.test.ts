@@ -3,6 +3,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import type { HearingFeed } from "@/lib/localities/types";
 
+// Page tests must not depend on the developer's private evidence store.
+vi.mock("@/lib/timeline/public", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/timeline/public")>();
+  return { ...actual, readTimelineState: async () => ({ version: 1, documents: {}, fields: {}, audit: [], runs: [], leases: {} }) };
+});
+
 // Exercise the real feed composition without Next's persistent cache in unit tests.
 vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }));
 vi.mock("@/lib/locality", () => ({
@@ -132,6 +138,8 @@ describe("Braeburn Creek project page", () => {
 
   it("shows the grouped project, next step, both case records and original image links", async () => {
     vi.spyOn(nampa, "getHearings").mockResolvedValue(feed);
+    vi.spyOn(nampa.energov!, "getPlan").mockResolvedValue(null);
+    vi.spyOn(nampa.energov!, "getPlanAttachments").mockResolvedValue([]);
     const html = renderToStaticMarkup(await BraeburnCreekPage());
     expect(html).toContain("Developer proposal, not yet approved.");
     expect(html).toContain("Monday, November 2, 2026");
@@ -199,7 +207,7 @@ describe("automatic case next step", () => {
     expect(html).toContain("Agenda usually posted the Thursday before the meeting");
     expect(html).toContain('href="/nampa/plan/ANN-00369-2026/hearing.ics"');
     expect(html).toContain("Developer proposal, not yet approved.");
-    expect(html).toContain("Nampa Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd to IL (light industrial).");
+    expect(html).toContain("Northside Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd to IL (light industrial).");
     expect(html.indexOf("Staff report:")).toBeLessThan(html.indexOf("Site plan"));
     expect(html.indexOf("Documents")).toBeLessThan(html.indexOf("Case status"));
     const response = await caseCalendarGET(new Request("http://localhost/calendar"), { params: Promise.resolve({ planNumber: logistics.appId }) });
@@ -257,12 +265,12 @@ describe("case parity, hub cleanup and SEO", () => {
     expect(html.indexOf("Share with a neighbor")).toBeLessThan(html.indexOf("Project status"));
     expect(html.indexOf("Project status")).toBeLessThan(html.indexOf("Next step"));
     expect(html).toContain("Official title:</span> Annexaation to IL");
-    expect(html).toContain(">Annexation to IL</h1>");
+    expect(html).toContain(">Northside Logistics Center annexation</h1>");
     expect((html.match(/>Site plan.pdf</g) ?? [])).toHaveLength(1);
     const meta = await caseMetadata({ params: Promise.resolve({ planNumber: record.appId }) });
-    expect(meta.description).toBe(summary);
+    expect(meta.description).toContain("Northside Logistics Center annexation. Council hearing. Next hearing:");
     expect(meta.alternates?.canonical).toBe("https://www.localagendawatch.com/nampa/plan/ANN-00369-2026");
-    expect(meta.openGraph).toMatchObject({ title: "Annexation to IL (ANN-00369-2026)", description: summary });
+    expect(meta.openGraph).toMatchObject({ title: "Northside Logistics Center annexation (ANN-00369-2026)", description: meta.description });
   });
 
   it("CUP-00411-2026 highlights Decided and hides Next step", async () => {
@@ -277,7 +285,7 @@ describe("case parity, hub cleanup and SEO", () => {
   it("uses the project image while preserving a case's own title and canonical URL", async () => {
     setup([{ ...record, appId: "ANN-00371-2026", appScope: "Braeburn annexation" }]);
     const meta = await caseMetadata({ params: Promise.resolve({ planNumber: "ANN-00371-2026" }) });
-    expect(meta.openGraph).toMatchObject({ title: "Braeburn annexation (ANN-00371-2026)", images: ["https://www.localagendawatch.com/nampa/toll-brothers-site-map.webp"] });
+    expect(meta.openGraph).toMatchObject({ title: "Braeburn Creek annexation (ANN-00371-2026)", images: ["https://www.localagendawatch.com/nampa/toll-brothers-site-map.webp"] });
   });
 
   it("hides irrelevant zero-case meetings, groups descriptions, and explains missing Council dates", async () => {
@@ -288,7 +296,7 @@ describe("case parity, hub cleanup and SEO", () => {
     expect(html).not.toContain("State of the City");
     expect(html).toContain("Council date not set");
     expect(html).not.toContain("September 29, 2026");
-    expect((html.match(/>Identical proposal text</g) ?? [])).toHaveLength(1);
+    expect((html.match(/>Identical proposal text annexation</g) ?? [])).toHaveLength(1);
     expect(html).toContain("ANN-00001-2026"); expect(html).toContain("SPP-00001-2026");
   });
 
@@ -322,5 +330,66 @@ describe("stage navigation on the Nampa overview", () => {
     expect(html).toContain('<details open=""');
     expect(html).toMatch(/href="\/nampa\/?\?stage=Under%20review"/);
     expect(html).toContain('aria-current="page"');
+  });
+});
+
+
+describe("site-review regressions", () => {
+  afterEach(() => vi.useRealTimers());
+  const record = (id: string, overrides: Partial<Hearing> = {}): Hearing => ({
+    appId: id, appType: id.split("-")[0], appTypeLabel: "Annexation", appStatus: "Pending", appPhase: "Other", appPhaseRaw: "", appScope: "A long official city description which must remain source text only.", appAcres: null, externalUrl: null, energovPlanId: null, meetings: [], ...overrides,
+  });
+  const decision = (id: string, result: string) => record(id, { meetings: [
+    { body: "City Council", bodyLabel: "City Council", date: "2026-09-21", dateLabel: "September 21, 2026", continuedNote: "Continued to October 19", sourceUrl: "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings" },
+    { body: "City Council", bodyLabel: "City Council", date: "2026-10-19", dateLabel: "October 19, 2026", continuedNote: null, result, sourceUrl: "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings" },
+  ] });
+  it("a Council decision overrides Submitted, stale continuances and upcoming hearings", async () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-22T18:00:00Z"));
+    for (const [id, result] of [["ANN-00358-2026", "Denied"], ["MPC-00006-2026", "Denied"], ["SPP-00182-2026", "Approved"]]) {
+      vi.spyOn(nampa, "getHearings").mockResolvedValue({ active: [], completed: [], upcomingOnly: [decision(id, result)] });
+      const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: id }) }));
+      expect(html).toContain("Decided (" + result + ")");
+      expect(html).toMatch(/aria-current="step"[^>]*><a[^>]*>Decided/);
+      expect(html).not.toContain(">Continued<"); expect(html).not.toContain("Continued to October 19");
+      expect(html).not.toContain('id="next-step-title"');
+      expect(html).not.toContain("Developer proposal, not yet approved.");
+      const meta = await caseMetadata({ params: Promise.resolve({ planNumber: id }) });
+      expect(meta.description).toContain("Decided (" + result + ")");
+      expect(meta.title).not.toContain("A long official");
+    }
+  });
+  it("lists all sitemap cases, including more than ten completed cases, with one shared count", async () => {
+    const completed = Array.from({ length: 12 }, (_, i) => record("CUP-" + String(i).padStart(5, "0") + "-2025", { decisionRecorded: true }));
+    completed.push(record("ANN-00339-2025", { decisionRecorded: true }));
+    const data = { active: [], completed, upcomingOnly: [decision("ANN-00358-2026", "Denied"), decision("MPC-00006-2026", "Denied"), decision("SPP-00182-2026", "Approved")] };
+    vi.spyOn(nampa, "getHearings").mockResolvedValue(data);
+    const hub = renderToStaticMarkup(await NampaHub());
+    const home = renderToStaticMarkup(await Home());
+    expect(hub).toContain("Recently decided");
+    expect(hub).toContain("18 items tracked"); expect(home).toContain("18 items tracked");
+    for (const url of (await sitemap()).map((e) => e.url).filter((u) => u.includes("/plan/"))) expect(hub).toContain('href="' + new URL(url).pathname + '"');
+  });
+  it("shows missing Council dates and stale unlinked Wilson Landing honestly", async () => {
+    vi.spyOn(nampa, "getHearings").mockResolvedValue({ active: [record("ANN-00370-2026", { appPhase: "City Council" }), record("SPP-00124-2023", { appPhase: "PZ Commission", appScope: "Wilson Landing" })], completed: [] });
+    const council = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: "ANN-00370-2026" }) }));
+    expect(council).toContain("Council date not set");
+    const wilson = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: "SPP-00124-2023" }) }));
+    expect(wilson).toContain("Status unclear, no recent city record");
+    expect(wilson).not.toContain('aria-current="step"');
+    const hub = renderToStaticMarkup(await NampaHub());
+    expect(hub).toContain("Status unclear, no recent city record");
+  });
+  it("hides neighborhood attendance sheets and retains the city-name clarification", async () => {
+    const hearing = record("ANN-00369-2026", { energovPlanId: "fixture", appPhase: "City Council" });
+    vi.spyOn(nampa, "getHearings").mockResolvedValue({ active: [hearing], completed: [] });
+    vi.spyOn(nampa.energov!, "getPlan").mockResolvedValue(null);
+    vi.spyOn(nampa.energov!, "getPlanAttachments").mockResolvedValue([
+      { AttachmentID: "private", FileName: "Neighborhood Meeting Sign In Sheet.pdf", Notes: "Neighborhood Mtg Sign-In Sheet", IsFileSecure: false },
+      { AttachmentID: "public", FileName: "Site Plan.pdf", IsFileSecure: false },
+    ] as EnerGovAttachment[]);
+    const html = renderToStaticMarkup(await PlanPage({ params: Promise.resolve({ planNumber: hearing.appId }) }));
+    expect(html).not.toContain("Sign In Sheet"); expect(html).not.toContain("Sign-In Sheet");
+    expect(html).toContain("Site Plan.pdf");
+    expect(html).toContain("(listed by the city as Nampa Logistics Center)");
   });
 });

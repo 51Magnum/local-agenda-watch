@@ -1,8 +1,26 @@
 import type { Hearing } from "./types";
 import { getProjectForCase, getProjectNextHearing, type ProjectStage } from "@/lib/projects";
 
+export function latestCouncilDecision(hearing: Hearing) {
+  const latest = hearing.meetings.filter((m) => /council/i.test(m.body) && (m.result || m.continuedNote))
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  return latest?.result && /^(approved|denied)\b/i.test(latest.result.trim()) ? latest : undefined;
+}
+
+export function isStatusUnclear(hearing: Hearing): boolean {
+  return Number(hearing.appId.slice(-4)) < new Date().getFullYear() && !hearing.decisionRecorded && !hearing.energovPlanId && !hearing.externalUrl && !hearing.meetings.length;
+}
+
+export function getCaseStatus(hearing: Hearing): string {
+  const decision = latestCouncilDecision(hearing);
+  if (decision) return "Decided (" + (/^approved/i.test(decision.result!) ? "Approved" : "Denied") + ")";
+  return isStatusUnclear(hearing) ? "Status unclear, no recent city record" : getCaseStage(hearing);
+}
+
 /** One public stage label; raw GIS/portal statuses stay in source data only. */
 export function getCaseStage(hearing: Hearing, completed = false, now = new Date()): ProjectStage {
+  // A published Council outcome takes precedence over stale GIS phases or schedules.
+  if (latestCouncilDecision(hearing)) return "Decided";
   completed ||= hearing.decisionRecorded === true;
   const project = getProjectForCase(hearing.appId);
   const knownNext = project && getProjectNextHearing(project, { active: completed ? [] : [hearing], completed: completed ? [hearing] : [] }, now);

@@ -1,3 +1,4 @@
+import { isPrivateDocument } from "@/lib/case-details";
 import { load } from "cheerio";
 import { getNampaHearings } from "@/lib/localities/nampa";
 import { getLocality } from "@/lib/localities";
@@ -61,11 +62,12 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
         const add = (key: FieldKey, value: string | undefined, label: string) => { if (value) fields.push({ key, value, quote: label + ": " + value, page: null }); };
         add("appliedDate", dateOnly(plan.ApplyDate), "ApplyDate"); add("lastActionDate", dateOnly(plan.LastActionDate), "LastActionDate");
         add("caseStatus", plan.PlanStatus, "PlanStatus");
+        add("reviewDate", dateOnly(plan.ReviewDate ?? plan.ReviewStartDate), plan.ReviewDate ? "ReviewDate" : "ReviewStartDate");
         documents.push({ url: portalUrl, title: caseId + " official case record", caseIds: [caseId], kind: "case-record", content: JSON.stringify({ plan, attachments }), fields });
       }
       for (const attachment of attachments ?? []) {
         const title = attachment.FileName + (attachment.Notes ? " — " + attachment.Notes : "");
-        if (attachment.IsFileSecure || !attachment.IsOnline || documentKind(title) === "other") continue;
+        if (attachment.IsFileSecure || isPrivateDocument(title) || !attachment.IsOnline || documentKind(title) === "other") continue;
         if (attachment.FilePath && officialDocumentUrl(attachment.FilePath)) documents.push({ url: attachment.FilePath, title, caseIds: [caseId], kind: documentKind(title) });
         else warnings.push(caseId + ": " + attachment.FileName + " requires a verified direct download URL in the source registry.");
       }

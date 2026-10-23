@@ -15,6 +15,7 @@ export type ProjectHearing = {
   commentSourceUrl?: string;
 };
 export type Project = {
+  name?: string;
   slug: string;
   title: string;
   location: string;
@@ -27,6 +28,7 @@ export type Project = {
 };
 
 export const braeburnCreek: Project = {
+  name: "Braeburn Creek",
   slug: "braeburn-creek",
   title: "Braeburn Creek: proposed homes at Amity & Happy Valley",
   location: "Northeast corner of E. Amity Ave & S. Happy Valley Rd, Nampa",
@@ -38,6 +40,8 @@ export const braeburnCreek: Project = {
   ],
   image: "/nampa/toll-brothers-site-map.webp",
   sourceDocuments: [
+    { label: "ANN-00371-2026_Braeburn Creek_Decision Letter PZ.pdf", url: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/885c7660-323f-4486-9d09-75d47c42968f?tab=attachments", sourceUrl: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/885c7660-323f-4486-9d09-75d47c42968f?tab=attachments", caseIds: ["ANN-00371-2026"] },
+
     {
       caseIds: ["ANN-00371-2026", "SPP-00184-2026"],
       label: "Agenda — P&Z hearing, September 29, 2026",

@@ -2,7 +2,7 @@ import { ProjectStatus } from "@/app/components/project-status";
 import { ProjectNextStep } from "@/app/components/project-next-step";
 import { stageNavigationLinks } from "@/lib/stage-navigation";
 import { getLocality, findHearing } from "@/lib/localities";
-import { getCaseStage } from "@/lib/localities/stages";
+import { getCaseStage, getCaseStatus, isStatusUnclear } from "@/lib/localities/stages";
 import { getCaseNextHearing } from "@/lib/case-details";
 import { getProjectForCase } from "@/lib/projects";
 import type { Metadata } from "next";
@@ -43,7 +43,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
     </header>
     {caseId && caseHref && <>
       <Link href={project ? href("/" + project.slug) : caseHref} className="text-sm underline underline-offset-4">← {project ? project.title : "Back to " + caseId}</Link>
-      <ProjectStatus stage={stage} viewing={viewing} links={stageNavigationLinks(caseHref, archiveHref)} />
+      <ProjectStatus stage={hearing && isStatusUnclear(hearing) ? undefined : stage} statusLabel={hearing ? getCaseStatus(hearing) : undefined} viewing={viewing} links={stageNavigationLinks(caseHref, archiveHref)} />
       {next && (!body || (body === "City Council" ? /council/i.test(next.body) : body === "P&Z" && /P&Z|Planning/i.test(next.body))) && <ProjectNextStep hearing={next} calendarHref={href("/plan/" + caseId + "/hearing.ics")} />}
     </>}
     {!caseId && <nav aria-label="Meeting bodies" className="flex flex-wrap gap-2 text-sm">

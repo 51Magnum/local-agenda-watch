@@ -1,7 +1,7 @@
 import { PENDING_AGENDA_MESSAGE } from "@/lib/case-details";
 import { formatDenverDate, formatDenverTime, PUBLIC_COMMENT_URL, type ProjectHearing } from "@/lib/projects";
 
-export function ProjectNextStep({ hearing, calendarHref }: { hearing?: ProjectHearing; calendarHref: string }) {
+export function ProjectNextStep({ hearing, calendarHref, emptyMessage }: { hearing?: ProjectHearing; calendarHref: string; emptyMessage?: string }) {
   return <section aria-labelledby="next-step-title" className="rounded-2xl border border-sky-300 bg-sky-50 p-6 dark:border-sky-700 dark:bg-sky-950/40">
     <h2 id="next-step-title" className="text-xl font-semibold">Next step</h2>
     {hearing ? <>
@@ -25,7 +25,7 @@ export function ProjectNextStep({ hearing, calendarHref }: { hearing?: ProjectHe
       {!hearing.agendaUrl && <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">{PENDING_AGENDA_MESSAGE}</p>}
       <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-400">Individual items may be heard after the public hearing start time. Dates and agendas can change.</p>
     </> : <>
-      <p className="mt-3 font-medium">No hearing scheduled yet.</p>
+      <p className="mt-3 font-medium">{emptyMessage ?? "No hearing scheduled yet."}</p>
       <a href={PUBLIC_COMMENT_URL} className="mt-3 inline-block text-sm underline underline-offset-4">How to participate when a hearing is scheduled</a>
     </>}
   </section>;

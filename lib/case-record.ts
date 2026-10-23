@@ -1,3 +1,4 @@
+import { caseCatalog } from "./case-catalog";
 import { cache } from "react";
 import { findHearing, getLocality } from "@/lib/localities";
 import type { EnerGovAttachment, EnerGovPlan } from "@/lib/sources/energov";
@@ -8,7 +9,7 @@ export const getCaseRecord = cache(async (planNumber: string) => {
   if (!locality?.energov || !locality.getHearings) return null;
   const feed = await locality.getHearings();
   const completed = findHearing(feed.completed, planNumber);
-  const found = findHearing(feed.active, planNumber) ?? completed ?? findHearing(feed.upcomingOnly ?? [], planNumber);
+  const found = findHearing(caseCatalog(feed), planNumber);
   if (!found) return null;
   const hearing = completed ? { ...found, decisionRecorded: true } : found;
   let attachmentsUnavailable = false;

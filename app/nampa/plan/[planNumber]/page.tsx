@@ -4,11 +4,11 @@ import { stageNavigationLinks } from "@/lib/stage-navigation";
 import type { Metadata } from "next";
 import { CaseVisuals } from "@/app/components/case-visuals";
 import { CASE_EVIDENCE } from "@/lib/case-evidence";
-import { getCaseNextHearing, caseSummary, staffReportLinks, displayTitle, uniqueAttachments } from "@/lib/case-details";
+import { getCaseNextHearing, caseSummary, staffReportLinks, caseDisplayTitle, caseMetaDescription, uniqueAttachments } from "@/lib/case-details";
 import { ProjectNextStep } from "@/app/components/project-next-step";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCaseStage } from "@/lib/localities/stages";
+import { getCaseStage, getCaseStatus, isStatusUnclear, latestCouncilDecision } from "@/lib/localities/stages";
 import { getProjectForCase } from "@/lib/projects";
 import { getLocalityContext, localityHref } from "@/lib/locality";
 import { getCaseRecord } from "@/lib/case-record";
@@ -29,8 +29,8 @@ export async function generateMetadata({
   const record = await getCaseRecord(planNumber);
   if (!record) return { title: planNumber, robots: { index: false } };
   const { hearing, plan, attachments } = record;
-  const title = displayTitle(hearing.appScope || plan?.Description || hearing.appTypeLabel) + " (" + hearing.appId + ")";
-  const summary = caseSummary(hearing, plan, attachments);
+  const title = caseDisplayTitle(hearing, plan, attachments) + " (" + hearing.appId + ")";
+  const summary = caseMetaDescription(hearing, caseDisplayTitle(hearing, plan, attachments), getCaseNextHearing(hearing, record.feed));
   const canonical = SITE_ORIGIN + "/nampa/plan/" + encodeURIComponent(hearing.appId);
   const project = getProjectForCase(hearing.appId);
   const images = [SITE_ORIGIN + (project?.image ?? "/opengraph-image")];
@@ -87,14 +87,15 @@ export default async function PlanPage({
           <p className="text-sm text-zinc-600 dark:text-zinc-400">This case is part of one development proposal.</p>
           <Link href={localityHref("nampa", "/" + project.slug, ctx)} className="mt-2 inline-block font-semibold underline underline-offset-4">View {project.title}</Link>
         </aside>}
-        <PlanHeader hearing={hearing} plan={plan} summary={summary} verifiedDecision={timeline?.finalDecisionApproved} />
-        <ShareProject title={displayTitle(hearing.appScope || plan?.Description || hearing.appTypeLabel) + " (" + hearing.appId + ")"} summary={summary} />
-        {timeline ? <CaseTimeline data={timeline} links={stageLinks} /> : <ProjectStatus stage={stage} links={stageLinks} />}
+        <PlanHeader hearing={hearing} plan={plan} summary={summary} title={caseDisplayTitle(hearing, plan, attachments)} verifiedDecision={timeline?.finalDecisionApproved} />
+        <ShareProject title={caseDisplayTitle(hearing, plan, attachments) + " (" + hearing.appId + ")"} summary={summary} />
+        {timeline ? <CaseTimeline data={timeline} links={stageLinks} /> : <ProjectStatus stage={isStatusUnclear(hearing) ? undefined : stage} statusLabel={getCaseStatus(hearing)} links={stageLinks} />}
         {timeline && <WhatsProposed data={timeline} />}
         <Link href={localityHref("nampa", "/meetings?case=" + hearing.appId, ctx)} prefetch={false} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results for this case</Link>
-        {stage !== "Decided" && <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />}
+        {stage !== "Decided" && <ProjectNextStep emptyMessage={isStatusUnclear(hearing) ? getCaseStatus(hearing) : stage === "Council hearing" ? "Council date not set" : undefined} hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />}
         <CaseVisuals visuals={CASE_EVIDENCE[hearing.appId]?.visuals} reportUrl={CASE_EVIDENCE[hearing.appId]?.reportUrl} />
         <PlanDocuments
+          sources={(project?.sourceDocuments ?? []).filter((d) => d.caseIds.includes(hearing.appId) && /decision|findings/i.test(d.label))}
           attachments={attachments}
           attachmentsUrl={attachmentsUrl}
           hasPlan={Boolean(planId)}
@@ -130,11 +131,13 @@ function PlanHeader({
   hearing,
   plan,
   summary,
+  title,
   verifiedDecision,
 }: {
   hearing: Hearing;
   plan: EnerGovPlan | null;
   summary: string;
+  title: string;
   verifiedDecision?: boolean;
 }) {
   const derived = plan
@@ -142,7 +145,6 @@ function PlanHeader({
       plan.PlanNumber
     : hearing.appTypeLabel;
   const officialTitle = hearing.appScope || derived;
-  const title = displayTitle(officialTitle);
   const planNumber = plan?.PlanNumber ?? hearing.appId;
   const rawStatus = getCaseStage(hearing);
   const status = verifiedDecision === undefined ? rawStatus : verifiedDecision ? "Decided" : rawStatus === "Decided" ? "Council hearing" : rawStatus;
@@ -155,7 +157,7 @@ function PlanHeader({
         </span>
         {status && (
           <span className="inline-flex items-center rounded-full border border-sky-300 bg-sky-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-sky-900 dark:border-sky-500/40 dark:bg-sky-500/10 dark:text-sky-300">
-            {status}
+            {isStatusUnclear(hearing) ? getCaseStatus(hearing) : status === "Decided" ? getCaseStatus(hearing) : status}
           </span>
         )}
       </div>
@@ -163,6 +165,7 @@ function PlanHeader({
         {title}
       </h1>
       <p className="text-base leading-7 text-zinc-600 dark:text-zinc-400">{summary}</p>
+      {hearing.appId === "ANN-00369-2026" && <p className="text-sm text-zinc-500">(listed by the city as Nampa Logistics Center)</p>}
       {status !== "Decided" && <p className="w-fit rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-200">Developer proposal, not yet approved.</p>}
       <p className="text-sm text-zinc-500 dark:text-zinc-400"><span className="font-medium">Official title:</span> {officialTitle}</p>
       {address && (
@@ -175,13 +178,14 @@ function PlanHeader({
 }
 
 function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
+  const decided = Boolean(latestCouncilDecision(hearing));
   const sourceUrl = hearing.meetings[0]?.sourceUrl;
   // Show only upcoming (non-continued) meetings as active; mute the rest.
   return (
     <section className="overflow-hidden rounded-xl border border-amber-300 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10">
       <div className="flex items-center justify-between gap-4 border-b border-amber-200 px-6 py-4 dark:border-amber-500/20">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-amber-800 dark:text-amber-300">
-          On the agenda
+          Hearing record
         </h2>
         {sourceUrl && (
           <a
@@ -204,16 +208,17 @@ function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
               <span className="text-sm text-amber-800 dark:text-amber-300">
                 {m.bodyLabel}
               </span>
+              {m.result && <p className="text-sm font-medium">{m.result}</p>}
               {m.agendaUrl && (
                 <a href={m.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-2 text-sm underline underline-offset-2">View agenda item &rarr;</a>
               )}
-              {m.continuedNote && (
+              {m.continuedNote && !decided && (
                 <span className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
                   {m.continuedNote}
                 </span>
               )}
             </div>
-            {m.continuedNote && (
+            {m.continuedNote && !decided && (
               <span className="mt-0.5 shrink-0 rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
                 Continued
               </span>
@@ -228,7 +233,7 @@ function OnTheAgendaCard({ hearing }: { hearing: Hearing }) {
 function HearingStatusCard({ hearing }: { hearing: Hearing }) {
   const candidates: Array<[string, string | null]> = [
     ["Type", hearing.appTypeLabel],
-    ["Stage", getCaseStage(hearing)],
+    ["Stage", getCaseStatus(hearing)],
     ["Acres", hearing.appAcres != null ? hearing.appAcres.toFixed(2) : null],
   ];
   const items = candidates.filter(
@@ -327,12 +332,14 @@ function PlanDocuments({
   hasPlan,
   unavailable,
   reports,
+  sources = [],
 }: {
   attachments: EnerGovAttachment[];
   attachmentsUrl: string;
   hasPlan: boolean;
   unavailable: boolean;
   reports: { label: string; url: string }[];
+  sources?: { label: string; url: string }[];
 }) {
   return (
     <section id="case-documents" className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
@@ -352,6 +359,7 @@ function PlanDocuments({
       {reports.length > 0 && <ul aria-label="Staff reports" className="divide-y divide-zinc-100 dark:divide-zinc-800">
         {reports.map((report) => <li key={report.label + report.url} className="px-6 py-4"><a href={report.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium underline underline-offset-4">Staff report: {report.label}</a></li>)}
       </ul>}
+      {sources.length > 0 && <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">{sources.map((source) => <li key={source.url} className="px-6 py-4"><a href={source.url} className="text-sm underline underline-offset-4">{source.label}</a></li>)}</ul>}
       {unavailable ? <p className="px-6 py-5 text-sm text-zinc-500 dark:text-zinc-400">Case documents temporarily unavailable here. Open the official portal for the latest files.</p> : !hasPlan ? (
         <p className="px-6 py-5 text-sm text-zinc-500 dark:text-zinc-400">
           No linked case record in the City of Nampa portal yet. Follow the
@@ -363,11 +371,11 @@ function PlanDocuments({
         </p>
       ) : (
         <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          {uniqueAttachments(attachments).filter((a) => !a.IsFileSecure && !/staff[\s_-]*report/i.test((a.Notes ?? "") + " " + a.FileName)).map((a) => (
+          {uniqueAttachments(attachments).filter((a) => !sources.some((source) => source.label === a.FileName) && !a.IsFileSecure && !/staff[\s_-]*report/i.test((a.Notes ?? "") + " " + a.FileName)).map((a) => (
             <li key={a.AttachmentID} className="flex flex-col gap-0.5 px-6 py-4">
-              <span className="text-sm font-medium text-black dark:text-zinc-50">
+              <a href={attachmentsUrl} className="text-sm font-medium text-black underline underline-offset-4 dark:text-zinc-50">
                 {a.Notes || a.FileName}
-              </span>
+              </a>
               {a.Notes && a.Notes.trim() !== a.FileName.trim() && <span className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
                 {a.FileName}
               </span>}

@@ -45,6 +45,8 @@ export type EnerGovPlan = {
   ExpireDate: string | null;
   CompleteDate: string | null;
   LastActionDate?: string | null;
+  ReviewDate?: string | null;
+  ReviewStartDate?: string | null;
   ApprovalExpireDate: string | null;
   WorkClassName: string | null;
   Description: string | null;

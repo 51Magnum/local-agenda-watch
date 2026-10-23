@@ -2,14 +2,15 @@ import Link from "next/link";
 import { PROJECT_STAGES, type ProjectStage } from "@/lib/projects";
 import { Glossary } from "./glossary";
 
-export function ProjectStatus({ stage, links = {}, viewing }: {
+export function ProjectStatus({ stage, links = {}, viewing, statusLabel }: {
+  statusLabel?: string;
   stage?: ProjectStage;
   links?: Partial<Record<ProjectStage, string>>;
   viewing?: ProjectStage;
 }) {
   return <section aria-labelledby="status-title">
     <h2 id="status-title" className="text-xl font-semibold">Project status</h2>
-    <p className="mt-2 text-lg font-medium text-sky-700 dark:text-sky-300">{stage ? "Current status: " + stage : "Current status unavailable"}</p>
+    <p className="mt-2 text-lg font-medium text-sky-700 dark:text-sky-300">{statusLabel ? (stage ? "Current status: " : "") + statusLabel : (stage ? "Current status: " + stage : "Current status unavailable")}</p>
     <StageNavigation stage={stage} viewing={viewing} links={links} />
     {viewing && <p className="mt-3 text-sm font-medium">Viewing: {viewing} records</p>}
     <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">Choose a stage to view its documents or meeting records. A <Glossary term="P&Z" /> recommendation is separate from a Council decision. The city’s official records control.</p>

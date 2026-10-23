@@ -1,3 +1,4 @@
+import { caseCatalog } from "@/lib/case-catalog";
 import { nampa } from "./nampa";
 import type { Hearing, HearingFeed, Locality } from "./types";
 
@@ -32,12 +33,9 @@ export function findHearing(
   return hearings.find((h) => h.appId.toUpperCase() === needle) ?? null;
 }
 
-/** Count unique active/scheduled cases, plus editorial items not in the feed. */
+/** Count every unique case shown in the catalog, plus unfiled editorial items. */
 export function getTrackedCaseCount(locality: Locality, feed?: HearingFeed): number {
-  const ids = new Set([
-    ...(feed?.active ?? []),
-    ...(feed?.upcomingOnly ?? []),
-  ].map((h) => h.appId.toUpperCase()));
+  const ids = new Set(caseCatalog(feed).map((h) => h.appId.toUpperCase()));
   for (const item of locality.tracked) {
     for (const id of item.caseIds ?? ["editorial:" + item.slug]) {
       ids.add(id.toUpperCase());

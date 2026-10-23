@@ -29,7 +29,7 @@ export function CaseTimeline({ data, links }: { data: TimelineData; links: Recor
         const hearings = appearances.filter((a) => a.isHearing);
         const fallbackAppearance = [...hearings].reverse().find((a) => a.date <= today) ?? hearings[0] ?? appearances[appearances.length - 1];
         const day = date?.value ?? upcoming?.startsAt.slice(0, 10) ?? fallbackAppearance?.date;
-        const recommendation = latestField(fields, "staffRecommendation");
+        const recommendation = latestField(fields, "staffRecommendation") ?? fields.find((field) => field.sourceKind === "staff-report");
         return <li key={stage} className="space-y-2">
           <h3 className="font-semibold">{stage}</h3>
           {stage === "Submitted" && (date ? <p>Applied {dateLabel(date.value)}. <Source field={date} /></p> : <p className="text-sm text-zinc-500">Applied date not yet available from the city record.</p>)}

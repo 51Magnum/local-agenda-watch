@@ -42,3 +42,12 @@ If a publicly listed decision letter cannot be fetched directly, add its verifie
 ## Operational limits
 
 This repository does not contain production credentials. No live AI extraction, production Neon connection, or hourly run is confirmed until those settings are supplied and the deployment/worker succeeds. The tests use explicitly synthetic decision-letter fixtures; they are never public seed data. If EnerGov is blocked or a letter is absent, the public timeline leaves those facts unavailable and keeps outcomes pending.
+
+
+## Braeburn report fallback and review dates
+
+The verified shared September staff report has a conservative native-text fallback for the request, overall site-area table, detached-lot count, requested zoning, and road-frontage conditions. Each recovered field must still pass exact-quote and physical-page validation. It supplies no recommendation or decision. High-confidence native fields appear under **All current fields** in review; decision fields always remain pending until approved. A changed extraction version preserves the text/OCR cache for unchanged PDF bytes.
+
+Under-review dates use only an explicit EnerGov ReviewDate or ReviewStartDate. Applied dates, last-action dates, and document posting dates are not substitutes. If neither explicit field exists, the date stays empty until a verified workflow source is added.
+
+The P&Z decision letter is listed through the official EnerGov attachments tab. Listing a portal document does not mean its PDF has been downloaded or processed. Discovery reports a missing verified download URL; do not claim its decision fields are queued until the PDF is actually ingested.

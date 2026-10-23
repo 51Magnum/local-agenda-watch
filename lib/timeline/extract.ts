@@ -2,7 +2,7 @@ import { isWorkflowRecommendation, EXTRACTED_KEYS, type ExtractedKey, type PageT
 
 export type ExtractedValue = { value: string | null; page: number | null; quote: string | null; confidence: number };
 export type Extraction = Record<ExtractedKey, ExtractedValue>;
-export const EXTRACTION_VERSION = "2026-10-22-v1";
+export const EXTRACTION_VERSION = "2026-10-22-v2";
 const nullableString = { type: ["string", "null"] };
 export const EXTRACTION_SCHEMA = {
   type: "object", additionalProperties: false, required: [...EXTRACTED_KEYS],

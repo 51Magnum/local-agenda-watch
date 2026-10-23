@@ -1,12 +1,13 @@
+import { caseCatalog } from "@/lib/case-catalog";
 import { StageNavigation } from "@/app/components/project-status";
 import { PROJECT_STAGES } from "@/lib/projects";
 import type { Metadata } from "next";
-import { PENDING_AGENDA_MESSAGE, displayTitle, getCaseNextHearing } from "@/lib/case-details";
+import { PENDING_AGENDA_MESSAGE, caseDisplayTitle, getCaseNextHearing } from "@/lib/case-details";
 import { projectPathForCase, type ProjectStage } from "@/lib/projects";
-import { getCaseStage } from "@/lib/localities/stages";
+import { getCaseStage, getCaseStatus, isStatusUnclear } from "@/lib/localities/stages";
 import Link from "next/link";
 import { getLocalityContext, localityHref } from "@/lib/locality";
-import { getLocality, getUpcomingMeetings } from "@/lib/localities";
+import { getLocality, getTrackedCaseCount, getUpcomingMeetings } from "@/lib/localities";
 import type {
   Hearing,
   TrackedItem,
@@ -43,18 +44,18 @@ function editorialEntry(item: TrackedItem, ctx: LocalityCtx): Entry {
 }
 
 function hearingEntry(h: Hearing, ctx: LocalityCtx, completed = false): Entry {
-  const label = displayTitle(h.appScope?.trim() || `${h.appTypeLabel} (${h.appId})`);
+  const label = caseDisplayTitle(h);
   const blurbParts: string[] = [];
   const stage = getCaseStage(h, completed);
   const nextMeeting = getCaseNextHearing(h);
-  if (stage === "Council hearing" && (!nextMeeting || !/council/i.test(nextMeeting.body))) {
+  if (!isStatusUnclear(h) && stage === "Council hearing" && (!nextMeeting || !/council/i.test(nextMeeting.body))) {
     blurbParts.push("Council date not set");
   } else if (nextMeeting) {
     blurbParts.push(nextMeeting.body + " — " + new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", year: "numeric", month: "long", day: "numeric" }).format(new Date(nextMeeting.startsAt.length === 10 ? nextMeeting.startsAt + "T12:00:00Z" : nextMeeting.startsAt)));
   }
   blurbParts.push(h.appTypeLabel);
   if (h.appAcres != null) blurbParts.push(`${h.appAcres.toFixed(2)} acres`);
-  blurbParts.push(getCaseStage(h, completed));
+  blurbParts.push(getCaseStatus(h));
   return {
     key: `hearing:${h.appId}`,
     href: localityHref("nampa", projectPathForCase(h.appId), ctx),
@@ -81,7 +82,7 @@ function collapseEntries(entries: Entry[]): Entry[] {
 function groupMeetingCases(cases: Hearing[]) {
   const groups = new Map<string, { label: string; cases: Hearing[] }>();
   for (const hearing of cases) {
-    const label = displayTitle(hearing.appScope?.trim() || hearing.appTypeLabel);
+    const label = caseDisplayTitle(hearing);
     const key = label.toLowerCase();
     const group = groups.get(key) ?? { label, cases: [] };
     group.cases.push(hearing);
@@ -117,12 +118,15 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
 
   const feed = nampa?.getHearings ? await nampa.getHearings() : null;
   const upcoming = feed ? getUpcomingMeetings(feed) : [];
-  const activeBuckets = feed ? groupByPhase(feed.active) : null;
+  const catalog = caseCatalog(feed ?? undefined);
+  const count = nampa ? getTrackedCaseCount(nampa, feed ?? undefined) : 0;
+  const activeBuckets = feed ? groupByPhase(catalog.filter((h) => getCaseStage(h) !== "Decided" && !isStatusUnclear(h))) : null;
   const populatedPhases = activeBuckets
     ? PHASE_ORDER.filter((p) => (!selectedStage || p === selectedStage) && (activeBuckets.get(p)?.length ?? 0) > 0)
     : [];
+  const unclearEntries = catalog.filter(isStatusUnclear).map((h) => hearingEntry(h, ctx));
   const completedEntries: Entry[] = feed
-    ? (selectedStage === "Decided" ? feed.completed : feed.completed.slice(0, 10)).map((h) => hearingEntry(h, ctx, true))
+    ? catalog.filter((h) => getCaseStage(h) === "Decided").map((h) => hearingEntry(h, ctx, true))
     : [];
 
   return (
@@ -138,6 +142,7 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
             </nav>
           )}
           <header>
+            <p className="mb-3 text-sm text-slate-300">{count} {count === 1 ? "item" : "items"} tracked</p>
             <p className="font-mono text-xs uppercase tracking-widest text-slate-400">
               Nampa, Idaho
             </p>
@@ -215,7 +220,8 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
             </section>
           )}
 
-          {/* Recently completed */}
+          {!selectedStage && unclearEntries.length > 0 && <PhaseAccordion title="Status unclear, no recent city record" entries={unclearEntries} />}
+          {/* Recently decided */}
           {(!selectedStage || selectedStage === "Decided") && completedEntries.length > 0 && (
             <details open={selectedStage === "Decided"} className="group">
               <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
@@ -223,7 +229,7 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
                   &#9654;
                 </span>
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
-                  Recently completed
+                  Recently decided
                 </h2>
                 <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600">
                   {completedEntries.length}
