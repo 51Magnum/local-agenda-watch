@@ -10,7 +10,7 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
 export type DocumentKind = "staff-report" | "pz-decision" | "council-decision" | "findings" | "minutes" | "agenda" | "case-record" | "other";
 export type PageText = { page: number; text: string; method: "native" | "ocr" | "structured" };
 export type SourceDocument = { url: string; title: string; caseIds: string[]; kind: DocumentKind; content?: string; meeting?: { body: string; date: string; isHearing: boolean; minutesUrl?: string }; fields?: Array<{ key: FieldKey; value: string; quote: string; page: number | null }> };
-export type StoredDocument = SourceDocument & { id: string; hash: string; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; state: "processing" | "complete" | "error" };
+export type StoredDocument = SourceDocument & { id: string; hash: string; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; state: "processing" | "complete" | "error" };
 export type EvidenceField = {
   id: string; documentId: string; documentHash: string; caseId: string; key: FieldKey; value: string;
   sourceUrl: string; page: number | null; quote: string; confidence: number; sourceKind: DocumentKind;

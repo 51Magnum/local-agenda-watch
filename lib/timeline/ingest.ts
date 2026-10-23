@@ -84,7 +84,14 @@ export async function ingestDocuments(store: EvidenceStore, documents: SourceDoc
           }
         } else if (document.kind !== "agenda" && document.kind !== "case-record") {
           if (deadline - Date.now() < 50000) throw new Error("Case extraction deferred to next run: processing budget reached");
-          const extracted = validateExtraction(await (dependencies.extract ?? extractFields)(document, caseId, pages), pages);
+          const warnings: string[] = [];
+          const extracted = validateExtraction(await (dependencies.extract ?? extractFields)(document, caseId, pages), pages, { warnings });
+          if (warnings.length) {
+            console.warn("[timeline:ingest] Omitted unsupported fields for " + caseId, warnings);
+            await store.mutate((state) => {
+              if (state.documents[id]?.hash === hash) state.documents[id].validationWarnings = [...(state.documents[id].validationWarnings ?? []), ...warnings.map((warning) => caseId + ": " + warning)];
+            });
+          }
           for (const [key, value] of Object.entries(extracted)) {
             if (value.value === null || value.page === null || !value.quote) continue;
             const fieldKey = key as EvidenceField["key"];

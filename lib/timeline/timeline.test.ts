@@ -106,6 +106,19 @@ describe("hash-based ingestion and review", () => {
     expect(deps.text).toHaveBeenCalledTimes(1);
     expect(publicFields(await store.read(), caseIds)).toHaveLength(2);
   });
+  it("omits an unsupported field while retaining verified evidence and unchanged-document caching", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const store = memoryStore(), deps = dependencies();
+    deps.extract.mockResolvedValue(extraction({ requestSummary: { value: "An unsupported summary", page: 1, quote: "A quote that does not appear in this document", confidence: 1 }, units: { value: "487", page: 1, quote, confidence: 0.99 } }));
+    const run = await ingestDocuments(store, [document], deps);
+    expect(run.processed).toBe(1); expect(run.errors).toEqual([]);
+    const state = await store.read();
+    expect(publicFields(state, caseIds).every((field) => field.key === "units")).toBe(true);
+    expect(publicFields(state, caseIds)).toHaveLength(2);
+    expect(state.documents[digest(document.url)].validationWarnings).toHaveLength(2);
+    await ingestDocuments(store, [document], deps);
+    expect(deps.extract).toHaveBeenCalledTimes(2);
+  });
   it("does not publish a decision asserted in a staff report", async () => {
     const store = memoryStore(); await ingestDocuments(store, [{ ...document, kind: "staff-report" }], dependencies());
     expect(Object.values((await store.read()).fields).some((field) => field.key === "pzResult")).toBe(false);
