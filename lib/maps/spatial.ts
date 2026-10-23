@@ -1,7 +1,19 @@
 import { area, bbox, booleanIntersects, centerOfMass, feature, featureCollection, intersect, point, pointToPolygonDistance } from "@turf/turf";
 import type { FeatureCollection } from "geojson";
 import type { CaseGeometry, MapCase } from "./types";
-export function geometryCentroid(geometry: CaseGeometry): [number, number] { return centerOfMass(feature(geometry)).geometry.coordinates.slice(0, 2) as [number, number]; }
+export function geometryCentroid(geometry: CaseGeometry): [number, number] {
+  // Calculate each polygon directly: Turf's MultiPolygon fallback builds a
+  // convex hull through concaveman, whose CommonJS dependency fails in the server bundle.
+  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+  let weight = 0, longitude = 0, latitude = 0;
+  for (const coordinates of polygons) {
+    const polygon = feature({ type: "Polygon" as const, coordinates });
+    const center = centerOfMass(polygon).geometry.coordinates;
+    const size = area(polygon) || 1;
+    longitude += center[0] * size; latitude += center[1] * size; weight += size;
+  }
+  return [longitude / weight, latitude / weight];
+}
 export function flumAtGeometry(geometry: CaseGeometry, flum: FeatureCollection<CaseGeometry>, categoryField: string): string[] {
   const shape = feature(geometry), box = bbox(shape);
   const coverage = new Map<string, number>();
