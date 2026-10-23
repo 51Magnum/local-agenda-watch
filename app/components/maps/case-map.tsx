@@ -42,7 +42,7 @@ function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jur
     figure.append(caption); card.append(figure);
   }
   const status = document.createElement("p"); status.className = "law-popup-status"; status.textContent = item.statusNote ?? item.stage; card.append(status);
-  if (item.summary) { const summary = document.createElement("p"); summary.textContent = item.summary.length > 180 ? item.summary.slice(0, 177).trimEnd() + "…" : item.summary; card.append(summary); }
+  if (item.summary) { const summary = document.createElement("p"); summary.textContent = item.summary; card.append(summary); }
   if (item.nextHearing) { const hearing = document.createElement("p"); hearing.className = "law-popup-hearing"; hearing.textContent = item.nextHearing.label; card.append(hearing); }
   if (item.confidence === "approximate") { const note = document.createElement("p"); note.textContent = "Approximate boundary"; card.append(note); }
   const link = document.createElement("a"); link.href = item.href; link.textContent = "View project →";
@@ -108,16 +108,25 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance = new lib.Map({ container: container.current, style: "https://tiles.openfreemap.org/styles/liberty", center: data.jurisdiction.center, zoom: data.jurisdiction.zoom, attributionControl: false }); map.current = instance;
       instance.addControl(new lib.NavigationControl(), "top-right");
       instance.addControl(new lib.AttributionControl({ compact: true, customAttribution: "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" }));
-      function show(content: HTMLElement, coordinates: [number, number]) {
+      function sizePopup() {
+        if (!instance || !popup.current?.getElement().classList.contains("law-case-popup")) return;
+        const element = popup.current.getElement(), viewport = instance.getContainer();
+        element.style.setProperty("--law-popup-content-height", Math.max(140, viewport.clientHeight * 0.8 - 36) + "px");
+        const bounds = element.getBoundingClientRect(), point = instance.project(popup.current.getLngLat());
+        const clamp = (value: number, half: number, total: number) => Math.max(half + 16, Math.min(total - half - 16, value));
+        popup.current.setOffset([clamp(point.x, bounds.width / 2, viewport.clientWidth) - point.x, clamp(point.y, bounds.height / 2, viewport.clientHeight) - point.y]);
+      }
+      function show(content: HTMLElement, coordinates: [number, number], projectCard = false) {
         popup.current?.remove();
-        const next = new lib.Popup({ closeButton: true, closeOnClick: false, maxWidth: "300px", offset: 12, focusAfterOpen: pinned }).setLngLat(coordinates).setDOMContent(content).addTo(instance!);
+        const next = new lib.Popup({ closeButton: true, closeOnClick: false, maxWidth: projectCard ? "none" : "300px", className: projectCard ? "law-case-popup" : "", anchor: projectCard ? "center" : undefined, offset: projectCard ? 0 : 12, focusAfterOpen: pinned }).setLngLat(coordinates).setDOMContent(content).addTo(instance!);
         popup.current = next;
+        sizePopup();
         next.getElement().addEventListener("mouseleave", closeHover);
         next.on("close", () => { popupDisposers.get(content)?.(); popupDisposers.delete(content); if (popup.current === next) { popup.current = null; hovered = ""; pinned = false; } });
       }
       function showProject(item: MapCase) {
         if (!item.geometry || !data) return;
-        show(popupContent(item, setExpandedImage, data.jurisdiction.id, data.cases), item.centroid ?? geometryCentroid(item.geometry));
+        show(popupContent(item, setExpandedImage, data.jurisdiction.id, data.cases), item.centroid ?? geometryCentroid(item.geometry), true);
       }
       openProject.current = (id) => {
         const item = data.cases.find((c) => c.id === id); if (!item?.geometry || !instance) return;
@@ -128,11 +137,13 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       };
       instance.on("load", () => {
         if (!instance) return;
-        instance.addSource("flum", { type: "geojson", data: empty }); instance.addLayer({ id: "flum-fill", type: "fill", source: "flum", paint: { "fill-color": "#94a3b8", "fill-opacity": 0.38 } });
+        instance.addSource("flum", { type: "geojson", data: empty }); instance.addLayer({ id: "flum-fill", type: "fill", source: "flum", paint: { "fill-color": "#94a3b8", "fill-opacity": 0.35 } });
         instance.addSource("cases", { type: "geojson", data: empty });
         instance.addLayer({ id: "case-fill", type: "fill", source: "cases", paint: { "fill-color": ["get", "color"], "fill-opacity": 0.2 } });
-        instance.addLayer({ id: "case-line", type: "line", source: "cases", filter: ["==", ["get", "approximate"], false], paint: { "line-color": ["get", "color"], "line-width": 3 } });
-        instance.addLayer({ id: "case-approx", type: "line", source: "cases", filter: ["==", ["get", "approximate"], true], paint: { "line-color": ["get", "color"], "line-width": 3, "line-dasharray": [2, 2] } });
+        instance.addLayer({ id: "case-halo", type: "line", source: "cases", filter: ["==", ["get", "approximate"], false], paint: { "line-color": "#ffffff", "line-width": 7 } });
+        instance.addLayer({ id: "case-approx-halo", type: "line", source: "cases", filter: ["==", ["get", "approximate"], true], paint: { "line-color": "#ffffff", "line-width": 7, "line-dasharray": [8 / 7, 8 / 7] } });
+        instance.addLayer({ id: "case-line", type: "line", source: "cases", filter: ["==", ["get", "approximate"], false], paint: { "line-color": ["get", "color"], "line-width": 4 } });
+        instance.addLayer({ id: "case-approx", type: "line", source: "cases", filter: ["==", ["get", "approximate"], true], paint: { "line-color": ["get", "color"], "line-width": 4, "line-dasharray": [2, 2] } });
         instance.addSource("search", { type: "geojson", data: empty });
         instance.addLayer({ id: "search-ring", type: "line", source: "search", filter: ["==", ["geometry-type"], "Polygon"], paint: { "line-color": "#0f766e", "line-width": 2, "line-dasharray": [3, 2] } });
         instance.addLayer({ id: "search-pin", type: "circle", source: "search", filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": 8, "circle-color": "#0f766e", "circle-stroke-color": "#fff", "circle-stroke-width": 3 } });
@@ -141,7 +152,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.on("mousemove", (event) => {
         if (!instance?.getLayer("case-fill")) return;
         if (pinMode.current) { instance.getCanvas().style.cursor = "crosshair"; return; }
-        const hit = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx"] })[0];
+        const hit = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "case-halo", "case-approx-halo"] })[0];
         instance.getCanvas().style.cursor = hit ? "pointer" : "";
         if (pinned) return;
         const pointer = { x: event.originalEvent.clientX, y: event.originalEvent.clientY };
@@ -165,7 +176,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.on("click", (event) => {
         if (!instance?.getLayer("case-fill")) return;
         if (pinMode.current) { applyMapPin.current?.([event.lngLat.lng, event.lngLat.lat]); return; }
-        const hits = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "flum-fill"] });
+        const hits = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "case-halo", "case-approx-halo", "flum-fill"] });
         const hit = hits.find((f) => f.properties?.id); const item = hit && data.cases.find((c) => c.id === String(hit.properties.id));
         popup.current?.remove(); pinned = true;
         if (item) { showProject(item); hovered = item.id; }
@@ -176,7 +187,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         }
       });
       instance.getCanvas().addEventListener("keydown", (event) => { if (event.key === "Escape") popup.current?.remove(); });
-      observer = new ResizeObserver(() => instance?.resize()); observer.observe(container.current);
+      instance.on("move", sizePopup);
+      observer = new ResizeObserver(() => { instance?.resize(); sizePopup(); }); observer.observe(container.current);
     }).catch(() => setError("The map could not load. Browse all cases using the link below."));
     return () => { disposed = true; observer?.disconnect(); popup.current?.remove(); openProject.current = null; instance?.remove(); map.current = null; setReady(false); };
   }, [data]);
@@ -193,6 +205,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   }, [flumOn, flum, jurisdiction]);
   useEffect(() => {
     if (!ready || !map.current || !data) return;
+    // Keep the transparent fill layer for hit testing across the whole project.
+    map.current.setPaintProperty("case-fill", "fill-opacity", flumOn ? 0 : 0.2);
     (map.current.getSource("flum") as GeoJSONSource)?.setData(flumOn && flum ? flum.geojson : empty);
     if (data.flum.legend.length) map.current.setPaintProperty("flum-fill", "fill-color", ["match", ["get", data.flum.categoryField], data.flum.legend[0].value, data.flum.legend[0].color, ...data.flum.legend.slice(1).flatMap((c) => [c.value, c.color]), "#94a3b8"] as ExpressionSpecification);
   }, [ready, flumOn, flum, data]);
@@ -232,11 +246,11 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     {error && <p role="status">{error}</p>}{!data && !error && <p role="status">Loading map…</p>}
     {data && <>
       <div className="law-map-toolbar">
-        {!compact && <form className="law-search" onSubmit={submit}><label className="sr-only" htmlFor={"map-address-" + jurisdiction}>Find an address in {data.jurisdiction.name}</label><input id={"map-address-" + jurisdiction} value={address} onChange={(e) => setAddress(e.target.value)} placeholder={location?.source === "map" ? location.label : "Search an address"} maxLength={200} minLength={3} required autoComplete="street-address"/><button disabled={searching} type="submit">{searching ? "Searching…" : "Search"}</button><button type="button" className="law-pin-control" disabled={!ready && location?.source !== "map"} aria-pressed={location?.source === "map" && !placingPin ? undefined : placingPin} onClick={location?.source === "map" && !placingPin ? clearLocation : togglePinMode}>{placingPin ? "Cancel pin" : location?.source === "map" ? "Clear pin" : "Drop pin"}</button><button type="button" onClick={share}>Copy link</button>{location && location.source !== "map" && <button type="button" onClick={clearLocation} title="Remove the address and one-mile filter">Clear address</button>}</form>}
+        {!compact && <form className="law-search" onSubmit={submit} aria-busy={searching}><label className="sr-only" htmlFor={"map-address-" + jurisdiction}>Find an address in {data.jurisdiction.name}</label><input id={"map-address-" + jurisdiction} value={address} onChange={(e) => setAddress(e.target.value)} placeholder={location?.source === "map" ? location.label : "Search an address"} maxLength={200} minLength={3} required autoComplete="street-address"/><button disabled={searching} type="submit">{searching && <span className="law-search-spinner" aria-hidden="true"/>}{searching ? "Searching..." : "Search"}</button><button type="button" className="law-pin-control" disabled={!ready && location?.source !== "map"} aria-pressed={location?.source === "map" && !placingPin ? undefined : placingPin} onClick={location?.source === "map" && !placingPin ? clearLocation : togglePinMode}>{placingPin ? "Cancel pin" : location?.source === "map" ? "Clear pin" : "Drop pin"}</button><button type="button" onClick={share}>Copy link</button>{location && location.source !== "map" && <button type="button" onClick={clearLocation} title="Remove the address and one-mile filter">Clear address</button>}</form>}
         <div className="law-map-toggles">
           {!compact && <label title={location ? "Show only projects within one mile of your selected location" : "Search an address or drop a pin first"}><input type="checkbox" checked={withinMile} disabled={!location} onChange={(e) => toggleNearby(e.target.checked)}/> Within 1 mile</label>}
           <label><input type="checkbox" checked={flumOn} onChange={(e) => setFlumOn(e.target.checked)}/> Future land use</label>
-          {!compact && <details className="law-filter-menu" onPointerEnter={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = true; }} onPointerLeave={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = false; }} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }} onKeyDown={(e) => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}><summary>Filters{hiddenStages.length + hiddenTypes.length > 0 ? " •" : ""}</summary><div>
+          {!compact && <details className="law-filter-menu" onPointerEnter={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = true; }} onPointerLeave={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = false; }} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }} onKeyDown={(e) => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}><summary className="law-filter-button"><span aria-hidden="true">☷</span> Filters{hiddenStages.length + hiddenTypes.length > 0 ? " •" : ""}</summary><div>
             <div className="law-filter-groups">
               <fieldset><legend>Stage</legend>
                 <label className="law-filter-all"><input type="checkbox" checked={hiddenStages.length === 0} onChange={(e) => setHiddenStages(e.target.checked ? [] : [...MAP_STAGES])}/> All stages</label>
@@ -251,12 +265,12 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
           </div></details>}
         </div>
       </div>
-      <p className="law-live-message" role="status">{searchMessage}</p>
+      <p className={searching ? "sr-only" : "law-live-message"} role="status">{searching ? "Searching..." : searchMessage}</p>
       {results.length > 1 && <div className="law-address-results">{results.map((r, i) => <button key={i} type="button" onClick={() => choose(r)}>{r.label}</button>)}</div>}
-      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label="Interactive project map. Hover or tap an outline for details."/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : "Hover or tap a project"}</span></div>
-      <div className="law-map-bottom"><span>{mapped.length} {compact ? "case outlines" : "projects shown"}</span><a href={"/" + jurisdiction + "#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>
+      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label="Interactive project map. Hover or tap an outline for details."/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : "Hover or tap a project"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{s}</span>)}<span>┄ Approximate boundary</span></div></details>}</div>
+      <div className="law-map-bottom"><span>{mapped.length} {compact ? "case outlines" : "projects shown"}</span>{!fullPage && <a href={"/" + jurisdiction + "#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
         <details className="law-map-info"><summary>Map key & sources</summary><div className="law-map-info-content">
-          <div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{s}</span>)}<span>┄ Approximate boundary</span></div>
+          {compact && <div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{s}</span>)}<span>┄ Approximate boundary</span></div>}
           {flumOn && <div className="law-map-legend" aria-label="Future land use legend">{data.flum.legend.map((c) => <span key={c.value}><i style={{ background: c.color }}/>{c.label}</span>)}</div>}
           <p><a href={data.flum.layerUrl + "?f=pjson"}>{data.flum.label}</a>{data.flum.adoptedDate && <> · <a href={data.flum.adoptionSource}>Adopted {data.flum.adoptedDate}</a></>}. Future land use is separate from zoning. {data.flum.dataNote}</p>
           <p>Updated {new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", dateStyle: "medium", timeStyle: "short" }).format(new Date(data.updatedAt))} (Mountain time).</p>{data.warnings.map((w) => <p key={w}>{w}</p>)}

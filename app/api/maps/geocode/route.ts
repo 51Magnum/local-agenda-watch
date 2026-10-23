@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     // POST keeps the address out of this site's URL/access logs. No database,
     // server cache, analytics or console logging receives the submitted address.
     const params = new URLSearchParams({ address: address + (new RegExp("\\b" + config.state.abbreviation + "\\b", "i").test(address) ? "" : ", " + config.addressPoints.suffix), benchmark: "Public_AR_Current", format: "json" });
-    const response = await fetch("https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?" + params, { cache: "no-store", signal: AbortSignal.timeout(15000) });
+    const response = await fetch("https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?" + params, { cache: "no-store", signal: AbortSignal.timeout(6500) });
     if (!response.ok) throw new Error("Geocoder unavailable");
     const json = await response.json();
     const results = (json.result?.addressMatches ?? []).filter((m: { addressComponents?: { state?: string }; coordinates?: { x?: number; y?: number } }) => m.addressComponents?.state === config.state.abbreviation && Number.isFinite(m.coordinates?.x) && Number.isFinite(m.coordinates?.y) && isLonLat([m.coordinates!.x!, m.coordinates!.y!])).map((m: { matchedAddress: string; coordinates: { x: number; y: number } }) => ({ label: m.matchedAddress, coordinates: [m.coordinates.x, m.coordinates.y], source: "Census" }));

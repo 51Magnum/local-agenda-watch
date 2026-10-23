@@ -14,14 +14,14 @@ export async function searchAddress(config: AddressSearchConfig, address: string
   let results: AddressResult[] = [];
   try {
     const params = new URLSearchParams({ where: addressWhere(config, address), outFields: config.addressPoints.addressField, returnGeometry: "true", outSR: "4326", f: "geojson", resultRecordCount: "6" });
-    const response = await fetch(config.addressPoints.layerUrl + "/query?" + params, { signal: AbortSignal.timeout(12000) });
+    const response = await fetch(config.addressPoints.layerUrl + "/query?" + params, { signal: AbortSignal.timeout(900) });
     if (!response.ok) throw new Error("Address points unavailable");
     const json = await response.json();
     if (json.error) throw new Error("Address points unavailable");
     results = (json.features ?? []).filter((f: { geometry?: { type: string; coordinates: number[] } }) => f.geometry?.type === "Point" && isLonLat(f.geometry.coordinates)).map((f: { properties: Record<string, string>; geometry: { coordinates: [number, number] } }) => ({ label: f.properties[config.addressPoints.addressField] + ", " + config.addressPoints.suffix, coordinates: f.geometry.coordinates.slice(0, 2) as [number, number], source: "local" }));
   } catch { /* Census is an independent fallback. No address is logged. */ }
   if (!results.length) {
-    const response = await fetch("/api/maps/geocode", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", body: JSON.stringify({ jurisdiction: config.id, address }) });
+    const response = await fetch("/api/maps/geocode", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", signal: AbortSignal.timeout(8000), body: JSON.stringify({ jurisdiction: config.id, address }) });
     const json = await response.json(); if (!response.ok) throw new Error(json.error ?? "Address lookup unavailable"); results = json.results;
   }
   try {

@@ -1,3 +1,4 @@
+import AllCasesLink from "@/app/components/all-cases-link";
 import WatchedProjects from "@/app/components/watched-projects";
 import { getProjectForCase } from "@/lib/projects";
 import CaseMap from "@/app/components/maps/case-map";
@@ -143,7 +144,7 @@ export default async function NampaHub({ searchParams }: { searchParams?: Promis
               <nav aria-label="Nampa sections" className="flex flex-wrap gap-2">
                 <a href="#you-are-watching-title" className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">Watching</a>
                 <a href="#upcoming-meetings" className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">Meetings</a>
-                <a href="#all-cases" className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800">All cases</a>
+                <AllCasesLink className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800" />
               </nav>
             </header>
             <CaseMap jurisdiction="nampa" fullPage />
