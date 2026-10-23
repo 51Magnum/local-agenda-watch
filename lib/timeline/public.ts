@@ -21,6 +21,7 @@ export type TimelineData = {
   currentStage: ProjectStage;
   caseIds: string[];
   next?: ProjectHearing;
+  statusSource?: string;
 };
 export function latestField(fields: EvidenceField[], key: FieldKey): EvidenceField | undefined {
   return fields.filter((field) => field.key === key).sort((a, b) =>

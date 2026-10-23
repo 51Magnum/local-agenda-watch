@@ -1,3 +1,4 @@
+import NorthsideProjectPage from "@/app/components/northside-project-page";
 import CaseMap from "@/app/components/maps/case-map";
 import { CaseTimeline, WhatsProposed } from "@/app/components/case-timeline";
 import { buildTimeline, readTimelineState, timelineEnabled } from "@/lib/timeline/public";
@@ -49,6 +50,7 @@ export default async function PlanPage({
   const { planNumber } = await params;
   const record = await getCaseRecord(planNumber);
   if (!record) notFound();
+  if (record.hearing.appId === "ANN-00369-2026") return NorthsideProjectPage({record});
   const { locality: nampa, feed, hearing, plan, attachments, attachmentsUnavailable } = record;
   const rawStage = getCaseStage(hearing);
   const next = getCaseNextHearing(hearing, feed);

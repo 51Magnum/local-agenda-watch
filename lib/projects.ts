@@ -24,6 +24,7 @@ export type Project = {
   cases: { id: string; label: string; portalUrl: string }[];
   image: string;
   sourceDocuments?: { caseIds: string[]; label: string; url: string; sourceUrl: string; fileNames?: string[] }[];
+  pastHearings?: { date: string; body: string; sourceUrl: string; isHearing: boolean }[];
   nextHearing?: ProjectHearing;
 };
 
@@ -56,6 +57,7 @@ export const braeburnCreek: Project = {
       sourceUrl: "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062#AgendaItem_35512",
     },
   ],
+  pastHearings: [{ date: "2026-09-29", body: "Planning & Zoning", sourceUrl: "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062#AgendaItem_35512", isHearing: true }],
   nextHearing: {
     startsAt: "2026-11-02T18:00:00-07:00",
     body: "City Council",

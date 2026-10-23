@@ -27,7 +27,7 @@ export async function getProjectDocuments(project: Project, locality: Locality, 
         const attachments = await locality.energov.getPlanAttachments(hearing.energovPlanId);
         for (const attachment of uniqueAttachments(attachments)) {
           const label = attachment.FileName;
-          if (documents.some((d) => d.label === label)) continue;
+          if (documents.some((d) => d.label === label) || project.sourceDocuments?.some((d) => d.caseIds.includes(projectCase.id) && d.fileNames?.includes(label))) continue;
           if (/decision[\s_-]*letter|reasoned|findings|staff[\s_-]*report|site[\s_-]*plan|prelim(?:inary)?[\s_-]*plat|concept[\s_-]*plan/i.test(label + " " + attachment.FileName)) {
             // EnerGov downloads are portal-mediated; do not invent a file endpoint.
             documents.push({ label, url: portalUrl + "?tab=attachments", sourceUrl: portalUrl });

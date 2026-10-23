@@ -110,6 +110,8 @@ export async function ingestDocuments(store: EvidenceStore, documents: SourceDoc
           for (const [key, value] of Object.entries(extracted)) {
             if (value.value === null || value.page === null || !value.quote) continue;
             const fieldKey = key as EvidenceField["key"];
+            if (["pzSpeakersFor", "pzSpeakersAgainst"].includes(fieldKey) && document.kind !== "minutes") continue;
+            if (fieldKey === "pzConditions" && !["pz-decision", "minutes"].includes(document.kind)) continue;
             if (fieldKey === "decisionDate" && document.kind === "pz-decision") continue;
             if (DECISION_KEYS.has(fieldKey) && !["pz-decision", "council-decision", "findings", "minutes"].includes(document.kind)) continue;
             const ocr = pages.find((p) => p.page === value.page)?.method === "ocr";

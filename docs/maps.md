@@ -38,3 +38,6 @@ Popup Watch checkboxes store only jurisdiction, project path, display title and 
 Nampa uses /nampa as the main map and city page. Its compact header links to Watching, Meetings and All cases below the map. /nampa/map returns a permanent redirect with query parameters retained; browsers inherit the original location fragment, preserving shared address and pin links.
 
 The main map shows a collapsible stage legend in its lower-left corner. Future land use renders at 35% below case fills and 4px stage outlines with a 7px white halo; approximate boundaries retain matching dashed halos. The city header provides the single All cases navigation link.
+
+Embedded project maps place Map key & sources in a collapsible corner panel and omit per-case outline counts and the extra All cases link. Mouse-wheel zoom is disabled on embedded maps so page scrolling passes through. Embedded maps use cooperative gestures for touch/page scrolling; the main map supports ordinary wheel zoom without a modifier key, at half the default wheel and trackpad rate. Zoom buttons remain available.
+Embedded maps open project cards on click/tap only, avoiding hover cards that can intercept scrolling. The main map retains hover previews.

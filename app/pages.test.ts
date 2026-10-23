@@ -1,3 +1,4 @@
+import * as mapStore from "@/lib/maps/store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
@@ -140,6 +141,7 @@ describe("Braeburn Creek project page", () => {
     vi.spyOn(nampa, "getHearings").mockResolvedValue(feed);
     vi.spyOn(nampa.energov!, "getPlan").mockResolvedValue(null);
     vi.spyOn(nampa.energov!, "getPlanAttachments").mockResolvedValue([]);
+    vi.spyOn(mapStore,"readMapSnapshot").mockResolvedValue({version:1,jurisdiction:"nampa",updatedAt:"2026-10-23",warnings:[],cases:[{id:"ANN-00371-2026",title:"Braeburn",summary:"",type:"ANN",typeLabel:"Annexation",stage:"Council/Board",href:"/nampa/braeburn-creek",geometry:null,centroid:null,source:"none",confidence:"approximate",citywide:false,flumCategories:["Medium Density Residential"]}]});
     const html = renderToStaticMarkup(await BraeburnCreekPage());
     expect(html).toContain("Developer proposal, not yet approved.");
     expect(html).toContain("Monday, November 2, 2026");
@@ -150,7 +152,15 @@ describe("Braeburn Creek project page", () => {
     expect(html).toContain("SPP-00184-2026");
     expect(html).toContain("/nampa/toll-brothers-site-map.png");
     expect(html).toContain("Share with a neighbor");
-    expect((html.match(/historyId=acf18754-7101-48d9-b4ea-f8398342a0fa/g) ?? [])).toHaveLength(2);
+    expect((html.match(/>Staff report · September 29, 2026 P&amp;Z hearing<\/a>/g) ?? [])).toHaveLength(1);
+    expect((html.match(/>P&amp;Z decision letter<\/a>/g) ?? [])).toHaveLength(1);
+    expect(html).toContain("~3.5 homes/acre");
+    expect(html).toContain("Medium Density Residential");
+    expect(html).toContain("Met Sep 29, 2026, result pending");
+    const proposed = html.split('aria-labelledby="whats-proposed-title"')[1]?.split("</section>")[0] ?? "";
+    expect(proposed).not.toMatch(/Krajnick|Brandi|R3066|Section 30|T3N|R1W|parcel/i);
+    expect(html).not.toContain("Where this is");
+    expect(html).not.toContain("Main conditions");
     expect(html).toContain("https://www.cityofnampa.us/1616/Public-Comment");
     expect(projectMetadata.openGraph).toMatchObject({ title: braeburnCreek.title, description: braeburnCreek.summary,
       images: [expect.objectContaining({ url: expect.stringContaining("site-map.webp") })] });
@@ -208,8 +218,9 @@ describe("automatic case next step", () => {
     expect(html).toContain('href="/nampa/plan/ANN-00369-2026/hearing.ics"');
     expect(html).toContain("Developer proposal, not yet approved.");
     expect(html).toContain("Northside Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd to IL (light industrial).");
-    expect(html.indexOf("Staff report:")).toBeLessThan(html.indexOf("Site plan"));
-    expect(html.indexOf("Documents")).toBeLessThan(html.indexOf("Case status"));
+    expect(html.indexOf("Staff report ·")).toBeLessThan(html.indexOf("Site plan"));
+    expect(html).toContain("Key documents");
+    expect(html).not.toContain("Case status");
     const response = await caseCalendarGET(new Request("http://localhost/calendar"), { params: Promise.resolve({ planNumber: logistics.appId }) });
     expect(response.status).toBe(200);
     expect(await response.text()).toContain("DTSTART:20261103T010000Z");
@@ -261,16 +272,26 @@ describe("case parity, hub cleanup and SEO", () => {
     const summary = "Northside Logistics Center: annexation of 1.69 acres at 17501 Northside Blvd, Nampa, ID 83687 to IL (light industrial).";
     expect(html).toContain(summary);
     expect(html).toContain("Share with a neighbor");
-    expect(html).toMatch(/aria-current="step"[^>]*><a[^>]*>Council hearing/);
-    expect(html.indexOf("Share with a neighbor")).toBeLessThan(html.indexOf("Project status"));
-    expect(html.indexOf("Project status")).toBeLessThan(html.indexOf("Next step"));
+    expect(html).toMatch(/aria-current="step"[^>]*>[\s\S]*?Council hearing/);
+    expect(html.indexOf("Share with a neighbor")).toBeLessThan(html.indexOf("Next step"));
+    expect(html).toContain("Project timeline");
     expect(html).toContain("Official title:</span> Annexaation to IL");
-    expect(html).toContain(">Northside Logistics Center annexation</h1>");
+    expect(html).toContain(">Northside Logistics Center</h1>");
     expect((html.match(/>Site plan.pdf</g) ?? [])).toHaveLength(1);
     const meta = await caseMetadata({ params: Promise.resolve({ planNumber: record.appId }) });
     expect(meta.description).toContain("Northside Logistics Center annexation. Council hearing. Next hearing:");
     expect(meta.alternates?.canonical).toBe("https://www.localagendawatch.com/nampa/plan/ANN-00369-2026");
     expect(meta.openGraph).toMatchObject({ title: "Northside Logistics Center annexation (ANN-00369-2026)", description: meta.description });
+  });
+
+  it("uses the zoning-only project template for Northside without inventing housing or buildings", async () => {
+    setup();
+    const html = renderToStaticMarkup(await PlanPage({params:Promise.resolve({planNumber:record.appId})}));
+    const facts=html.split('aria-label="Key project facts"')[1]?.split("</section>")[0]??"";
+    expect(facts).toContain("1.69");expect(facts).toContain("IL (Light Industrial)");expect(facts).not.toContain("HOMES / LOTS");expect(facts).not.toContain("homes/acre");expect(facts).not.toContain("Building area");
+    expect(html).toContain("rather than approval of a specific building");expect(html).toContain("Council hearing · Nov 2, 2026");expect(html).not.toContain("Council hearing · Nov 3");
+    expect((html.match(/>Site plan.pdf</g)??[])).toHaveLength(1);
+    expect(html).not.toContain("<h3 class=\"font-semibold\">Schools");
   });
 
   it("CUP-00411-2026 highlights Decided and hides Next step", async () => {

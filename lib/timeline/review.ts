@@ -13,6 +13,7 @@ export async function reviewField(store: EvidenceStore, input: { id: string; act
       if (/Date$/.test(field.key) && !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error("Use a date in YYYY-MM-DD format");
       if (field.key === "pzResult" && !["recommend approval", "recommend denial", "continued"].includes(value)) throw new Error("Choose recommend approval, recommend denial, or continued");
       if (field.key === "councilDecision" && !["approved", "denied", "continued", "withdrawn"].includes(value)) throw new Error("Choose approved, denied, continued, or withdrawn");
+      if (["pzSpeakersFor", "pzSpeakersAgainst"].includes(field.key) && !/^\d+$/.test(value)) throw new Error("Use a whole-number speaker count");
       field.originalValue ??= originalValue; field.value = value; field.status = "approved";
     } else field.status = "rejected";
     field.reviewedAt = new Date().toISOString();

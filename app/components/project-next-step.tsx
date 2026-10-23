@@ -1,7 +1,7 @@
 import { PENDING_AGENDA_MESSAGE } from "@/lib/case-details";
 import { formatDenverDate, formatDenverTime, PUBLIC_COMMENT_URL, type ProjectHearing } from "@/lib/projects";
 
-export function ProjectNextStep({ hearing, calendarHref, emptyMessage }: { hearing?: ProjectHearing; calendarHref: string; emptyMessage?: string }) {
+export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise = false }: { hearing?: ProjectHearing; calendarHref: string; emptyMessage?: string; concise?: boolean }) {
   return <section aria-labelledby="next-step-title" className="rounded-2xl border border-sky-300 bg-sky-50 p-6 dark:border-sky-700 dark:bg-sky-950/40">
     <h2 id="next-step-title" className="text-xl font-semibold">Next step</h2>
     {hearing ? <>
@@ -11,7 +11,7 @@ export function ProjectNextStep({ hearing, calendarHref, emptyMessage }: { heari
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Decision-making body</dt><dd className="mt-1 font-medium">{hearing.body}</dd></div>
         <div className="sm:col-span-2"><dt className="text-sm text-zinc-500 dark:text-zinc-400">Location</dt><dd className="mt-1">{hearing.location}</dd></div>
         <div className="sm:col-span-2 border-t border-sky-200 pt-4 dark:border-sky-800"><dt className="text-sm font-semibold">Written-comment deadline (portal)</dt><dd className="mt-1">{hearing.commentDeadline ? formatDenverDate(hearing.commentDeadline) + " at " + formatDenverTime(hearing.commentDeadline) : "Not confirmed. Check the city's instructions."}</dd>
-          {hearing.commentDeadline && <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Based on the city’s regular Council meeting rules; confirm with the published agenda.</p>}
+          {hearing.commentDeadline && !concise && <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Based on the city’s regular Council meeting rules; confirm with the published agenda.</p>}
         </div>
       </dl>
       <p className="mt-5 text-sm leading-6">Once the agenda is posted, use the comment bubble in the city’s meeting portal to send written comments, or the microphone button to sign up to speak. Include the relevant case number.</p>
@@ -23,7 +23,7 @@ export function ProjectNextStep({ hearing, calendarHref, emptyMessage }: { heari
       {hearing.agendaUrl && <a href={hearing.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">View official agenda</a>}
       {hearing.packetUrl && <a href={hearing.packetUrl} target="_blank" rel="noopener noreferrer" className="ml-4 mt-4 inline-block text-sm font-medium underline underline-offset-4">View official meeting packet</a>}
       {!hearing.agendaUrl && <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">{PENDING_AGENDA_MESSAGE}</p>}
-      <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-400">Individual items may be heard after the public hearing start time. Dates and agendas can change.</p>
+      <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-400">{concise ? "Date and written-comment deadline: confirm with the published agenda; individual items may be heard later." : "Individual items may be heard after the public hearing start time. Dates and agendas can change."}</p>
     </> : <>
       <p className="mt-3 font-medium">{emptyMessage ?? "No hearing scheduled yet."}</p>
       <a href={PUBLIC_COMMENT_URL} className="mt-3 inline-block text-sm underline underline-offset-4">How to participate when a hearing is scheduled</a>
