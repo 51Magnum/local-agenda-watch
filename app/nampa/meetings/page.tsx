@@ -1,3 +1,10 @@
+import { ProjectStatus } from "@/app/components/project-status";
+import { ProjectNextStep } from "@/app/components/project-next-step";
+import { stageNavigationLinks } from "@/lib/stage-navigation";
+import { getLocality, findHearing } from "@/lib/localities";
+import { getCaseStage } from "@/lib/localities/stages";
+import { getCaseNextHearing } from "@/lib/case-details";
+import { getProjectForCase } from "@/lib/projects";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getNampaMeetingArchive } from "@/lib/sources/primegov";
@@ -15,7 +22,18 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
   const body = typeof query.body === "string" && ["P&Z", "City Council", "Arts & Historic Preservation"].includes(query.body) ? query.body : undefined;
   const ctx = await getLocalityContext();
   const href = (path: string) => localityHref("nampa", path, ctx);
-  const { meetings, unavailable, unsearched } = await getNampaMeetingArchive(year, { caseId, body });
+  const [{ meetings, unavailable, unsearched }, feed] = await Promise.all([
+    getNampaMeetingArchive(year, { caseId, body }),
+    caseId ? getLocality("nampa")?.getHearings?.().catch((err: unknown) => { console.error("[meetings] Case status unavailable", err); return undefined; }) : undefined,
+  ]);
+  const completed = caseId && feed ? findHearing(feed.completed, caseId) : undefined;
+  const hearing = caseId && feed ? findHearing(feed.active, caseId) ?? completed ?? findHearing(feed.upcomingOnly ?? [], caseId) : undefined;
+  const stage = hearing ? getCaseStage(hearing, Boolean(completed)) : undefined;
+  const next = hearing && stage !== "Decided" ? getCaseNextHearing(hearing, feed) : undefined;
+  const viewing = body === "P&Z" ? "P&Z hearing" : body === "City Council" ? "Council hearing" : undefined;
+  const caseHref = caseId ? href("/plan/" + caseId) : undefined;
+  const project = caseId ? getProjectForCase(caseId) : undefined;
+  const archiveHref = href("/meetings?case=" + caseId + "&year=" + year);
   return <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-10">
     <Link href={href("")} className="text-sm underline">← Nampa</Link>
     <header className="space-y-3">
@@ -23,10 +41,18 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       <p className="text-zinc-600 dark:text-zinc-400">{caseId ? "Meetings with an agenda item referencing " + caseId + "." : "City Council, Planning & Zoning, and Arts & Historic Preservation meeting records."} {body && body + "."}</p>
       <p className="text-sm leading-6 text-zinc-500">Read the official minutes for motions and votes. An agenda or staff recommendation does not establish the outcome. A P&amp;Z recommendation is separate from a Council decision.</p>
     </header>
+    {caseId && caseHref && <>
+      <Link href={project ? href("/" + project.slug) : caseHref} className="text-sm underline underline-offset-4">← {project ? project.title : "Back to " + caseId}</Link>
+      <ProjectStatus stage={stage} viewing={viewing} links={stageNavigationLinks(caseHref, archiveHref)} />
+      {next && (!body || (body === "City Council" ? /council/i.test(next.body) : body === "P&Z" && /P&Z|Planning/i.test(next.body))) && <ProjectNextStep hearing={next} calendarHref={href("/plan/" + caseId + "/hearing.ics")} />}
+    </>}
+    {!caseId && <nav aria-label="Meeting bodies" className="flex flex-wrap gap-2 text-sm">
+      {[{ label: "All meetings", value: "" }, { label: "P&Z hearing", value: "P&Z" }, { label: "Council hearing", value: "City Council" }, { label: "Arts & Historic Preservation", value: "Arts & Historic Preservation" }].map((item) => <Link key={item.value} prefetch={false} aria-current={(body ?? "") === item.value ? "page" : undefined} href={href("/meetings?year=" + year + (item.value ? "&body=" + encodeURIComponent(item.value) : ""))} className={"inline-flex min-h-11 items-center rounded-full border px-3 py-1.5 underline underline-offset-4 " + ((body ?? "") === item.value ? "border-sky-500 bg-sky-100 text-sky-950 dark:bg-sky-900 dark:text-sky-100" : "border-zinc-300 dark:border-zinc-700")}>{item.label}</Link>)}
+    </nav>}
     <form className="flex flex-wrap items-end gap-4">
       {caseId && <input type="hidden" name="case" value={caseId} />}
       <label className="flex flex-col gap-1 text-sm">Year<select name="year" defaultValue={year} className="rounded border border-zinc-400 bg-white p-2 text-black">{Array.from({ length: currentYear - 2022 }, (_, i) => currentYear - i).map((y) => <option key={y}>{y}</option>)}</select></label>
-      <label className="flex flex-col gap-1 text-sm">Meeting body<select name="body" defaultValue={body ?? ""} className="rounded border border-zinc-400 bg-white p-2 text-black"><option value="">All bodies</option>{["City Council", "P&Z", "Arts & Historic Preservation"].map((b) => <option key={b}>{b}</option>)}</select></label>
+      {body && <input type="hidden" name="body" value={body} />}
       <button className="rounded border border-zinc-400 px-4 py-2 text-sm">Show meetings</button>
       {caseId && <Link href={href("/meetings?year=" + year)} className="text-sm underline">Browse all meetings for this year</Link>}
     </form>

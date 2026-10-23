@@ -44,6 +44,7 @@ export type EnerGovPlan = {
   ApplyDate: string | null;
   ExpireDate: string | null;
   CompleteDate: string | null;
+  LastActionDate?: string | null;
   ApprovalExpireDate: string | null;
   WorkClassName: string | null;
   Description: string | null;
@@ -103,6 +104,7 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
 
   async function call<T>(path: string, opts: FetchOpts): Promise<EnerGovEnvelope<T> | null> {
     const res = await fetch(`${baseUrl}/apps/selfservice/api${path}`, {
+      signal: AbortSignal.timeout(15000),
       headers: {
         Accept: "application/json, text/plain, */*",
         tenantId: String(config.tenantId),

@@ -1,0 +1,27 @@
+name: Refresh case timelines
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: case-timeline-ingestion
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Invoke protected timeline worker
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: https://www.localagendawatch.com
+        shell: bash
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::notice::Timeline ingestion is paused until the repository CRON_SECRET is configured."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 330 \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/case-timeline"

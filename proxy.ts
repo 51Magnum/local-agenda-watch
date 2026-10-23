@@ -1,3 +1,4 @@
+import { authorizedReviewer } from "@/lib/timeline/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -8,6 +9,12 @@ import type { NextRequest } from "next/server";
 const LOCALITIES = new Set(["nampa"]);
 
 export function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/")) {
+    if (!process.env.REVIEW_ADMIN_PASSWORD) return new NextResponse("Review access is not configured", { status: 503, headers: { "Cache-Control": "no-store" } });
+    if (!authorizedReviewer(request.headers.get("authorization"))) return new NextResponse("Authentication required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Case evidence review", charset="UTF-8"', "Cache-Control": "no-store" } });
+    return NextResponse.next({ headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" } });
+  }
+  if (request.nextUrl.pathname.startsWith("/api/")) return;
   const host = (request.headers.get("host") ?? "").toLowerCase().split(":")[0];
   const parts = host.split(".");
   if (parts.length < 3) return;

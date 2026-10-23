@@ -1,3 +1,5 @@
+import { StageNavigation } from "@/app/components/project-status";
+import { PROJECT_STAGES } from "@/lib/projects";
 import type { Metadata } from "next";
 import { PENDING_AGENDA_MESSAGE, displayTitle, getCaseNextHearing } from "@/lib/case-details";
 import { projectPathForCase, type ProjectStage } from "@/lib/projects";
@@ -102,7 +104,9 @@ function groupByPhase(hearings: Hearing[]): Map<ProjectStage, Hearing[]> {
   return buckets;
 }
 
-export default async function NampaHub() {
+export default async function NampaHub({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> } = {}) {
+  const query = await searchParams;
+  const selectedStage = PROJECT_STAGES.find((stage) => stage === query?.stage);
   const ctx = await getLocalityContext();
   const onNampaSubdomain = ctx.onSubdomain && ctx.subdomainSlug === "nampa";
   const nampa = getLocality("nampa");
@@ -115,10 +119,10 @@ export default async function NampaHub() {
   const upcoming = feed ? getUpcomingMeetings(feed) : [];
   const activeBuckets = feed ? groupByPhase(feed.active) : null;
   const populatedPhases = activeBuckets
-    ? PHASE_ORDER.filter((p) => (activeBuckets.get(p)?.length ?? 0) > 0)
+    ? PHASE_ORDER.filter((p) => (!selectedStage || p === selectedStage) && (activeBuckets.get(p)?.length ?? 0) > 0)
     : [];
   const completedEntries: Entry[] = feed
-    ? feed.completed.slice(0, 10).map((h) => hearingEntry(h, ctx, true))
+    ? (selectedStage === "Decided" ? feed.completed : feed.completed.slice(0, 10)).map((h) => hearingEntry(h, ctx, true))
     : [];
 
   return (
@@ -152,6 +156,14 @@ export default async function NampaHub() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-14">
         <div className="flex flex-col gap-16">
 
+          <section aria-labelledby="browse-stages-title">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 id="browse-stages-title" className="text-xl font-semibold">Browse by stage</h2>
+              <Link href={localityHref("nampa", "", ctx)} aria-current={!selectedStage ? "page" : undefined} className="text-sm underline underline-offset-4">All stages</Link>
+            </div>
+            <StageNavigation viewing={selectedStage} links={Object.fromEntries(PROJECT_STAGES.map((stage) => [stage, localityHref("nampa", "/?stage=" + encodeURIComponent(stage), ctx)]))} />
+            {selectedStage && !populatedPhases.length && !(selectedStage === "Decided" && completedEntries.length) && <p className="mt-4 text-sm text-zinc-500">No cases currently listed at this stage.</p>}
+          </section>
           {feed?.scheduleUnavailable && (
             <p role="status" className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
               Meeting schedule temporarily unavailable. Check the{" "}
@@ -164,7 +176,7 @@ export default async function NampaHub() {
 
           <Link href={localityHref("nampa", "/meetings", ctx)} className="text-sm font-medium underline underline-offset-4">Browse past meetings, agendas &amp; results →</Link>
           {/* Upcoming meeting hero cards */}
-          {upcoming.length > 0 && (
+          {!selectedStage && upcoming.length > 0 && (
             <section>
               <SectionLabel>Upcoming meetings &amp; public hearings</SectionLabel>
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -176,7 +188,7 @@ export default async function NampaHub() {
           )}
 
           {/* Editorial */}
-          {editorialEntries.length > 0 && (
+          {!selectedStage && editorialEntries.length > 0 && (
             <section>
               <SectionLabel>We&rsquo;re watching</SectionLabel>
               <EntryList entries={editorialEntries} className="mt-6" ctx={ctx} />
@@ -196,6 +208,7 @@ export default async function NampaHub() {
                       hearingEntry(h, ctx)
                     )}
                     bordered={i > 0}
+                    open={Boolean(selectedStage)}
                   />
                 ))}
               </div>
@@ -203,8 +216,8 @@ export default async function NampaHub() {
           )}
 
           {/* Recently completed */}
-          {completedEntries.length > 0 && (
-            <details className="group">
+          {(!selectedStage || selectedStage === "Decided") && completedEntries.length > 0 && (
+            <details open={selectedStage === "Decided"} className="group">
               <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
                 <span className="text-[10px] text-zinc-400 transition-transform group-open:rotate-90">
                   &#9654;
@@ -328,13 +341,15 @@ function PhaseAccordion({
   title,
   entries,
   bordered,
+  open,
 }: {
   title: string;
   entries: Entry[];
   bordered?: boolean;
+  open?: boolean;
 }) {
   return (
-    <details
+    <details open={open}
       className={`group${bordered ? " border-t border-zinc-200 dark:border-zinc-800" : ""}`}
     >
       <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 hover:bg-zinc-50 dark:hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">

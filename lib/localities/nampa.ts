@@ -141,7 +141,7 @@ export function indexScheduledMeetings(
   return byAppId;
 }
 
-async function getNampaHearings(): Promise<HearingFeed> {
+export async function getNampaHearings(): Promise<HearingFeed> {
   const outFields = [
     "OBJECTID",
     "APPID",

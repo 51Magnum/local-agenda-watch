@@ -74,6 +74,7 @@ export async function queryFeatures<TAttrs>(
   for (let page = 0; page < 10; page++) {
     const params = new URLSearchParams({ ...baseParams, resultOffset: String(offset) });
     const res = await fetch(`${endpoint}?${params.toString()}`, {
+      signal: AbortSignal.timeout(15000),
       next: {
         revalidate,
         ...(tag ? { tags: [tag] } : {}),

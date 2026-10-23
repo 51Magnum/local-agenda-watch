@@ -307,3 +307,20 @@ describe("case parity, hub cleanup and SEO", () => {
     expect(html).not.toContain("mailto:"); expect(html).not.toContain("github.com");
   });
 });
+
+
+describe("stage navigation on the Nampa overview", () => {
+  it("filters to the selected stage, opens its cases, and retains all stage links", async () => {
+    const base = { appId: "ANN-12345-2026", appType: "ANN", appTypeLabel: "Annexation", appStatus: "Pending", appPhaseRaw: "", appScope: "Council case", appAcres: 1, externalUrl: null, energovPlanId: null, meetings: [] };
+    vi.spyOn(nampa, "getHearings").mockResolvedValue({ active: [
+      { ...base, appPhase: "City Council" } as Hearing,
+      { ...base, appId: "ANN-12346-2026", appPhase: "Review", appScope: "Review case" } as Hearing,
+    ], completed: [] });
+    const html = renderToStaticMarkup(await NampaHub({ searchParams: Promise.resolve({ stage: "Council hearing" }) }));
+    expect(html).toContain("Council case");
+    expect(html).not.toContain("Review case");
+    expect(html).toContain('<details open=""');
+    expect(html).toMatch(/href="\/nampa\/?\?stage=Under%20review"/);
+    expect(html).toContain('aria-current="page"');
+  });
+});

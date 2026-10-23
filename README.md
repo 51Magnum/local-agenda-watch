@@ -41,3 +41,7 @@ Deployed on Vercel from the `main` branch. Pushes auto-deploy.
 ## Status
 
 Early / experimental. First use case: Toll Brothers' proposed 500-home development at E. Amity Ave and S. Happy Valley Rd in Nampa, Idaho.
+
+## Case timeline pilot
+
+Braeburn Creek now has a source-backed timeline and protected evidence review workflow. See [setup and operating instructions](docs/case-timeline.md) for Neon storage, extraction credentials, the hourly GitHub Actions trigger, and review rules.

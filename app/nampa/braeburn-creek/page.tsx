@@ -1,3 +1,6 @@
+import { CaseTimeline, WhatsProposed } from "@/app/components/case-timeline";
+import { buildTimeline, readTimelineState } from "@/lib/timeline/public";
+import { stageNavigationLinks } from "@/lib/stage-navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,7 +10,6 @@ import { braeburnCreek, getProjectNextHearing, getProjectStage, PUBLIC_COMMENT_U
 import { getProjectDocuments } from "@/lib/project-documents";
 import { ProjectNextStep } from "@/app/components/project-next-step";
 import { Glossary } from "@/app/components/glossary";
-import { ProjectStatus } from "@/app/components/project-status";
 import ShareProject from "@/app/components/share-project";
 
 const project = braeburnCreek;
@@ -30,8 +32,16 @@ export default async function BraeburnCreekPage() {
     console.error("[project] Application feed unavailable", err);
     return undefined;
   });
-  const next = getProjectNextHearing(project, feed);
-  const stage = getProjectStage(project, feed);
+  const state = await readTimelineState();
+  const plans = await Promise.all(project.cases.map(async (item) => {
+    const planId = item.portalUrl.match(/\/plan\/([^?]+)/)?.[1];
+    if (!planId || !locality.energov) return null;
+    const plan = await locality.energov.getPlan(planId).catch((error: unknown) => { console.error("[timeline] Case record unavailable: " + item.id, error); return null; });
+    return plan ? { caseId: item.id, plan, sourceUrl: item.portalUrl } : null;
+  }));
+  const timeline = buildTimeline(state, { caseIds: project.caseIds, stage: getProjectStage(project, feed), next: getProjectNextHearing(project, feed), plans: plans.filter((plan) => plan !== null), hearings: [...(feed?.active ?? []), ...(feed?.completed ?? [])].filter((hearing) => project.caseIds.includes(hearing.appId)) });
+  const stage = timeline.currentStage;
+  const next = timeline.next;
   const documents = await getProjectDocuments(project, locality, feed);
   return <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-6 py-10 sm:py-14">
     <nav className="text-sm text-zinc-500 dark:text-zinc-400"><Link href={localityHref("nampa", "", ctx)} className="underline underline-offset-4">Nampa</Link><span className="mx-2">/</span>Braeburn Creek</nav>
@@ -40,13 +50,14 @@ export default async function BraeburnCreekPage() {
       <h1 className="max-w-4xl text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">{project.title}</h1>
       <p className="text-lg text-zinc-600 dark:text-zinc-300">{project.location}</p>
       <p className="max-w-3xl text-base leading-8 text-zinc-600 dark:text-zinc-300">{project.summary}</p>
-      <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-200">Developer proposal, not yet approved.</p>
+      {!timeline.finalDecisionApproved && <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 dark:border-amber-600 dark:bg-amber-950/30 dark:text-amber-200">Developer proposal, not yet approved.</p>}
       <ShareProject title={project.title} summary={project.summary} />
     </header>
 
-    <ProjectStatus stage={stage} links={{ "Under review": "#cases-title", "P&Z hearing": localityHref("nampa", "/meetings?case=ANN-00371-2026&body=P%26Z", ctx), "Council hearing": localityHref("nampa", "/meetings?case=ANN-00371-2026&body=City%20Council", ctx) }} />
+    <CaseTimeline data={timeline} links={{ ...stageNavigationLinks(localityHref("nampa", "/plan/" + project.caseIds[0], ctx), localityHref("nampa", "/meetings?case=" + project.caseIds[0], ctx)), Submitted: "#cases-title", "Under review": "#cases-title" }} />
     <Link href={localityHref("nampa", "/meetings?case=ANN-00371-2026", ctx)} prefetch={false} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results for Braeburn Creek</Link>
 
+    <WhatsProposed data={timeline} />
     {stage !== "Decided" && <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/braeburn-creek/hearing.ics", ctx)} />}
 
     <section aria-labelledby="location-title" className="flex flex-col gap-4">

@@ -47,7 +47,7 @@ export function parsePrimeGovMeetings(payload: unknown): AgendaMeeting[] {
     const docs: PrimeGovDocument[] = Array.isArray(row.documentList) ? row.documentList : [];
     const html = docs.find((d) => d.compileOutputType === 3 && /agenda/i.test(d.templateName));
     const agenda = html ?? docs.find((d) => /agenda/i.test(d.templateName));
-    const minutes = docs.find((d) => /minutes/i.test(d.templateName));
+    const minutes = docs.find((d) => /minutes/i.test(d.templateName) && d.compileOutputType === 1) ?? docs.find((d) => /minutes/i.test(d.templateName));
     const packet = docs.find((d) => /packet/i.test(d.templateName));
     const date = row.dateTime.slice(0, 10); // PrimeGov publishes Nampa wall time without an offset.
     return [{

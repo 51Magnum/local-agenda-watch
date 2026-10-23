@@ -1,3 +1,6 @@
+import { CaseTimeline, WhatsProposed } from "@/app/components/case-timeline";
+import { buildTimeline, readTimelineState, timelineEnabled } from "@/lib/timeline/public";
+import { stageNavigationLinks } from "@/lib/stage-navigation";
 import type { Metadata } from "next";
 import { CaseVisuals } from "@/app/components/case-visuals";
 import { CASE_EVIDENCE } from "@/lib/case-evidence";
@@ -46,7 +49,7 @@ export default async function PlanPage({
   const record = await getCaseRecord(planNumber);
   if (!record) notFound();
   const { locality: nampa, feed, hearing, plan, attachments, attachmentsUnavailable } = record;
-  const stage = getCaseStage(hearing);
+  const rawStage = getCaseStage(hearing);
   const next = getCaseNextHearing(hearing, feed);
   const summary = caseSummary(hearing, plan, attachments);
   const project = getProjectForCase(hearing.appId);
@@ -64,6 +67,9 @@ export default async function PlanPage({
     ? nampa.energov!.planPortalUrl(planId, "attachments")
     : hearing.externalUrl ?? fallbackPortal;
 
+  const timeline = timelineEnabled(hearing.appId) ? buildTimeline(await readTimelineState(), { caseIds: [hearing.appId], stage: rawStage, next, plans: plan ? [{ caseId: hearing.appId, plan, sourceUrl: portalUrl }] : [], hearings: [hearing] }) : undefined;
+  const stage = timeline?.currentStage ?? rawStage;
+  const stageLinks = stageNavigationLinks(localityHref("nampa", "/plan/" + hearing.appId, ctx), localityHref("nampa", "/meetings?case=" + hearing.appId, ctx));
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 py-10">
@@ -81,9 +87,10 @@ export default async function PlanPage({
           <p className="text-sm text-zinc-600 dark:text-zinc-400">This case is part of one development proposal.</p>
           <Link href={localityHref("nampa", "/" + project.slug, ctx)} className="mt-2 inline-block font-semibold underline underline-offset-4">View {project.title}</Link>
         </aside>}
-        <PlanHeader hearing={hearing} plan={plan} summary={summary} />
+        <PlanHeader hearing={hearing} plan={plan} summary={summary} verifiedDecision={timeline?.finalDecisionApproved} />
         <ShareProject title={displayTitle(hearing.appScope || plan?.Description || hearing.appTypeLabel) + " (" + hearing.appId + ")"} summary={summary} />
-        <ProjectStatus stage={stage} links={{ "Under review": "#case-documents", "P&Z hearing": localityHref("nampa", "/meetings?case=" + hearing.appId + "&body=P%26Z", ctx), "Council hearing": localityHref("nampa", "/meetings?case=" + hearing.appId + "&body=City%20Council", ctx), "Decided": localityHref("nampa", "/meetings?case=" + hearing.appId, ctx) }} />
+        {timeline ? <CaseTimeline data={timeline} links={stageLinks} /> : <ProjectStatus stage={stage} links={stageLinks} />}
+        {timeline && <WhatsProposed data={timeline} />}
         <Link href={localityHref("nampa", "/meetings?case=" + hearing.appId, ctx)} prefetch={false} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results for this case</Link>
         {stage !== "Decided" && <ProjectNextStep hearing={next} calendarHref={localityHref("nampa", "/plan/" + encodeURIComponent(hearing.appId) + "/hearing.ics", ctx)} />}
         <CaseVisuals visuals={CASE_EVIDENCE[hearing.appId]?.visuals} reportUrl={CASE_EVIDENCE[hearing.appId]?.reportUrl} />
@@ -123,10 +130,12 @@ function PlanHeader({
   hearing,
   plan,
   summary,
+  verifiedDecision,
 }: {
   hearing: Hearing;
   plan: EnerGovPlan | null;
   summary: string;
+  verifiedDecision?: boolean;
 }) {
   const derived = plan
     ? [plan.PlanType, plan.Description].filter(Boolean).join(" \u2014 ") ||
@@ -135,7 +144,8 @@ function PlanHeader({
   const officialTitle = hearing.appScope || derived;
   const title = displayTitle(officialTitle);
   const planNumber = plan?.PlanNumber ?? hearing.appId;
-  const status = getCaseStage(hearing);
+  const rawStatus = getCaseStage(hearing);
+  const status = verifiedDecision === undefined ? rawStatus : verifiedDecision ? "Decided" : rawStatus === "Decided" ? "Council hearing" : rawStatus;
   const address = plan?.MainAddress ?? null;
   return (
     <header className="flex flex-col gap-4">
@@ -225,7 +235,7 @@ function HearingStatusCard({ hearing }: { hearing: Hearing }) {
     (entry): entry is [string, string] => entry[1] != null && entry[1] !== ""
   );
   return (
-    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <section id="case-status" className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Case status
@@ -257,7 +267,7 @@ function PlanStatusCard({ plan }: { plan: EnerGovPlan }) {
   );
 
   return (
-    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <section id="case-status" className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Case status
