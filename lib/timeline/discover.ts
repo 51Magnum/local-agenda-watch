@@ -73,6 +73,8 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
       for (const attachment of attachments ?? []) {
         const title = attachment.FileName + (attachment.Notes ? " — " + attachment.Notes : "");
         if (attachment.IsFileSecure || isPrivateDocument(title) || documentKind(title) === "other") continue;
+        // Use an explicitly registered canonical report instead of its portal mirror.
+        if (project?.sourceDocuments?.some((source) => source.caseIds.includes(caseId) && source.fileNames?.includes(attachment.FileName))) continue;
         if (attachment.FilePath && officialDocumentUrl(attachment.FilePath)) documents.push({ url: attachment.FilePath, title, caseIds: [caseId], kind: documentKind(title) });
         else if (portalUrl && /\.pdf$/i.test(attachment.FileName)) {
           documents.push({ url: energovDocumentReference(portalUrl, attachment.AttachmentID), title, caseIds: [caseId], kind: documentKind(title) });

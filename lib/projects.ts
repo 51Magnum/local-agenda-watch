@@ -23,7 +23,7 @@ export type Project = {
   caseIds: string[];
   cases: { id: string; label: string; portalUrl: string }[];
   image: string;
-  sourceDocuments?: { caseIds: string[]; label: string; url: string; sourceUrl: string }[];
+  sourceDocuments?: { caseIds: string[]; label: string; url: string; sourceUrl: string; fileNames?: string[] }[];
   nextHearing?: ProjectHearing;
 };
 
@@ -51,6 +51,7 @@ export const braeburnCreek: Project = {
     {
       caseIds: ["ANN-00371-2026", "SPP-00184-2026"],
       label: "Staff report — P&Z hearing, September 29, 2026 (shared project report)",
+      fileNames: ["ANN-00371-2026_Braeburn Creek_Staff Report PZ_Sept2026.pdf"],
       url: "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=acf18754-7101-48d9-b4ea-f8398342a0fa",
       sourceUrl: "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062#AgendaItem_35512",
     },
