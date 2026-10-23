@@ -11,5 +11,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ juri
     const flum = new URL(request.url).searchParams.get("layer") === "flum";
     if (flum && !snapshot.flum) return Response.json({ error: "Future land use temporarily unavailable" }, { status: 503 });
     return Response.json(flum ? snapshot.flum : publicMapData(config, snapshot), { headers: { "Cache-Control": flum ? "public, max-age=3600, s-maxage=3600" : "public, max-age=300, s-maxage=300" } });
-  } catch { return Response.json({ error: "Map data temporarily unavailable. The case list and official GIS sources remain available." }, { status: 503, headers: { "Cache-Control": "no-store" } }); }
+  } catch (error) {
+    const failure = error as { name?: string; code?: string; stack?: string };
+    console.error("[map-data] Request failed", { jurisdiction: config.id, name: failure.name, code: failure.code, frames: failure.stack?.split("\n").slice(1, 4) });
+    return Response.json({ error: "Map data temporarily unavailable. The case list and official GIS sources remain available." }, { status: 503, headers: { "Cache-Control": "no-store" } }); }
 }
