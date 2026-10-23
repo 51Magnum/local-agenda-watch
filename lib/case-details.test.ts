@@ -52,7 +52,7 @@ describe("automatic case next step", () => {
     expect(denverInstant("2026-10-27", "18:00")).toBe("2026-10-28T00:00:00.000Z");
     expect(denverInstant("2026-11-02", "18:00")).toBe("2026-11-03T01:00:00.000Z");
     const calendar = hearingCalendar({ slug: "ann-00369-2026", title: "Nampa Logistics Center", path: "plan/ANN-00369-2026" }, getCaseNextHearing(hearing, undefined, now)!)!;
-    expect(calendar).toContain("URL:https://www.localagendawatch.com/nampa/plan/ANN-00369-2026");
+    expect(calendar).toContain("URL:https://www.localagendawatch.com/us/id/nampa/plan/ANN-00369-2026");
     expect(calendar).toContain("DTSTART:20261103T010000Z");
   });
 });

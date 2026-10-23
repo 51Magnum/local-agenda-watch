@@ -9,6 +9,7 @@ import { geometryCentroid, nearbyCases } from "@/lib/maps/spatial";
 import { createMapPin, readSharedSearch, searchAddress, searchHash } from "@/lib/maps/address-search";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./map.css";
+import {areaPath,getArea,mapStageLabel} from "@/lib/areas/registry";
 import MapImageViewer from "./map-image-viewer";
 import { isWatching, setWatching, subscribeWatches, watchFromCase } from "@/lib/watches";
 const popupDisposers = new WeakMap<HTMLElement, () => void>();
@@ -41,7 +42,7 @@ function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jur
     if (exhibit.note) { const note = document.createElement("span"); note.textContent = exhibit.note; caption.append(note); }
     figure.append(caption); card.append(figure);
   }
-  const status = document.createElement("p"); status.className = "law-popup-status"; status.textContent = item.statusNote ?? item.stage; card.append(status);
+  const status = document.createElement("p"); status.className = "law-popup-status"; status.textContent = item.statusNote ?? mapStageLabel(item.stage,getArea(jurisdiction)); card.append(status);
   if (item.summary) { const summary = document.createElement("p"); summary.textContent = item.summary; card.append(summary); }
   if (item.nextHearing) { const hearing = document.createElement("p"); hearing.className = "law-popup-hearing"; hearing.textContent = item.nextHearing.label; card.append(hearing); }
   if (item.confidence === "approximate") { const note = document.createElement("p"); note.textContent = "Approximate boundary"; card.append(note); }
@@ -49,7 +50,8 @@ function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jur
   const footer = document.createElement("div"); footer.className = "law-popup-footer"; footer.append(link, watchLabel); card.append(footer, watchError);
   return card;
 }
-export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPage = false, matchHeightTo }: { jurisdiction: string; caseIds?: readonly string[]; compact?: boolean; fullPage?: boolean; matchHeightTo?: string }) {
+export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPage = false, matchHeightTo, showNearbyList = false }: { jurisdiction: string; caseIds?: readonly string[]; compact?: boolean; fullPage?: boolean; matchHeightTo?: string; showNearbyList?: boolean }) {
+  const area = getArea(jurisdiction);
   const [expandedImage, setExpandedImage] = useState<MapVisual>();
   const [linkCopied, setLinkCopied] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -86,9 +88,10 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   }, [jurisdiction]);
   useEffect(() => {
     if (compact) return;
-    const restore = () => { const shared = readSharedSearch(window.location.hash); if (shared) { setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile(new URLSearchParams(window.location.hash.slice(1)).get("nearby") === "1"); } };
+    try { if(getArea(jurisdiction)?.status==="live")localStorage.setItem("law:last-area",jurisdiction); } catch {}
+    const restore = () => { const query=new URLSearchParams(window.location.search); const shared = readSharedSearch(window.location.hash) ?? readSharedSearch("#"+query); if (shared) { if(!window.location.hash)shared.source="map"; setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile((window.location.hash?new URLSearchParams(window.location.hash.slice(1)):query).get("nearby") === "1"); } };
     restore(); window.addEventListener("hashchange", restore); return () => window.removeEventListener("hashchange", restore);
-  }, [compact]);
+  }, [compact,jurisdiction]);
   useEffect(() => {
     applyMapPin.current = (coordinates) => {
       const pin = createMapPin(coordinates);
@@ -97,7 +100,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       pinMode.current = false; setPlacingPin(false);
       if (map.current) map.current.getCanvas().style.cursor = "";
       popup.current?.remove();
-      window.history.replaceState(null, "", window.location.pathname + window.location.search + searchHash(pin) + (withinMile ? "&nearby=1" : ""));
+      window.history.replaceState(null, "", mapBaseUrl() + searchHash(pin) + (withinMile ? "&nearby=1" : ""));
     };
   }, [withinMile]);
   function togglePinMode() {
@@ -234,7 +237,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     if (!ready || !map.current || !location) return;
     const b = bbox(circle(location.coordinates, 1, { units: "miles", steps: 80 })); map.current.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 45 });
   }, [ready, location]);
-  function locationUrl(result: AddressResult, nearby = withinMile) { return window.location.pathname + window.location.search + searchHash(result) + (nearby ? "&nearby=1" : ""); }
+  function mapBaseUrl(){const q=new URLSearchParams(window.location.search);for(const key of ["lat","lng","nearby","pin","address"])q.delete(key);return window.location.pathname+(q.size?"?"+q:"");}
+  function locationUrl(result: AddressResult, nearby = withinMile) { return mapBaseUrl() + searchHash(result) + (nearby ? "&nearby=1" : ""); }
   function choose(result: AddressResult) { setLocation(result); setResults([]); setSearchMessage(""); window.history.replaceState(null, "", locationUrl(result)); }
   function toggleNearby(checked: boolean) {
     setWithinMile(checked);
@@ -254,16 +258,16 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     catch { if (generation === searchGeneration.current) setSearchMessage("Address search is temporarily unavailable."); } finally { if (generation === searchGeneration.current) setSearching(false); }
   }
   async function share() { try { const path = location ? locationUrl(location) : window.location.pathname + window.location.search; await navigator.clipboard.writeText(window.location.origin + path); setSearchMessage(""); setLinkCopied(true); if (copyTimer.current) clearTimeout(copyTimer.current); copyTimer.current = setTimeout(() => setLinkCopied(false), 2000); } catch { setSearchMessage("Copy this page’s URL to share."); } }
-  function clearLocation() { searchGeneration.current += 1; setSearching(false); if (pinMode.current) togglePinMode(); setLocation(undefined); setAddress(""); setWithinMile(false); setSearchMessage(""); window.history.replaceState(null, "", window.location.pathname + window.location.search); }
+  function clearLocation() { searchGeneration.current += 1; setSearching(false); if (pinMode.current) togglePinMode(); setLocation(undefined); setAddress(""); setWithinMile(false); setSearchMessage(""); window.history.replaceState(null, "", mapBaseUrl()); }
   const mapInfo = data && (<details className={compact ? "law-map-stage-key law-project-map-key" : "law-map-info"}><summary>Map key & sources</summary><div className="law-map-info-content">
-          {compact && <div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{s}</span>)}<span>┄ Approximate boundary</span></div>}
+          {compact && <div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{mapStageLabel(s,area)}</span>)}<span>┄ Approximate boundary</span></div>}
           {flumOn && <div className="law-map-legend" aria-label="Future land use legend">{data.flum.legend.map((c) => <span key={c.value}><i style={{ background: c.color }}/>{c.label}</span>)}</div>}
           <p><a href={data.flum.layerUrl + "?f=pjson"}>{data.flum.label}</a>{data.flum.adoptedDate && <> · <a href={data.flum.adoptionSource}>Adopted {data.flum.adoptedDate}</a></>}. Future land use is separate from zoning. {data.flum.dataNote}</p>
-          <p>Updated {new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", dateStyle: "medium", timeStyle: "short" }).format(new Date(data.updatedAt))} (Mountain time).</p>{data.warnings.map((w) => <p key={w}>{w}</p>)}
+          <p>Updated {new Intl.DateTimeFormat("en-US", { timeZone: area?.timezone ?? "UTC", dateStyle: "medium", timeStyle: "short" }).format(new Date(data.updatedAt))} ({area?.timezone ?? "UTC"}).</p>{data.warnings.map((w) => <p key={w}>{w}</p>)}
           {!compact && <label>Find a project <select aria-label="Find a project" defaultValue="" onChange={(e) => openProject.current?.(e.target.value)}><option value="">Choose a project</option>{mapped.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>}
         </div></details>);
   return <section id={compact ? "case-location-map" : "case-map"} className={"law-map" + (compact ? " law-map-compact" : "") + (fullPage ? " law-map-full" : "") + (matchHeightTo ? " law-map-match-card" : "")} aria-label="Development map" onKeyDown={(e) => { if (e.key === "Escape" && pinMode.current) { e.preventDefault(); togglePinMode(); } }}>
-    {!fullPage && <div className="law-map-heading"><h2>{compact ? "Project map" : "Development map"}</h2>{!compact && <a href={"/" + jurisdiction + "#case-map"}>Open map →</a>}</div>}
+    {!fullPage && <div className="law-map-heading"><h2>{compact ? "Project map" : "Development map"}</h2>{!compact && <a href={areaPath(jurisdiction)+"/map"}>Open map →</a>}</div>}
     {error && <p role="status">{error}</p>}{!data && !error && <p role="status">Loading map…</p>}
     {data && <>
       <div className="law-map-toolbar">
@@ -275,7 +279,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
             <div className="law-filter-groups">
               <fieldset><legend>Stage</legend>
                 <label className="law-filter-all"><input type="checkbox" checked={hiddenStages.length === 0} onChange={(e) => setHiddenStages(e.target.checked ? [] : [...MAP_STAGES])}/> All stages</label>
-                {MAP_STAGES.map((stage) => <label key={stage}><input type="checkbox" checked={!hiddenStages.includes(stage)} onChange={(e) => setHiddenStages((current) => e.target.checked ? current.filter((s) => s !== stage) : [...current, stage])}/><i className="law-stage-swatch" style={{ background: STAGE_COLORS[stage] }}/>{stage}</label>)}
+                {MAP_STAGES.map((stage) => <label key={stage}><input type="checkbox" checked={!hiddenStages.includes(stage)} onChange={(e) => setHiddenStages((current) => e.target.checked ? current.filter((s) => s !== stage) : [...current, stage])}/><i className="law-stage-swatch" style={{ background: STAGE_COLORS[stage] }}/>{mapStageLabel(stage,area)}</label>)}
               </fieldset>
               <fieldset><legend>Case type</legend>
                 <label className="law-filter-all"><input type="checkbox" checked={hiddenTypes.length === 0} onChange={(e) => setHiddenTypes(e.target.checked ? [] : [...new Set(data.cases.map((c) => c.type))])}/> All case types</label>
@@ -288,13 +292,14 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       </div>
       <p className={searching ? "sr-only" : "law-live-message"} role="status">{searching ? "Searching..." : searchMessage}</p>
       {results.length > 1 && <div className="law-address-results">{results.map((r, i) => <button key={i} type="button" onClick={() => choose(r)}>{r.label}</button>)}</div>}
-      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover or tap an outline for details."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : compact ? "Click a boundary for details" : "Hover or tap a project"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{s}</span>)}<span>┄ Approximate boundary</span></div></details>}{compact && mapInfo}</div>
-      {!compact && <div className="law-map-bottom"><span>{mapped.length} projects shown</span>{!fullPage && <a href={"/" + jurisdiction + "#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
+      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover or tap an outline for details."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : compact ? "Click a boundary for details" : "Hover or tap a project"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{mapStageLabel(s,area)}</span>)}<span>┄ Approximate boundary</span></div></details>}{compact && mapInfo}</div>
+      {!compact && <div className="law-map-bottom"><span>{mapped.length} projects shown</span>{!fullPage && <a href={areaPath(jurisdiction)+"#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
         {mapInfo}
       </div>}
       {compact && <p className="law-map-source"><strong>Future land use:</strong> {[...new Set(cases.flatMap((c) => c.flumCategories))].join("; ") || "Not yet available"}</p>}
       {withinMile && !mapped.length && <p role="status">No projects within 1 mile match your filters.</p>}
     </>}
+    {showNearbyList&&withinMile&&location&&<section aria-label="Projects within one mile" className="rounded-xl border border-zinc-300 p-5 dark:border-zinc-800"><h2>Within 1 mile</h2><ul className="mt-3 divide-y divide-zinc-200 dark:divide-zinc-800">{nearbyCases(filtered,location.coordinates).map(c=><li key={c.id} className="flex flex-wrap justify-between gap-3 py-3 text-sm"><a href={c.href}>{c.title}</a><span>{c.distance.toFixed(1)} mi{c.nextHearing?" · "+c.nextHearing.label:""}</span></li>)}</ul></section>}
     {linkCopied && <div className="law-copy-toast" role="status"><span aria-hidden="true">✓</span> Link copied</div>}
     {expandedImage && <MapImageViewer visual={expandedImage} onClose={() => setExpandedImage(undefined)} />}
   </section>;

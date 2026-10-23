@@ -1,3 +1,4 @@
+import{areaPath,FEATURED_AREA_ID,getArea}from"./areas/registry";
 import type { HearingFeed } from "@/lib/localities/types";
 
 export const PUBLIC_COMMENT_URL = "https://www.cityofnampa.us/1616/Public-Comment";
@@ -15,6 +16,7 @@ export type ProjectHearing = {
   commentSourceUrl?: string;
 };
 export type Project = {
+  areaId?:string;
   name?: string;
   slug: string;
   title: string;
@@ -39,7 +41,7 @@ export const braeburnCreek: Project = {
     { id: "ANN-00371-2026", label: "Annexation and zoning", portalUrl: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/885c7660-323f-4486-9d09-75d47c42968f" },
     { id: "SPP-00184-2026", label: "Preliminary plat", portalUrl: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/c453892b-7335-4195-8113-a3a19524dbf5" },
   ],
-  image: "/nampa/toll-brothers-site-map.webp",
+  image: "/us/id/nampa/toll-brothers-site-map.webp",
   sourceDocuments: [
     { label: "ANN-00371-2026_Braeburn Creek_Decision Letter PZ.pdf", url: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/885c7660-323f-4486-9d09-75d47c42968f?tab=attachments", sourceUrl: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/885c7660-323f-4486-9d09-75d47c42968f?tab=attachments", caseIds: ["ANN-00371-2026"] },
 
@@ -69,11 +71,11 @@ export const braeburnCreek: Project = {
 };
 
 export const projects: Project[] = [braeburnCreek];
-export function getProjectForCase(caseId: string): Project | undefined {
-  return projects.find((p) => p.caseIds.includes(caseId.toUpperCase()));
+export function getProjectForCase(caseId: string,areaId=FEATURED_AREA_ID): Project | undefined {
+  return projects.find((p) => (p.areaId??FEATURED_AREA_ID)===areaId&&p.caseIds.includes(caseId.toUpperCase()));
 }
-export function projectPathForCase(caseId: string): string {
-  const project = getProjectForCase(caseId);
+export function projectPathForCase(caseId: string, areaId=FEATURED_AREA_ID): string {
+  const project = getProjectForCase(caseId, areaId);
   return project ? "/" + project.slug : "/plan/" + encodeURIComponent(caseId);
 }
 export function projectHearings(project: Project, feed?: HearingFeed) {
@@ -124,7 +126,7 @@ export function formatDenverTime(value: string): string {
 }
 
 /** RFC 5545 calendar event in UTC; offsets on source dates account for DST. */
-export function hearingCalendar(project: Pick<Project, "slug" | "title"> & { path?: string }, hearing: ProjectHearing): string | undefined {
+export function hearingCalendar(project: Pick<Project, "slug" | "title"> & { path?: string; areaId?:string }, hearing: ProjectHearing): string | undefined {
   if (hearing.startsAt.length === 10) return undefined; // Time not confirmed.
   const escape = (s: string) => s.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
   const utc = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
@@ -132,8 +134,8 @@ export function hearingCalendar(project: Pick<Project, "slug" | "title"> & { pat
     "UID:" + project.slug + "-" + hearing.startsAt.slice(0, 10) + "@localagendawatch.com",
     "DTSTAMP:" + utc(new Date()), "DTSTART:" + utc(new Date(hearing.startsAt)),
     "SUMMARY:" + escape(project.title + " — " + hearing.body + " hearing"), "LOCATION:" + escape(hearing.location),
-    "DESCRIPTION:" + escape("Public hearing start time; individual items may be heard later. Confirm details with the city. " + PUBLIC_COMMENT_URL),
-    "URL:https://www.localagendawatch.com/nampa/" + (project.path ?? project.slug), "END:VEVENT", "END:VCALENDAR"];
+    "DESCRIPTION:" + escape("Public hearing start time; individual items may be heard later. Confirm details with the published agenda. " + (getArea(project.areaId??FEATURED_AREA_ID)?.commentInstructionsUrl??hearing.sourceUrl)),
+    "URL:https://www.localagendawatch.com"+areaPath(project.areaId??FEATURED_AREA_ID)+"/" + (project.path ?? project.slug), "END:VEVENT", "END:VCALENDAR"];
   // Fold by UTF-8 octets, not JS characters, to preserve Unicode titles.
   return lines.map((line) => {
     let result = "", segment = "";

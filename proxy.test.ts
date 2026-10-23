@@ -1,0 +1,8 @@
+import{NextRequest}from"next/server";
+import{expect,it}from"vitest";
+import{proxy}from"./proxy";
+it("301 redirects every legacy area path, preserving repeated query values",()=>{
+  for(const path of ["/nampa","/nampa/map","/nampa/meetings","/nampa/braeburn-creek","/nampa/plan/ANN-00371-2026","/nampa/plan/ANN-00371-2026/hearing.ics","/nampa/braeburn-creek/hearing.ics","/nampa/toll-brothers-concept-plan.png","/nampa/unknown/deep/path"]){const response=proxy(new NextRequest("https://www.localagendawatch.com"+path+"?case=ANN-00371-2026&tag=a&tag=b"));expect(response?.status).toBe(301);const url=new URL(response!.headers.get("location")!);expect(url.pathname).toBe("/us/id"+path);expect(url.searchParams.getAll("tag")).toEqual(["a","b"]);expect(url.searchParams.get("case")).toBe("ANN-00371-2026");}
+});
+it("serves canonical area paths without a redirect loop, and rewrites legacy assets internally",()=>{expect(proxy(new NextRequest("https://www.localagendawatch.com/us/id/nampa/meetings"))).toBeUndefined();const image=proxy(new NextRequest("https://www.localagendawatch.com/us/id/nampa/toll-brothers-concept-plan.png"));expect(image?.headers.get("x-middleware-rewrite")).toBe("https://www.localagendawatch.com/nampa/toll-brothers-concept-plan.png");});
+it("preserves old locality subdomains as redirects to the canonical area",()=>{const response=proxy(new NextRequest("https://nampa.localagendawatch.com/meetings?year=2026",{headers:{host:"nampa.localagendawatch.com"}}));expect(response?.status).toBe(301);expect(response?.headers.get("location")).toBe("https://www.localagendawatch.com/us/id/nampa/meetings?year=2026");});

@@ -1,6 +1,6 @@
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-vi.mock("@/lib/locality", () => ({ getLocalityContext: async () => ({}), localityHref: (_slug: string, path: string) => "/nampa" + path }));
+vi.mock("@/lib/locality", () => ({ getLocalityContext: async () => ({}), localityHref: (_slug: string, path: string) => "/us/id/nampa" + path }));
 vi.mock("@/lib/sources/primegov", () => ({ getNampaMeetingArchive: vi.fn() }));
 import { getNampaMeetingArchive } from "@/lib/sources/primegov";
 import Page from "./page";
@@ -35,8 +35,8 @@ it("retains case and year when switching hearing tabs and includes the next Coun
   const html = renderToStaticMarkup(await Page({ searchParams: Promise.resolve({ case: "ANN-00369-2026", body: "City Council", year: "2026" }) }));
   expect(html).toContain("Current status: Council hearing");
   expect(html).toContain("Viewing: Council hearing records");
-  expect(html).toContain('href="/nampa/meetings?case=ANN-00369-2026&amp;year=2026&amp;body=P%26Z"');
-  expect(html).toContain('href="/nampa/plan/ANN-00369-2026#case-documents"');
+  expect(html).toContain('href="/us/id/nampa/meetings?case=ANN-00369-2026&amp;year=2026&amp;body=P%26Z"');
+  expect(html).toContain('href="/us/id/nampa/plan/ANN-00369-2026#case-documents"');
   expect(html).toContain('aria-current="page"');
   expect(html).toContain("November 2, 2026");
 });

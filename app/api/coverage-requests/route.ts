@@ -1,0 +1,18 @@
+import{saveCoverageRequest}from"@/lib/areas/requests";
+export const runtime="nodejs";
+export async function POST(request:Request){
+  const headers={"Cache-Control":"no-store"};
+  try{
+    const origin=request.headers.get("origin");if(origin&&new URL(origin).host!==new URL(request.url).host)return Response.json({error:"Please submit this form from the site."},{status:403,headers});
+    const text=await request.text();if(text.length>2000)return Response.json({error:"Request too long."},{status:400,headers});let data;
+    try{data=JSON.parse(text);}catch{return Response.json({error:"Invalid request."},{status:400,headers});}
+    if(!data||typeof data!=="object"||Array.isArray(data))return Response.json({error:"Invalid request."},{status:400,headers});
+    if(data.website)return Response.json({ok:true},{headers});
+    if(!["coverage","follow"].includes(data.kind))return Response.json({error:"Invalid request."},{status:400,headers});
+    const areaRequested=typeof data.areaRequested==="string"?data.areaRequested.trim():"";
+    const email=typeof data.email==="string"?data.email.trim():"";
+    if(!areaRequested||areaRequested.length>160||email.length>254||(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))return Response.json({error:"Enter an area name and, optionally, a valid email."},{status:400,headers});
+    let location=null;if(data.location!=null){const{lat,lng}=data.location;if(typeof lat!=="number"||typeof lng!=="number"||!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return Response.json({error:"Invalid location."},{status:400,headers});location={lat,lng};}
+    await saveCoverageRequest({kind:data.kind,areaRequested,location,email:email||null,createdAt:new Date().toISOString()});return Response.json({ok:true},{status:201,headers});
+  }catch{return Response.json({error:"We couldn't save this yet. Please try again."},{status:503,headers});}
+}

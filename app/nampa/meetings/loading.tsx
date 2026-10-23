@@ -1,1 +1,1 @@
-export default function Loading() { return <p role="status" className="mx-auto max-w-4xl px-6 py-10">Loading official meeting records…</p>; }
+export default function Loading() { return <div className="mx-auto max-w-4xl space-y-4 px-6 py-10"><p role="status">Searching official meeting agendas…</p><p className="text-sm">This can take a moment. <a href="https://nampa.primegov.com/public/portal" className="underline">Open the official meeting archive</a>.</p></div>; }

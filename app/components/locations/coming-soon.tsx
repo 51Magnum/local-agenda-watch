@@ -1,0 +1,5 @@
+import Link from"next/link";
+import type{AreaDefinition}from"@/lib/areas/registry";
+import CoverageMap from"./coverage-map";
+import InterestForm from"./interest-form";
+export default function ComingSoon({area}:{area:AreaDefinition}){return <main className="mx-auto w-full max-w-5xl flex-1 space-y-8 px-6 py-12"><Link href={"/"+area.country+"/"+area.state} className="text-sm underline">← {area.stateName}</Link><header className="space-y-4"><p className="text-sm font-medium uppercase tracking-widest text-zinc-500">Coming soon</p><h1 className="text-4xl font-semibold">{area.name}, {area.stateAbbreviation}</h1><p>We’re not tracking this area yet. No projects or meeting data are live here.</p></header><CoverageMap areas={[area]}/><p className="text-xs text-zinc-500">Boundary: {area.boundarySources.map(url=><a key={url} href={url+"?f=pjson"} className="underline">Official boundary source</a>)}</p><section className="rounded-2xl border border-zinc-300 p-6 dark:border-zinc-800"><h2 className="text-xl font-semibold">Request coverage</h2><InterestForm areaName={area.name+", "+area.stateAbbreviation}/></section></main>;}

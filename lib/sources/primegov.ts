@@ -174,3 +174,22 @@ export async function getNampaMeetingArchive(year: number, filter: { caseId?: st
     return { meetings: [], unavailable: true, unsearched: 0 };
   }
 }
+
+/** Recent official reports for deterministic map previews, shared across case refreshes. */
+export async function getNampaVisualReports(deadline:number) {
+  const reports:{caseIds:string[];label:string;url:string}[]=[];
+  const year=Number(new Intl.DateTimeFormat("en-US",{timeZone:"America/Denver",year:"numeric"}).format(new Date()));
+  const request=async(url:string)=>{
+    if(Date.now()>deadline-1000)throw new Error("Preview discovery deadline");
+    const r=await fetch(url,{signal:AbortSignal.timeout(Math.min(6000,deadline-Date.now())),next:{revalidate:3600}});
+    if(!r.ok)throw new Error("Report source unavailable");return r;
+  };
+  try{
+    const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Denver"}).format(new Date());
+    const meetings=parsePrimeGovMeetings(await(await request(NAMPA_PRIMEGOV_ORIGIN+"/api/v2/PublicPortal/ListArchivedMeetings?year="+year)).json()).filter(m=>m.htmlAgendaUrl&&m.date<=today&&["City Council","P&Z"].includes(m.body)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,12);
+    for(let i=0;i<meetings.length&&Date.now()<deadline-1000;i+=4)await Promise.all(meetings.slice(i,i+4).map(async m=>{
+      try{const items=parsePrimeGovAgenda(await(await request(m.htmlAgendaUrl!)).text(),m.htmlAgendaUrl!);for(const item of items)for(const report of item.staffReports)reports.push({...report,caseIds:item.caseIds});}catch{/* Other agendas and image sources keep working. */}
+    }));
+  }catch{console.error("[map-visual] Archived reports unavailable");}
+  return reports;
+}

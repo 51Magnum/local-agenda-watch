@@ -1,11 +1,12 @@
+import{FEATURED_AREA_ID}from"./areas/registry";
 import { caseCatalog } from "./case-catalog";
 import { cache } from "react";
 import { findHearing, getLocality } from "@/lib/localities";
 import type { EnerGovAttachment, EnerGovPlan } from "@/lib/sources/energov";
 
 /** Share the same record and summary inputs between metadata and page rendering. */
-export const getCaseRecord = cache(async (planNumber: string) => {
-  const locality = getLocality("nampa");
+export const getCaseRecord = cache(async (planNumber: string,areaId=FEATURED_AREA_ID) => {
+  const locality = getLocality(areaId);
   if (!locality?.energov || !locality.getHearings) return null;
   const feed = await locality.getHearings();
   const completed = findHearing(feed.completed, planNumber);

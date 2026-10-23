@@ -1,0 +1,4 @@
+import{ImageResponse}from"next/og";
+import{findArea}from"@/lib/areas/registry";
+export const size={width:1200,height:630};export const contentType="image/png";export const alt="Local development proposals and public hearings";
+export default async function Image({params}:{params:Promise<{country:string;state:string;area:string}>}){const p=await params,a=findArea(p.country,p.state,p.area);return new ImageResponse(<div style={{width:"100%",height:"100%",background:"#0b1718",color:"#f4faf8",padding:75,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontSize:28,color:"#5eead4"}}>LOCAL AGENDA WATCH</div><div style={{fontSize:82,fontWeight:700}}>{a ? `${a.name}, ${a.stateAbbreviation}` : "Local projects"}</div><div style={{fontSize:32,color:"#bfdbd3"}}>Rezoning · Development proposals · Public hearings</div><div style={{fontSize:24}}>Independent summaries. Official sources.</div></div>,size);}

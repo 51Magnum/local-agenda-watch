@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getWatchSnapshot, isWatching, parseWatches, resolveWatchedProjects, setWatching, subscribeWatches, watchFromCase, WATCH_STORAGE_KEY, type WatchedProject } from "./watches";
 import type { MapCase } from "./maps/types";
-const project: WatchedProject = { jurisdiction: "nampa", href: "/nampa/braeburn-creek", title: "Braeburn Creek", caseIds: ["ANN-00371-2026", "SPP-00184-2026"] };
+const project: WatchedProject = { jurisdiction: "nampa", href: "/us/id/nampa/braeburn-creek", title: "Braeburn Creek", caseIds: ["ANN-00371-2026", "SPP-00184-2026"] };
 beforeEach(() => {
   const values = new Map<string,string>();
   vi.stubGlobal("localStorage", { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string,value: string) => values.set(key,value) });
@@ -9,6 +9,15 @@ beforeEach(() => {
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 describe("browser-local watches", () => {
+  it("migrates legacy saved URLs and keeps their current watch checked without duplicating it", () => {
+    const legacy = {...project, href:"/nampa/braeburn-creek"};
+    localStorage.setItem(WATCH_STORAGE_KEY, JSON.stringify({version:1, items:[legacy,project]}));
+    expect(parseWatches(getWatchSnapshot())).toEqual([project]);
+    expect(isWatching(project)).toBe(true);
+    expect(isWatching(legacy)).toBe(true);
+    setWatching(project,false);
+    expect(parseWatches(getWatchSnapshot())).toEqual([]);
+  });
   it("persists, deduplicates and removes watches while notifying same-tab subscribers", () => {
     const listener = vi.fn(), unsubscribe = subscribeWatches(listener);
     setWatching(project,true); expect(isWatching(project)).toBe(true);
@@ -20,7 +29,7 @@ describe("browser-local watches", () => {
   it("groups related cases by their project page and never stores geometry or a searched address", () => {
     const first = { id:"ANN-00371-2026", href:project.href, title:"Braeburn Creek annexation" } as MapCase;
     const second = { id:"SPP-00184-2026", href:project.href, title:"Braeburn Creek preliminary plat" } as MapCase;
-    const unrelated = { id:"ANN-00369-2026", href:"/nampa/plan/ANN-00369-2026" } as MapCase;
+    const unrelated = { id:"ANN-00369-2026", href:"/us/id/nampa/plan/ANN-00369-2026" } as MapCase;
     const entry = watchFromCase("nampa",first,[first,second,unrelated]);
     expect(entry.caseIds).toEqual(project.caseIds); setWatching(entry,true);
     setWatching(watchFromCase("nampa",second,[first,second]),true);

@@ -20,7 +20,7 @@ import type {
 
 export const metadata: Metadata = {
   title: "What’s coming to Nampa, Idaho",
-  alternates: { canonical: "https://www.localagendawatch.com/nampa" },
+  alternates: { canonical: "https://www.localagendawatch.com/us/id/nampa" },
   description:
     "Explore proposed developments on the Nampa map, upcoming public hearings, and projects you watch.",
 };

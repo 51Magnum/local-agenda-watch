@@ -1,3 +1,4 @@
+import { areaPath } from "@/lib/areas/registry";
 import { headers } from "next/headers";
 
 const APEX_DOMAIN = "localagendawatch.com";
@@ -50,10 +51,8 @@ export function localityHref(
         ? subpath
         : `/${subpath}`;
 
-  if (ctx.onSubdomain && ctx.subdomainSlug === locality) {
-    return normalized === "" ? "/" : normalized;
-  }
-  return `/${locality}${normalized}`;
+  void ctx;
+  return areaPath(locality) + normalized;
 }
 
 /** Absolute URL of the apex home page, for cross-origin "Home" links. */

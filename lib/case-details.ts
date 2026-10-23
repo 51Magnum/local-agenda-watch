@@ -1,19 +1,21 @@
+import{FEATURED_AREA_ID}from"./areas/registry";
+import{displayArea}from"./areas/format";
 import { CASE_EVIDENCE } from "@/lib/case-evidence";
 import { getCaseStage, getCaseStatus } from "@/lib/localities/stages";
 import type { Hearing, HearingFeed } from "@/lib/localities/types";
 import type { EnerGovAttachment, EnerGovPlan } from "@/lib/sources/energov";
-import { getProjectForCase, getProjectNextHearing, PUBLIC_COMMENT_URL, type ProjectHearing } from "@/lib/projects";
+import { getProjectForCase, getProjectNextHearing, type ProjectHearing } from "@/lib/projects";
 
 export const PENDING_AGENDA_MESSAGE = "Agenda usually posted the Thursday before the meeting";
 export const NAMPA_HEARING_LOCATION = "Nampa City Hall, Council Chambers, 411 3rd St S, Nampa, ID";
 
 /** Convert Nampa wall time using its IANA zone, including daylight-saving time. */
-export function denverInstant(date: string, time: string): string {
+export function denverInstant(date: string, time: string,timezone=displayArea().timezone): string {
   const [y, m, d] = date.split("-").map(Number);
   const [h, min] = time.split(":").map(Number);
   const target = Date.UTC(y, m - 1, d, h, min);
   let instant = target;
-  const formatter = new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const formatter = new Intl.DateTimeFormat("en-US", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   for (let i = 0; i < 3; i++) {
     const p = Object.fromEntries(formatter.formatToParts(new Date(instant)).map((part) => [part.type, part.value]));
     const wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
@@ -22,9 +24,10 @@ export function denverInstant(date: string, time: string): string {
   return new Date(instant).toISOString();
 }
 
-export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = new Date()): ProjectHearing | undefined {
+export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = new Date(),areaId=FEATURED_AREA_ID): ProjectHearing | undefined {
+  const area=displayArea(areaId);
   if (getCaseStage(hearing, false, now) === "Decided") return undefined;
-  const project = getProjectForCase(hearing.appId);
+  const project = getProjectForCase(hearing.appId,areaId);
   if (project) {
     const curated = getProjectNextHearing(project, feed ?? { active: [hearing], completed: [] }, now);
     if (curated) return curated;
@@ -35,19 +38,19 @@ export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = n
     .sort((a, b) => a.date.localeCompare(b.date))[0];
   if (!next) return undefined;
   const agendaMeeting = feed?.agendaMeetings?.find((m) => m.body === next.body && m.date === next.date);
-  const council = next.body === "City Council";
+  const council = next.body === area.bodies.decision.id;
   // Nampa's published hearing schedule specifies 6 p.m. for Council and P&Z.
   // Use an explicitly published hearing time before a general meeting's start.
-  const isCityHearing = next.sourceUrl.includes("cityofnampa.us/1433/");
-  const time = next.time ?? (isCityHearing && (council || next.body === "P&Z") ? "18:00" : agendaMeeting?.localStartTime);
+  const isCityHearing = !!area.sources.hearingsSchedule&&next.sourceUrl.startsWith(area.sources.hearingsSchedule);
+  const time = next.time ?? (isCityHearing ? area.meetingRules.defaultHearingTime : agendaMeeting?.localStartTime);
   return {
-    startsAt: time ? denverInstant(next.date, time) : next.date,
+    startsAt: time ? denverInstant(next.date, time,area.timezone) : next.date,
     body: next.bodyLabel,
-    location: next.location || agendaMeeting?.location || (council || next.body === "P&Z" ? NAMPA_HEARING_LOCATION : "Location not confirmed — check the official agenda."),
+    location: next.location || agendaMeeting?.location || (area.meetingRules.location??"Location not confirmed — check the official agenda."),
     sourceUrl: next.sourceUrl,
     agendaUrl: next.agendaUrl ?? agendaMeeting?.agendaUrl,
     packetUrl: next.packetUrl ?? agendaMeeting?.packetUrl,
-    ...(council ? { commentDeadline: denverInstant(next.date, "12:00"), commentSourceUrl: PUBLIC_COMMENT_URL } : {}),
+    ...(council&&area.meetingRules.decisionCommentDeadlineHour!=null ? { commentDeadline: denverInstant(next.date, String(area.meetingRules.decisionCommentDeadlineHour).padStart(2,"0")+":00",area.timezone), commentSourceUrl: area.commentInstructionsUrl } : {}),
   };
 }
 

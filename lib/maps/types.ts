@@ -1,3 +1,4 @@
+import type { AreaDefinition } from "@/lib/areas/registry";
 import type { FeatureCollection, Polygon, MultiPolygon, Position } from "geojson";
 import type { caseSummary } from "@/lib/case-details";
 import type { Hearing, HearingFeed } from "@/lib/localities/types";
@@ -6,8 +7,9 @@ export const MAP_STAGES = ["Filed", "In review", "P&Z", "Council/Board", "Decide
 export type MapStage = typeof MAP_STAGES[number];
 export const STAGE_COLORS: Record<MapStage, string> = { Filed: "#64748b", "In review": "#b45309", "P&Z": "#7c3aed", "Council/Board": "#0284c7", Decided: "#52525b", Recorded: "#15803d" };
 export type CaseGeometry = Polygon | MultiPolygon;
-export type MapVisual = { src: string; alt: string; label: string; note?: string; sourceUrl: string; fullSizeUrl: string; kind: "proposal" | "context" };
+export type MapVisual = { documentTitle?: string; src: string; alt: string; label: string; note?: string; sourceUrl: string; fullSizeUrl: string; kind: "proposal" | "context" };
 export type JurisdictionConfig = {
+  area?: AreaDefinition;
   id: string; name: string; mapOnHub?: boolean; center: [number, number]; zoom: number; state: { abbreviation: string; fips: string; name: string }; bounds: [number, number, number, number];
   caseGeometry: { layers: string[]; caseIdField: string; fields: { type: string; phase: string; status: string; title: string; acres?: string; link?: string; parcel?: string }; parcelFallback: { layerUrl: string; matchField: string; recordField: string; ignored: string[] } };
   flum: { layerUrl: string; categoryField: string; colorSource: "renderer"; planName: string; label: string; adoptedDate: string | null; adoptionSource: string; dataNote?: string; simplifyTolerance: number };
@@ -15,6 +17,7 @@ export type JurisdictionConfig = {
   stages: { phase: Record<string, MapStage>; status: Record<string, MapStage>; recorded: { phases: string[]; statuses: string[] } };
   caseTypes: Record<string, string>; citywideTypes: string[];
   caseVisuals?: Record<string, MapVisual>;
+  loadCaseReports?: (deadline:number) => Promise<{caseIds:string[];label:string;url:string}[]>;
   loadCases?: () => Promise<HearingFeed>; recordClient?: EnerGovClient;
   presentation?: (hearing: Hearing, plan: Parameters<typeof caseSummary>[1]) => { title: string; summary: string; href: string; hearing?: { startsAt: string; body: string } };
 };
@@ -22,7 +25,7 @@ export type MapCase = {
   id: string; title: string; summary: string; type: string; typeLabel: string; stage: MapStage; statusNote?: string; href: string;
   nextHearing?: { date: string; body: string; label: string };
   geometry: CaseGeometry | null; centroid: [number, number] | null; source: "polygon" | "parcel match" | "none"; confidence: "exact" | "approximate" | "citywide";
-  visual?: MapVisual;
+  visual?: MapVisual; visualCheckedAt?: string;
   sourceUrl?: string; geometryUpdatedAt?: string; citywide: boolean; flumCategories: string[];
 };
 export type FlumLegendItem = { value: string; label: string; color: string };

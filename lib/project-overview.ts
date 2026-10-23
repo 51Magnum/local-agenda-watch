@@ -6,10 +6,10 @@ import { uniqueDocumentLinks } from "./case-details";
 
 export type SourcedFact = { value: string; url: string; page?: number };
 export type ProjectOverview = {
-  variant?: "residential" | "zoning" | "nonresidential" | "mixed-use";
+  variant?: "residential" | "zoning" | "nonresidential" | "mixed-use" | "subdivision";
   request?: SourcedFact; use?: SourcedFact; buildingArea?: SourcedFact; currentJurisdiction?: SourcedFact;
   homes?: SourcedFact; acres?: SourcedFact; zoning?: SourcedFact; applicant?: SourcedFact;
-  traffic?: SourcedFact; schools?: SourcedFact; summary?: string; summarySource?: SourcedFact;
+  traffic?: SourcedFact; schools?: SourcedFact; recommendation?: SourcedFact; summary?: string; summarySource?: SourcedFact;
   earlierNotice?: string;
 };
 export const BRAEBURN_REPORT = "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=acf18754-7101-48d9-b4ea-f8398342a0fa";
@@ -35,6 +35,7 @@ export function projectOverview(data: TimelineData, editorial: ProjectOverview =
     acres: sourcedField(latestField(report,"acres")) ?? editorial.acres,
     zoning: sourcedField(latestField(report,"zoningRequested")) ?? editorial.zoning,
     applicant: sourcedField(latestField(report,"applicantCompany")) ?? editorial.applicant,
+    recommendation: sourcedField(latestField(report,"staffRecommendation")) ?? editorial.recommendation,
     traffic: sourcedField(latestField(report,"trafficSummary")) ?? editorial.traffic,
     schools: sourcedField(latestField(report,"schoolComment")) ?? editorial.schools,
   };

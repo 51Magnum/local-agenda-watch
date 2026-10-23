@@ -1,47 +1,30 @@
+import { AREAS, areaPath } from "@/lib/areas/registry";
 import { authorizedReviewer } from "@/lib/timeline/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Known locality subdomains. Requests to <locality>.localagendawatch.com are
-// rewritten internally to /<locality>/<rest> so the subdomain stays in the
-// URL bar. Requests that explicitly include the /<locality> prefix on the
-// subdomain are redirected to the clean form first.
-const LOCALITIES = new Set(["nampa"]);
-
+// Preserve legacy locality links while making country/state/area paths canonical.
 export function proxy(request: NextRequest) {
   if (request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/")) {
     if (!process.env.REVIEW_ADMIN_PASSWORD) return new NextResponse("Review access is not configured", { status: 503, headers: { "Cache-Control": "no-store" } });
     if (!authorizedReviewer(request.headers.get("authorization"))) return new NextResponse("Authentication required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Case evidence review", charset="UTF-8"', "Cache-Control": "no-store" } });
     return NextResponse.next({ headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" } });
   }
-  if (request.nextUrl.pathname.startsWith("/api/") || request.nextUrl.pathname.startsWith("/maplibre/")) return;
-  const host = (request.headers.get("host") ?? "").toLowerCase().split(":")[0];
-  const parts = host.split(".");
-  if (parts.length < 3) return;
-
-  const [subdomain, ...rest] = parts;
-  if (rest.join(".") !== "localagendawatch.com") return;
-  if (!LOCALITIES.has(subdomain)) return;
-
-  const { pathname } = request.nextUrl;
-  if (["/robots.txt", "/sitemap.xml", "/about", "/contact", "/privacy"].includes(pathname)) return;
-  const prefix = `/${subdomain}`;
-
-  // Normalise `nampa.localagendawatch.com/nampa[/...]` to the clean subdomain
-  // URL with a permanent redirect, so shared links stay canonical.
-  if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
-    const cleaned = request.nextUrl.clone();
-    const stripped = pathname.slice(prefix.length);
-    cleaned.pathname = stripped === "" ? "/" : stripped;
-    return NextResponse.redirect(cleaned, 308);
+  const path=request.nextUrl.pathname;
+  if(path.startsWith("/api/")||path.startsWith("/maplibre/"))return;
+  const host=(request.headers.get("host")??"").toLowerCase().split(":")[0];
+  for(const area of Object.values(AREAS)){
+    const old="/"+area.id,base=areaPath(area);
+    if(path===old||path.startsWith(old+"/")){
+      const target=request.nextUrl.clone();target.pathname=base+path.slice(old.length);return NextResponse.redirect(target,301);
+    }
+    if(host===area.id+".localagendawatch.com"){
+      const target=request.nextUrl.clone();target.protocol="https:";target.host="www.localagendawatch.com";target.pathname=path.startsWith(base)?path:base+(path==="/"?"":path);return NextResponse.redirect(target,301);
+    }
+    // Keep existing image files available at their canonical area URLs.
+    if(path.startsWith(base+"/")&&/\.(?:png|jpe?g|webp|svg)$/i.test(path)){
+      const target=request.nextUrl.clone();target.pathname=old+path.slice(base.length);return NextResponse.rewrite(target);
+    }
   }
-
-  // Rewrite the subdomain path to the internal /<locality>-prefixed route.
-  const rewritten = request.nextUrl.clone();
-  rewritten.pathname = pathname === "/" ? prefix : `${prefix}${pathname}`;
-  return NextResponse.rewrite(rewritten);
 }
-
-export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-};
+export const config={matcher:["/((?!_next/static|_next/image|favicon.ico).*)"]};

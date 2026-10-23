@@ -1,3 +1,4 @@
+import { isPrivateDocument } from "@/lib/case-details";
 /**
  * Client for Tyler Technologies' EnerGov "Self Service" public portal.
  *
@@ -98,6 +99,7 @@ export type EnerGovClient = {
   ): Promise<EnerGovAttachment[]>;
   getAttachmentMetadata?(attachmentId: string): Promise<Record<string, unknown> | null>;
   downloadAttachment?(attachmentId: string): Promise<Uint8Array>;
+  downloadPublicAttachment?(attachmentId: string): Promise<Uint8Array>;
   getPlanWorkflowActivities?(planId: string): Promise<Record<string, unknown>[]>;
   /** Public URL for the plan detail page in the citizen portal. */
   planPortalUrl(planId: string, tab?: string): string;
@@ -145,12 +147,23 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
       return env?.Success && Array.isArray(env.Result) ? env.Result : [];
     },
     getAttachmentMetadata: metadata,
-    async downloadAttachment(attachmentId) {
+    async downloadAttachment(attachmentId) { return download(attachmentId, true); },
+    async downloadPublicAttachment(attachmentId) { return download(attachmentId, false); },
+    async getPlanAttachments(planId, opts = {}) {
+      const env = await call<{ Attachments: EnerGovAttachment[] }>(`/energov/entity/attachments/search/entityattachments/${planId}/${EnerGovModule.Plan}/true`, opts);
+      return env?.Success && env.Result ? env.Result.Attachments ?? [] : [];
+    },
+    planPortalUrl(planId, tab) {
+      const suffix = tab ? `?tab=${encodeURIComponent(tab)}` : "";
+      return `${baseUrl}/Apps/SelfService#/plan/${planId}${suffix}`;
+    },
+  };
+  async function download(attachmentId: string, pdfOnly: boolean) {
       // Contract verified in the city's public FileDownloadService. IsOnline
       // indicates how a file was uploaded, not whether it is publicly visible.
       const info = await metadata(attachmentId);
       const size = Number(info?.FileSize), token = info?.FileToken;
-      if (!info || !Number.isSafeInteger(size) || size <= 0 || size > 45000000 || typeof token !== "string" || !token || !/\.pdf$/i.test(String(info.FileName))) throw new Error("Invalid public PDF metadata");
+      if (!info || info.IsFileSecure === true || isPrivateDocument(String(info.FileName)) || !Number.isSafeInteger(size) || size <= 0 || size > 45000000 || typeof token !== "string" || !token || !(pdfOnly ? /\.pdf$/i : /\.(?:pdf|png|jpe?g|webp)$/i).test(String(info.FileName))) throw new Error("Invalid public PDF metadata");
       const chunks: Uint8Array[] = [];
       const chunkSize = 1000000;
       for (let start = 0; start < size; start += chunkSize) {
@@ -167,22 +180,8 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
         chunks.push(bytes);
       }
       const bytes = new Uint8Array(Buffer.concat(chunks));
-      if (!Buffer.from(bytes.subarray(0, 1024)).includes(Buffer.from("%PDF-"))) throw new Error("Expected public PDF; received an unsupported response");
+      if (pdfOnly && !Buffer.from(bytes.subarray(0, 1024)).includes(Buffer.from("%PDF-"))) throw new Error("Expected public PDF; received an unsupported response");
       return bytes;
-    },
 
-    async getPlanAttachments(planId, opts = {}) {
-      const env = await call<{ Attachments: EnerGovAttachment[] }>(
-        `/energov/entity/attachments/search/entityattachments/${planId}/${EnerGovModule.Plan}/true`,
-        opts
-      );
-      if (!env || !env.Success || !env.Result) return [];
-      return env.Result.Attachments ?? [];
-    },
-
-    planPortalUrl(planId, tab) {
-      const suffix = tab ? `?tab=${encodeURIComponent(tab)}` : "";
-      return `${baseUrl}/Apps/SelfService#/plan/${planId}${suffix}`;
-    },
-  };
+  }
 }

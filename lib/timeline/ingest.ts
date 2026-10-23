@@ -25,7 +25,7 @@ export async function downloadDocument(url: string): Promise<Uint8Array> {
       if (!location) throw new Error("Document redirect missing location");
       target = new URL(location, target).href;
       const redirected = new URL(target);
-      const officialStorage = redirected.protocol === "https:" && redirected.hostname === "pgwest.blob.core.windows.net" && redirected.pathname.startsWith("/nampa/") && !redirected.username && !redirected.password;
+      const officialStorage = redirected.protocol === "https:" && redirected.hostname === "pgwest.blob.core.windows.net" && redirected.pathname.startsWith("/us/id/nampa/") && !redirected.username && !redirected.password;
       if (!officialDocumentUrl(target) && !officialStorage) throw new Error("Document redirect is outside the official source allowlist");
       continue;
     }

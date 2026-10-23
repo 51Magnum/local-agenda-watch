@@ -38,7 +38,7 @@ export default async function Image() {
             maxWidth: "90%",
           }}
         >
-          Know what your local government is planning — before it happens.
+          What&apos;s being built near you?
         </div>
         <div style={{ fontSize: 24, color: "#a1a1aa" }}>
           localagendawatch.com

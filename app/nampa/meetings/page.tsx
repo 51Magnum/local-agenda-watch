@@ -11,7 +11,7 @@ import { getNampaMeetingArchive } from "@/lib/sources/primegov";
 import { getLocalityContext, localityHref } from "@/lib/locality";
 import { SITE_ORIGIN } from "@/lib/site-config";
 
-export const metadata: Metadata = { title: "Nampa past meetings, agendas & results", alternates: { canonical: SITE_ORIGIN + "/nampa/meetings" } };
+export const metadata: Metadata = { title: "Nampa past meetings, agendas & results", alternates: { canonical: SITE_ORIGIN + "/us/id/nampa/meetings" } };
 
 export default async function MeetingsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const query = await searchParams;
@@ -56,6 +56,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
       <button className="rounded border border-zinc-400 px-4 py-2 text-sm">Show meetings</button>
       {caseId && <Link href={href("/meetings?year=" + year)} className="text-sm underline">Browse all meetings for this year</Link>}
     </form>
+    <p className="text-sm"><a href="https://nampa.primegov.com/public/portal" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Open the official meeting archive ↗</a></p>
     {unavailable && <p role="status">Meeting archive temporarily unavailable. <a href="https://nampa.primegov.com/public/portal" className="underline">Open the official archive</a>.</p>}
     {!!unsearched && <p className="text-sm text-zinc-500">{unsearched} meeting agendas could not be searched, including PDF-only or unavailable agendas. This case history may be incomplete. <Link href={href("/meetings?year=" + year)} className="underline">Browse all meetings</Link>.</p>}
     {!unavailable && !meetings.length && <p>No matching past meeting found for {year}. This does not establish that a hearing has not occurred. Check other years or the official archive.</p>}

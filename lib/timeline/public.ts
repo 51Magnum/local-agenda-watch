@@ -15,6 +15,7 @@ export const readTimelineState = cache(async (): Promise<EvidenceState> => {
 });
 export type TimelineAppearance = { date: string; body: string; sourceUrl: string; isHearing: boolean };
 export type TimelineData = {
+  areaId?: string;
   fields: EvidenceField[];
   appearances: TimelineAppearance[];
   finalDecisionApproved: boolean;
@@ -22,13 +23,15 @@ export type TimelineData = {
   caseIds: string[];
   next?: ProjectHearing;
   statusSource?: string;
+  /** Explicit outcomes supplied directly by the city feed, separate from AI evidence. */
+  cityDecisions?: { caseId: string; date: string; result: string; sourceUrl: string }[];
 };
 export function latestField(fields: EvidenceField[], key: FieldKey): EvidenceField | undefined {
   return fields.filter((field) => field.key === key).sort((a, b) =>
     Number(b.status === "approved") - Number(a.status === "approved") ||
     (/Date$/.test(key) ? b.value.localeCompare(a.value) : (b.reviewedAt ?? b.createdAt).localeCompare(a.reviewedAt ?? a.createdAt)))[0];
 }
-export function buildTimeline(state: EvidenceState, input: { caseIds: string[]; stage: ProjectStage; next?: ProjectHearing; plans?: { caseId: string; plan: EnerGovPlan; sourceUrl: string }[]; hearings?: Hearing[] }): TimelineData {
+export function buildTimeline(state: EvidenceState, input: { areaId?:string; caseIds: string[]; stage: ProjectStage; next?: ProjectHearing; plans?: { caseId: string; plan: EnerGovPlan; sourceUrl: string }[]; hearings?: Hearing[] }): TimelineData {
   const fields = publicFields(state, input.caseIds);
   for (const record of input.plans ?? []) {
     const reviewDate = record.plan.ReviewDate ?? record.plan.ReviewStartDate;
@@ -50,7 +53,7 @@ export function buildTimeline(state: EvidenceState, input: { caseIds: string[]; 
     if (!meeting.continuedNote) appearances.push({ date: meeting.date, body: meeting.body, sourceUrl: meeting.agendaUrl ?? meeting.sourceUrl, isHearing: true });
   }
   const finalDecisionApproved = input.caseIds.every((caseId) => fields.some((field) => field.caseId === caseId && field.key === "councilDecision" && field.status === "approved" && ["approved", "denied", "withdrawn"].includes(field.value)));
-  return { fields, caseIds: input.caseIds, appearances: [...new Map(appearances.map((a) => [a.body + a.date, a])).values()].sort((a, b) => a.date.localeCompare(b.date)), finalDecisionApproved,
+  return { areaId: input.areaId, fields, caseIds: input.caseIds, appearances: [...new Map(appearances.map((a) => [a.body + a.date, a])).values()].sort((a, b) => a.date.localeCompare(b.date)), finalDecisionApproved,
     currentStage: finalDecisionApproved ? "Decided" : input.stage === "Decided" ? "Council hearing" : input.stage,
     next: finalDecisionApproved ? undefined : input.next };
 }

@@ -15,13 +15,16 @@
     "predev": "node scripts/prepare-map-assets.mjs"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^1.0.13",
     "@turf/turf": "^7.4.0",
     "cheerio": "^1.2.0",
     "maplibre-gl": "^6.15.0",
     "next": "16.2.4",
+    "pdfjs-dist": "^6.4.299",
     "pg": "^8.23.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "sharp": "^0.34.5",
     "unpdf": "^1.9.1"
   },
   "devDependencies": {

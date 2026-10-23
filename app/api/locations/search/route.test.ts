@@ -1,0 +1,7 @@
+import{afterEach,expect,it,vi}from"vitest";
+import{POST}from"./route";
+import{locationMapUrl}from"@/lib/areas/coverage";
+afterEach(()=>vi.unstubAllGlobals());
+it("geocodes a US address through Census and preserves coverage coordinates",async()=>{const fetcher=vi.fn().mockResolvedValue(Response.json({result:{addressMatches:[{matchedAddress:"17501 NORTHSIDE BLVD, NAMPA, ID",coordinates:{x:-116.573553,y:43.627026}}]}}));vi.stubGlobal("fetch",fetcher);const r=await POST(new Request("http://localhost/api/locations/search",{method:"POST",body:JSON.stringify({query:"17501 Northside Blvd, Nampa, ID"})}));const body=await r.json();expect(locationMapUrl(body.results[0].coordinates)).toContain("/us/id/nampa/map?lat=");expect(String(fetcher.mock.calls[0][0])).toContain("benchmark=Public_AR_Current");expect(r.headers.get("Cache-Control")).toBe("no-store");});
+it("supports city-only input using the official Census place layer",async()=>{const fetcher=vi.fn().mockResolvedValue(Response.json({features:[{attributes:{NAME:"Nampa city",STATE:"16",INTPTLAT:"43.58",INTPTLON:"-116.56"}}]}));vi.stubGlobal("fetch",fetcher);const r=await POST(new Request("http://localhost/api/locations/search",{method:"POST",body:JSON.stringify({query:"Nampa, ID"})}));expect((await r.json()).results).toHaveLength(1);expect(String(fetcher.mock.calls[0][0])).toContain("Places_CouSub_ConCity_SubMCD/MapServer/4/query");});
+

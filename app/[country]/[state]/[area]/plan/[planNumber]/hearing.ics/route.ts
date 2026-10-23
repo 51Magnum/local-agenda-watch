@@ -1,0 +1,1 @@
+import{routeArea,AREA_ADAPTERS,type AreaParams}from"@/lib/areas/server";export async function GET(request:Request,{params}:{params:Promise<AreaParams&{planNumber:string}>}){const p=await params,a=routeArea(p);if(a.status!=="live")return new Response("Not found",{status:404});return AREA_ADAPTERS[a.id].caseCalendar(request,{params:Promise.resolve({planNumber:p.planNumber})});}
