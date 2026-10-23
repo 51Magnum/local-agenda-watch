@@ -1,3 +1,5 @@
+import { workflowReviewStart } from "./workflow";
+import { energovDocumentReference } from "@/lib/sources/energov-document";
 import { isPrivateDocument } from "@/lib/case-details";
 import { load } from "cheerio";
 import { getNampaHearings } from "@/lib/localities/nampa";
@@ -53,9 +55,10 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
     const planId = hearing?.energovPlanId ?? configuredCase?.portalUrl.match(/\/plan\/([^?]+)/)?.[1];
     const portalUrl = planId && locality.energov ? locality.energov.planPortalUrl(planId) : undefined;
     if (planId && portalUrl && locality.energov) {
-      const [plan, attachments] = await Promise.all([
+      const [plan, attachments, workflowActivities] = await Promise.all([
         locality.energov.getPlan(planId, { revalidate: 0 }).catch((error: unknown) => { warnings.push(caseId + " case record unavailable: " + String(error)); return null; }),
         locality.energov.getPlanAttachments(planId, { revalidate: 0 }).catch((error: unknown) => { warnings.push(caseId + " document list unavailable: " + String(error)); return null; }),
+        locality.energov.getPlanWorkflowActivities?.(planId).catch(() => []) ?? Promise.resolve([]),
       ]);
       if (plan) {
         const fields: NonNullable<SourceDocument["fields"]> = [];
@@ -63,26 +66,17 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
         add("appliedDate", dateOnly(plan.ApplyDate), "ApplyDate"); add("lastActionDate", dateOnly(plan.LastActionDate), "LastActionDate");
         add("caseStatus", plan.PlanStatus, "PlanStatus");
         add("reviewDate", dateOnly(plan.ReviewDate ?? plan.ReviewStartDate), plan.ReviewDate ? "ReviewDate" : "ReviewStartDate");
-        documents.push({ url: portalUrl, title: caseId + " official case record", caseIds: [caseId], kind: "case-record", content: JSON.stringify({ plan, attachments }), fields });
+        const workflowStart = workflowReviewStart(workflowActivities);
+        if (!fields.some((f) => f.key === "reviewDate") && workflowStart) fields.push({ key: "reviewDate", ...workflowStart, page: null });
+        documents.push({ url: portalUrl, title: caseId + " official case record", caseIds: [caseId], kind: "case-record", content: JSON.stringify({ plan, attachments, workflowActivities }), fields });
       }
       for (const attachment of attachments ?? []) {
         const title = attachment.FileName + (attachment.Notes ? " — " + attachment.Notes : "");
         if (attachment.IsFileSecure || isPrivateDocument(title) || documentKind(title) === "other") continue;
         if (attachment.FilePath && officialDocumentUrl(attachment.FilePath)) documents.push({ url: attachment.FilePath, title, caseIds: [caseId], kind: documentKind(title) });
-        else {
-          if (documentKind(title) === "pz-decision" && locality.energov.getAttachmentMetadata) {
-            try {
-              const metadata = await locality.energov.getAttachmentMetadata(attachment.AttachmentID);
-              const record = documents.find((d) => d.url === portalUrl && d.kind === "case-record");
-              if (record?.content) {
-                const data = JSON.parse(record.content);
-                data.attachmentChecks = [...(data.attachmentChecks ?? []), { kind: "pz-decision", metadataAvailable: Boolean(metadata), metadataKeys: Object.keys(metadata ?? {}).filter((key) => /^[A-Za-z][A-Za-z0-9_]{0,40}$/.test(key)) }];
-                record.content = JSON.stringify(data);
-              }
-            } catch { warnings.push(caseId + ": P&Z decision metadata unavailable."); }
-          }
-          warnings.push(caseId + ": " + attachment.FileName + " requires a verified direct download URL in the source registry.");
-        }
+        else if (portalUrl && /\.pdf$/i.test(attachment.FileName)) {
+          documents.push({ url: energovDocumentReference(portalUrl, attachment.AttachmentID), title, caseIds: [caseId], kind: documentKind(title) });
+        } else warnings.push(caseId + ": " + attachment.FileName + " requires a verified direct download URL in the source registry.");
       }
     }
     for (const source of project?.sourceDocuments ?? []) {
@@ -154,5 +148,6 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
   // Merge associations so shared reports are downloaded and transcribed once.
   const unique = new Map<string, SourceDocument>();
   for (const document of documents) { const old = unique.get(document.url); unique.set(document.url, old ? { ...old, caseIds: [...new Set([...old.caseIds, ...document.caseIds])] } : document); }
-  return { documents: [...unique.values()], warnings, caseIds, extractedPages };
+  const rank = (kind: DocumentKind) => kind === "case-record" ? 0 : kind === "pz-decision" || kind === "council-decision" ? 1 : kind === "findings" ? 2 : kind === "staff-report" ? 3 : 4;
+  return { documents: [...unique.values()].sort((a, b) => rank(a.kind) - rank(b.kind)), warnings, caseIds, extractedPages };
 }

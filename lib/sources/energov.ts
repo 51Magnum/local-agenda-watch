@@ -97,6 +97,8 @@ export type EnerGovClient = {
     opts?: FetchOpts
   ): Promise<EnerGovAttachment[]>;
   getAttachmentMetadata?(attachmentId: string): Promise<Record<string, unknown> | null>;
+  downloadAttachment?(attachmentId: string): Promise<Uint8Array>;
+  getPlanWorkflowActivities?(planId: string): Promise<Record<string, unknown>[]>;
   /** Public URL for the plan detail page in the citizen portal. */
   planPortalUrl(planId: string, tab?: string): string;
 };
@@ -105,7 +107,7 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
   const culture = config.culture ?? "en-US";
   const baseUrl = config.baseUrl.replace(/\/+$/, "");
 
-  async function call<T>(path: string, opts: FetchOpts): Promise<EnerGovEnvelope<T> | null> {
+  async function call<T>(path: string, opts: FetchOpts, extraHeaders: Record<string, string> = {}): Promise<EnerGovEnvelope<T> | null> {
     const res = await fetch(`${baseUrl}/apps/selfservice/api${path}`, {
       signal: AbortSignal.timeout(15000),
       headers: {
@@ -114,6 +116,7 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
         tenantName: config.tenantName,
         "Tyler-TenantUrl": config.tenantName,
         "Tyler-Tenant-Culture": culture,
+        ...extraHeaders,
       },
       next: {
         revalidate: opts.revalidate ?? 3600,
@@ -125,6 +128,11 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
     return (await res.json()) as EnerGovEnvelope<T>;
   }
 
+  const attachmentHeaders = (id: string) => ({ FileID: id, FileToken: "", DownloadProvider: "attachment", FileType: "attachment", AllowViewCorrection: "false" });
+  const metadata = async (id: string) => {
+    const env = await call<Record<string, unknown>>("/energov/attachments/metadata/", { revalidate: 0 }, attachmentHeaders(id));
+    return env?.Success && env.Result ? env.Result : null;
+  };
   return {
     async getPlan(planId, opts = {}) {
       const env = await call<EnerGovPlan>(`/energov/plans/${planId}`, opts);
@@ -132,9 +140,35 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
       return env.Result;
     },
 
-    async getAttachmentMetadata(attachmentId) {
-      const env = await call<Record<string, unknown>>(`/energov/attachments/metadata/${encodeURIComponent(attachmentId)}`, { revalidate: 0 });
-      return env?.Success && env.Result ? env.Result : null;
+    async getPlanWorkflowActivities(planId) {
+      const env = await call<Record<string, unknown>[]>(`/energov/workflow/summary/activities/${EnerGovModule.Plan}/${planId}`, { revalidate: 0 });
+      return env?.Success && Array.isArray(env.Result) ? env.Result : [];
+    },
+    getAttachmentMetadata: metadata,
+    async downloadAttachment(attachmentId) {
+      // Contract verified in the city's public FileDownloadService. IsOnline
+      // indicates how a file was uploaded, not whether it is publicly visible.
+      const info = await metadata(attachmentId);
+      const size = Number(info?.FileSize), token = info?.FileToken;
+      if (!info || !Number.isSafeInteger(size) || size <= 0 || size > 45000000 || typeof token !== "string" || !token || !/\.pdf$/i.test(String(info.FileName))) throw new Error("Invalid public PDF metadata");
+      const chunks: Uint8Array[] = [];
+      const chunkSize = 1000000;
+      for (let start = 0; start < size; start += chunkSize) {
+        const end = Math.min(size - 1, start + chunkSize - 1);
+        const response = await fetch(baseUrl + "/apps/selfservice/api/energov/attachments/rangedownload/", {
+          cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
+          headers: { ...attachmentHeaders(attachmentId), FileToken: token, range: "bytes=" + start + "-" + end,
+            tenantId: String(config.tenantId), "Tyler-TenantUrl": config.tenantName, "Tyler-Tenant-Culture": culture },
+        });
+        if (!response.ok) throw new Error("Public document HTTP " + response.status);
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const range = response.headers.get("content-range");
+        if (range !== "bytes " + start + "-" + end + "/" + size || bytes.length !== end - start + 1) throw new Error("Public document range mismatch");
+        chunks.push(bytes);
+      }
+      const bytes = new Uint8Array(Buffer.concat(chunks));
+      if (!Buffer.from(bytes.subarray(0, 1024)).includes(Buffer.from("%PDF-"))) throw new Error("Expected public PDF; received an unsupported response");
+      return bytes;
     },
 
     async getPlanAttachments(planId, opts = {}) {

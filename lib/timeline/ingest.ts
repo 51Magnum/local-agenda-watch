@@ -1,3 +1,4 @@
+import { parseEnerGovDocumentReference, downloadEnerGovReference } from "@/lib/sources/energov-document";
 import { explicitReportFacts } from "./report-facts";
 import { createHash } from "node:crypto";
 import { DECISION_KEYS, type EvidenceField, type IngestionRun, type PageText, type SourceDocument } from "./types";
@@ -13,6 +14,8 @@ export function officialDocumentUrl(value: string): boolean {
 }
 export async function downloadDocument(url: string): Promise<Uint8Array> {
   if (!officialDocumentUrl(url)) throw new Error("Document is outside the official source allowlist");
+  const energov = parseEnerGovDocumentReference(url);
+  if (energov) return downloadEnerGovReference(energov);
   // Do not follow a city redirect to an unvalidated host.
   let target = url;
   for (let i = 0; i < 4; i++) {

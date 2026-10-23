@@ -8,7 +8,7 @@ function dateLabel(value: string): string {
   return new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", month: "short", day: "numeric", year: "numeric" }).format(new Date(date + "T12:00:00-07:00"));
 }
 function Source({ field }: { field: EvidenceField }) {
-  return <a href={evidenceSourceHref(field)} className="text-sm underline underline-offset-4">Source{field.page ? " · p. " + field.page : " · city record"}</a>;
+  return <a href={evidenceSourceHref(field)} title={field.sourceUrl.includes("attachmentId=") ? "Opens the official city attachment list; consult the decision PDF and cited physical page." : undefined} className="text-sm underline underline-offset-4">Source{field.page ? " · p. " + field.page : " · city record"}</a>;
 }
 export function CaseTimeline({ data, links }: { data: TimelineData; links: Record<ProjectStage, string> }) {
   const { fields } = data;

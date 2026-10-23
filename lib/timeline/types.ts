@@ -35,5 +35,6 @@ export function publicFields(state: EvidenceState, caseIds: string[]): EvidenceF
   return Object.values(state.fields).filter((field) => caseIds.includes(field.caseId) && isPublicField(field, state));
 }
 export function evidenceSourceHref(field: Pick<EvidenceField, "sourceUrl" | "page">): string {
+  if (field.sourceUrl.includes("tylerhost.net/Apps/SelfService#/plan/")) return field.sourceUrl;
   return field.page ? field.sourceUrl.split("#")[0] + "#page=" + field.page : field.sourceUrl;
 }
