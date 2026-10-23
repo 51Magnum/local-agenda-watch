@@ -21,7 +21,12 @@ export type AuditEntry = { fieldId: string; at: string; action: "approve" | "edi
 export type IngestionRun = { startedAt: string; finishedAt?: string; checked: number; processed: number; skipped: number; errors: string[] };
 export type EvidenceState = { version: 1; documents: Record<string, StoredDocument>; fields: Record<string, EvidenceField>; audit: AuditEntry[]; runs: IngestionRun[]; leases: Record<string, { token: string; expiresAt: number }>; cursor?: string };
 export function emptyEvidenceState(): EvidenceState { return { version: 1, documents: {}, fields: {}, audit: [], runs: [], leases: {} }; }
+/** A report's action heading identifies workflow, not staff's position on approval. */
+export function isWorkflowRecommendation(value: string): boolean {
+  return /^\s*\(?(?:Action:\s*)?Recommendation to (?:City )?Council\)?[.\s]*$/i.test(value);
+}
 export function isPublicField(field: EvidenceField, state: EvidenceState): boolean {
+  if (field.key === "staffRecommendation" && isWorkflowRecommendation(field.value)) return false;
   const current = state.documents[field.documentId];
   return Boolean(current && current.hash === field.documentHash && current.state === "complete" &&
     (field.status === "approved" || (!DECISION_KEYS.has(field.key) && field.status === "auto_published")));

@@ -109,7 +109,9 @@ describe("hash-based ingestion and review", () => {
   it("omits an unsupported field while retaining verified evidence and unchanged-document caching", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const store = memoryStore(), deps = dependencies();
-    deps.extract.mockResolvedValue(extraction({ requestSummary: { value: "An unsupported summary", page: 1, quote: "A quote that does not appear in this document", confidence: 1 }, units: { value: "487", page: 1, quote, confidence: 0.99 } }));
+    const unitQuote = "The proposal contains 487 single-family homes.";
+    deps.text.mockResolvedValue([{ page: 1, text: unitQuote, method: "native" }]);
+    deps.extract.mockResolvedValue(extraction({ requestSummary: { value: "An unsupported summary", page: 1, quote: "A quote that does not appear in this document", confidence: 1 }, units: { value: "487", page: 1, quote: unitQuote, confidence: 0.99 } }));
     const run = await ingestDocuments(store, [document], deps);
     expect(run.processed).toBe(1); expect(run.errors).toEqual([]);
     const state = await store.read();
@@ -118,6 +120,17 @@ describe("hash-based ingestion and review", () => {
     expect(state.documents[digest(document.url)].validationWarnings).toHaveLength(2);
     await ingestDocuments(store, [document], deps);
     expect(deps.extract).toHaveBeenCalledTimes(2);
+  });
+  it("does not present a report's workflow heading as a staff position", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const store = memoryStore(), deps = dependencies();
+    const heading = "Recommendation to City Council";
+    deps.text.mockResolvedValue([{ page: 1, text: "Public hearing item. (Action: " + heading + ")", method: "native" }]);
+    deps.extract.mockResolvedValue(extraction({ staffRecommendation: { value: heading, page: 1, quote: heading, confidence: 1 } }));
+    await ingestDocuments(store, [{ ...document, kind: "staff-report" }], deps);
+    expect(publicFields(await store.read(), caseIds)).toEqual([]);
+    await store.mutate((state) => { const source = state.documents[digest(document.url)]; state.fields.legacy = { id: "legacy", documentId: source.id, documentHash: source.hash, caseId: caseIds[0], key: "staffRecommendation", value: heading, quote: heading, page: 1, sourceUrl: document.url, sourceKind: "staff-report", confidence: 1, status: "auto_published", createdAt: "" }; });
+    expect(publicFields(await store.read(), caseIds)).toEqual([]);
   });
   it("does not publish a decision asserted in a staff report", async () => {
     const store = memoryStore(); await ingestDocuments(store, [{ ...document, kind: "staff-report" }], dependencies());
