@@ -1,4 +1,6 @@
 import { usState } from "@/lib/areas/us-states";
+import { AREAS } from "@/lib/areas/registry";
+import { searchAddressPoints } from "@/lib/maps/address-search";
 export const runtime="nodejs";
 const headers={"Cache-Control":"no-store","Referrer-Policy":"no-referrer"};
 export async function POST(request:Request){
@@ -6,6 +8,15 @@ export async function POST(request:Request){
     const data=await request.json();const query=typeof data.query==="string"?data.query.trim():"";const country=data.country??"us";
     if(query.length<2||query.length>200)return Response.json({error:"Enter an address or city."},{status:400,headers});
     if(country!=="us")return Response.json({error:"Address search is available in the United States for now."},{status:422,headers});
+    // Only query a city's layer when the input names that city; a matching street
+    // elsewhere must not silently send someone to the featured area's map.
+    if(/^\d/.test(query)){
+      const requestedState=usState((query.split(",")[2]??"").trim().replace(/\s+\d{5}(?:-\d{4})?$/,""));
+      const area=Object.values(AREAS).find(a=>a.country===country&&a.status==="live"&&(!requestedState||a.stateAbbreviation===requestedState.abbreviation)&&a.addressSearch&&a.sources.addressPoints&&new RegExp("\\b"+a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i").test(query));
+      if(area?.addressSearch&&area.sources.addressPoints){
+        try{const results=await searchAddressPoints({addressPoints:{layerUrl:area.sources.addressPoints,...area.addressSearch}},query);if(results.length)return Response.json({results},{headers});}catch{/* A short local timeout leaves Census available. No address is logged. */}
+      }
+    }
     const params=new URLSearchParams({address:query,benchmark:"Public_AR_Current",format:"json"});
     const response=/\d/.test(query)?await fetch("https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?"+params,{cache:"no-store",signal:AbortSignal.timeout(8000)}):null;
     if(response&&!response.ok)throw new Error("Geocoder unavailable");

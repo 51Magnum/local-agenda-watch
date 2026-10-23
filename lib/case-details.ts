@@ -133,6 +133,8 @@ const CITY_CASE_NAMES: Record<string, string> = {
   "CTA-00026-2026": "SH16 Specific Area Plan", "CMA-00074-2026": "SH16 future land-use map",
   "ZTA-00050-2026": "Group homes and GB district",
   "SPP-00124-2023": "Wilson Landing", "SPF-00294-2025": "Silverland Park",
+  // City notice: https://www.cityofnampa.us/AgendaCenter/ViewFile/Agenda/_04282026-3417
+  "CMA-00067-2026": "Elite Industrial", "ANN-00352-2026": "Elite Industrial", "SPP-00175-2026": "Elite Industrial",
 };
 const SHORT_TYPES: Record<string, string> = {
   ANN: "annexation", MPC: "master plan", SPP: "preliminary plat", SPF: "final plat",

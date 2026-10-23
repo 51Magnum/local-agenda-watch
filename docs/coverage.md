@@ -15,12 +15,20 @@ paths to `/us/id/nampa` with HTTP 301 and preserves query strings. Canonical ima
 paths rewrite internally to existing public files. Saved watches normalize legacy
 links when read, preserving residents' selections.
 
-Homepage US address searches use Census, and city-only searches use its place
-layer. Results are cached in the browser session for 24 hours, with at most 40
+Homepage street searches naming a live city try its address points first, with
+a 700 ms cutoff, before falling back to Census. City-only searches use the Census
+place layer. Results are cached in the browser session for 24 hours, with at most 40
 entries. Ordinary searches are not written to the application database. Boundary
 matching selects live areas only, preferring a city over an overlapping county.
 Searches and optional browser geolocation open the canonical map with `lat`, `lng`
-and `nearby=1`. Shared URLs therefore contain the selected coordinates.
+and `nearby=1`, plus the matched address in `q` when available. Shared URLs contain
+that address and the selected coordinates.
+
+Optional `flumCompatibility` entries map a designation to supported zoning codes,
+with an official source for each category and a jurisdiction-specific code pattern.
+The key facts compare only those districts, leave mixed sites unclassified, and
+show the designation alone when no mapping or requested code is available. A match
+does not establish that every other comprehensive-plan policy has been satisfied.
 
 Coverage requests and follow interest are submitted separately. With the existing
 server-only `DATABASE_URL`, the app creates `law_coverage_requests` in Neon on the

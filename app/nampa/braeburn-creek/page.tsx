@@ -1,7 +1,8 @@
+import { landUseFact } from "@/lib/areas/land-use";
 import CaseMap from "@/app/components/maps/case-map";
 import { ProjectFacts, ProjectProposal, ProjectTimeline } from "@/app/components/project-overview";
 import { buildTimeline, readTimelineState } from "@/lib/timeline/public";
-import { braeburnOverview, numericFact, projectOverview, projectDocumentList, BRAEBURN_REPORT, type SourcedFact } from "@/lib/project-overview";
+import { braeburnOverview, numericFact, projectOverview, projectDocumentList, BRAEBURN_REPORT } from "@/lib/project-overview";
 import { readMapSnapshot } from "@/lib/maps/store";
 import { getJurisdiction } from "@/lib/maps/jurisdictions";
 import { shortDate } from "@/lib/project-timeline";
@@ -44,7 +45,7 @@ export default async function BraeburnCreekPage() {
   overview.summarySource = { value: "September staff report", url: BRAEBURN_REPORT, page: 1 };
   const snapshot = await readMapSnapshot("nampa").catch(() => undefined);
   const categories = [...new Set(snapshot?.cases.filter(c => project.caseIds.includes(c.id)).flatMap(c => c.flumCategories) ?? [])];
-  const landUse: SourcedFact | undefined = categories.length ? { value: (categories.length > 1 ? "Multiple designations: " : "") + categories.join("; "), url: getJurisdiction("nampa")!.flum.layerUrl + "?f=pjson" } : undefined;
+  const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value);
   const documentList = projectDocumentList(documents);
   const status = stage === "Decided" ? "Decided" : next ? (/Council/i.test(next.body) ? "Council hearing" : "P&Z hearing") + " · " + shortDate(next.startsAt) : stage === "Council hearing" ? "Council date not set" : stage;
   return <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-6 py-8 sm:py-10">

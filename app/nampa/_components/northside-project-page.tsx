@@ -1,3 +1,4 @@
+import { landUseFact } from "@/lib/areas/land-use";
 import Link from "next/link";
 import CaseMap from "@/app/components/maps/case-map";
 import ShareProject from "@/app/components/share-project";
@@ -9,7 +10,7 @@ import { getLocalityContext, localityHref } from "@/lib/locality";
 import { getCaseRecord } from "@/lib/case-record";
 import { buildTimeline, readTimelineState } from "@/lib/timeline/public";
 import { shortDate } from "@/lib/project-timeline";
-import { projectOverview, type SourcedFact } from "@/lib/project-overview";
+import { projectOverview } from "@/lib/project-overview";
 import { northsideOverview, NORTHSIDE_REPORT } from "@/lib/northside-project";
 import { readMapSnapshot } from "@/lib/maps/store";
 import { getJurisdiction } from "@/lib/maps/jurisdictions";
@@ -29,7 +30,7 @@ export default async function NorthsideProjectPage({record}:{record:RecordData})
   overview.summary=summary+" The staff report describes future warehouse and manufacturing uses; this application requests annexation and zoning rather than approval of a specific building.";
   const snapshot=await readMapSnapshot("nampa").catch(()=>undefined);
   const categories=snapshot?.cases.find(c=>c.id===hearing.appId)?.flumCategories??[];
-  const landUse:SourcedFact|undefined=categories.length?{value:(categories.length>1?"Multiple designations: ":"")+categories.join("; "),url:getJurisdiction("nampa")!.flum.layerUrl+"?f=pjson"}:undefined;
+  const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value);
   const reports=staffReportLinks(hearing,attachments,files).filter((report,_,all)=>!(report.url===files&&/^staff[\s_-]*report(?:\.pdf)?$/i.test(report.label)&&all.some(other=>other.url!==files)));
   const all=uniqueDocumentLinks([...reports.map(r=>({...r,sourceUrl:CASE_SOURCE})),...uniqueAttachments(attachments).filter(a=>!a.IsFileSecure&&!/staff[\s_-]*report/i.test((a.Notes??"")+" "+a.FileName)).map(a=>({label:a.Notes||a.FileName,url:files,sourceUrl:portal}))]);
   const key=all.filter(d=>/staff[\s_-]*report|decision|findings|reasoned|site[\s_-]*plan|concept/i.test(d.label));

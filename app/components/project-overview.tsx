@@ -1,5 +1,6 @@
 import{displayArea}from"@/lib/areas/format";
 import{stageLabel}from"@/lib/areas/registry";
+import type { LandUseFact } from "@/lib/areas/land-use";
 import { Glossary } from "./glossary";
 import { factHref, numericFact, projectDensity, type ProjectOverview, type SourcedFact } from "@/lib/project-overview";
 import type { TimelineData } from "@/lib/timeline/public";
@@ -9,16 +10,23 @@ import { evidenceSourceHref } from "@/lib/timeline/types";
 function FactSource({ fact, label }: { fact: SourcedFact; label: string }) {
   return <a href={factHref(fact)} aria-label={"Source for "+label+(fact.page?", page "+fact.page:"")} title={fact.page?"Source · page "+fact.page:"Official source"} className="ml-2 shrink-0 text-xs text-zinc-500 underline underline-offset-4">↗</a>;
 }
-export function ProjectFacts({ overview, landUse }: { overview: ProjectOverview; landUse?: SourcedFact }) {
+export function ProjectFacts({ overview, landUse }: { overview: ProjectOverview; landUse?: SourcedFact & Partial<LandUseFact> }) {
   const homes=numericFact(overview.homes),acres=numericFact(overview.acres),density=projectDensity(overview);
   const residential=[homes&&overview.homes?{label:"Homes / lots",value:homes.toLocaleString("en-US"),source:overview.homes}:null,acres&&overview.acres?{label:"Acres",value:Math.round(acres).toLocaleString("en-US"),source:overview.acres}:null,density&&overview.acres?{label:"Density overall",value:density,source:overview.acres}:null].filter(x=>x!==null);
   const acreage=acres&&overview.acres?{label:"Site acres",value:Number(acres.toFixed(2)).toLocaleString("en-US"),source:overview.acres}:null;
   const primary=overview.variant==="subdivision"?[overview.homes?{label:"Lots",value:overview.homes.value,source:overview.homes}:null,acreage].filter(x=>x!==null):overview.variant==="zoning"?[overview.request?{label:"Request",value:overview.request.value,source:overview.request}:null,acreage,overview.zoning?{label:"Requested zoning",value:overview.zoning.value,source:overview.zoning}:null].filter(x=>x!==null):overview.variant==="nonresidential"?[overview.use?{label:"Proposed use",value:overview.use.value,source:overview.use}:overview.request?{label:"Request",value:overview.request.value,source:overview.request}:null,acreage,overview.buildingArea?{label:"Building area",value:overview.buildingArea.value,source:overview.buildingArea}:null].filter(x=>x!==null):overview.variant==="mixed-use"?[residential[0],overview.buildingArea?{label:"Commercial floor area",value:overview.buildingArea.value,source:overview.buildingArea}:null,acreage].filter(x=>x!=null):residential;
   const secondary=[overview.variant!=="zoning"&&overview.zoning?{label:"Requested zoning",fact:overview.zoning}:null,overview.variant==="zoning"&&overview.currentJurisdiction?{label:"Current jurisdiction",fact:overview.currentJurisdiction}:null,landUse?{label:"Future land use",fact:landUse}:null,overview.applicant?{label:"Applicant",fact:overview.applicant}:null].filter(x=>x!==null);
   if(!primary.length&&!secondary.length)return null;
+  const sources = new Map<string, string[]>();
+  for (const entry of [...primary.map(f=>({label:f.label,fact:f.source})),...secondary]) {
+    const href=factHref(entry.fact), labels=sources.get(href)??[];
+    labels.push(entry.label+(entry.fact.page?" (page "+entry.fact.page+")":"")); sources.set(href,labels);
+  }
+  if(landUse?.comparisonSourceUrl)sources.set(landUse.comparisonSourceUrl,["Plan / zoning district comparison"]);
   return <section aria-label="Key project facts" className="space-y-5">
-    {!!primary.length&&<dl className={"grid gap-3 "+(primary.length===1?"sm:grid-cols-1":primary.length===2?"sm:grid-cols-2":"sm:grid-cols-3")}>{primary.map(f=><div key={f.label} className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"><dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{f.label}<FactSource fact={f.source} label={f.label}/></dt><dd className="mt-2 text-2xl font-semibold tracking-tight">{f.value}</dd></div>)}</dl>}
-    {!!secondary.length&&<dl className="grid gap-5 text-sm sm:grid-cols-3">{secondary.map(f=><div key={f.label}><dt className="text-zinc-500">{f.label}<FactSource fact={f.fact} label={f.label}/></dt><dd className="mt-1 font-medium leading-6">{f.fact.value}</dd></div>)}</dl>}
+    {!!primary.length&&<dl className={"grid gap-3 "+(primary.length===1?"sm:grid-cols-1":primary.length===2?"sm:grid-cols-2":"sm:grid-cols-3")}>{primary.map(f=><div key={f.label} className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"><dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{f.label}</dt><dd className="mt-2 text-2xl font-semibold tracking-tight">{f.value}</dd></div>)}</dl>}
+    {!!secondary.length&&<dl className="grid gap-5 text-sm sm:grid-cols-3">{secondary.map(f=><div key={f.label}><dt className="text-zinc-500">{f.label}</dt><dd className="mt-1 font-medium leading-6">{f.label==="Future land use"&&landUse?.mapHref?<a href={landUse.mapHref} className="underline underline-offset-4">{f.fact.value}</a>:f.fact.value}</dd></div>)}</dl>}
+    <details className="text-xs text-zinc-500"><summary className="w-fit cursor-pointer underline underline-offset-4">Sources</summary><ul className="mt-3 space-y-2">{[...sources].map(([href,labels])=><li key={href}><a href={href} className="underline underline-offset-4">{labels.join(" · ")}</a></li>)}</ul></details>
   </section>;
 }
 export function ProjectProposal({ overview, data, terms = ["annexation", "rezone", "preliminary plat"], areaId }: { overview: ProjectOverview; data: TimelineData; terms?: ("annexation" | "rezone" | "preliminary plat")[]; areaId?: string }) {

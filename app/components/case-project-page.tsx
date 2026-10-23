@@ -1,3 +1,4 @@
+import { landUseFact } from "@/lib/areas/land-use";
 import {stageLabel} from "@/lib/areas/registry";
 import {displayArea} from "@/lib/areas/format";
 import Link from "next/link";
@@ -14,7 +15,7 @@ import { getCaseRecord } from "@/lib/case-record";
 import { getProjectForCase, PROJECT_STAGES } from "@/lib/projects";
 import { buildTimeline, readTimelineState } from "@/lib/timeline/public";
 import { shortDate } from "@/lib/project-timeline";
-import { projectDocumentList, type SourcedFact } from "@/lib/project-overview";
+import { projectDocumentList } from "@/lib/project-overview";
 import type { ProjectCaseDocuments } from "@/lib/project-documents";
 import { readMapSnapshot } from "@/lib/maps/store";
 import { getJurisdiction } from "@/lib/maps/jurisdictions";
@@ -58,7 +59,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const snapshot = !citywide ? await readMapSnapshot(area.id).catch(() => undefined) : undefined;
   const hasGeometry = !snapshot || snapshot.cases.some(c => caseIds.includes(c.id) && c.geometry);
   const categories = [...new Set(snapshot?.cases.filter(c => caseIds.includes(c.id)).flatMap(c => c.flumCategories ?? []) ?? [])];
-  const landUse: SourcedFact | undefined = categories.length ? {value:(categories.length>1 ? "Mixed: " : "")+categories.join("; "), url:config.flum.layerUrl+"?f=pjson"} : undefined;
+  const landUse = landUseFact(area, categories, overview.zoning?.value);
   const groups: ProjectCaseDocuments[] = records.map(r => {
     const urls = recordUrls(r);
     const reports = staffReportLinks(r.hearing, r.attachments, urls.files);

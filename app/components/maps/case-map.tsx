@@ -89,7 +89,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   useEffect(() => {
     if (compact) return;
     try { if(getArea(jurisdiction)?.status==="live")localStorage.setItem("law:last-area",jurisdiction); } catch {}
-    const restore = () => { const query=new URLSearchParams(window.location.search); const shared = readSharedSearch(window.location.hash) ?? readSharedSearch("#"+query); if (shared) { if(!window.location.hash)shared.source="map"; setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile((window.location.hash?new URLSearchParams(window.location.hash.slice(1)):query).get("nearby") === "1"); } };
+    const restore = () => { const query=new URLSearchParams(window.location.search); setFlumOn(query.get("flum")==="1"); const shared = readSharedSearch(window.location.hash) ?? readSharedSearch("#"+query); if (shared) { if(!window.location.hash&&!query.get("q")&&!query.get("address"))shared.source="map"; setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile((window.location.hash?new URLSearchParams(window.location.hash.slice(1)):query).get("nearby") === "1"); } };
     restore(); window.addEventListener("hashchange", restore); return () => window.removeEventListener("hashchange", restore);
   }, [compact,jurisdiction]);
   useEffect(() => {
@@ -237,7 +237,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     if (!ready || !map.current || !location) return;
     const b = bbox(circle(location.coordinates, 1, { units: "miles", steps: 80 })); map.current.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 45 });
   }, [ready, location]);
-  function mapBaseUrl(){const q=new URLSearchParams(window.location.search);for(const key of ["lat","lng","nearby","pin","address"])q.delete(key);return window.location.pathname+(q.size?"?"+q:"");}
+  function mapBaseUrl(){const q=new URLSearchParams(window.location.search);for(const key of ["lat","lng","nearby","pin","address","q"])q.delete(key);return window.location.pathname+(q.size?"?"+q:"");}
   function locationUrl(result: AddressResult, nearby = withinMile) { return mapBaseUrl() + searchHash(result) + (nearby ? "&nearby=1" : ""); }
   function choose(result: AddressResult) { setLocation(result); setResults([]); setSearchMessage(""); window.history.replaceState(null, "", locationUrl(result)); }
   function toggleNearby(checked: boolean) {
@@ -274,7 +274,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         {!compact && <form className="law-search" onSubmit={submit} aria-busy={searching}><label className="sr-only" htmlFor={"map-address-" + jurisdiction}>Find an address in {data.jurisdiction.name}</label><input id={"map-address-" + jurisdiction} value={address} onChange={(e) => setAddress(e.target.value)} placeholder={location?.source === "map" ? location.label : "Search an address"} maxLength={200} minLength={3} required autoComplete="street-address"/><button disabled={searching} type="submit">{searching && <span className="law-search-spinner" aria-hidden="true"/>}{searching ? "Searching..." : "Search"}</button><button type="button" className="law-pin-control" disabled={!ready && location?.source !== "map"} aria-pressed={location?.source === "map" && !placingPin ? undefined : placingPin} onClick={location?.source === "map" && !placingPin ? clearLocation : togglePinMode}>{placingPin ? "Cancel pin" : location?.source === "map" ? "Clear pin" : "Drop pin"}</button><button type="button" onClick={share}>Copy link</button>{location && location.source !== "map" && <button type="button" onClick={clearLocation} title="Remove the address and one-mile filter">Clear address</button>}</form>}
         <div className="law-map-toggles">
           {!compact && <label title={location ? "Show only projects within one mile of your selected location" : "Search an address or drop a pin first"}><input type="checkbox" checked={withinMile} disabled={!location} onChange={(e) => toggleNearby(e.target.checked)}/> Within 1 mile</label>}
-          <label><input type="checkbox" checked={flumOn} onChange={(e) => setFlumOn(e.target.checked)}/> Future land use</label>
+          <label><input type="checkbox" checked={flumOn} onChange={(e) => { setFlumOn(e.target.checked); const url=new URL(window.location.href); if(e.target.checked)url.searchParams.set("flum","1");else url.searchParams.delete("flum");window.history.replaceState(null,"",url.pathname+url.search+url.hash); }}/> Future land use</label>
           {!compact && <details className="law-filter-menu" onPointerEnter={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = true; }} onPointerLeave={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = false; }} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }} onKeyDown={(e) => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}><summary className="law-filter-button"><span aria-hidden="true">☷</span> Filters{hiddenStages.length + hiddenTypes.length > 0 ? " •" : ""}</summary><div>
             <div className="law-filter-groups">
               <fieldset><legend>Stage</legend>
