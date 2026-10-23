@@ -67,9 +67,22 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
       }
       for (const attachment of attachments ?? []) {
         const title = attachment.FileName + (attachment.Notes ? " — " + attachment.Notes : "");
-        if (attachment.IsFileSecure || isPrivateDocument(title) || !attachment.IsOnline || documentKind(title) === "other") continue;
+        if (attachment.IsFileSecure || isPrivateDocument(title) || documentKind(title) === "other") continue;
         if (attachment.FilePath && officialDocumentUrl(attachment.FilePath)) documents.push({ url: attachment.FilePath, title, caseIds: [caseId], kind: documentKind(title) });
-        else warnings.push(caseId + ": " + attachment.FileName + " requires a verified direct download URL in the source registry.");
+        else {
+          if (documentKind(title) === "pz-decision" && locality.energov.getAttachmentMetadata) {
+            try {
+              const metadata = await locality.energov.getAttachmentMetadata(attachment.AttachmentID);
+              const record = documents.find((d) => d.url === portalUrl && d.kind === "case-record");
+              if (record?.content) {
+                const data = JSON.parse(record.content);
+                data.attachmentChecks = [...(data.attachmentChecks ?? []), { kind: "pz-decision", metadataAvailable: Boolean(metadata), metadataKeys: Object.keys(metadata ?? {}).filter((key) => /^[A-Za-z][A-Za-z0-9_]{0,40}$/.test(key)) }];
+                record.content = JSON.stringify(data);
+              }
+            } catch { warnings.push(caseId + ": P&Z decision metadata unavailable."); }
+          }
+          warnings.push(caseId + ": " + attachment.FileName + " requires a verified direct download URL in the source registry.");
+        }
       }
     }
     for (const source of project?.sourceDocuments ?? []) {

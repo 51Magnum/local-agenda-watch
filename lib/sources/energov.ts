@@ -96,6 +96,7 @@ export type EnerGovClient = {
     planId: string,
     opts?: FetchOpts
   ): Promise<EnerGovAttachment[]>;
+  getAttachmentMetadata?(attachmentId: string): Promise<Record<string, unknown> | null>;
   /** Public URL for the plan detail page in the citizen portal. */
   planPortalUrl(planId: string, tab?: string): string;
 };
@@ -129,6 +130,11 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
       const env = await call<EnerGovPlan>(`/energov/plans/${planId}`, opts);
       if (!env || !env.Success || !env.Result) return null;
       return env.Result;
+    },
+
+    async getAttachmentMetadata(attachmentId) {
+      const env = await call<Record<string, unknown>>(`/energov/attachments/metadata/${encodeURIComponent(attachmentId)}`, { revalidate: 0 });
+      return env?.Success && env.Result ? env.Result : null;
     },
 
     async getPlanAttachments(planId, opts = {}) {
