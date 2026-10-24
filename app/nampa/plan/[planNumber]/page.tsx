@@ -5,7 +5,6 @@ import CaseProjectPage from "@/app/components/case-project-page";
 import NorthsideProjectPage from "@/app/nampa/_components/northside-project-page";
 import { getCaseRecord } from "@/lib/case-record";
 import { caseDisplayTitle, caseMetaDescription, getCaseNextHearing } from "@/lib/case-details";
-import { getProjectForCase } from "@/lib/projects";
 import { SITE_ORIGIN } from "@/lib/site-config";
 type RouteParams = { planNumber: string };
 
@@ -21,8 +20,7 @@ export async function generateMetadata({
   const title = caseDisplayTitle(hearing, plan, attachments) + " (" + hearing.appId + ")";
   const summary = caseMetaDescription(hearing, caseDisplayTitle(hearing, plan, attachments), getCaseNextHearing(hearing, record.feed));
   const canonical = SITE_ORIGIN + "/us/id/nampa/plan/" + encodeURIComponent(hearing.appId);
-  const project = getProjectForCase(hearing.appId);
-  const images = [SITE_ORIGIN + (project?.image ?? areaPath(record.locality.slug)+"/opengraph-image")];
+  const images = [SITE_ORIGIN + (areaPath(record.locality.slug)+"/opengraph-image")];
   return { title, description: summary, alternates: { canonical },
     openGraph: { type: "website", title, description: summary, url: canonical, images },
     twitter: { card: "summary_large_image", title, description: summary, images },

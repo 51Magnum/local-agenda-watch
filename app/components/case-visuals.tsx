@@ -1,8 +1,9 @@
+const documentImagesEnabled = () => false;
 import Image from "next/image";
 import type { CaseVisual } from "@/lib/case-evidence";
 
 export function CaseVisuals({ visuals, reportUrl }: { visuals?: CaseVisual[]; reportUrl?: string }) {
-  if (!visuals?.length || !reportUrl) return null;
+  if (!documentImagesEnabled() || !visuals?.length || !reportUrl) return null;
   return <section aria-labelledby="case-visuals-title" className="flex flex-col gap-5">
     <div>
       <h2 id="case-visuals-title" className="text-xl font-semibold">Maps from the staff report</h2>

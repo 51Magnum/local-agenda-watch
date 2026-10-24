@@ -5,6 +5,11 @@ import type { NextRequest } from "next/server";
 
 // Preserve legacy locality links while making country/state/area paths canonical.
 export function proxy(request: NextRequest) {
+  if(request.nextUrl.pathname === "/_next/image") {
+    const source=request.nextUrl.searchParams.get("url")??"";
+    if(/\/api\/maps\/.+\/visual\/|\/(?:nampa|us\/id\/nampa)\/.+\.(?:png|jpe?g|webp)/i.test(source)) return new NextResponse("Image removed pending privacy verification",{status:410,headers:{"Cache-Control":"private, no-store, max-age=0"}});
+    return;
+  }
   if (request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/")) {
     if (!process.env.REVIEW_ADMIN_PASSWORD) return new NextResponse("Review access is not configured", { status: 503, headers: { "Cache-Control": "no-store" } });
     if (!authorizedReviewer(request.headers.get("authorization"))) return new NextResponse("Authentication required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Case evidence review", charset="UTF-8"', "Cache-Control": "no-store" } });
@@ -27,4 +32,4 @@ export function proxy(request: NextRequest) {
     }
   }
 }
-export const config={matcher:["/((?!_next/static|_next/image|favicon.ico).*)"]};
+export const config={matcher:["/((?!_next/static|favicon.ico).*)"]};

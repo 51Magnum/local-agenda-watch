@@ -8,7 +8,7 @@ import { getJurisdiction } from "@/lib/maps/jurisdictions";
 import { shortDate } from "@/lib/project-timeline";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+
 import { getLocality } from "@/lib/localities";
 import { getLocalityContext, localityHref } from "@/lib/locality";
 import { braeburnCreek, getProjectNextHearing, getProjectStage, PUBLIC_COMMENT_URL } from "@/lib/projects";
@@ -21,8 +21,8 @@ const canonical = "https://www.localagendawatch.com/us/id/nampa/" + project.slug
 export const metadata: Metadata = {
   title: project.title, description: project.summary, alternates: { canonical },
   openGraph: { type: "website", title: project.title, description: project.summary, url: canonical,
-    images: [{ url: "https://www.localagendawatch.com" + project.image, width: 1535, height: 1054, alt: "Braeburn Creek site at Amity and Happy Valley, outlined on an aerial map" }] },
-  twitter: { card: "summary_large_image", title: project.title, description: project.summary, images: ["https://www.localagendawatch.com" + project.image] },
+    images: [{ url: "https://www.localagendawatch.com/us/id/nampa/opengraph-image", width: 1535, height: 1054, alt: "Braeburn Creek site at Amity and Happy Valley, outlined on an aerial map" }] },
+  twitter: { card: "summary_large_image", title: project.title, description: project.summary, images: ["https://www.localagendawatch.com/us/id/nampa/opengraph-image"] },
 };
 export default async function BraeburnCreekPage() {
   const ctx = await getLocalityContext();
@@ -58,7 +58,7 @@ export default async function BraeburnCreekPage() {
     {stage!=="Decided"&&<ProjectNextStep hearing={next} calendarHref={localityHref("nampa","/braeburn-creek/hearing.ics",ctx)} concise/>}
     <section aria-label="Project location" className="space-y-3">
       <CaseMap jurisdiction="nampa" caseIds={project.caseIds} compact matchHeightTo='[aria-labelledby="next-step-title"]'/>
-      <a href="/us/id/nampa/toll-brothers-site-map.png" className="inline-flex items-center gap-3 text-xs text-zinc-500 underline underline-offset-4"><Image src={project.image} alt="Earlier aerial view of the Braeburn Creek site" width={96} height={66} className="h-14 w-20 rounded-md border border-zinc-200 object-cover dark:border-zinc-800"/>Earlier aerial · March neighborhood notice</a>
+
     </section>
     <ProjectProposal overview={overview} data={timeline}/>
     <div className="space-y-5"><ProjectTimeline data={timeline}/><Link href={localityHref("nampa","/meetings?case="+project.caseIds[0],ctx)} className="inline-block text-sm underline underline-offset-4">Past meetings, agendas &amp; results</Link></div>

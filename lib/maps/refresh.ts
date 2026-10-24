@@ -123,5 +123,5 @@ export async function refreshConfiguredMaps(deadline = Date.now() + 50000) {
 
 export function publicMapData(config: JurisdictionConfig, snapshot: MapSnapshot): PublicMapData {
   const { id, name, center, zoom, bounds, state, addressPoints } = config;
-  return { jurisdiction: { id, name, center, zoom, bounds, state, addressPoints }, updatedAt: snapshot.updatedAt, cases: snapshot.cases.map((c) => ({ ...c, href: canonicalAreaHref(config.id,c.href), visual: config.caseVisuals?.[c.id] ?? c.visual })), warnings: snapshot.warnings, flum: { ...config.flum, updatedAt: snapshot.flum?.updatedAt, legend: snapshot.flum?.legend ?? [] } };
+  return { jurisdiction: { id, name, center, zoom, bounds, state, addressPoints }, updatedAt: snapshot.updatedAt, cases: snapshot.cases.map((c) => ({ ...c, href: canonicalAreaHref(config.id,c.href), visual: undefined })), warnings: snapshot.warnings, flum: { ...config.flum, updatedAt: snapshot.flum?.updatedAt, legend: snapshot.flum?.legend ?? [] } };
 }
