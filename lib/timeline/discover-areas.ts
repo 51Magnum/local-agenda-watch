@@ -1,3 +1,4 @@
+import {hostWasBlocked} from "./telemetry";
 import { AREAS, type AreaDefinition } from "@/lib/areas/registry";
 import { getLocality } from "@/lib/localities";
 import type { Hearing,HearingFeed } from "@/lib/localities/types";
@@ -85,7 +86,7 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
  if(options.store){
   // Rotate library work across areas/cases; completed and blocked roots cannot starve the backlog.
   const offset=Number(state.cursors?.libraries??0)%Math.max(1,libraryJobs.length);const jobs=[...libraryJobs.slice(offset),...libraryJobs.slice(0,offset)];let visited=0;
-  for(const job of jobs){if(Date.now()>=deadline-14000)break;visited++;
+  for(const job of jobs){if(Date.now()>=deadline-14000)break;visited++;if(hostWasBlocked(job.area.id,job.url))continue;
    try{for(const file of await walkLibrary(job.area.id,job.h.appId,job.url,options.store,Math.min(deadline,Date.now()+14000))){const kind=areaDocumentKind(job.area,file.title);if(kind!=="other"&&!isPrivateDocument(file.title))documents.push({areaId:job.area.id,caseIds:[job.h.appId],kind,...file});}}
    catch(error){warnings.push(job.area.id+" library "+job.h.appId+": "+(error instanceof Error?error.message:"Unavailable"));}
   }

@@ -14,7 +14,12 @@ export async function sourceRequest(url:string,areaId:string,accept="text/html,a
   const r=await fetch(target,{redirect:"manual",cache:"no-store",signal:AbortSignal.timeout(timeout),headers:{Accept:accept,"User-Agent":"Mozilla/5.0 (compatible; LocalAgendaWatch public records reader)"}});
   if([301,302,303,307,308].includes(r.status)){
    const location=r.headers.get("location");if(!location)throw new Error("Source redirect missing location");
-   target=new URL(location,target).href;if(!allowedSource(target,areaId))throw new Error("Source redirect is outside the jurisdiction allowlist");continue;
+   const next=new URL(location,target);
+   if(!allowedSource(next.href,areaId)){
+    if(["login.microsoftonline.com","login.microsoft.com","accounts.google.com"].includes(next.hostname))throw new BlockedSourceError(new URL(url).hostname);
+    throw new Error("Source redirect is outside the jurisdiction allowlist");
+   }
+   target=next.href;continue;
   }
   if([401,403,429].includes(r.status)){await r.body?.cancel();throw new BlockedSourceError(new URL(target).hostname);}
   if(!r.ok)throw new Error("Official source HTTP "+r.status);
