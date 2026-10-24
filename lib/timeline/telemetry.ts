@@ -22,3 +22,6 @@ export function recordHost(areaId:string,url:string,outcome:HostCheck["outcome"]
 
 export function currentRun(){return context.getStore()?.run;}
 export function hostWasBlocked(areaId:string,url:string){const host=new URL(url).hostname;return Boolean(context.getStore()?.run.hosts?.some(h=>h.areaId===areaId&&h.host===host&&h.outcome==="blocked"));}
+
+/** Aggregate diagnostics contain no credentials, addresses, quotes, or resident information. */
+export function safeRunSummary(run:IngestionRun){return {startedAt:run.startedAt,finishedAt:run.finishedAt,areas:run.areas,hosts:run.hosts,checked:run.checked,processed:run.processed,errors:run.errors.length,tokens:{calls:run.usage?.length??0,input:run.usage?.reduce((n,u)=>n+u.inputTokens,0)??0,output:run.usage?.reduce((n,u)=>n+u.outputTokens,0)??0,total:run.usage?.reduce((n,u)=>n+u.totalTokens,0)??0}};}

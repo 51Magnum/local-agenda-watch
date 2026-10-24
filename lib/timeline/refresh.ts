@@ -2,7 +2,7 @@ import { refreshConfiguredMaps } from "@/lib/maps/refresh";
 import { discoverCaseDocuments } from "./discover";
 import { ingestDocuments,digest } from "./ingest";
 import { extractNativePdfPages } from "./extract";
-import { checkpointRun,withRun } from "./telemetry";
+import { checkpointRun,safeRunSummary,withRun } from "./telemetry";
 import type { EvidenceStore } from "./store";
 import type { IngestionRun } from "./types";
 /** One durable run spans discovery OCR and extraction, including usage before a timeout. */
@@ -19,6 +19,6 @@ export async function refreshTimelines(store:EvidenceStore,{budgetMs=280000,disc
    await ingestDocuments(store,documents,{run,budgetMs:Math.max(0,deadline-Date.now()),text:async bytes=>discovery.extractedPages.get(digest(bytes))??extractNativePdfPages(bytes)});
    return {run,maps,caseIds:discovery.caseIds};
   }catch(error){run.errors.push(error instanceof Error?error.message:"Timeline refresh failed");throw error;}
-  finally{run.finishedAt=new Date().toISOString();await checkpointRun(store,run);console.info("[timeline:run]",JSON.stringify({startedAt:run.startedAt,areas:run.areas,hosts:run.hosts,checked:run.checked,processed:run.processed,errors:run.errors.length,tokens:{calls:run.usage?.length??0,total:run.usage?.reduce((n,u)=>n+u.totalTokens,0)??0}}));}
+  finally{run.finishedAt=new Date().toISOString();await checkpointRun(store,run);console.info("[timeline:run]",JSON.stringify(safeRunSummary(run)));}
  });
 }

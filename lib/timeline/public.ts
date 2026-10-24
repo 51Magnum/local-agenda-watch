@@ -1,3 +1,4 @@
+import { safeRunSummary } from "./telemetry";
 import { cache } from "react";
 import { getEvidenceStore } from "./store";
 import { emptyEvidenceState, publicFields, type EvidenceField, type EvidenceState, type FieldKey } from "./types";
@@ -9,8 +10,14 @@ export function timelineEnabled(caseId: string): boolean {
   const configured = process.env.TIMELINE_CASE_IDS ?? "*";
   return configured === "*" || configured.split(",").map((value) => value.trim()).includes(caseId);
 }
+let lastLoggedRun="";
 export const readTimelineState = cache(async (): Promise<EvidenceState> => {
-  try { return await getEvidenceStore().read(); }
+  try {
+    const state=await getEvidenceStore().read(),run=state.runs.at(-1);
+    const version=run?run.startedAt+":"+(run.finishedAt??"running"):"";
+    if(run&&version!==lastLoggedRun){console.info("[timeline:status]",JSON.stringify(safeRunSummary(run)));lastLoggedRun=version;}
+    return state;
+  }
   catch (error) { console.error("[timeline:public] Evidence unavailable", error instanceof Error ? error.message : "Unknown error"); return emptyEvidenceState(); }
 });
 export type TimelineAppearance = { date: string; body: string; sourceUrl: string; isHearing: boolean };
