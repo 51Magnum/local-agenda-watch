@@ -1,4 +1,5 @@
-import {unstable_cache} from "next/cache";
+import {trackedRows} from "@/lib/db-transfer";
+import {revalidateTag,unstable_cache} from "next/cache";
 import { Pool } from "pg";
 import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -18,7 +19,7 @@ export async function readMapSnapshot(id: string,options:{caseIds?:readonly stri
   if (process.env.DATABASE_URL) {
    const db=database();await initialized;
    const query=options.caseIds?"SELECT (snapshot-'cases')||jsonb_build_object('cases',coalesce((SELECT jsonb_agg(c) FROM jsonb_array_elements(snapshot->'cases') c WHERE c->>'id'=ANY($2::text[])),'[]'::jsonb)) AS snapshot FROM law_map_cache WHERE jurisdiction=$1":"SELECT snapshot FROM law_map_cache WHERE jurisdiction=$1";
-   const snapshot=(await db.query(query,options.caseIds?[id,options.caseIds]:[id])).rows[0]?.snapshot as MapSnapshot|undefined;
+   const snapshot=trackedRows("maps",(await db.query(query,options.caseIds?[id,options.caseIds]:[id])).rows)[0]?.snapshot as MapSnapshot|undefined;
    if(snapshot&&options.includeFlum)snapshot.flum=await readFlumSnapshot(id);
    return snapshot;
   }
@@ -29,13 +30,13 @@ export async function saveMapSnapshot(snapshot: MapSnapshot) {
   if (process.env.DATABASE_URL) {
    const db=database();await initialized;const {flum,...cases}=snapshot;
    await db.query("INSERT INTO law_map_cache (jurisdiction,snapshot) VALUES ($1,$2::jsonb) ON CONFLICT (jurisdiction) DO UPDATE SET snapshot=excluded.snapshot",[snapshot.jurisdiction,JSON.stringify(cases)]);
-   if(flum)await db.query("INSERT INTO law_flum_cache VALUES($1,$2::jsonb) ON CONFLICT(jurisdiction) DO UPDATE SET snapshot=excluded.snapshot WHERE law_flum_cache.snapshot->>'updatedAt' IS DISTINCT FROM excluded.snapshot->>'updatedAt'",[snapshot.jurisdiction,JSON.stringify(flum)]);
+   if(flum){const result=await db.query("INSERT INTO law_flum_cache VALUES($1,$2::jsonb) ON CONFLICT(jurisdiction) DO UPDATE SET snapshot=excluded.snapshot WHERE law_flum_cache.snapshot->>'updatedAt' IS DISTINCT FROM excluded.snapshot->>'updatedAt'",[snapshot.jurisdiction,JSON.stringify(flum)]);if(result.rowCount&&process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test")revalidateTag("map-flum",{expire:0});}
    return;
   }
   if (process.env.VERCEL) throw new Error("Map storage requires DATABASE_URL");
   const file = filename(snapshot.jurisdiction); await mkdir(path.dirname(file), { recursive: true }); const tmp = file + "." + randomUUID() + ".tmp"; await writeFile(tmp, JSON.stringify(snapshot)); await rename(tmp, file);
 }
 
-async function loadFlum(id:string):Promise<FlumCache|undefined>{const db=database();await initialized;return(await db.query("SELECT snapshot FROM law_flum_cache WHERE jurisdiction=$1",[id])).rows[0]?.snapshot;}
-const cachedFlum=unstable_cache(loadFlum,["flum-storage-v2"],{revalidate:3600,tags:["map-flum"]});
+async function loadFlum(id:string):Promise<FlumCache|undefined>{const db=database();await initialized;return trackedRows("flum",(await db.query("SELECT snapshot FROM law_flum_cache WHERE jurisdiction=$1",[id])).rows)[0]?.snapshot;}
+const cachedFlum=unstable_cache(loadFlum,["flum-storage-v2"],{revalidate:604800,tags:["map-flum"]});
 export async function readFlumSnapshot(id:string){if(!process.env.DATABASE_URL)return(await readMapSnapshot(id))?.flum;return process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test"?cachedFlum(id):loadFlum(id);}

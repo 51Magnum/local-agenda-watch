@@ -1,3 +1,4 @@
+import {trackedRows} from "@/lib/db-transfer";
 import { Pool } from "pg";
 import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 import path from "node:path";
@@ -15,7 +16,7 @@ function filename(jurisdiction:string,id:string) {
 }
 export async function readVisualAsset(jurisdiction:string,id:string):Promise<VisualAsset|undefined>{
   const file=filename(jurisdiction,id);
-  if(process.env.DATABASE_URL)return(await(await database()).query("SELECT asset FROM law_map_visuals WHERE id=$1 AND jurisdiction=$2",[id,jurisdiction])).rows[0]?.asset;
+  if(process.env.DATABASE_URL)return trackedRows("visuals",(await(await database()).query("SELECT asset FROM law_map_visuals WHERE id=$1 AND jurisdiction=$2",[id,jurisdiction])).rows)[0]?.asset;
   if(process.env.VERCEL)throw new Error("Visual storage requires DATABASE_URL");
   try{return JSON.parse(await readFile(file,"utf8"));}catch(e){if((e as NodeJS.ErrnoException).code!=="ENOENT")throw e;}
 }

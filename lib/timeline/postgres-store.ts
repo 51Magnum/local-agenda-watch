@@ -1,3 +1,4 @@
+import {trackedRows} from "@/lib/db-transfer";
 import {Pool,type PoolClient} from "pg";
 import {createHash,randomUUID} from "node:crypto";
 import type {EvidenceStore} from "./store";
@@ -51,7 +52,7 @@ export function createPostgresStore({buffered=false}:{buffered?:boolean}={}):Evi
  let state:EvidenceState|undefined,loading:Promise<EvidenceState>|undefined;
  const baseline=new Map<string,string>(),loadedPages=new Set<string>();
  const metrics={readBytes:0,writeBytes:0,queries:0,legacyRowBytes:undefined as number|undefined};
- async function query(client:Pool|PoolClient,sql:string,params:unknown[]=[]){metrics.queries++;metrics.writeBytes+=Buffer.byteLength(json(params));const r=await client.query(sql,params);metrics.readBytes+=Buffer.byteLength(json(r.rows));return r;}
+ async function query(client:Pool|PoolClient,sql:string,params:unknown[]=[]){metrics.queries++;metrics.writeBytes+=Buffer.byteLength(json(params));const r=await client.query(sql,params);metrics.readBytes+=Buffer.byteLength(json(trackedRows("timeline",r.rows)));return r;}
  function entries(s:EvidenceState){
   const rows=new Map<string,unknown>();
   for(const d of Object.values(s.documents))rows.set("d:"+d.id,documentMetadata(d));
