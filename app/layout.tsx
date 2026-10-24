@@ -1,3 +1,5 @@
+import ThemeSelector from "./components/theme-selector";
+import {THEME_BOOTSTRAP} from "@/lib/theme";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -31,14 +33,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head><script id="law-theme" dangerouslySetInnerHTML={{__html:THEME_BOOTSTRAP}}/></head>
       <body className="min-h-full flex flex-col bg-zinc-50 text-black dark:bg-black dark:text-zinc-50">
         <header className="border-b border-zinc-200 bg-white/70 backdrop-blur dark:border-zinc-800 dark:bg-black/60">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4">
             <Link href="/" className="font-semibold tracking-tight">
               Local Agenda Watch
             </Link>
+            <ThemeSelector/>
           </div>
         </header>
         {children}
