@@ -11,7 +11,7 @@ export async function walkLibrary(areaId:string,caseId:string,root:string,store:
  while(queue.length&&Date.now()<deadline&&visited<5){
   const url=queue.shift()!;if(seen.has(url)||!allowedSource(url,areaId))continue;seen.add(url);visited++;
   try{
-   const response=await sourceRequest(url,areaId);const type=response.headers.get("content-type")??"";
+   const response=await sourceRequest(url,areaId,url.includes("/_api/")?"application/json;odata=nometadata":undefined);const type=response.headers.get("content-type")??"";
    if(/application\/pdf/i.test(type)){await response.body?.cancel();files.push({url,title:decodeURIComponent(new URL(url).pathname.split("/").at(-1)??"Official report")});continue;}
    const text=await response.text(),$=load(text),host=new URL(url).hostname;
    // Public SharePoint folders expose subfolders/files through their documented REST lists.
@@ -26,14 +26,17 @@ export async function walkLibrary(areaId:string,caseId:string,root:string,store:
      for(const child of [...(node.Files?.results??node.Files??[]),...(node.Folders?.results??node.Folders??[])]){
       if(!child.ServerRelativeUrl||/sign[ _-]*in|attendance|sign[ _-]*up/i.test(child.Name??""))continue;
       const next=new URL(child.ServerRelativeUrl,url).href;
-      if(/\.pdf$/i.test(child.Name??""))files.push({url:next,title:child.Name});else if(!seen.has(next))queue.push(next);
+      if(/\.pdf$/i.test(child.Name??""))files.push({url:next,title:child.Name});else if(!seen.has(next)){
+       const path=child.ServerRelativeUrl,base=path.split("/").slice(0,path.startsWith("/sites/")?3:1).join("/");
+       queue.push(new URL(base+"/_api/web/GetFolderByServerRelativeUrl('"+path.replace(/'/g,"''")+"')?$expand=Folders,Files",url).href);
+      }
      }
     }
    }
    // WebLink and public meeting pages: descend only explicit library/attachment links.
    for(const node of $("iframe[src],embed[src],object[data]").toArray()){
     const raw=$(node).attr("src")??$(node).attr("data");if(!raw)continue;const next=new URL(raw,url).href;
-    if(allowedSource(next,areaId)&&/\.pdf|Download|MetaViewer/i.test(next))files.push({url:next,title:$(node).attr("title")??"Meeting packet"});
+    if(allowedSource(next,areaId)&&/\.pdf|Download|MetaViewer/i.test(next))files.push({url:next,title:$(node).attr("title")??(/minutes/i.test(url)?"Minutes":"Meeting packet")});
    }
    for(const a of $("a[href]").toArray()){
     if($(a).closest("nav,.breadcrumb,#breadcrumbs").length)continue;

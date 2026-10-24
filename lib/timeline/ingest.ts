@@ -136,7 +136,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         if(!current)state.documents[id]={...document,id,hash:"",pages:[],checkedAt:new Date().toISOString(),state:"error"};
         const doc=state.documents[id];
         doc.failCount=Math.min(3,(doc.failCount??0)+1);doc.lastAttemptAt=new Date().toISOString();doc.error=message;
-        if(replaced||doc.state!=="complete")doc.state=doc.failCount>=3?"failed-permanent":"error";
+        if(doc.failCount>=3)doc.state="failed-permanent";else if(replaced||doc.state!=="complete")doc.state="error";
       });
     }
     });
