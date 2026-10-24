@@ -1,3 +1,4 @@
+import { recordPageOnHosts, type RecordPageContext } from "./record-links";
 import {IDAHO_CITIES} from "./idaho-cities";
 import type { MultiPolygon, Polygon } from "geojson";
 import nampaBoundary from "./boundaries/nampa.json";
@@ -11,6 +12,7 @@ export type AreaDefinition = {
   bodies:{additional?:{id:string;label:string;shortLabel:string;stageLabel:string}[];planning:{id:string;label:string;shortLabel:string;stageLabel:string};decision:{id:string;label:string;shortLabel:string;stageLabel:string}};
   meetingRules:{defaultHearingTime?:string;decisionCommentDeadlineHour?:number;agendaNotice:string;commentInstructions:string;location?:string};
   commentInstructionsUrl?:string;
+  recordPage?:(context:RecordPageContext)=>string|undefined;
   addressSearch?:{addressField:string;where:string;suffix:string};
   flumCompatibility?:{
     zoningCodePattern:string;
@@ -37,10 +39,12 @@ export const AREAS:Record<string,AreaDefinition>={
   meridian:{id:"meridian",slug:"meridian",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Meridian",type:"city",status:"live",timezone:"America/Denver",center:[-116.3915,43.6121],boundary:meridianBoundary as Polygon|MultiPolygon,boundaryLabel:"Official city limits",boundarySources:["https://gis.meridiancity.org/server/rest/services/CD/Boundaries_places_Webservice/MapServer/2"],coverageNote:"City planning applications. Nearby unincorporated areas may have a different planning authority.",
     bodies:{planning:{id:"P&Z",label:"Planning & Zoning Commission",shortLabel:"P&Z",stageLabel:"P&Z hearing"},decision:{id:"City Council",label:"City Council",shortLabel:"Council",stageLabel:"Council hearing"}},
     meetingRules:{agendaNotice:"Check the official agenda archive for the meeting agenda and packet.",location:"City Council Chambers, 33 East Broadway Avenue, Meridian, Idaho",commentInstructions:"Follow the City's public-meeting instructions to submit written testimony or sign up to speak. Confirm the deadline for your hearing; the noon exhibit deadline is separate from written testimony."},commentInstructionsUrl:"https://meridiancity.org/government/public-meeting-information/",
+    recordPage:context=>recordPageOnHosts(context,["weblink.meridiancity.org","apps.meridiancity.org","meetings.municode.com"]),
     sources:{cases:"https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6",geometry:["https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6"],flum:"https://gis.meridiancity.org/server/rest/services/CD/FLUM_Webservice/MapServer/15",hearingsSchedule:"https://apps.meridiancity.org/CLERKSCONTENT/pubhearnot_detail.aspx",agendas:"https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",parcelFallback:"https://gis.meridiancity.org/server/rest/services/CD/Parcel_Layers/MapServer/0"}},
   "canyon-county":{id:"canyon-county",slug:"canyon-county",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Canyon County",type:"county",status:"live",timezone:"America/Denver",center:[-116.7,43.63],boundary:canyonBoundary as MultiPolygon,coverageBoundary:canyonJurisdiction as MultiPolygon,boundaryLabel:"Unincorporated Canyon County",coverageNote:"County land-use cases. Incorporated cities have separate planning authorities; a postal city does not determine jurisdiction.",boundarySources:["https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1","https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0"],
     bodies:{planning:{id:"P&Z",label:"Planning & Zoning Commission",shortLabel:"Planning / Examiner",stageLabel:"P&Z hearing"},decision:{id:"Board of County Commissioners",label:"Board of County Commissioners",shortLabel:"Board",stageLabel:"Board hearing"},additional:[{id:"Hearing Examiner",label:"Hearing Examiner",shortLabel:"Examiner",stageLabel:"Hearing Examiner"}]},
     meetingRules:{agendaNotice:"Staff reports are published seven days before the scheduled hearing.",commentInstructions:"Use the case-specific comment deadline and contact shown in the County's hearing record. Confirm how to submit comments and the hearing location in the published notice."},commentInstructionsUrl:"https://landhearingsagenda.canyoncounty.id.gov/Landing",
+    recordPage:context=>recordPageOnHosts(context,["landhearingsagenda.canyoncounty.id.gov","agenda.canyoncounty.id.gov"]),
     sources:{cases:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0",hearingsSchedule:"https://landhearingsagenda.canyoncounty.id.gov/Landing",geometry:["https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0"],flum:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1",agendas:"https://landhearingsagenda.canyoncounty.id.gov/Landing",parcelFallback:"https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"}},
   ...IDAHO_CITIES,
 };
@@ -52,3 +56,8 @@ export function canonicalAreaHref(id:string,path:string){const a=getArea(id);if(
 export function stageLabel(stage:string,area:AreaDefinition){return stage.startsWith("P&Z hearing")?area.bodies.planning.stageLabel+stage.slice("P&Z hearing".length):stage.startsWith("Council hearing")?area.bodies.decision.stageLabel+stage.slice("Council hearing".length):stage;}
 export function mapStageLabel(stage:string,area?:AreaDefinition){return stage==="P&Z"?area?.bodies.planning.shortLabel??"Planning":stage==="Council/Board"?area?.bodies.decision.shortLabel??"Decision body":stage;}
 export function bodyLabel(body:string,area:AreaDefinition){return body===area.bodies.planning.id?area.bodies.planning.label:body===area.bodies.decision.id?area.bodies.decision.label:body;}
+
+/** Builders stay on the server; React client props contain data only. */
+export function publicArea(area:AreaDefinition):Omit<AreaDefinition,"recordPage"> {
+ const data={...area};delete data.recordPage;return data;
+}

@@ -1,3 +1,4 @@
+import { residentHref } from "@/lib/areas/record-links";
 import{displayArea}from"@/lib/areas/format";
 import{stageLabel}from"@/lib/areas/registry";
 import type { LandUseFact } from "@/lib/areas/land-use";
@@ -8,6 +9,7 @@ import { latestField } from "@/lib/timeline/public";
 import { projectTimelineRows } from "@/lib/project-timeline";
 import { evidenceSourceHref } from "@/lib/timeline/types";
 function FactSource({ fact, label }: { fact: SourcedFact; label: string }) {
+  if (!residentHref(factHref(fact))) return null;
   return <a href={factHref(fact)} aria-label={"Source for "+label+(fact.page?", page "+fact.page:"")} title={fact.page?"Source · page "+fact.page:"Official source"} className="ml-2 shrink-0 text-xs text-zinc-500 underline underline-offset-4">↗</a>;
 }
 export function ProjectFacts({ overview, landUse }: { overview: ProjectOverview; landUse?: SourcedFact & Partial<LandUseFact> }) {
@@ -19,10 +21,10 @@ export function ProjectFacts({ overview, landUse }: { overview: ProjectOverview;
   if(!primary.length&&!secondary.length)return null;
   const sources = new Map<string, string[]>();
   for (const entry of [...primary.map(f=>({label:f.label,fact:f.source})),...secondary]) {
-    const href=factHref(entry.fact), labels=sources.get(href)??[];
+    const href=residentHref(factHref(entry.fact)); if (!href) continue; const labels=sources.get(href)??[];
     labels.push(entry.label+(entry.fact.page?" (page "+entry.fact.page+")":"")); sources.set(href,labels);
   }
-  if(landUse?.comparisonSourceUrl)sources.set(landUse.comparisonSourceUrl,["Plan / zoning district comparison"]);
+  if(residentHref(landUse?.comparisonSourceUrl))sources.set(landUse!.comparisonSourceUrl!,["Plan / zoning district comparison"]);
   return <section aria-label="Key project facts" className="space-y-5">
     {!!primary.length&&<dl className={"grid gap-3 "+(primary.length===1?"sm:grid-cols-1":primary.length===2?"sm:grid-cols-2":"sm:grid-cols-3")}>{primary.map(f=><div key={f.label} className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"><dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">{f.label}</dt><dd className="mt-2 text-2xl font-semibold tracking-tight">{f.value}</dd></div>)}</dl>}
     {!!secondary.length&&<dl className="grid gap-5 text-sm sm:grid-cols-3">{secondary.map(f=><div key={f.label}><dt className="text-zinc-500">{f.label}</dt><dd className="mt-1 font-medium leading-6">{f.label==="Future land use"&&landUse?.mapHref?<a href={landUse.mapHref} className="underline underline-offset-4">{f.fact.value}</a>:f.fact.value}</dd></div>)}</dl>}

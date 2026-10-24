@@ -1,3 +1,4 @@
+import {sourceIsStale,sourceFailureCode} from "./source-freshness";
 import {unstable_cache}from "next/cache";
 import {geoQuery}from "@/lib/maps/gis";
 import {readSourceFeed,saveSourceFeed}from "./source-cache";
@@ -7,10 +8,14 @@ import type {Locality,AgendaMeeting}from "./types";
 export async function refreshMeridianFeed(){
  const previous=await readSourceFeed("meridian").catch(()=>undefined),oldCases=[...(previous?.active??[]),...(previous?.completed??[])] as MeridianCase[];
  const oldNotices=[...new Map(oldCases.flatMap(h=>h.meridian.notices).map(n=>[n.caseIds.join(",")+n.body+n.date,n])).values()];
- let notices:MeridianNotice[]=!oldNotices.length||!previous?.scheduleRefreshedAt||previous.scheduleRefreshedAt<=initialNotices.checkedAt?initialNotices.notices:oldNotices,scheduleUnavailable=false,agendaUnavailable=false;
+ const useInitial=!oldNotices.length||!previous?.scheduleRefreshedAt||previous.scheduleRefreshedAt<=initialNotices.checkedAt;
+ let notices:MeridianNotice[]=useInitial?initialNotices.notices:oldNotices,scheduleUnavailable=false,agendaUnavailable=false;
+ let noticeCheckedAt=useInitial?initialNotices.checkedAt:previous!.scheduleRefreshedAt!;
+ let noticeFailure="";
  const [records,noticeResult,indexes]=await Promise.allSettled([geoQuery(MERIDIAN_CASES,{where:MERIDIAN_WHERE,returnGeometry:"false"}),meridianHtml(MERIDIAN_NOTICES),Promise.allSettled(Object.entries(MERIDIAN_PORTALS).map(async([body,url])=>parseMeridianMeetings(await meridianHtml(url),body,url)))]);
- if(noticeResult.status==="fulfilled"){try{notices=parseMeridianNotices(noticeResult.value);}catch{scheduleUnavailable=true;}}else scheduleUnavailable=true;
- if(scheduleUnavailable)console.error("[meridian] Hearing notices unavailable; retaining last verified notices");
+ if(noticeResult.status==="fulfilled"){try{notices=parseMeridianNotices(noticeResult.value);}catch(error){scheduleUnavailable=true;noticeFailure=sourceFailureCode(error);}}else {scheduleUnavailable=true;noticeFailure=sourceFailureCode(noticeResult.reason);}
+ if(scheduleUnavailable)console.error("[meridian] Hearing notices unavailable ("+noticeFailure+"); retaining notices verified "+noticeCheckedAt);
+ else noticeCheckedAt=new Date().toISOString();
  const meetings:AgendaMeeting[]=[];
  if(indexes.status==="fulfilled")for(const result of indexes.value){if(result.status==="fulfilled")meetings.push(...result.value);else agendaUnavailable=true;}else agendaUnavailable=true;
  const deadline=Date.now()+25000;
@@ -21,10 +26,11 @@ export async function refreshMeridianFeed(){
  if(records.status==="rejected")console.error("[meridian] GIS case source unavailable; retaining prior records");
  if(!features.length&&records.status==="rejected"&&!notices.length)throw new Error("Meridian sources unavailable");
  const feed=composeMeridianFeed(features,notices,meetings);
- feed.scheduleUnavailable=scheduleUnavailable||agendaUnavailable;feed.dataUnavailable=records.status==="rejected";
- feed.scheduleRefreshedAt=scheduleUnavailable?(previous?.scheduleRefreshedAt??initialNotices.checkedAt):new Date().toISOString();
+ feed.agendaRefreshedAt=agendaUnavailable?(previous?.agendaRefreshedAt??previous?.refreshedAt):new Date().toISOString();
+ feed.scheduleUnavailable=(scheduleUnavailable&&sourceIsStale(noticeCheckedAt))||(agendaUnavailable&&sourceIsStale(feed.agendaRefreshedAt));feed.dataUnavailable=records.status==="rejected";
+ feed.scheduleRefreshedAt=noticeCheckedAt;
  try{await saveSourceFeed("meridian",feed);}catch{console.error("[meridian] Source snapshot could not be saved");}
  return feed;
 }
-export const getMeridianHearings=unstable_cache(refreshMeridianFeed,["meridian:feed:v2"],{revalidate:3600,tags:["meridian:cases"]});
+export const getMeridianHearings=unstable_cache(refreshMeridianFeed,["meridian:feed:v3"],{revalidate:3600,tags:["meridian:cases"]});
 export const meridian:Locality={slug:"meridian",displayName:"Meridian",fullName:"Meridian, Idaho",portalUrl:MERIDIAN_NOTICES,dataAttribution:"City of Meridian GIS, hearing notices and official meeting archive",tracked:[],getHearings:getMeridianHearings};

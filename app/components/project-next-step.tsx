@@ -1,3 +1,4 @@
+import {residentHref} from "@/lib/areas/record-links";
 import {displayArea,areaDate,areaTime} from "@/lib/areas/format";
 import { type ProjectHearing } from "@/lib/projects";
 
@@ -19,10 +20,10 @@ export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise =
       <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
         <a href={area.commentInstructionsUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">How to comment — official instructions</a>
         {hearing.startsAt.length > 10 && <a href={calendarHref} className="underline underline-offset-4">Add hearing to calendar (.ics)</a>}
-        <a href={hearing.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Official hearing schedule</a>
+        {residentHref(hearing.sourceUrl)&&<a href={hearing.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Official hearing schedule</a>}
       </div>
-      {hearing.agendaUrl && <a href={hearing.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">View official agenda</a>}
-      {hearing.packetUrl && <a href={hearing.packetUrl} target="_blank" rel="noopener noreferrer" className="ml-4 mt-4 inline-block text-sm font-medium underline underline-offset-4">View official meeting packet</a>}
+      {residentHref(hearing.agendaUrl) && <a href={hearing.agendaUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">View official agenda</a>}
+      {residentHref(hearing.packetUrl) && <a href={hearing.packetUrl} target="_blank" rel="noopener noreferrer" className="ml-4 mt-4 inline-block text-sm font-medium underline underline-offset-4">View official meeting packet</a>}
       {!hearing.agendaUrl && <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">{area.meetingRules.agendaNotice}</p>}
       <p className="mt-4 text-xs text-zinc-500 dark:text-zinc-400">{concise ? "Date and written-comment deadline: confirm with the published agenda; individual items may be heard later." : "Individual items may be heard after the public hearing start time. Dates and agendas can change."}</p>
     </> : <>

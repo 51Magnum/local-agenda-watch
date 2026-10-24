@@ -128,6 +128,8 @@ export type HearingFeed = {
   refreshedAt?: string;
   scheduleUnavailable?: boolean;
   scheduleRefreshedAt?: string;
+  /** Last successful agenda refresh, preserved across partial outages. */
+  agendaRefreshedAt?: string;
   dataUnavailable?: boolean;
   agendaMeetings?: AgendaMeeting[];
   active: Hearing[];

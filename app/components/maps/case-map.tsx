@@ -215,6 +215,14 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     if (compact && cases.some((c) => c.geometry)) { const b = bbox(caseFeatures(cases)); map.current.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 35, maxZoom: 15, duration: 0 }); }
   }, [ready, cases, compact]);
   useEffect(() => {
+    if (!ready || !map.current || compact || !data) return;
+    const id = new URLSearchParams(window.location.search).get("case");
+    const item = data.cases.find(c => c.id === id);
+    if (!item?.geometry) return;
+    const bounds = bbox(caseFeatures([item]));
+    map.current.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 65, maxZoom: 15, duration: 0 });
+  }, [ready, compact, data]);
+  useEffect(() => {
     if (!flumOn || flum) return;
     const abort = new AbortController();
     fetch("/api/maps/" + encodeURIComponent(jurisdiction) + "?layer=flum", { signal: abort.signal }).then(async (r) => { if (!r.ok) throw new Error(); setFlum(await r.json()); }).catch(() => { if (!abort.signal.aborted) setSearchMessage("Future land use is temporarily unavailable."); });
@@ -262,7 +270,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   const mapInfo = data && (<details className={compact ? "law-map-stage-key law-project-map-key" : "law-map-info"}><summary>Map key & sources</summary><div className="law-map-info-content">
           {compact && <div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{mapStageLabel(s,area)}</span>)}<span>┄ Approximate boundary</span></div>}
           {flumOn && <div className="law-map-legend" aria-label="Future land use legend">{data.flum.legend.map((c) => <span key={c.value}><i style={{ background: c.color }}/>{c.label}</span>)}</div>}
-          {data.flum.layerUrl && <p><a href={data.flum.layerUrl + "?f=pjson"}>{data.flum.label}</a>{data.flum.adoptedDate && <> · <a href={data.flum.adoptionSource}>Adopted {data.flum.adoptedDate}</a></>}. Future land use is separate from zoning. {data.flum.dataNote}</p>}
+          {data.flum.layerUrl && <p><span>{data.flum.label}</span>{data.flum.adoptedDate && <> · <a href={data.flum.adoptionSource}>Adopted {data.flum.adoptedDate}</a></>}. Future land use is separate from zoning. {data.flum.dataNote}</p>}
           <p>Updated {new Intl.DateTimeFormat("en-US", { timeZone: area?.timezone ?? "UTC", dateStyle: "medium", timeStyle: "short" }).format(new Date(data.updatedAt))} ({area?.timezone ?? "UTC"}).</p>{data.warnings.map((w) => <p key={w}>{w}</p>)}
           {!compact && <label>Find a project <select aria-label="Find a project" defaultValue="" onChange={(e) => openProject.current?.(e.target.value)}><option value="">Choose a project</option>{mapped.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></label>}
         </div></details>);

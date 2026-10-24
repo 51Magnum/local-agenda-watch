@@ -59,7 +59,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const snapshot = !citywide ? await readMapSnapshot(area.id).catch(() => undefined) : undefined;
   const hasGeometry = !snapshot || snapshot.cases.some(c => caseIds.includes(c.id) && c.geometry);
   const categories = [...new Set(snapshot?.cases.filter(c => caseIds.includes(c.id)).flatMap(c => c.flumCategories ?? []) ?? [])];
-  const landUse = landUseFact(area, categories, overview.zoning?.value);
+  const landUse = landUseFact(area, categories, overview.zoning?.value, caseIds[0]);
   const groups: ProjectCaseDocuments[] = records.map(r => {
     const urls = recordUrls(r);
     const reports = staffReportLinks(r.hearing, r.attachments, urls.files);

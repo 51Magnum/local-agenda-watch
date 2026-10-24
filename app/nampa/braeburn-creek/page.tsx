@@ -45,7 +45,7 @@ export default async function BraeburnCreekPage() {
   overview.summarySource = { value: "September staff report", url: BRAEBURN_REPORT, page: 1 };
   const snapshot = await readMapSnapshot("nampa").catch(() => undefined);
   const categories = [...new Set(snapshot?.cases.filter(c => project.caseIds.includes(c.id)).flatMap(c => c.flumCategories) ?? [])];
-  const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value);
+  const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value, project.caseIds[0]);
   const documentList = projectDocumentList(documents);
   const status = stage === "Decided" ? "Decided" : next ? (/Council/i.test(next.body) ? "Council hearing" : "P&Z hearing") + " · " + shortDate(next.startsAt) : stage === "Council hearing" ? "Council date not set" : stage;
   return <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-6 py-8 sm:py-10">
@@ -73,7 +73,7 @@ export default async function BraeburnCreekPage() {
         {documents.map(item=><div key={item.id}><p className="text-sm font-medium">{item.label} · <span className="font-mono text-xs">{item.id}</span></p><div className="mt-2 flex flex-wrap gap-4 text-sm"><a href={item.portalUrl+"?tab=attachments"} className="underline underline-offset-4">Official case files</a><Link href={localityHref("nampa","/plan/"+item.id,ctx)} className="underline underline-offset-4">Individual case record</Link></div></div>)}
       </div></details>
     </section>
-    <footer className="space-y-3 border-t border-zinc-200 pt-6 text-xs leading-6 text-zinc-500 dark:border-zinc-800"><p>Independent summary; city records control. Not affiliated with the developer or the City of Nampa.</p><p>Sources: <a href={BRAEBURN_REPORT} className="underline">September staff report</a> · <a href={PUBLIC_COMMENT_URL} className="underline">Official participation instructions</a> · <a href={getJurisdiction("nampa")!.flum.layerUrl+"?f=pjson"} className="underline">Future Land Use layer</a></p></footer>
+    <footer className="space-y-3 border-t border-zinc-200 pt-6 text-xs leading-6 text-zinc-500 dark:border-zinc-800"><p>Independent summary; city records control. Not affiliated with the developer or the City of Nampa.</p><p>Sources: <a href={BRAEBURN_REPORT} className="underline">September staff report</a> · <a href={PUBLIC_COMMENT_URL} className="underline">Official participation instructions</a> · <a href={"/us/id/nampa/map?flum=1&case=ANN-00371-2026"} className="underline">Future Land Use layer</a></p></footer>
   </main>;
 }
 function documentTitle(label: string) {

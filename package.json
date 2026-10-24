@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "check:links": "tsx scripts/check-resident-links.ts",
     "test:watch": "vitest",
     "timeline:sync": "tsx --env-file-if-exists=.env.local scripts/sync-case-timeline.ts",
     "maps:sync": "tsx --env-file-if-exists=.env.local scripts/refresh-maps.ts",

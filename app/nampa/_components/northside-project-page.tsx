@@ -30,7 +30,7 @@ export default async function NorthsideProjectPage({record}:{record:RecordData})
   overview.summary=summary+" The staff report describes future warehouse and manufacturing uses; this application requests annexation and zoning rather than approval of a specific building.";
   const snapshot=await readMapSnapshot("nampa").catch(()=>undefined);
   const categories=snapshot?.cases.find(c=>c.id===hearing.appId)?.flumCategories??[];
-  const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value);
+  const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value, hearing.appId);
   const reports=staffReportLinks(hearing,attachments,files).filter((report,_,all)=>!(report.url===files&&/^staff[\s_-]*report(?:\.pdf)?$/i.test(report.label)&&all.some(other=>other.url!==files)));
   const all=uniqueDocumentLinks([...reports.map(r=>({...r,sourceUrl:CASE_SOURCE})),...uniqueAttachments(attachments).filter(a=>!a.IsFileSecure&&!/staff[\s_-]*report/i.test((a.Notes??"")+" "+a.FileName)).map(a=>({label:a.Notes||a.FileName,url:files,sourceUrl:portal}))]);
   const key=all.filter(d=>/staff[\s_-]*report|decision|findings|reasoned|site[\s_-]*plan|concept/i.test(d.label));

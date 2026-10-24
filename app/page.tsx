@@ -1,6 +1,6 @@
 import type{Metadata}from"next";
 import LocationHome from"./components/locations/location-home";
-import{AREAS}from"@/lib/areas/registry";
+import{AREAS,publicArea}from"@/lib/areas/registry";
 import{getLocality,getTrackedCaseCount}from"@/lib/localities";
 import{homeAreaData,type HomeAreaData}from"@/lib/areas/home-data";
 import{SITE_ORIGIN}from"@/lib/site-config";
@@ -10,5 +10,5 @@ export default async function Home(){
   const rows=await Promise.all(Object.values(AREAS).filter(a=>a.status==="live").map(async area=>{try{const locality=getLocality(area.id),feed=await locality?.getHearings?.();return locality&&feed?{count:getTrackedCaseCount(locality,feed),data:homeAreaData(area,feed)}:null;}catch{console.error("[home] Area feed unavailable",area.id);return null;}}));
   const data:HomeAreaData[]=rows.flatMap(row=>row?[row.data]:[]);
   const count=rows.some(row=>!row)?null:rows.reduce((sum,row)=>sum+(row?.count??0),0);
-  return <LocationHome areas={Object.values(AREAS)} data={data} caseCount={count}/>;
+  return <LocationHome areas={Object.values(AREAS).map(publicArea)} data={data} caseCount={count}/>;
 }

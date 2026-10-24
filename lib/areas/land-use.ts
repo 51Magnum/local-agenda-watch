@@ -4,13 +4,13 @@ import type { SourcedFact } from "../project-overview";
 export type LandUseFact = SourcedFact & { mapHref: string; comparisonSourceUrl?: string };
 
 /** A district comparison only, not a finding that every plan policy is satisfied. */
-export function landUseFact(area: AreaDefinition, categories: string[], zoning?: string): LandUseFact | undefined {
+export function landUseFact(area: AreaDefinition, categories: string[], zoning?: string, caseId?:string): LandUseFact | undefined {
   const unique = [...new Set(categories.filter(Boolean))];
   if (!unique.length || !area.sources.flum) return undefined;
   const fact: LandUseFact = {
     value: (unique.length > 1 ? "Mixed: " : "") + unique.join("; "),
-    url: area.sources.flum + "?f=pjson",
-    mapHref: areaPath(area) + "/map?flum=1",
+    url: areaPath(area) + "/map?flum=1"+(caseId?"&case="+encodeURIComponent(caseId):""),
+    mapHref: areaPath(area) + "/map?flum=1"+(caseId?"&case="+encodeURIComponent(caseId):""),
   };
   // Multiple designations need the proposed zoning layout to make a comparison.
   if (unique.length !== 1 || !zoning || !area.flumCompatibility) return fact;
