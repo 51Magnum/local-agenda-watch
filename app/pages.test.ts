@@ -153,7 +153,7 @@ describe("Braeburn Creek project page", () => {
     expect(html).toContain("12:00 PM MST");
     expect(html).toContain("ANN-00371-2026");
     expect(html).toContain("SPP-00184-2026");
-    expect(html).toContain("/us/id/nampa/toll-brothers-site-map.png");
+    expect(html).not.toContain("/us/id/nampa/toll-brothers-site-map.png");
     expect(html).toContain("Share with a neighbor");
     expect((html.match(/>Staff report · September 29, 2026 P&amp;Z hearing<\/a>/g) ?? [])).toHaveLength(1);
     expect((html.match(/>P&amp;Z decision letter<\/a>/g) ?? [])).toHaveLength(1);
@@ -166,7 +166,7 @@ describe("Braeburn Creek project page", () => {
     expect(html).not.toContain("Main conditions");
     expect(html).toContain("https://www.cityofnampa.us/1616/Public-Comment");
     expect(projectMetadata.openGraph).toMatchObject({ title: braeburnCreek.title, description: braeburnCreek.summary,
-      images: [expect.objectContaining({ url: expect.stringContaining("site-map.webp") })] });
+      images: [expect.objectContaining({ url: expect.stringContaining("opengraph-image") })] });
   });
 
   it("shows the unscheduled state without inventing a date or calendar link", () => {
@@ -309,7 +309,7 @@ describe("case parity, hub cleanup and SEO", () => {
   it("uses the project image while preserving a case's own title and canonical URL", async () => {
     setup([{ ...record, appId: "ANN-00371-2026", appScope: "Braeburn annexation" }]);
     const meta = await caseMetadata({ params: Promise.resolve({ planNumber: "ANN-00371-2026" }) });
-    expect(meta.openGraph).toMatchObject({ title: "Braeburn Creek annexation (ANN-00371-2026)", images: ["https://www.localagendawatch.com/us/id/nampa/toll-brothers-site-map.webp"] });
+    expect(meta.openGraph).toMatchObject({ title: "Braeburn Creek annexation (ANN-00371-2026)", images: ["https://www.localagendawatch.com/us/id/nampa/opengraph-image"] });
   });
 
   it("hides irrelevant zero-case meetings, groups descriptions, and explains missing Council dates", async () => {

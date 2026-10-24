@@ -1,3 +1,5 @@
+import { approvedCaseImages } from "@/lib/maps/image-review-store";
+import ReviewedImageGallery from "@/app/components/reviewed-image-gallery";
 import { landUseFact } from "@/lib/areas/land-use";
 import CaseMap from "@/app/components/maps/case-map";
 import { ProjectFacts, ProjectProposal, ProjectTimeline } from "@/app/components/project-overview";
@@ -25,6 +27,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: project.title, description: project.summary, images: ["https://www.localagendawatch.com/us/id/nampa/opengraph-image"] },
 };
 export default async function BraeburnCreekPage() {
+  const reviewedImages=await approvedCaseImages("nampa",project.caseIds).catch(()=>[]);
   const ctx = await getLocalityContext();
   const locality = getLocality("nampa")!;
   const feed = await locality.getHearings?.().catch(() => undefined);
@@ -60,6 +63,7 @@ export default async function BraeburnCreekPage() {
       <CaseMap jurisdiction="nampa" caseIds={project.caseIds} compact matchHeightTo='[aria-labelledby="next-step-title"]'/>
 
     </section>
+    <ReviewedImageGallery visuals={reviewedImages}/>
     <ProjectProposal overview={overview} data={timeline}/>
     <div className="space-y-5"><ProjectTimeline data={timeline}/><Link href={localityHref("nampa","/meetings?case="+project.caseIds[0],ctx)} className="inline-block text-sm underline underline-offset-4">Past meetings, agendas &amp; results</Link></div>
     <section aria-labelledby="cases-title" className="space-y-5">

@@ -7,7 +7,7 @@ export const MAP_STAGES = ["Filed", "In review", "P&Z", "Council/Board", "Decide
 export type MapStage = typeof MAP_STAGES[number];
 export const STAGE_COLORS: Record<MapStage, string> = { Filed: "#64748b", "In review": "#b45309", "P&Z": "#7c3aed", "Council/Board": "#0284c7", Decided: "#52525b", Recorded: "#15803d" };
 export type CaseGeometry = Polygon | MultiPolygon;
-export type MapVisual = { documentTitle?: string; src: string; alt: string; label: string; note?: string; sourceUrl: string; fullSizeUrl: string; kind: "proposal" | "context" };
+export type MapVisual = { approval?: import("./image-policy").ImageCheck; documentTitle?: string; src: string; alt: string; label: string; note?: string; sourceUrl: string; fullSizeUrl: string; kind: "proposal" | "context" };
 export type JurisdictionConfig = {
   area?: AreaDefinition;
   id: string; name: string; mapOnHub?: boolean; center: [number, number]; zoom: number; state: { abbreviation: string; fips: string; name: string }; bounds: [number, number, number, number];

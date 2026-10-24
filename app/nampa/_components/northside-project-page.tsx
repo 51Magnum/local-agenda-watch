@@ -1,3 +1,5 @@
+import { approvedCaseImages } from "@/lib/maps/image-review-store";
+import ReviewedImageGallery from "@/app/components/reviewed-image-gallery";
 import { landUseFact } from "@/lib/areas/land-use";
 import Link from "next/link";
 import CaseMap from "@/app/components/maps/case-map";
@@ -18,6 +20,7 @@ import { getJurisdiction } from "@/lib/maps/jurisdictions";
 type RecordData=NonNullable<Awaited<ReturnType<typeof getCaseRecord>>>;
 export default async function NorthsideProjectPage({record}:{record:RecordData}){
   const {hearing,plan,feed,attachments,locality}=record;
+  const reviewedImages=await approvedCaseImages(locality.slug,[hearing.appId]).catch(()=>[]);
   const ctx=await getLocalityContext(),stage=getCaseStage(hearing),next=getCaseNextHearing(hearing,feed);
   const portal=hearing.energovPlanId?locality.energov!.planPortalUrl(hearing.energovPlanId):hearing.externalUrl??locality.portalUrl!;
   const files=hearing.energovPlanId?locality.energov!.planPortalUrl(hearing.energovPlanId,"attachments"):portal;
@@ -42,6 +45,7 @@ export default async function NorthsideProjectPage({record}:{record:RecordData})
     <ProjectFacts overview={overview} landUse={landUse}/>
     {!decided&&<ProjectNextStep hearing={next} emptyMessage={stage==="Council hearing"?"Council date not set":undefined} calendarHref={localityHref("nampa","/plan/"+hearing.appId+"/hearing.ics",ctx)} concise/>}
     <CaseMap jurisdiction="nampa" caseIds={[hearing.appId]} compact matchHeightTo='[aria-labelledby="next-step-title"]'/>
+    <ReviewedImageGallery visuals={reviewedImages}/>
     <ProjectProposal overview={overview} data={timeline} terms={["annexation","rezone"]}/>
     <div className="space-y-5"><ProjectTimeline data={timeline}/><Link href={localityHref("nampa","/meetings?case="+hearing.appId,ctx)} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results</Link></div>
     <section id="case-documents" aria-labelledby="key-documents-title" className="space-y-5"><h2 id="key-documents-title" className="text-2xl font-semibold">Key documents</h2><ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 px-5 dark:divide-zinc-800 dark:border-zinc-800">{key.map(d=><li key={d.label+d.url} className="py-4"><a href={d.url} className="text-sm font-medium underline underline-offset-4">{/staff[\s_-]*report/i.test(d.label)?"Staff report · September 29, 2026 P&Z hearing":d.label}</a></li>)}</ul>

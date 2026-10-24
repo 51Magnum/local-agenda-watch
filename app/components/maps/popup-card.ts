@@ -1,4 +1,4 @@
-const documentImagesEnabled = () => false;
+import { approvedImageCheck } from "@/lib/maps/image-policy";
 import type { MapCase, MapVisual } from "@/lib/maps/types";
 import { getArea } from "@/lib/areas/registry";
 import { buildPopupModel, popupProjectName } from "@/lib/maps/popup-model";
@@ -20,11 +20,11 @@ export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => vo
   const watchError = document.createElement("p"); watchError.setAttribute("role", "status"); watchError.hidden = true;
   watch.addEventListener("change", () => { try { const checked=watch.checked;for(const project of watchedProjects)setWatching(project,checked); watchError.hidden = true; } catch (error) { watch.checked = allWatched(); watchError.textContent = error instanceof Error ? error.message : "Could not save your watch."; watchError.hidden = false; } });
   popupDisposers.set(card, subscribeWatches(() => { watch.checked = allWatched(); }));
-  if (documentImagesEnabled() && item.visual) {
+  if (item.visual && approvedImageCheck(item.visual.approval)) {
     const exhibit = item.visual;
     const figure = document.createElement("figure"); figure.className = "law-popup-visual";
     const enlarge = document.createElement("button"); enlarge.type = "button"; enlarge.className = "law-popup-image-button"; enlarge.setAttribute("aria-label", "Enlarge " + exhibit.label); enlarge.addEventListener("click", (event) => { event.stopPropagation(); onEnlarge(exhibit); });
-    const image = document.createElement("img"); image.src = "/_next/image?" + new URLSearchParams({ url: exhibit.src, w: "384", q: "75" }); image.alt = exhibit.alt; image.width = 384; image.height = 160; image.decoding = "async";
+    const image = document.createElement("img"); image.src = exhibit.src; image.alt = exhibit.alt; image.width = 384; image.height = 160; image.decoding = "async";
     // A missing exhibit must not leave a broken image or hide the case details.
     image.addEventListener("error", () => figure.remove(), { once: true });
     enlarge.append(image); figure.append(enlarge);

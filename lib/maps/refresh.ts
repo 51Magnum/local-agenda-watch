@@ -1,3 +1,4 @@
+import { publishCaseImage } from "./image-review-store";
 import { canonicalAreaHref } from "@/lib/areas/registry";
 import { refreshCaseVisual } from "./visuals";
 import { bbox, feature, simplify } from "@turf/turf";
@@ -94,6 +95,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
     if (!config.caseVisuals?.[hearing.appId] && Date.now() < deadline - 16000 && config.recordClient?.downloadPublicAttachment) {
       try { visual = await refreshCaseVisual(config, hearing, deadline, reports.filter(r=>r.caseIds.includes(hearing.appId))) ?? visual; }
       catch { console.error("[map-visual] City files unavailable", hearing.appId); }
+      if(visual?.approval)await publishCaseImage(config.id,[hearing.appId],visual);
       visualCheckedAt = now.toISOString();
     }
     let stage = normalizeMapStage(config, hearing);

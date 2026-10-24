@@ -1,3 +1,4 @@
+import { imageReviews, displayedImageReviews } from "./image-review-store";
 import { caseCatalog } from "@/lib/case-catalog";
 import { getProjectForCase } from "@/lib/projects";
 import { publicFields } from "@/lib/timeline/types";
@@ -8,9 +9,10 @@ import type { JurisdictionConfig, MapCase } from "./types";
 /** Batch scoped metadata/fields only; no page text, AI calls, or additional document downloads on map views. */
 export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase[]): Promise<MapCase[]> {
   if (!config.area || !cases.length) return cases;
-  const [state, feed] = await Promise.all([
+  const [state, feed, reviews] = await Promise.all([
     readTimelineState([...new Set(cases.flatMap(c => getProjectForCase(c.id, config.id)?.caseIds ?? [c.id]))], config.id),
     config.loadCases?.().catch(() => undefined),
+    imageReviews(config.id,cases.map(c=>c.id)).catch(()=>[]),
   ]);
   const catalog = new Map(caseCatalog(feed).map(h => [h.appId, h]));
   return cases.map(item => {
@@ -39,6 +41,6 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
         if (applicant && !extractedCopy.explanation) { popup.explanation = applicant[1] + " wants to add this land to " + config.area!.name + " and build a neighborhood of single-family homes."; popup.aiGenerated = false; }
       }
     }
-    return { ...item, popup };
+    return { ...item, popup, visual: displayedImageReviews(reviews).find(r=>r.caseIds.includes(item.id))?.visual };
   });
 }

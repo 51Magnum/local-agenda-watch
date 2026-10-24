@@ -1,3 +1,5 @@
+import { approvedCaseImages } from "@/lib/maps/image-review-store";
+import ReviewedImageGallery from "@/app/components/reviewed-image-gallery";
 import { landUseFact } from "@/lib/areas/land-use";
 import {stageLabel} from "@/lib/areas/registry";
 import {displayArea} from "@/lib/areas/format";
@@ -39,6 +41,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const siblings = (await Promise.all(related.map(h => getCaseRecord(h.appId,area.id)))).filter((r): r is RecordData => r !== null);
   const records = [record, ...siblings];
   const caseIds = records.map(r => r.hearing.appId);
+  const reviewedImages=await approvedCaseImages(area.id,caseIds).catch(()=>[]);
   const allDecided = records.every(r => getCaseStage(r.hearing) === "Decided");
   const activeStages = records.map(r => getCaseStage(r.hearing)).filter(s => s !== "Decided");
   const stage = allDecided ? "Decided" : activeStages.sort((a,b) => PROJECT_STAGES.indexOf(b)-PROJECT_STAGES.indexOf(a))[0];
@@ -87,6 +90,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
     <ProjectFacts overview={overview} landUse={landUse}/>
     {!decided&&!unclear&&<ProjectNextStep areaId={area.id} hearing={next} emptyMessage={stage==="Council hearing"?area.bodies.decision.shortLabel+" date not set":undefined} calendarHref={localityHref(area.id,"/plan/"+(nextRecord?.id??hearing.appId)+"/hearing.ics",ctx)} concise/>}
     {!citywide&&hasGeometry&&<CaseMap jurisdiction={area.id} caseIds={caseIds} compact matchHeightTo='[aria-labelledby="next-step-title"]'/>}
+    <ReviewedImageGallery visuals={reviewedImages}/>
     <ProjectProposal areaId={area.id} overview={overview} data={timeline} terms={terms}/>
     <div className="space-y-5">{!unclear&&<ProjectTimeline areaId={area.id} data={timeline}/>}<Link href={localityHref(area.id,"/meetings?case="+hearing.appId,ctx)} className="text-sm underline underline-offset-4">Past meetings, agendas &amp; results</Link></div>
     <section id="case-documents" aria-label="Project documents" className="space-y-5">

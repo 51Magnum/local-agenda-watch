@@ -91,12 +91,12 @@ describe("private submit-only address lookup", () => {
 });
 
 describe("verified popup exhibits", () => {
-  it("attaches the same dated developer concept to both Braeburn cases, even for older cached snapshots", () => {
+  it("withdraws every unverified curated image, including older Braeburn snapshots", () => {
     const snapshot: MapSnapshot = { version: 1, jurisdiction: "nampa", updatedAt: new Date().toISOString(), cases: [mapCase("ANN-00371-2026"), mapCase("SPP-00184-2026"), mapCase("UNKNOWN")], warnings: [] };
     const cases = publicMapData(JURISDICTIONS.nampa, snapshot).cases;
     expect(cases[0].visual).toEqual(cases[1].visual);
-    expect(cases[0].visual).toMatchObject({ kind: "proposal", src: "/us/id/nampa/braeburn-concept-preview.webp", label: "Developer concept · March 13, 2026", sourceUrl: "/us/id/nampa/toll-brothers-concept-plan.png" });
-    expect(cases[0].visual?.note).toContain("later submissions may differ");
+    expect(cases[0].visual).toBeUndefined();
+    expect(cases[1].visual).toBeUndefined();
     expect(cases[2].visual).toBeUndefined();
   });
   it("labels Northside's existing zoning exhibit as context, not a proposed layout", () => {
