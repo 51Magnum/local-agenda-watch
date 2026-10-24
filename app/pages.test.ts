@@ -18,6 +18,7 @@ vi.mock("@/lib/locality", () => ({
 }));
 
 import { nampa } from "@/lib/localities/nampa";
+vi.mock("@/lib/localities/meridian",()=>({meridian:{slug:"meridian",tracked:[],getHearings:async()=>({active:[],completed:[]})},getMeridianHearings:async()=>({active:[],completed:[]})}));
 vi.mock("@/lib/localities/canyon-county",()=>({canyonCounty:{slug:"canyon-county",tracked:[],getHearings:async()=>({active:[],completed:[]})},getCanyonCountyHearings:async()=>({active:[],completed:[]})}));
 import Home from "./page";
 import NampaHub from "./nampa/page";

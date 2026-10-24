@@ -1,5 +1,6 @@
 import { caseCatalog } from "@/lib/case-catalog";
 import { nampa } from "./nampa";
+import { meridian } from "./meridian";
 import { canyonCounty } from "./canyon-county";
 import type { Hearing, HearingFeed, Locality } from "./types";
 
@@ -15,6 +16,7 @@ export { getUpcomingMeetings, type UpcomingMeeting } from "./meetings";
 
 const LOCALITIES: Record<string, Locality> = {
   [nampa.slug]: nampa,
+  [meridian.slug]: meridian,
   [canyonCounty.slug]: canyonCounty,
 };
 

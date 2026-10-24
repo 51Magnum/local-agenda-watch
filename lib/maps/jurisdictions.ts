@@ -1,3 +1,5 @@
+import {getMeridianHearings}from "@/lib/localities/meridian";
+import {MERIDIAN_WHERE,MERIDIAN_TYPES,meridianFromFeature,meridianStage,meridianTitle,meridianSummary}from "@/lib/sources/meridian";
 import { getCanyonCountyHearings } from "@/lib/localities/canyon-county";
 import { countyFromFeature, countyCaseWhere, countyStage, countyTitle, countySummary, COUNTY_TYPES } from "@/lib/sources/canyon-county";
 import { AREAS, areaPath } from "@/lib/areas/registry";
@@ -31,6 +33,11 @@ export const JURISDICTIONS: Record<string, JurisdictionConfig> = {
     },
     loadCases: getNampaHearings, loadCaseReports: getNampaVisualReports, recordClient: nampa.energov,
     presentation: (hearing, plan) => ({ title: caseDisplayTitle(hearing, plan), summary: caseSummary(hearing, plan), href: areaPath(AREAS.nampa) + projectPathForCase(hearing.appId), hearing: getProjectForCase(hearing.appId)?.nextHearing }),
+  },
+  meridian:{area:AREAS.meridian,id:"meridian",name:"Meridian",mapOnHub:true,center:AREAS.meridian.center,zoom:11,bounds:[-116.58,43.46,-116.23,43.8],state:{abbreviation:"ID",fips:"16",name:"Idaho"},
+    caseGeometry:{layers:AREAS.meridian.sources.geometry!,where:MERIDIAN_WHERE,caseIdField:"App_ID",fields:{type:"App_ID",phase:"Hearing_Type",status:"Action",title:"Name",link:"Weblink"},parcelFallback:{layerUrl:AREAS.meridian.sources.parcelFallback!,matchField:"PARCEL",recordField:"parcel",ignored:[]}},
+    flum:{layerUrl:AREAS.meridian.sources.flum!,categoryField:"class2",colorSource:"renderer",planName:"Meridian Comprehensive Plan",label:"Meridian Comprehensive Plan, Future Land Use",adoptedDate:null,adoptionSource:"https://meridiancity.org/community-development/planning/comprehensive-plan/",dataNote:"Plan designation only. Listed zoning examples are not exhaustive; compatibility is not inferred from an unlisted district.",simplifyTolerance:0.00002},
+    addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:"Meridian, ID"},stages:{phase:{Review:"In review","City Council":"Council/Board","PZ Commission":"P&Z",Decided:"Decided"},status:{},recorded:{phases:[],statuses:[]}},caseTypes:MERIDIAN_TYPES,citywideTypes:[],isCitywide:h=>h.citywide===true,loadCases:getMeridianHearings,parseFeature:meridianFromFeature,stageForCase:h=>meridianStage(h) as import("./types").MapStage,presentation:h=>({title:meridianTitle(h),summary:meridianSummary(h),href:areaPath(AREAS.meridian)+"/plan/"+encodeURIComponent(h.appId)}),
   },
   "canyon-county": {
     area: AREAS["canyon-county"], id:"canyon-county", name:"Canyon County", mapOnHub:true, center:AREAS["canyon-county"].center, zoom:10, bounds:[-117.2,43.15,-116.3,44.0], state:{abbreviation:"ID",fips:"16",name:"Idaho"},

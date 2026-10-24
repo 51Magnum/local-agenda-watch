@@ -66,6 +66,8 @@ export type AgendaMeeting = {
 export type ScheduledMeeting = {
   /** Published case-specific deadline; a date alone does not imply a time. */
   commentDeadline?: string;
+  minutesUrl?: string;
+  videoUrl?: string;
   /** Published hearing outcome; distinct from a continuance. */
   result?: string;
   /** Published public-hearing time, HH:mm in America/Denver. */
@@ -125,6 +127,7 @@ export type HearingFeed = {
   /** Timestamp of this cached application-data snapshot. */
   refreshedAt?: string;
   scheduleUnavailable?: boolean;
+  scheduleRefreshedAt?: string;
   dataUnavailable?: boolean;
   agendaMeetings?: AgendaMeeting[];
   active: Hearing[];
