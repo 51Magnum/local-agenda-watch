@@ -90,7 +90,7 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
   if(d.meeting?.minutesUrl&&allowedSource(d.meeting.minutesUrl,areaId))documents.push({areaId,url:d.meeting.minutesUrl,title:d.meeting.body+" minutes — "+d.meeting.date,kind:"minutes",caseIds:matched});
  }
  // Resume known sources even if this run's case-record discovery stopped early.
- for(const d of Object.values(state.documents))if(d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting});
+ for(const d of Object.values(state.documents))if((d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))||(d.kind==="agenda"&&d.content===undefined&&d.state!=="complete"&&Boolean(d.meeting)))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting});
  // Probe public portals once per run so blocked hosts are reported even when using cached notices.
  await Promise.all(areas.filter(a=>a.id==="meridian"&&Date.now()<deadline-13000).map(async a=>{if(a.sources.hearingsSchedule)try{await (await sourceRequest(a.sources.hearingsSchedule,a.id)).body?.cancel();}catch{warnings.push(a.id+": hearing notice host unavailable; using cached meeting associations");}}));
  if(options.store){

@@ -47,4 +47,7 @@ it("matches previously deferred agenda OCR to cases and discovers minutes withou
  const feeds=Object.fromEntries(Object.keys(AREAS).map(id=>[id,emptyFeed()]));feeds["canyon-county"]={active:[h] as never[],completed:[]};
  const found=await discoverCaseDocuments({store:s,feeds,deadline:Date.now()+1000});
  expect(found.documents.find(d=>d.url===url)?.caseIds).toEqual([h.appId]);expect(found.documents.some(d=>d.kind==="minutes"&&d.caseIds.includes(h.appId))).toBe(true);
+ state.documents[documentId(d)].state="processing";state.documents[documentId(d)].caseIds=[];
+ const deferred=await discoverCaseDocuments({store:s,feeds,deadline:Date.now()+1000});
+ expect(deferred.documents.some(source=>source.url===url)).toBe(true);
 });
