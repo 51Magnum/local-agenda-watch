@@ -85,7 +85,9 @@ describe("hash-based ingestion and review", () => {
   it("caches text through extraction failures and preserves rejections on rerun", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const store = memoryStore(), deps = dependencies(); deps.extract.mockRejectedValueOnce(new Error("temporary failure"));
+    vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-23T12:00:00Z"));
     await ingestDocuments(store, [document], deps);
+    vi.setSystemTime(new Date("2026-10-24T12:00:00Z"));
     await ingestDocuments(store, [document], deps);
     expect(deps.text).toHaveBeenCalledTimes(1);
     const field = Object.values((await store.read()).fields).find((f) => f.key === "pzResult")!;
@@ -99,8 +101,10 @@ describe("hash-based ingestion and review", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const store = memoryStore(), deps = dependencies();
     deps.extract.mockResolvedValueOnce(decision()).mockRejectedValueOnce(new Error("second case failed"));
+    vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-23T12:00:00Z"));
     await ingestDocuments(store, [document], deps);
     expect(publicFields(await store.read(), caseIds)).toEqual([]);
+    vi.setSystemTime(new Date("2026-10-24T12:00:00Z"));
     await ingestDocuments(store, [document], deps);
     expect(deps.extract).toHaveBeenCalledTimes(3);
     expect(deps.text).toHaveBeenCalledTimes(1);

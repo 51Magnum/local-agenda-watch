@@ -6,7 +6,7 @@ import type { Hearing } from "@/lib/localities/types";
 import type { ProjectHearing, ProjectStage } from "@/lib/projects";
 
 export function timelineEnabled(caseId: string): boolean {
-  const configured = process.env.TIMELINE_CASE_IDS ?? "ANN-00371-2026,SPP-00184-2026";
+  const configured = process.env.TIMELINE_CASE_IDS ?? "*";
   return configured === "*" || configured.split(",").map((value) => value.trim()).includes(caseId);
 }
 export const readTimelineState = cache(async (): Promise<EvidenceState> => {
@@ -32,7 +32,7 @@ export function latestField(fields: EvidenceField[], key: FieldKey): EvidenceFie
     (/Date$/.test(key) ? b.value.localeCompare(a.value) : (b.reviewedAt ?? b.createdAt).localeCompare(a.reviewedAt ?? a.createdAt)))[0];
 }
 export function buildTimeline(state: EvidenceState, input: { areaId?:string; caseIds: string[]; stage: ProjectStage; next?: ProjectHearing; plans?: { caseId: string; plan: EnerGovPlan; sourceUrl: string }[]; hearings?: Hearing[] }): TimelineData {
-  const fields = publicFields(state, input.caseIds);
+  const fields = publicFields(state, input.caseIds,input.areaId??"nampa");
   for (const record of input.plans ?? []) {
     const reviewDate = record.plan.ReviewDate ?? record.plan.ReviewStartDate;
     if (reviewDate && /^\d{4}-\d{2}-\d{2}/.test(reviewDate) && !fields.some((field) => field.caseId === record.caseId && field.key === "reviewDate")) fields.push({
@@ -46,7 +46,7 @@ export function buildTimeline(state: EvidenceState, input: { areaId?:string; cas
   }
   const appearances: TimelineAppearance[] = [];
   for (const document of Object.values(state.documents)) {
-    if (document.state !== "complete" || !document.caseIds.some((id) => input.caseIds.includes(id)) || !document.meeting) continue;
+    if ((document.areaId??"nampa")!==(input.areaId??"nampa") || document.state !== "complete" || !document.caseIds.some((id) => input.caseIds.includes(id)) || !document.meeting) continue;
     appearances.push({ ...document.meeting, sourceUrl: document.url });
   }
   for (const hearing of input.hearings ?? []) for (const meeting of hearing.meetings) {

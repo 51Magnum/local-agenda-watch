@@ -1,8 +1,10 @@
+import { currentRun, withDocument } from "./telemetry";
+import { sourceRequest } from "./source-access";
 import { workflowReviewStart } from "./workflow";
 import { energovDocumentReference } from "@/lib/sources/energov-document";
 import { isPrivateDocument } from "@/lib/case-details";
 import { load } from "cheerio";
-import { getNampaHearings } from "@/lib/localities/nampa";
+
 import { getLocality } from "@/lib/localities";
 import { projects } from "@/lib/projects";
 import type { HearingFeed } from "@/lib/localities/types";
@@ -10,7 +12,7 @@ import { NAMPA_PRIMEGOV_ORIGIN, parsePrimeGovMeetings, parsePrimeGovAgenda } fro
 import { extractNativePdfPages, ocrMissingPages } from "./extract";
 import type { EvidenceStore } from "./store";
 import { emptyEvidenceState, publicFields, type PageText } from "./types";
-import { digest, downloadDocument, officialDocumentUrl } from "./ingest";
+import { digest, downloadDocument, officialDocumentUrl, ingestDocuments, retryDue } from "./ingest";
 import type { DocumentKind, FieldKey, SourceDocument } from "./types";
 
 export function documentKind(title: string): DocumentKind {
@@ -27,27 +29,24 @@ function dateOnly(value: string | null | undefined): string | undefined {
   if (legacy) return new Date(Number(legacy[1])).toISOString().slice(0, 10);
   return undefined;
 }
-async function officialRequest(url: string) {
-  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(12000), headers: { Accept: "application/json,text/html", "User-Agent": "Mozilla/5.0 LocalAgendaWatch/1.0" } });
-  if (!response.ok) throw new Error("City source HTTP " + response.status);
-  return response;
-}
-export async function discoverCaseDocuments(options: { caseIds?: string[]; budgetMs?: number; store?: EvidenceStore; deadline?: number } = {}) {
+async function officialRequest(url:string){return sourceRequest(url,"nampa");}
+export async function discoverNampaDocuments(options: { caseIds?: string[]; budgetMs?: number; store?: EvidenceStore; deadline?: number; feed?:HearingFeed } = {}) {
   const deadline = options.deadline ?? Date.now() + (options.budgetMs ?? 120000);
   const locality = getLocality("nampa")!;
   const cached = options.store ? await options.store.read() : emptyEvidenceState();
   const extractedPages = new Map<string, PageText[]>();
   const warnings: string[] = [];
-  const feed: HearingFeed | undefined = await getNampaHearings().catch((error: unknown) => { warnings.push("Case feed unavailable: " + String(error)); return undefined; });
-  const configured = process.env.TIMELINE_CASE_IDS ?? "ANN-00371-2026,SPP-00184-2026";
+  const feed: HearingFeed | undefined = options.feed ?? await locality.getHearings!().catch((error: unknown) => { warnings.push("Case feed unavailable: " + String(error)); return undefined; });
+  const configured = process.env.TIMELINE_CASE_IDS ?? "*";
   const unresolved = [...new Set(Object.values(cached.documents).flatMap((document) => document.caseIds))].filter((caseId) => !publicFields(cached, [caseId]).some((field) => field.key === "councilDecision" && field.status === "approved" && ["approved", "denied", "withdrawn"].includes(field.value)));
   const caseIds = options.caseIds ?? (configured === "*" ? [...new Set([...([... (feed?.active ?? []), ...(feed?.upcomingOnly ?? [])].map((h) => h.appId)), ...unresolved]) ] : configured.split(",").map((id) => id.trim().toUpperCase()).filter((id) => /^[A-Z]{2,6}-\d{5}-\d{4}$/.test(id)));
   const documents: SourceDocument[] = [];
-  const offset = Math.max(0, caseIds.indexOf(cached.cursor ?? ""));
+  const offset = Math.max(0, caseIds.indexOf(cached.cursors?.nampa ?? cached.cursor ?? ""));
   const orderedCases = [...caseIds.slice(offset), ...caseIds.slice(0, offset)];
   let lastCase: string | undefined;
+  const caseDeadline=Date.now()+Math.max(0,(deadline-Date.now())*.55);
   for (const caseId of orderedCases) {
-    if (Date.now() > deadline) { warnings.push("Case discovery time limit reached; remaining cases resume next run."); break; }
+    if (Date.now() > caseDeadline) { warnings.push("Case discovery time limit reached; remaining cases resume next run."); break; }
     lastCase = caseId;
     const project = projects.find((p) => p.caseIds.includes(caseId));
     const hearing = [...(feed?.active ?? []), ...(feed?.upcomingOnly ?? []), ...(feed?.completed ?? [])].find((h) => h.appId === caseId);
@@ -91,19 +90,21 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
       if (key) documents.push({ url: meeting.sourceUrl + (meeting.sourceUrl.includes("#") ? "" : "#case-" + caseId + "-" + meeting.date), title: caseId + " public hearing schedule", caseIds: [caseId], kind: "agenda", content: JSON.stringify(meeting), meeting: { body: meeting.body, date: meeting.date, isHearing: true }, fields: [{ key, value: meeting.date, quote: meeting.bodyLabel + " — " + meeting.dateLabel, page: null }] });
     }
   }
-  if (lastCase && options.store) await options.store.mutate((state) => { state.cursor = caseIds[(caseIds.indexOf(lastCase!) + 1) % caseIds.length]; });
+  if (lastCase && options.store) await options.store.mutate((state) => { (state.cursors??={}).nampa = caseIds[(caseIds.indexOf(lastCase!) + 1) % caseIds.length]; });
   // Manual source registry supplies only official URLs, never extracted facts or approvals.
   if (process.env.TIMELINE_SOURCE_REGISTRY) {
     const registry = JSON.parse(process.env.TIMELINE_SOURCE_REGISTRY) as SourceDocument[];
     for (const source of registry) if (Array.isArray(source.caseIds) && source.caseIds.some((id) => caseIds.includes(id)) && officialDocumentUrl(source.url)) documents.push({ url: source.url, title: source.title, caseIds: source.caseIds.filter((id) => caseIds.includes(id)), kind: documentKind(source.title) });
   }
   const years = [...new Set(caseIds.map((id) => Number(id.slice(-4))).concat(new Date().getFullYear()))].filter((year) => year >= 2023 && year <= new Date().getFullYear());
-  const meetingLists = await Promise.all([
+  const meetingLists = Date.now()>=deadline ? [] : await Promise.all([
     officialRequest(NAMPA_PRIMEGOV_ORIGIN + "/api/v2/PublicPortal/ListUpcomingMeetings").then((r) => r.json()).then(parsePrimeGovMeetings).catch((error) => { warnings.push("Upcoming agendas unavailable: " + String(error)); return []; }),
     ...years.map((year) => officialRequest(NAMPA_PRIMEGOV_ORIGIN + "/api/v2/PublicPortal/ListArchivedMeetings?year=" + year).then((r) => r.json()).then(parsePrimeGovMeetings).catch((error) => { warnings.push("Archived agendas unavailable for " + year + ": " + String(error)); return []; })),
   ]);
   const priorityAgendas = new Set(projects.filter((project) => project.caseIds.some((id) => caseIds.includes(id))).flatMap((project) => project.sourceDocuments ?? []).map((source) => source.url.split("#")[0]));
-  const meetings = [...new Map(meetingLists.flat().map((meeting) => [meeting.id, meeting])).values()].filter((m) => !/attendance|state of the city/i.test(m.title)).sort((a, b) => Number(priorityAgendas.has(b.htmlAgendaUrl ?? "")) - Number(priorityAgendas.has(a.htmlAgendaUrl ?? "")) || b.date.localeCompare(a.date));
+  const allMeetings = [...new Map(meetingLists.flat().map((meeting) => [meeting.id, meeting])).values()].filter((m) => !/attendance|state of the city/i.test(m.title)).sort((a, b) => Number(priorityAgendas.has(b.htmlAgendaUrl ?? "")) - Number(priorityAgendas.has(a.htmlAgendaUrl ?? "")) || b.date.localeCompare(a.date));
+  const agendaOffset=Number(cached.cursors?.["nampa:agendas"]??0)%Math.max(1,allMeetings.length);
+  const meetings=[...allMeetings.slice(agendaOffset),...allMeetings.slice(0,agendaOffset)];
   for (let i = 0; i < meetings.length; i += 6) {
     if (Date.now() > deadline) { warnings.push("Agenda discovery time limit reached; remaining agendas will be retried."); break; }
     await Promise.all(meetings.slice(i, i + 6).map(async (meeting) => {
@@ -113,7 +114,21 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
           const bytes = await downloadDocument(meeting.agendaUrl);
           const hash = digest(bytes);
           const previous = cached.documents[digest(meeting.agendaUrl)];
-          const pages = previous?.hash === hash && previous.pages.length ? previous.pages : await ocrMissingPages(bytes, await extractNativePdfPages(bytes));
+          const persisted=cached.discoveryText?.[digest(meeting.agendaUrl)];
+          let pages:PageText[];
+          if(persisted?.hash===hash)pages=persisted.pages;
+          else if(previous?.hash===hash&&previous.state==="complete"&&previous.pages.length)pages=previous.pages;
+          else {
+            if(previous?.hash===hash&&!retryDue(previous))return;
+            if(!options.store)pages=await withDocument("nampa",digest(meeting.agendaUrl),async()=>ocrMissingPages(bytes,await extractNativePdfPages(bytes)));
+            else {
+              await ingestDocuments(options.store,[{areaId:"nampa",url:meeting.agendaUrl,title:meeting.title+" agenda — "+meeting.date,kind:"agenda",caseIds:[],fields:[]}],{run:currentRun(),budgetMs:Math.max(0,deadline-Date.now()),download:async()=>bytes});
+              const saved=(await options.store.read()).documents[digest(meeting.agendaUrl)];
+              if(saved?.hash!==hash||saved.state!=="complete")return;
+              pages=saved.pages;
+            }
+          }
+          if(options.store)await options.store.mutate(state=>{(state.discoveryText??={})[digest(meeting.agendaUrl!)!]={hash,pages,checkedAt:new Date().toISOString()};});
           extractedPages.set(hash, pages);
           const text = pages.map((page) => page.text).join("\n");
           const matchedIds = caseIds.filter((caseId) => new RegExp("\\b" + caseId + "\\b", "i").test(text));
@@ -146,6 +161,7 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
         }
       } catch (error) { warnings.push("Agenda " + meeting.id + " unavailable: " + String(error)); }
     }));
+    if(options.store)await options.store.mutate(state=>{(state.cursors??={})["nampa:agendas"]=String((agendaOffset+i+6)%Math.max(1,meetings.length));});
   }
   // Merge associations so shared reports are downloaded and transcribed once.
   const unique = new Map<string, SourceDocument>();
@@ -153,3 +169,5 @@ export async function discoverCaseDocuments(options: { caseIds?: string[]; budge
   const rank = (kind: DocumentKind) => kind === "case-record" ? 0 : kind === "pz-decision" || kind === "council-decision" ? 1 : kind === "findings" ? 2 : kind === "staff-report" ? 3 : 4;
   return { documents: [...unique.values()].sort((a, b) => rank(a.kind) - rank(b.kind)), warnings, caseIds, extractedPages };
 }
+
+export { discoverCaseDocuments } from "./discover-areas";

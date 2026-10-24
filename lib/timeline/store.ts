@@ -78,3 +78,13 @@ export async function acquireLease(store: EvidenceStore, name: string, milliseco
 export async function releaseLease(store: EvidenceStore, name: string, token: string) {
   await store.mutate((state) => { if (state.leases[name]?.token === token) delete state.leases[name]; });
 }
+
+/** Explicit admin retry is durable and audited; a failed document never approves its evidence. */
+export async function resetDocumentRetry(store:EvidenceStore,id:string){
+ await store.mutate(state=>{
+  const doc=state.documents[id];if(!doc)throw new Error("Document not found");
+  doc.failCount=0;delete doc.lastAttemptAt;delete doc.error;
+  if(doc.state==="failed-permanent"||doc.state==="error")doc.state="processing";
+  (state.retryAudit??=[]).push({documentId:id,at:new Date().toISOString()});
+ });
+}

@@ -10,17 +10,20 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
 };
 export type DocumentKind = "staff-report" | "pz-decision" | "council-decision" | "findings" | "minutes" | "agenda" | "case-record" | "other";
 export type PageText = { page: number; text: string; method: "native" | "ocr" | "structured" };
-export type SourceDocument = { url: string; title: string; caseIds: string[]; kind: DocumentKind; content?: string; meeting?: { body: string; date: string; isHearing: boolean; minutesUrl?: string }; fields?: Array<{ key: FieldKey; value: string; quote: string; page: number | null }> };
-export type StoredDocument = SourceDocument & { id: string; hash: string; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; state: "processing" | "complete" | "error" };
+export type SourceDocument = { areaId?: string; url: string; title: string; caseIds: string[]; kind: DocumentKind; content?: string; meeting?: { body: string; date: string; isHearing: boolean; minutesUrl?: string }; fields?: Array<{ key: FieldKey; value: string; quote: string; page: number | null }> };
+export type StoredDocument = SourceDocument & { id: string; hash: string; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; failCount?: number; lastAttemptAt?: string; state: "processing" | "complete" | "error" | "failed-permanent" };
 export type EvidenceField = {
-  id: string; documentId: string; documentHash: string; caseId: string; key: FieldKey; value: string;
+  areaId?: string; id: string; documentId: string; documentHash: string; caseId: string; key: FieldKey; value: string;
   sourceUrl: string; page: number | null; quote: string; confidence: number; sourceKind: DocumentKind;
   status: "pending" | "approved" | "rejected" | "auto_published";
   createdAt: string; reviewedAt?: string; originalValue?: string;
 };
 export type AuditEntry = { fieldId: string; at: string; action: "approve" | "edit" | "reject"; previousValue: string; value: string; note: string };
-export type IngestionRun = { startedAt: string; finishedAt?: string; checked: number; processed: number; skipped: number; errors: string[] };
-export type EvidenceState = { version: 1; documents: Record<string, StoredDocument>; fields: Record<string, EvidenceField>; audit: AuditEntry[]; runs: IngestionRun[]; leases: Record<string, { token: string; expiresAt: number }>; cursor?: string };
+export type UsageCall = { at: string; areaId: string; documentId?: string; operation: string; inputTokens: number; outputTokens: number; totalTokens: number };
+export type HostCheck = { areaId: string; host: string; outcome: "worked" | "blocked" | "unavailable"; detail?: string };
+export type AreaRunCount = { cases: number; visited: number; documents: number; extracted: number; processed?:number };
+export type IngestionRun = { startedAt: string; finishedAt?: string; checked: number; processed: number; skipped: number; errors: string[]; usage?: UsageCall[]; hosts?: HostCheck[]; areas?: Record<string, AreaRunCount> };
+export type EvidenceState = { version: 1; documents: Record<string, StoredDocument>; fields: Record<string, EvidenceField>; audit: AuditEntry[]; runs: IngestionRun[]; leases: Record<string, { token: string; expiresAt: number }>; cursor?: string; cursors?: Record<string,string>; folderQueues?: Record<string,string[]>; discoveryText?: Record<string,{hash:string;pages:PageText[];checkedAt:string}>; retryAudit?: {documentId:string;at:string}[] };
 export function emptyEvidenceState(): EvidenceState { return { version: 1, documents: {}, fields: {}, audit: [], runs: [], leases: {} }; }
 /** A report's action heading identifies workflow, not staff's position on approval. */
 export function isWorkflowRecommendation(value: string): boolean {
@@ -32,8 +35,8 @@ export function isPublicField(field: EvidenceField, state: EvidenceState): boole
   return Boolean(current && current.hash === field.documentHash && current.state === "complete" &&
     (field.status === "approved" || (!DECISION_KEYS.has(field.key) && field.status === "auto_published")));
 }
-export function publicFields(state: EvidenceState, caseIds: string[]): EvidenceField[] {
-  return Object.values(state.fields).filter((field) => caseIds.includes(field.caseId) && isPublicField(field, state));
+export function publicFields(state: EvidenceState, caseIds: string[], areaId = "nampa"): EvidenceField[] {
+  return Object.values(state.fields).filter((field) => (field.areaId ?? "nampa") === areaId && caseIds.includes(field.caseId) && isPublicField(field, state));
 }
 export function evidenceSourceHref(field: Pick<EvidenceField, "sourceUrl" | "page">): string {
   if (field.sourceUrl.includes("tylerhost.net/Apps/SelfService#/plan/")) return field.sourceUrl;

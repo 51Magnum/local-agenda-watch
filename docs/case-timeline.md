@@ -1,13 +1,13 @@
-# Case timeline pilot
+# Case timelines across live areas
 
-The pilot covers ANN-00371-2026 and SPP-00184-2026 (Braeburn Creek). The application remains a developer proposal until reviewed final-decision evidence exists for both cases. No decision-letter result or applied date is pre-seeded or inferred from a staff report.
+Discovery covers every live area configured in the jurisdiction registry. Braeburn Creek remains the reference project. The application remains a developer proposal until reviewed final-decision evidence exists for both cases. No decision-letter result or applied date is pre-seeded or inferred from a staff report.
 
 ## Production setup: Neon + Vercel
 
 1. Create/select a Neon database. Copy its **pooled** connection string (pooler hostname, sslmode=require) to the Vercel project's server-only DATABASE_URL variable. Do not commit the connection string.
 2. Configure server-only OPENAI_API_KEY, OPENAI_EXTRACTION_MODEL, REVIEW_ADMIN_PASSWORD, and CRON_SECRET in the same Vercel project. Use independent, long random secrets. No secret uses a NEXT_PUBLIC_ prefix. The default extraction model is gpt-4.1-mini; change it to another model supporting Structured Outputs and PDF inputs if desired.
-3. Keep TIMELINE_CASE_IDS=ANN-00371-2026,SPP-00184-2026 during the pilot. After reviewing extraction quality, set it to * to include every active/scheduled Nampa case, or use a comma-separated allowlist.
-4. Deploy. The first ingestion initializes the law_evidence JSONB table automatically; the database role needs CREATE TABLE permission initially. This pilot uses one transaction-locked document/evidence snapshot. For large multi-city volumes, split documents/fields into normalized tables before expansion. Neon provides durability; do not use Vercel's local filesystem for evidence.
+3. TIMELINE_CASE_IDS defaults to *: every active, upcoming, and unresolved case across live jurisdictions. A comma-separated case allowlist is optional. Discovery uses area-specific official hosts and document-label rules in the registry.
+4. Deploy. The first ingestion initializes the law_evidence JSONB table automatically; the database role needs CREATE TABLE permission initially. This pilot uses one transaction-locked document/evidence snapshot. Runs remain bounded; monitor JSONB snapshot size as the document archive grows and partition storage before large-volume national coverage. Neon provides durability; do not use Vercel's local filesystem for evidence.
 5. The hourly schedule is in .github/workflows/case-timeline.yml (17 minutes past each hour). Add a GitHub repository Actions secret CRON_SECRET with the same value as the Vercel variable. The workflow calls /api/cron/case-timeline with Authorization: Bearer CRON_SECRET; it pauses harmlessly until that repository secret exists. GitHub schedules can be delayed; use workflow_dispatch for a manual refresh. An overlapping worker returns 409; a missing API key returns 503. The worker runs on Vercel with a 300-second limit. This supports hourly scheduling without changing the Vercel cron plan. Do not enable a second scheduler for the same worker.
 6. Visit /admin/review. The browser requests HTTP Basic authentication: username admin, password REVIEW_ADMIN_PASSWORD. All admin pages/actions are protected; no credentials are shown in pages or logged. The admin is excluded from indexing. Mutating review requests also require a matching Origin.
 7. Validate the actual P&Z decision letter against its quoted source, then approve pzResult and any vote separately. An approved P&Z recommendation does not approve the development.
@@ -18,7 +18,7 @@ Copy .env.example to .env.local and supply your private configuration there. Loc
 
 - npm run timeline:sync -- --discover-only: refresh city records and agenda appearances without PDF fact extraction. Scanned PDF-only agendas may still require the configured OCR API key; failures are logged.
 - npm run timeline:sync: run the full worker, using the same lease/cache/review rules as cron.
-- npm run dev -- --port 3010: preview /nampa/braeburn-creek and /admin/review. Restart after changing environment variables.
+- npm run dev -- --port 3010: preview /us/id/nampa/braeburn-creek and /admin/review. Restart after changing environment variables.
 
 ## Sources and missing records
 
@@ -30,6 +30,9 @@ If a publicly listed decision letter cannot be fetched directly, add its verifie
 
 ## Processing and publication rules
 
+- Document failures wait 24 hours between attempts. At three failures the version becomes failed-permanent and stops AI work. /admin/review lists these documents with an authenticated, same-origin Retry action; retries are audited. Changed SHA-256 bytes automatically reset the limit. Blocked hosts and time-budget deferrals do not consume failures.
+- Token usage from each API response is checkpointed immediately into the durable run log, including incomplete responses. Per-area discovery counts, extraction completions, and worked/blocked/unavailable hosts appear in review and the protected cron response.
+- Agenda OCR text is checkpointed before agenda matching or processing another document. Discovery library queues and per-area case cursors resume across runs. Upcoming/newest cases are prioritized, and extraction interleaves areas.
 - SHA-256 hashes identify document versions. Each version caches physical-page text. Unchanged completed versions skip extraction, OCR, and AI. Shared reports are transcribed once, with case-specific field extraction.
 - Native PDF text extraction uses unpdf. Pages with little/no embedded text use PDF visual transcription as an OCR fallback, retaining physical page numbering. OCR-derived fields always require review, even at high confidence. Native text is cached before OCR; successful OCR text is cached before fact extraction. Failed jobs resume completed case extractions without repeating them.
 - The worker limits PDFs to 45 MB / 200 pages, text inputs to 500,000 characters, and bounds source/API timeouts. Unsupported documents stay in the error list for retry/manual splitting.
