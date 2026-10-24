@@ -17,8 +17,7 @@ export function recordHost(areaId:string,url:string,outcome:HostCheck["outcome"]
  const c=context.getStore();if(!c)return;
  let host:string;try{host=new URL(url).hostname;}catch{return;}
  const entry={areaId,host,outcome,detail};
- if(!(c.run.hosts??=[]).some(h=>h.areaId===areaId&&h.host===host&&h.outcome===outcome&&h.detail===detail))c.run.hosts.push(entry);
- console.info("[timeline:host]",areaId,host,outcome,detail??"");
+ if(!(c.run.hosts??=[]).some(h=>h.areaId===areaId&&h.host===host&&h.outcome===outcome&&h.detail===detail)){c.run.hosts.push(entry);console.info("[timeline:host]",areaId,host,outcome,detail??"");}
 }
 
 export function currentRun(){return context.getStore()?.run;}

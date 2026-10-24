@@ -13,7 +13,8 @@
     "timeline:sync": "tsx --env-file-if-exists=.env.local scripts/sync-case-timeline.ts",
     "maps:sync": "tsx --env-file-if-exists=.env.local scripts/refresh-maps.ts",
     "prebuild": "node scripts/prepare-map-assets.mjs",
-    "predev": "node scripts/prepare-map-assets.mjs"
+    "predev": "node scripts/prepare-map-assets.mjs",
+    "postbuild": "node scripts/report-db-transfer.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.13",
