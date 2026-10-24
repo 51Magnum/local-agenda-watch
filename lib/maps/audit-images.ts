@@ -1,3 +1,4 @@
+import { projects } from "@/lib/projects";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -14,6 +15,7 @@ export async function auditDisplayedImages(options:{areaId?:string;limit?:number
   const snapshot=await readMapSnapshot(config.id,{includeFlum:false});
   const candidates=new Map<string,{visual:MapVisual;caseIds:string[]}>();
   for(const c of snapshot?.cases??[]){const v=config.caseVisuals?.[c.id]??c.visual;if(v){const prior=candidates.get(v.src);candidates.set(v.src,{visual:v,caseIds:[...new Set([...(prior?.caseIds??[]),c.id])]});}}
+  for(const project of projects.filter(p=>(p.areaId??"nampa")===config.id))if(project.image&&!candidates.has(project.image))candidates.set(project.image,{caseIds:project.caseIds,visual:{src:project.image,fullSizeUrl:project.image,sourceUrl:project.image,label:"Earlier aerial · March neighborhood notice",alt:"Earlier aerial",kind:"context"}});
   for(const [caseId,v]of Object.entries(config.caseVisuals??{})){const prior=candidates.get(v.src);candidates.set(v.src,{visual:v,caseIds:[...new Set([...(prior?.caseIds??[]),caseId])]});}
   for(const {visual:v,caseIds}of candidates.values()){
    const id=createHash("sha256").update(config.id+v.src).digest("hex");
