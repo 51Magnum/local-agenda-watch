@@ -7,7 +7,7 @@ export function placeProjectCard(viewport:{width:number;height:number},project:P
  const clamp=(v:number,limit:number)=>Math.max(margin,Math.min(limit,v));
  const cy=(project.top+project.bottom)/2,cx=(project.left+project.right)/2;
  const candidates:CardPlacement[]=[];
- const minWidth=Math.min(300,width),minHeight=Math.min(350,height);
+ const minWidth=width,minHeight=height;
  const left=project.left-gap-margin,right=W-margin-project.right-gap,top=project.top-gap-margin,bottom=H-margin-project.bottom-gap;
  if(right>=minWidth){const w=Math.min(width,right);candidates.push({x:clamp(project.right+gap,W-w-margin),y:clamp(cy-height/2,H-height-margin),width:w,height,side:"right",reframe:false});}
  if(left>=minWidth){const w=Math.min(width,left);candidates.push({x:clamp(project.left-gap-w,W-w-margin),y:clamp(cy-height/2,H-height-margin),width:w,height,side:"left",reframe:false});}
@@ -16,7 +16,7 @@ export function placeProjectCard(viewport:{width:number;height:number},project:P
  if(candidates.length)return candidates.sort((a,b)=>b.width*b.height-a.width*a.height)[0];
  // A zoomed-in project can occupy the entire canvas. Reserve space for the card
  // and fit the outline in the remaining map instead of covering it.
- const side=cx<W/2?"right":"left",w=Math.min(width,W*.44);
- if(W<650){const h=Math.min(height,H*.42);return {x:margin,y:H-margin-h,width,height:h,side:"bottom",reframe:true};}
+ const side=cx<W/2?"right":"left",w=Math.min(width,Math.max(320,W-280));
+ if(W<650){const h=Math.min(height,H-2*margin);return {x:margin,y:H-margin-h,width,height:h,side:"bottom",reframe:true};}
  return {x:side==="left"?margin:W-margin-w,y:margin,width:w,height,side,reframe:true};
 }

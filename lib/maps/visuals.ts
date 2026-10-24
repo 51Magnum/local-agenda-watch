@@ -1,3 +1,4 @@
+import {visualPreview} from "./preview-crop";
 import { classifyImagePage } from "./classify-image";
 import { allowedImageTitle, forbiddenImageDocument, approvedImageCheck, imageCaption, IMAGE_CHECK_VERSION, type ImageCheck } from "./image-policy";
 import { join } from "node:path";
@@ -48,7 +49,7 @@ export async function documentPreview(jurisdiction:string,bytes:Uint8Array,title
  let asset=await readVisualAsset(jurisdiction,id);
  if(!approvedImageCheck(asset?.approval)){
   const result=await extractDocumentVisual(bytes,title,deadline);if(!result)return;
-  asset={image:result.image.toString("base64"),page:result.page,approval:result.approval};await saveVisualAsset(jurisdiction,id,asset);
+  asset={image:result.image.toString("base64"),page:result.page,approval:result.approval,preview:await visualPreview(result.image,result.approval.pageHash)};await saveVisualAsset(jurisdiction,id,asset);
  }
  const src="/api/maps/"+jurisdiction+"/visual/"+id;
  return {approval:asset!.approval,documentTitle:title,src,fullSizeUrl:src,sourceUrl:sourceUrl+(asset!.page&&!sourceUrl.includes("#/plan/")?"#page="+asset!.page:""),label:imageCaption(asset!.approval!),alt:imageCaption(asset!.approval!),kind:asset!.approval!.type==="vicinity/aerial exhibit"?"context":"proposal"};

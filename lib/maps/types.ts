@@ -17,6 +17,7 @@ export type JurisdictionConfig = {
   stages: { phase: Record<string, MapStage>; status: Record<string, MapStage>; recorded: { phases: string[]; statuses: string[] } };
   caseTypes: Record<string, string>; citywideTypes: string[];
   caseVisuals?: Record<string, MapVisual>;
+  reviewedApplications?:Record<string,{headline:string;explanation:string;reportUrl:string;page:number;sourceDate:string}>;
   loadCaseReports?: (deadline:number) => Promise<{caseIds:string[];label:string;url:string}[]>;
   isCitywide?: (hearing: Hearing) => boolean;
   parcelNumbersForCase?: (hearing: Hearing) => string[];

@@ -101,6 +101,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     if (!data || !container.current) return;
     let disposed = false, pinned = false, hovered = "";
     let popupProject: MapCase | undefined, reframing=false;
+    let previousMapMinHeight:string|undefined;
     let hoverOrigin: ScreenPoint | null = null, previousPointer: ScreenPoint | null = null;
     let instance: LibreMap | undefined; let observer: ResizeObserver | undefined;let viewportTimer:ReturnType<typeof setTimeout>|undefined;
     const closeHover = () => { if (!pinned) { popup.current?.remove(); hovered = ""; } };
@@ -115,13 +116,17 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       function sizePopup() {
         if (!instance || !popup.current?.getElement().classList.contains("law-case-popup")) return;
         const element = popup.current.getElement(), viewport = instance.getContainer();
-        element.style.setProperty("--law-popup-content-height", Math.max(140, viewport.clientHeight * 0.8 - 36) + "px");
+        element.style.width=Math.min(640,viewport.clientWidth-32)+"px";
         if (!popupProject?.geometry) return;
         const bounds=bbox(popupProject.geometry),nw=instance.project([bounds[0],bounds[3]]),se=instance.project([bounds[2],bounds[1]]);
         const content=element.querySelector<HTMLElement>(".law-project-popup");
-        const placement=placeProjectCard({width:viewport.clientWidth,height:viewport.clientHeight},{left:nw.x,right:se.x,top:nw.y,bottom:se.y},{width:viewport.clientWidth<650?viewport.clientWidth-32:viewport.clientWidth*.5,height:Math.min(viewport.clientHeight*.8,(content?.scrollHeight??400)+36)});
+        let placement=placeProjectCard({width:viewport.clientWidth,height:viewport.clientHeight},{left:nw.x,right:se.x,top:nw.y,bottom:se.y},{width:Math.min(640,viewport.clientWidth-32),height:(content?.scrollHeight??300)});
         element.style.width=placement.width+"px";
         element.style.minWidth="0";
+        // Re-measure if the reserved width switches the card to a vertical stack.
+        const actualHeight=content?.getBoundingClientRect().height??placement.height;
+        if(actualHeight>viewport.clientHeight-32){previousMapMinHeight??=viewport.style.minHeight;viewport.style.minHeight=Math.ceil(actualHeight+32)+"px";}
+        if(Math.abs(actualHeight-placement.height)>2){placement=placeProjectCard({width:viewport.clientWidth,height:viewport.clientHeight},{left:nw.x,right:se.x,top:nw.y,bottom:se.y},{width:placement.width,height:actualHeight});element.style.width=placement.width+"px";}
         element.style.setProperty("--law-popup-content-height",Math.max(100,placement.height-36)+"px");
         const point=instance.project(popup.current.getLngLat());
         popup.current.setOffset([placement.x+placement.width/2-point.x,placement.y+placement.height/2-point.y]);
@@ -129,7 +134,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
           reframing=true;
           const padding={top:40,bottom:40,left:40,right:40};
           if(placement.side==="left"||placement.side==="right")padding[placement.side]=placement.width+52;
-          else padding[placement.side]=placement.height+52;
+          else padding[placement.side]=Math.min(placement.height+32,viewport.clientHeight-90);
           instance.fitBounds([[bounds[0],bounds[1]],[bounds[2],bounds[3]]],{padding,maxZoom:instance.getZoom(),duration:0});
           reframing=false;
         }
@@ -140,9 +145,9 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         const next = new lib.Popup({ closeButton: true, closeOnClick: false, maxWidth: projectCard ? "none" : "300px", className: projectCard ? "law-case-popup" : "", anchor: projectCard ? "center" : undefined, offset: projectCard ? 0 : 12, focusAfterOpen: pinned }).setLngLat(coordinates).setDOMContent(content).addTo(instance!);
         popup.current = next;
         sizePopup();
-        content.querySelectorAll("img").forEach(image => image.addEventListener("load", sizePopup, {once:true}));
+        content.querySelectorAll("img").forEach(image => {image.addEventListener("load", sizePopup, {once:true});image.addEventListener("error",sizePopup,{once:true});});
         next.getElement().addEventListener("mouseleave", closeHover);
-        next.on("close", () => { popupDisposers.get(content)?.(); popupDisposers.delete(content); if (popup.current === next) { popupProject=undefined; popup.current = null; hovered = ""; pinned = false; } });
+        next.on("close", () => { popupDisposers.get(content)?.(); popupDisposers.delete(content); if (popup.current === next) { if(previousMapMinHeight!==undefined){instance!.getContainer().style.minHeight=previousMapMinHeight;previousMapMinHeight=undefined;} popupProject=undefined; popup.current = null; hovered = ""; pinned = false; } });
       }
       function showProject(item: MapCase) {
         if (!item.geometry || !data) return;

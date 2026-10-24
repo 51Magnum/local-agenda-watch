@@ -9,7 +9,13 @@ export type CaseVisual = {
 };
 
 /** Verified public document metadata remains available when EnerGov is down. */
-export const CASE_EVIDENCE: Record<string, { documentNames: string[]; address?: string; sourceUrl: string; reportUrl?: string; visuals?: CaseVisual[] }> = {
+export const CASE_EVIDENCE: Record<string, { documentNames: string[]; address?: string; sourceUrl: string; reportUrl?: string; applicationCopy?: {headline:string;explanation:string;page:number;sourceDate:string}; visuals?: CaseVisual[] }> = {
+  "ANN-00368-2026": {
+    documentNames:["ANN-00368-2026_Americrete Annex_Staff Report PZ"],
+    sourceUrl:"https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062",
+    reportUrl:"https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=2dfe2f93-94c2-465e-b8aa-70833bc86e88",
+    applicationCopy:{headline:"Annex 148.52 acres for existing concrete operations",explanation:"Americrete Land Holding and Triple Crown Development want to bring an existing concrete plant and gravel pit into Nampa with light-industrial zoning.",page:1,sourceDate:"2026-09-15"},
+  },
   "ANN-00369-2026": {
     documentNames: ["3-1.a 17501 Northside Blvd Annexation and Zoning to IL_ANN-00369-2026_Northside Logistics Center_Staff Report PZ"],
     visuals: [

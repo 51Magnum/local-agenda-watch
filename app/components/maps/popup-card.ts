@@ -9,8 +9,9 @@ export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => vo
   const card = document.createElement("article"); card.className = "law-project-popup";
   const area = getArea(item.areaId ?? jurisdiction);
   const model = item.popup ?? (area ? buildPopupModel(item, area) : { headline: popupProjectName(item.title), projectName: popupProjectName(item.title), progress: [] });
-  const title = document.createElement("a"); title.href = item.href; title.className = "law-popup-title"; title.textContent = model.headline; card.append(title);
-  if (model.explanation) { const explanation = document.createElement("p"); explanation.className = "law-popup-explanation"; explanation.textContent = model.explanation; card.append(explanation); }
+  const text = document.createElement("div"); text.className="law-popup-copy";
+  const title = document.createElement("a"); title.href = item.href; title.className = "law-popup-title"; title.textContent = model.headline; text.append(title);
+  if (model.explanation) { const explanation = document.createElement("p"); explanation.className = "law-popup-explanation"; explanation.textContent = model.explanation; text.append(explanation); }
   const watchedProjects = watchesFromMapCase(item.areaId??jurisdiction,item,catalog);
   const allWatched=()=>watchedProjects.every(isWatching);
   const watchLabel = document.createElement("label"); watchLabel.className = "law-watch-toggle";
@@ -22,14 +23,14 @@ export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => vo
   popupDisposers.set(card, subscribeWatches(() => { watch.checked = allWatched(); }));
   if (item.visual && approvedImageCheck(item.visual.approval)) {
     const exhibit = item.visual;
-    const figure = document.createElement("figure"); figure.className = "law-popup-visual";
+    const figure = document.createElement("figure"); figure.className = "law-popup-visual"; card.classList.add("law-popup-with-image");
     const enlarge = document.createElement("button"); enlarge.type = "button"; enlarge.className = "law-popup-image-button"; enlarge.setAttribute("aria-label", "Enlarge " + exhibit.label); enlarge.addEventListener("click", (event) => { event.stopPropagation(); onEnlarge(exhibit); });
-    const image = document.createElement("img"); image.src = exhibit.src; image.alt = exhibit.alt; image.width = 384; image.height = 160; image.decoding = "async";
+    const image = document.createElement("img"); image.src = exhibit.src.startsWith("/api/maps/") ? exhibit.src.split("?")[0]+"?preview=main-v1" : exhibit.src; image.alt = exhibit.alt; image.width = 384; image.height = 160; image.decoding = "async";
     // A missing exhibit must not leave a broken image or hide the case details.
-    image.addEventListener("error", () => figure.remove(), { once: true });
+    image.addEventListener("error", () => {figure.remove();card.classList.remove("law-popup-with-image");}, { once: true });
     enlarge.append(image); figure.append(enlarge);
     const caption = document.createElement("figcaption");
-    const source = document.createElement("a"); source.href = exhibit.sourceUrl; source.target = "_blank"; source.rel = "noopener noreferrer"; source.textContent = exhibit.label.replace(" · March 13, 2026", ", Mar 2026"); caption.append(source);
+    const source = document.createElement("a"); source.href = exhibit.sourceUrl; source.target = "_blank"; source.rel = "noopener noreferrer"; source.textContent = exhibit.label.replace("Vicinity/aerial exhibit", "Vicinity exhibit"); caption.append(source);
 
     figure.append(caption); card.append(figure);
   }
@@ -40,11 +41,11 @@ export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => vo
     const symbol = document.createElement("span"); symbol.setAttribute("aria-hidden", "true"); symbol.textContent = step.state === "done" ? "✓ " : step.state === "current" ? "● " : "";
     row.append(symbol, document.createTextNode(step.label)); tracker.append(row);
   }
-  if (tracker.children.length) card.append(tracker);
+  if (tracker.children.length) text.append(tracker);
   const link = document.createElement("a"); link.href = item.href; link.textContent = "View project →";
   const footer = document.createElement("div"); footer.className = "law-popup-footer"; const name = document.createElement("span"); name.className = "law-popup-project-name";
   const jurisdictions = item.members ? [...new Set(item.members.map(m => { const a = getArea(m.areaId); return a ? (a.type === "city" ? "City of " : "") + a.name : m.areaId; }))].join(" / ") : item.jurisdictionLabel ?? (area ? (area.type === "city" ? "City of " : "") + area.name : "");
   name.textContent = model.projectName + (jurisdictions ? " · " + jurisdictions : "");
-  footer.append(name, link, watchLabel); card.append(footer, watchError);
+  footer.append(name, link, watchLabel); text.append(footer, watchError); card.append(text);
   return card;
 }

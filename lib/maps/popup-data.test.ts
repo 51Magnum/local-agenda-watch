@@ -1,0 +1,14 @@
+import {CASE_EVIDENCE} from "@/lib/case-evidence";
+import {expect,it,vi} from "vitest";
+import {emptyEvidenceState} from "@/lib/timeline/types";
+import {AREAS} from "@/lib/areas/registry";
+import type {MapCase,JurisdictionConfig} from "./types";
+vi.mock("@/lib/timeline/public",()=>({readTimelineState:vi.fn(async()=>emptyEvidenceState())}));
+vi.mock("./image-review-store",()=>({imageReviews:vi.fn(async()=>[]),displayedImageReviews:vi.fn(()=>[])}));
+import {enrichMapPopups} from "./popup-data";
+it("shows Americrete's verified current request and explanation and logs missing extraction without inventing expansion",async()=>{
+ const log=vi.spyOn(console,"info").mockImplementation(()=>{});
+ const config={id:"nampa",area:AREAS.nampa,reviewedApplications:{"ANN-00368-2026":{...CASE_EVIDENCE["ANN-00368-2026"].applicationCopy!,reportUrl:CASE_EVIDENCE["ANN-00368-2026"].reportUrl!}},loadCases:async()=>({active:[],upcomingOnly:[],completed:[],agendaMeetings:[]})} as unknown as JurisdictionConfig;
+ const c={id:"ANN-00368-2026",title:"Americrete annexation",stage:"Council/Board"} as MapCase;
+ const [result]=await enrichMapPopups(config,[c]);expect(result.popup?.headline).toBe("Annex 148.52 acres for existing concrete operations");expect(result.popup?.explanation).toContain("existing concrete plant and gravel pit");expect(result.popup?.aiGenerated).toBe(false);expect(JSON.stringify(result.popup)).not.toContain("expansion");expect(log).toHaveBeenCalledWith("[map-popup:copy-fallback]",expect.stringContaining('"caseId":"ANN-00368-2026"'));log.mockRestore();
+});
