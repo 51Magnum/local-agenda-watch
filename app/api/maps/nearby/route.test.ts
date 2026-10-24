@@ -1,5 +1,5 @@
 import {afterEach,expect,it,vi} from "vitest";
-import {readMapSnapshot} from "@/lib/maps/store";
+import {readFlumSnapshot,readMapSnapshot} from "@/lib/maps/store";
 import {GET} from "./route";
 vi.mock("@/lib/maps/store",()=>({readMapSnapshot:vi.fn(),readFlumSnapshot:vi.fn()}));
 afterEach(()=>vi.resetAllMocks());
@@ -13,4 +13,21 @@ it("queries bounded cases for both city and county and emits one stage scheme",a
 it("validates a bounded radius before reading any map data",async()=>{
  for(const q of ["lat=invalid&lng=1","lat=43&lng=-116&r=100","lat=43&lng=-116&r=0"]){expect((await GET(new Request("https://example.test/api/maps/nearby?"+q))).status).toBe(400);}
  expect(readMapSnapshot).not.toHaveBeenCalled();
+});
+
+it("opens all covered areas when an address is cleared instead of applying a hidden one-mile radius",async()=>{
+ vi.mocked(readMapSnapshot).mockImplementation(async id=>({version:1,jurisdiction:id,updatedAt:"2026-10-24",warnings:[],cases:[]}));
+ const response=await GET(new Request("https://example.test/api/maps/nearby?overview=1&country=us&state=id"));const data=await response.json();
+ expect(response.status).toBe(200);expect(data.overview).toBe(true);expect(data.areas).toHaveLength(7);
+ expect(data.jurisdiction.bounds[2]-data.jurisdiction.bounds[0]).toBeGreaterThan(.5);
+});
+it("loads FLUM by viewport without requiring an address or radius",async()=>{
+ vi.mocked(readFlumSnapshot).mockResolvedValue({updatedAt:"2026-10-24",legend:[],geojson:{type:"FeatureCollection",features:[]}});
+ const response=await GET(new Request("https://example.test/api/maps/nearby?bbox=-116.7,43.4,-116.3,43.8&layer=flum"));
+ expect(response.status).toBe(200);expect(readMapSnapshot).not.toHaveBeenCalled();
+ expect(readFlumSnapshot).toHaveBeenCalledWith("nampa",{bounds:[-116.7,43.4,-116.3,43.8]});
+});
+it("rejects malformed viewport bounds before loading plans",async()=>{
+ expect((await GET(new Request("https://example.test/api/maps/nearby?bbox=NaN,43,-116,44&layer=flum"))).status).toBe(400);
+ expect(readFlumSnapshot).not.toHaveBeenCalled();
 });

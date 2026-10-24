@@ -3,6 +3,7 @@ import {booleanPointInPolygon,point} from "@turf/turf";
 import {AREAS} from "@/lib/areas/registry";
 import {clipCombinedFlum,combineRadiusCases,flumGroup,liveAreasInRadius,sameSite} from "./radius";
 import type {CaseGeometry,MapCase} from "./types";
+import braeburnFlum from "./fixtures/braeburn-flum.json";
 const square=(x:number,y:number,size=.001):CaseGeometry=>({type:"Polygon",coordinates:[[[x,y],[x+size,y],[x+size,y+size],[x,y+size],[x,y]]]});
 const item=(id:string,x=0,y=0):MapCase=>({id,title:id,summary:"Proposed project",type:"ANN",typeLabel:"Annexation",stage:"P&Z",href:"/plan/"+id,geometry:square(x,y),centroid:[x+.0005,y+.0005],source:"polygon",confidence:"exact",citywide:false,flumCategories:[]});
 it("finds both city and county at the Victory / Happy Valley edge",()=>{
@@ -27,7 +28,7 @@ it("uses matching parcel identifiers only within a shared parcel system; mere co
 it("clips city and county FLUM without covering cities with the county plan",()=>{
  const city={...AREAS.nampa,boundary:square(0,0,.01)},county={...AREAS["canyon-county"],boundary:square(-.01,-.01,.04),coverageBoundary:undefined};
  const layer=(value:string)=>({updatedAt:"2026-10-24",geojson:{type:"FeatureCollection" as const,features:[{type:"Feature" as const,geometry:county.boundary,properties:{category:value}}]},legend:[]});
- const result=clipCombinedFlum([{area:city,flum:layer("Medium Density Residential"),categoryField:"category"},{area:county,flum:layer("AGRICULTURE"),categoryField:"category"}],[city],[.005,.005],1);
+ const result=clipCombinedFlum([{area:city,flum:{...layer("Medium Density Residential"),geojson:{type:"FeatureCollection",features:[{type:"Feature",geometry:city.boundary,properties:{category:"Medium Density Residential"}}]}},categoryField:"category"},{area:county,flum:layer("AGRICULTURE"),categoryField:"category"}],[city],[.005,.005],1);
  const inside=result.geojson.features.filter(f=>booleanPointInPolygon(point([.005,.005]),f));
  expect(inside).toHaveLength(1);expect(inside[0].properties?.group).toBe("Residential med");
  const outside=result.geojson.features.filter(f=>booleanPointInPolygon(point([-.002,.005]),f));expect(outside[0].properties?.group).toBe("Ag/Rural");
@@ -36,4 +37,22 @@ it("clips city and county FLUM without covering cities with the county plan",()=
 it("returns nearby projects in distance order with namespaced IDs",()=>{
  const result=combineRadiusCases([{area:AREAS.nampa,cases:[item("far",.008,0),item("near",.001,0)]}],[0,0],1);
  expect(result.map(c=>c.id)).toEqual(["nampa:near","nampa:far"]);expect(result[0].distance).toBeLessThan(result[1].distance);
+});
+
+it("preserves published city FLUM outside current city limits and beyond the search radius",()=>{
+ const city={...AREAS.nampa,boundary:square(0,0,.001)};
+ const flum={updatedAt:"2026-10-24",geojson:{type:"FeatureCollection" as const,features:[{type:"Feature" as const,geometry:square(0,0,.05),properties:{category:"Medium Density Residential"}}]},legend:[]};
+ const result=clipCombinedFlum([{area:city,flum,categoryField:"category"}],[city],[0,0],.25,[-.01,-.01,.06,.06]);
+ const outsideCityAndRadius=point([.04,.04]);
+ expect(result.geojson.features.some(f=>booleanPointInPolygon(outsideCityAndRadius,f))).toBe(true);
+ expect(result.geojson.features[0].properties?.group).toBe("Residential med");
+});
+it("keeps Braeburn's official Medium Density Residential polygon visible outside current city limits",()=>{
+ const site=point([-116.50809790878,43.565270358210505]);
+ expect(booleanPointInPolygon(site,AREAS.nampa.boundary)).toBe(false);
+ const official=braeburnFlum as import("geojson").Feature<CaseGeometry>;
+ const flum={updatedAt:"2026-10-24",geojson:{type:"FeatureCollection" as const,features:[official]},legend:[]};
+ const result=clipCombinedFlum([{area:AREAS.nampa,flum,categoryField:"DESIG"}],[AREAS.nampa],[-116.5099174,43.5756774],1,[-116.55,43.54,-116.48,43.61]);
+ const covering=result.geojson.features.find(f=>booleanPointInPolygon(site,f));
+ expect(covering?.properties).toMatchObject({category:"Medium Density Residential",group:"Residential med"});
 });

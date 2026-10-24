@@ -67,11 +67,15 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   const [hiddenStages, setHiddenStages] = useState<string[]>([]);
   const [hiddenTypes, setHiddenTypes] = useState<string[]>([]);
   const [withinMile, setWithinMile] = useState(Boolean(combined));
+  const [searchRestored,setSearchRestored]=useState(!combined);
+  const [viewport,setViewport]=useState<string>();
   const [radius,setRadius]=useState(1),[hiddenAreas,setHiddenAreas]=useState<string[]>([]);
   const [placingPin, setPlacingPin] = useState(false);
   const pinMode = useRef(false);
   const applyMapPin = useRef<((coordinates: [number, number]) => void) | null>(null);
   const searchGeneration = useRef(0);
+  const flumRequestKey=useRef("");
+  const [loadedFlumKey,setLoadedFlumKey]=useState("");
   const [flumOn, setFlumOn] = useState(false); const [flum, setFlum] = useState<FlumCache>();
   const [address, setAddress] = useState(""); const [searching, setSearching] = useState(false); const [searchMessage, setSearchMessage] = useState(""); const [results, setResults] = useState<AddressResult[]>([]); const [location, setLocation] = useState<AddressResult>();
   useEffect(()=>{if(!combined||!location)return;const selected=liveAreaAtPoint(location.coordinates);if(selected)try{localStorage.setItem("law:last-area",selected.id);}catch{}},[combined,location]);
@@ -80,7 +84,9 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   const idsKey = caseIds?.join(",") ?? "";
   const longitude=location?.coordinates[0]??area?.center[0]??0,latitude=location?.coordinates[1]??area?.center[1]??0;
   const radiusQuery=new URLSearchParams({lng:String(longitude),lat:String(latitude),r:String(radius),country:combined?.country??"",state:combined?.state??""}).toString();
-  const combinedKey=combined?radiusQuery:"";
+  const coverageQuery=new URLSearchParams({overview:"1",country:combined?.country??"",state:combined?.state??""}).toString();
+  const combinedKey=combined?(location?radiusQuery:coverageQuery):"";
+  const flumLoading=flumOn&&(combined?Boolean(viewport&&loadedFlumKey!==viewport):!flum);
   const displayStage=(stage:string)=>combined?commonStageLabel(stage):mapStageLabel(stage,area);
   useEffect(() => {
     const canvas = container.current;
@@ -95,14 +101,15 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     return () => { observer.disconnect(); canvas.style.height = ""; };
   }, [data, matchHeightTo]);
   useEffect(() => {
+    if(combined&&!searchRestored)return;
     const abort = new AbortController();
-    fetch(combinedKey?"/api/maps/nearby?"+combinedKey:"/api/maps/" + encodeURIComponent(jurisdiction)+(idsKey?"?cases="+encodeURIComponent(idsKey):""), { signal: abort.signal, cache: "no-cache" }).then(async (r) => { if (!r.ok) throw new Error("Map data is temporarily unavailable."); setData(await r.json());if(combinedKey)setFlum(undefined);setError(""); }).catch((e) => { if (!abort.signal.aborted) setError(e.message); });
+    fetch(combinedKey?"/api/maps/nearby?"+combinedKey:"/api/maps/" + encodeURIComponent(jurisdiction)+(idsKey?"?cases="+encodeURIComponent(idsKey):""), { signal: abort.signal, cache: "no-cache" }).then(async (r) => { if (!r.ok) throw new Error("Map data is temporarily unavailable."); setData(await r.json());setError(""); }).catch((e) => { if (!abort.signal.aborted) setError(e.message); });
     return () => abort.abort();
-  }, [jurisdiction,idsKey,combinedKey]);
+  }, [jurisdiction,idsKey,combinedKey,searchRestored,combined]);
   useEffect(() => {
     if (compact) return;
     try { if(!combined&&getArea(jurisdiction)?.status==="live")localStorage.setItem("law:last-area",jurisdiction); } catch {}
-    const restore = () => { const query=new URLSearchParams(window.location.search); setFlumOn(query.get("flum")==="1"); const shared = readSharedSearch(window.location.hash) ?? readSharedSearch("#"+query); if (shared) { if(!combined){const destination=locationMapUrl(shared.coordinates,shared.label);if(destination){window.location.replace(destination+(shared.source==="map"?"&pin=1":"")+(query.get("flum")==="1"?"&flum=1":""));return;}} if(!window.location.hash&&!query.get("q")&&!query.get("address"))shared.source="map"; setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile(Boolean(combined)||(window.location.hash?new URLSearchParams(window.location.hash.slice(1)):query).get("nearby") === "1"); const r=Number(query.get("r")??1);if(combined&&Number.isFinite(r)&&r>=.25&&r<=10)setRadius(r); } };
+    const restore = () => { setSearchRestored(true);const query=new URLSearchParams(window.location.search); setFlumOn(query.get("flum")==="1"); const shared = readSharedSearch(window.location.hash) ?? readSharedSearch("#"+query); if (shared) { if(!combined){const destination=locationMapUrl(shared.coordinates,shared.label);if(destination){window.location.replace(destination+(shared.source==="map"?"&pin=1":"")+(query.get("flum")==="1"?"&flum=1":""));return;}} if(!window.location.hash&&!query.get("q")&&!query.get("address"))shared.source="map"; setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile(Boolean(combined)||(window.location.hash?new URLSearchParams(window.location.hash.slice(1)):query).get("nearby") === "1"); const r=Number(query.get("r")??1);if(combined&&Number.isFinite(r)&&r>=.25&&r<=10)setRadius(r); } };
     restore(); window.addEventListener("hashchange", restore); return () => window.removeEventListener("hashchange", restore);
   }, [compact,jurisdiction,combined]);
   useEffect(() => {
@@ -131,7 +138,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     let disposed = false, pinned = false, hovered = "";
     let popupProject: MapCase | undefined, reframing=false;
     let hoverOrigin: ScreenPoint | null = null, previousPointer: ScreenPoint | null = null;
-    let instance: LibreMap | undefined; let observer: ResizeObserver | undefined;
+    let instance: LibreMap | undefined; let observer: ResizeObserver | undefined;let viewportTimer:ReturnType<typeof setTimeout>|undefined;
     const closeHover = () => { if (!pinned) { popup.current?.remove(); hovered = ""; } };
     import("maplibre-gl").then((lib) => {
       if (disposed || !container.current) return;
@@ -184,6 +191,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         instance.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 70, maxZoom: 15 });
         showProject(item); hovered = id;
       };
+      const updateViewport=()=>{if(!combined||!instance)return;if(viewportTimer)clearTimeout(viewportTimer);viewportTimer=setTimeout(()=>{if(disposed||!instance)return;const b=instance.getBounds(),span=Math.max(b.getEast()-b.getWest(),b.getNorth()-b.getSouth()),step=2**Math.floor(Math.log2(span/8));const bounds=[Math.floor(b.getWest()/step)*step,Math.floor(b.getSouth()/step)*step,Math.ceil(b.getEast()/step)*step,Math.ceil(b.getNorth()/step)*step];setViewport(bounds.map(v=>Number(v.toFixed(6))).join(","));},200);};
+      instance.on("moveend",updateViewport);
       instance.on("load", () => {
         if (!instance) return;
         instance.addSource("flum", { type: "geojson", data: empty }); instance.addLayer({ id: "flum-fill", type: "fill", source: "flum", paint: { "fill-color": "#94a3b8", "fill-opacity": 0.35 } });
@@ -197,7 +206,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         instance.addSource("search", { type: "geojson", data: empty });
         instance.addLayer({ id: "search-ring", type: "line", source: "search", filter: ["==", ["geometry-type"], "Polygon"], paint: { "line-color": "#0f766e", "line-width": 2, "line-dasharray": [3, 2] } });
         instance.addLayer({ id: "search-pin", type: "circle", source: "search", filter: ["==", ["geometry-type"], "Point"], paint: { "circle-radius": 8, "circle-color": "#0f766e", "circle-stroke-color": "#fff", "circle-stroke-width": 3 } });
-        setReady(true);
+        if(data.overview)instance.fitBounds([[data.jurisdiction.bounds[0],data.jurisdiction.bounds[1]],[data.jurisdiction.bounds[2],data.jurisdiction.bounds[3]]],{padding:35,maxZoom:11,duration:0});
+        updateViewport();setReady(true);
       });
       instance.on("mousemove", (event) => {
         if (!instance?.getLayer("case-fill")) return;
@@ -244,8 +254,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.on("move", sizePopup);
       observer = new ResizeObserver(() => { instance?.resize(); sizePopup(); }); observer.observe(container.current);
     }).catch(() => setError("The map could not load. Browse cases from the city page."));
-    return () => { disposed = true; observer?.disconnect(); popup.current?.remove(); openProject.current = null; instance?.remove(); map.current = null; setReady(false); };
-  }, [data, compact]);
+    return () => { disposed = true;if(viewportTimer)clearTimeout(viewportTimer); observer?.disconnect(); popup.current?.remove(); openProject.current = null; instance?.remove(); map.current = null; setReady(false); };
+  }, [data, compact,combined]);
   useEffect(() => {
     if (!ready || !map.current) return;
     popup.current?.remove(); (map.current.getSource("cases") as GeoJSONSource)?.setData(caseFeatures(cases));
@@ -260,11 +270,12 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     map.current.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 65, maxZoom: 15, duration: 0 });
   }, [ready, compact, data]);
   useEffect(() => {
-    if (!flumOn || flum || !data) return;
+    if (!flumOn || !data || (combined?!viewport:Boolean(flum))) return;
+    const key=combined?viewport!:jurisdiction;if(flumRequestKey.current===key&&flum)return;
     const abort = new AbortController();
-    fetch(combinedKey?"/api/maps/nearby?"+combinedKey+"&layer=flum":"/api/maps/" + encodeURIComponent(jurisdiction) + "?layer=flum", { signal: abort.signal }).then(async (r) => { if (!r.ok) throw new Error(); setFlum(await r.json()); }).catch(() => { if (!abort.signal.aborted) setSearchMessage("Future land use is temporarily unavailable."); });
+    fetch(combined?"/api/maps/nearby?"+new URLSearchParams({bbox:viewport!,layer:"flum",country:combined.country,state:combined.state}):"/api/maps/" + encodeURIComponent(jurisdiction) + "?layer=flum", { signal: abort.signal }).then(async (r) => { if (!r.ok) throw new Error(); const layer=await r.json();if(!abort.signal.aborted){flumRequestKey.current=key;setLoadedFlumKey(key);setFlum(layer);} }).catch(() => { if (!abort.signal.aborted){setLoadedFlumKey(key);setSearchMessage("Future land use is temporarily unavailable.");} });
     return () => abort.abort();
-  }, [flumOn, flum, jurisdiction,combinedKey,data]);
+  }, [flumOn, flum, jurisdiction,viewport,data,combined]);
   useEffect(() => {
     if (!ready || !map.current || !data) return;
     // Keep the transparent fill layer for hit testing across the whole project.
@@ -339,7 +350,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       </div>
       <p className={searching ? "sr-only" : "law-live-message"} role="status">{searching ? "Searching..." : searchMessage}</p>
       {results.length > 1 && <div className="law-address-results">{results.map((r, i) => <button key={i} type="button" onClick={() => choose(r)}>{r.label}</button>)}</div>}
-      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover or tap an outline for details."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : compact ? "Click a boundary for details" : "Hover or tap a project"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{combined?" · Dashed gray: city limits":""}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
+      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover or tap an outline for details."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : flumLoading ? "Loading future land use…" : compact ? "Click a boundary for details" : "Hover or tap a project"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{combined?" · Dashed gray: city limits":""}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
       {!compact && <div className="law-map-bottom"><span>{mapped.length} projects shown</span>{!fullPage && <a href={areaPath(jurisdiction)+"#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
         {mapInfo}
       </div>}
