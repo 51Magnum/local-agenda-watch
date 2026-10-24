@@ -1,3 +1,5 @@
+import { getCanyonCountyHearings } from "@/lib/localities/canyon-county";
+import { countyFromFeature, countyCaseWhere, countyStage, countyTitle, countySummary, COUNTY_TYPES } from "@/lib/sources/canyon-county";
 import { AREAS, areaPath } from "@/lib/areas/registry";
 import { getNampaVisualReports } from "@/lib/sources/primegov";
 import { getNampaHearings, nampa } from "@/lib/localities/nampa";
@@ -29,6 +31,16 @@ export const JURISDICTIONS: Record<string, JurisdictionConfig> = {
     },
     loadCases: getNampaHearings, loadCaseReports: getNampaVisualReports, recordClient: nampa.energov,
     presentation: (hearing, plan) => ({ title: caseDisplayTitle(hearing, plan), summary: caseSummary(hearing, plan), href: areaPath(AREAS.nampa) + projectPathForCase(hearing.appId), hearing: getProjectForCase(hearing.appId)?.nextHearing }),
+  },
+  "canyon-county": {
+    area: AREAS["canyon-county"], id:"canyon-county", name:"Canyon County", mapOnHub:true, center:AREAS["canyon-county"].center, zoom:10, bounds:[-117.2,43.15,-116.3,44.0], state:{abbreviation:"ID",fips:"16",name:"Idaho"},
+    caseGeometry:{layers:AREAS["canyon-county"].sources.geometry!,where:countyCaseWhere(),caseIdField:"PermitNum",fields:{type:"AppType",phase:"Status",status:"ApprovalStatus",title:"Description",parcel:"ACCOUNT"},parcelFallback:{layerUrl:AREAS["canyon-county"].sources.parcelFallback!,matchField:"ACCOUNT",recordField:"ACCOUNT",ignored:[]}},
+    flum:{layerUrl:AREAS["canyon-county"].sources.flum!,categoryField:"FLU_ZONE_C",colorSource:"renderer",planName:"Canyon County 2030 Comprehensive Plan",label:"Canyon County 2030 adopted Future Land Use",adoptedDate:null,adoptionSource:"https://www.canyoncounty.id.gov/elected-officials/commissioners/development-services/dsd-gis/",dataNote:"Adopted Future Land Use layer. City plans and rural-residential overlays are separate; this designation alone does not establish zoning compatibility.",simplifyTolerance:0.00002},
+    addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:"ID"},
+    stages:{phase:{Review:"In review",Board:"Council/Board","Hearing Examiner":"P&Z","PZ Commission":"P&Z",Decided:"Decided"},status:{Approved:"Decided",Denied:"Decided","In Progress":"In review"},recorded:{phases:[],statuses:[]}},
+    caseTypes:COUNTY_TYPES,citywideTypes:[],isCitywide:h=>h.citywide===true,loadCases:getCanyonCountyHearings,parseFeature:countyFromFeature,
+    stageForCase:hearing=>{const stage=countyStage(hearing);return stage==="Hearing Examiner"?"P&Z":stage as import("./types").MapStage;},
+    presentation:hearing=>({title:countyTitle(hearing),summary:countySummary(hearing),href:areaPath(AREAS["canyon-county"])+"/plan/"+encodeURIComponent(hearing.appId)}),
   },
 };
 export function getJurisdiction(id: string): JurisdictionConfig | undefined { return Object.hasOwn(JURISDICTIONS, id) ? JURISDICTIONS[id] : undefined; }

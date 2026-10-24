@@ -11,7 +11,7 @@ export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise =
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Public hearing</dt><dd className="mt-1 font-medium">{hearing.startsAt.length > 10 ? formatTime(hearing.startsAt) + " ("+area.timezone+")" : "Time not confirmed"}</dd></div>
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Decision-making body</dt><dd className="mt-1 font-medium">{hearing.body}</dd></div>
         <div className="sm:col-span-2"><dt className="text-sm text-zinc-500 dark:text-zinc-400">Location</dt><dd className="mt-1">{hearing.location}</dd></div>
-        <div className="sm:col-span-2 border-t border-sky-200 pt-4 dark:border-sky-800"><dt className="text-sm font-semibold">Written-comment deadline (portal)</dt><dd className="mt-1">{hearing.commentDeadline ? formatDate(hearing.commentDeadline) + " at " + formatTime(hearing.commentDeadline) : "Not confirmed. Check the city's instructions."}</dd>
+        <div className="sm:col-span-2 border-t border-sky-200 pt-4 dark:border-sky-800"><dt className="text-sm font-semibold">Written-comment deadline{area.type==="city"?" (portal)":""}</dt><dd className="mt-1">{hearing.commentDeadline ? formatDate(hearing.commentDeadline) + (hearing.commentDeadline.length>10 ? " at " + formatTime(hearing.commentDeadline) : " (time not specified)") : "Not confirmed. Check the official hearing notice."}</dd>
           {hearing.commentDeadline && !concise && <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Based on {area.bodies.decision.label} meeting rules; confirm with the published agenda.</p>}
         </div>
       </dl>

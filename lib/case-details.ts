@@ -34,7 +34,7 @@ export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = n
   }
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
   const councilStage = getCaseStage(hearing, false, now) === "Council hearing";
-  const next = hearing.meetings.filter((m) => !m.continuedNote && m.date >= today && (!councilStage || m.body === "City Council"))
+  const next = hearing.meetings.filter((m) => !m.continuedNote && m.date >= today && (!councilStage || m.body === area.bodies.decision.id))
     .sort((a, b) => a.date.localeCompare(b.date))[0];
   if (!next) return undefined;
   const agendaMeeting = feed?.agendaMeetings?.find((m) => m.body === next.body && m.date === next.date);
@@ -50,7 +50,7 @@ export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = n
     sourceUrl: next.sourceUrl,
     agendaUrl: next.agendaUrl ?? agendaMeeting?.agendaUrl,
     packetUrl: next.packetUrl ?? agendaMeeting?.packetUrl,
-    ...(council&&area.meetingRules.decisionCommentDeadlineHour!=null ? { commentDeadline: denverInstant(next.date, String(area.meetingRules.decisionCommentDeadlineHour).padStart(2,"0")+":00",area.timezone), commentSourceUrl: area.commentInstructionsUrl } : {}),
+    ...(next.commentDeadline ? {commentDeadline:next.commentDeadline,commentSourceUrl:next.sourceUrl} : council&&area.meetingRules.decisionCommentDeadlineHour!=null ? { commentDeadline: denverInstant(next.date, String(area.meetingRules.decisionCommentDeadlineHour).padStart(2,"0")+":00",area.timezone), commentSourceUrl: area.commentInstructionsUrl } : {}),
   };
 }
 

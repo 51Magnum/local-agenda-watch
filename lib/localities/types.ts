@@ -64,6 +64,8 @@ export type AgendaMeeting = {
 };
 
 export type ScheduledMeeting = {
+  /** Published case-specific deadline; a date alone does not imply a time. */
+  commentDeadline?: string;
   /** Published hearing outcome; distinct from a continuance. */
   result?: string;
   /** Published public-hearing time, HH:mm in America/Denver. */
@@ -87,6 +89,10 @@ export type ScheduledMeeting = {
 };
 
 export type Hearing = {
+  /** Provider-authored short title and neutral summary, when available. */
+  citywide?: boolean;
+  displayTitle?: string;
+  summary?: string;
   /** True when supplied by the city’s completed-applications layer. */
   decisionRecorded?: boolean;
   /** Stable application id as displayed by the jurisdiction, e.g. "ANN-00352-2026". */
@@ -119,6 +125,7 @@ export type HearingFeed = {
   /** Timestamp of this cached application-data snapshot. */
   refreshedAt?: string;
   scheduleUnavailable?: boolean;
+  dataUnavailable?: boolean;
   agendaMeetings?: AgendaMeeting[];
   active: Hearing[];
   completed: Hearing[];

@@ -9,6 +9,7 @@ export function addressWhere(config: Pick<AddressSearchConfig,"addressPoints">, 
   return "(" + config.addressPoints.where + ") AND UPPER(" + config.addressPoints.addressField + ") LIKE " + sqlString("%" + tokens.join("%") + "%");
 }
 export async function searchAddressPoints(config: Pick<AddressSearchConfig,"addressPoints">, address: string, timeoutMs = 700): Promise<AddressResult[]> {
+  if (!config.addressPoints.layerUrl) return [];
   const params = new URLSearchParams({ where: addressWhere(config, address), outFields: config.addressPoints.addressField, returnGeometry: "true", outSR: "4326", f: "geojson", resultRecordCount: "6" });
   const response = await fetch(config.addressPoints.layerUrl + "/query?" + params, { cache:"no-store", signal: AbortSignal.timeout(timeoutMs) });
   if (!response.ok) throw new Error("Address points unavailable");

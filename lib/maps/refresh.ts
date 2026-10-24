@@ -13,6 +13,7 @@ import type { CaseGeometry, FlumCache, JurisdictionConfig, MapCase, MapSnapshot,
 const WEEK = 7 * 24 * 3600000;
 const inFlight = new Map<string, Promise<MapSnapshot>>();
 export function normalizeMapStage(config: JurisdictionConfig, hearing: Hearing): MapStage {
+  if (config.stageForCase) return config.stageForCase(hearing);
   const latest = hearing.meetings.filter((m) => /council|board/i.test(m.body) && (m.result || m.continuedNote)).sort((a, b) => b.date.localeCompare(a.date))[0];
   const decision = latest?.result && /^(approved|denied)\b/i.test(latest.result.trim()) ? latest : undefined;
   if (decision && /^denied/i.test(decision.result!)) return "Decided";
@@ -42,7 +43,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
   const deadline = options.deadline ?? Date.now() + 70000, now = new Date(), warnings: string[] = [];
   const oldCases = new Map(previous?.cases.map((c) => [c.id, c]));
   const [layers, feed, flum, reports] = await Promise.all([
-    Promise.all(config.caseGeometry.layers.map(async (url) => { try { return { url, data: await geoQuery(url) }; } catch { warnings.push("A case boundary layer is unavailable; existing cached outlines are retained."); return { url, data: undefined }; } })),
+    Promise.all(config.caseGeometry.layers.map(async (url) => { try { return { url, data: await geoQuery(url, config.caseGeometry.where ? { where: config.caseGeometry.where } : {}) }; } catch { warnings.push("A case boundary layer is unavailable; existing cached outlines are retained."); return { url, data: undefined }; } })),
     config.loadCases?.().catch(() => { warnings.push("The case schedule is unavailable; source layer records are shown."); return undefined; }),
     previous?.flum && Date.now() - Date.parse(previous.flum.updatedAt) < WEEK ? Promise.resolve(previous.flum) : fetchFlum(config).catch(() => { warnings.push("Future land use is temporarily unavailable or out of date."); return previous?.flum; }),
     config.loadCaseReports?.(Math.min(deadline-16000,Date.now()+16000)).catch(()=>[]) ?? Promise.resolve([]),
@@ -51,7 +52,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
   const retained = new Set<string>();
   const polygons = new Map<string, { features: Feature[]; url: string; parcel?: unknown }>();
   for (const layer of layers) for (const item of layer.data?.features ?? []) {
-    const source = hearingFromFeature(config, item); if (!source.appId) continue;
+    const source = config.parseFeature?.(item) ?? hearingFromFeature(config, item); if (!source.appId) continue;
     if (!hearings.has(source.appId)) hearings.set(source.appId, source);
     const existing = polygons.get(source.appId);
     if (!existing || existing.url === layer.url) polygons.set(source.appId, { url: layer.url, features: [...(existing?.features ?? []), item], parcel: config.caseGeometry.fields.parcel ? item.properties?.[config.caseGeometry.fields.parcel] : undefined });
@@ -67,7 +68,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
   for (let offset = 0; offset < inputs.length; offset += 4) await Promise.all(inputs.slice(offset, offset + 4).map(async (hearing) => {
     const polygon = polygons.get(hearing.appId), old = oldCases.get(hearing.appId);
     if (retained.has(hearing.appId) && old) { cases.push(old); return; }
-    const citywide = config.citywideTypes.includes(hearing.appType);
+    const citywide = config.isCitywide?.(hearing) ?? config.citywideTypes.includes(hearing.appType);
     let geometry = citywide ? null : combinePolygons(polygon?.features ?? []);
     let source: MapCase["source"] = geometry ? "polygon" : "none", confidence: MapCase["confidence"] = citywide ? "citywide" : geometry ? "exact" : "approximate", sourceUrl = geometry ? polygon?.url : undefined;
     let plan = null;
@@ -112,14 +113,13 @@ export async function refreshJurisdiction(config: JurisdictionConfig, deadline?:
   inFlight.set(config.id, task); return task;
 }
 export async function refreshConfiguredMaps(deadline = Date.now() + 50000) {
-  const results = [];
-  for (const config of Object.values(JURISDICTIONS)) {
-    if (Date.now() >= deadline) break;
-    try { const snapshot = await refreshJurisdiction(config, deadline); results.push({ jurisdiction: config.id, cases: snapshot.cases.length, mapped: snapshot.cases.filter((c) => c.geometry).length, citywide: snapshot.cases.filter((c) => c.citywide).length, warnings: snapshot.warnings.length }); }
-    catch { console.error("[maps] Refresh unavailable for " + config.id); results.push({ jurisdiction: config.id, unavailable: true }); }
-  }
-  return results;
+  // Each area starts independently so a slow city's reports cannot starve another area.
+  return Promise.all(Object.values(JURISDICTIONS).map(async config => {
+    try { const snapshot = await refreshJurisdiction(config, deadline); return { jurisdiction: config.id, cases: snapshot.cases.length, mapped: snapshot.cases.filter((c) => c.geometry).length, citywide: snapshot.cases.filter((c) => c.citywide).length, warnings: snapshot.warnings.length }; }
+    catch { console.error("[maps] Refresh unavailable for " + config.id); return { jurisdiction: config.id, unavailable: true }; }
+  }));
 }
+
 export function publicMapData(config: JurisdictionConfig, snapshot: MapSnapshot): PublicMapData {
   const { id, name, center, zoom, bounds, state, addressPoints } = config;
   return { jurisdiction: { id, name, center, zoom, bounds, state, addressPoints }, updatedAt: snapshot.updatedAt, cases: snapshot.cases.map((c) => ({ ...c, href: canonicalAreaHref(config.id,c.href), visual: config.caseVisuals?.[c.id] ?? c.visual })), warnings: snapshot.warnings, flum: { ...config.flum, updatedAt: snapshot.flum?.updatedAt, legend: snapshot.flum?.legend ?? [] } };

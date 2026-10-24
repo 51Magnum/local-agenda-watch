@@ -11,13 +11,16 @@ export type MapVisual = { documentTitle?: string; src: string; alt: string; labe
 export type JurisdictionConfig = {
   area?: AreaDefinition;
   id: string; name: string; mapOnHub?: boolean; center: [number, number]; zoom: number; state: { abbreviation: string; fips: string; name: string }; bounds: [number, number, number, number];
-  caseGeometry: { layers: string[]; caseIdField: string; fields: { type: string; phase: string; status: string; title: string; acres?: string; link?: string; parcel?: string }; parcelFallback: { layerUrl: string; matchField: string; recordField: string; ignored: string[] } };
+  caseGeometry: { where?: string; layers: string[]; caseIdField: string; fields: { type: string; phase: string; status: string; title: string; acres?: string; link?: string; parcel?: string }; parcelFallback: { layerUrl: string; matchField: string; recordField: string; ignored: string[] } };
   flum: { layerUrl: string; categoryField: string; colorSource: "renderer"; planName: string; label: string; adoptedDate: string | null; adoptionSource: string; dataNote?: string; simplifyTolerance: number };
   addressPoints: { layerUrl: string; addressField: string; where: string; suffix: string };
   stages: { phase: Record<string, MapStage>; status: Record<string, MapStage>; recorded: { phases: string[]; statuses: string[] } };
   caseTypes: Record<string, string>; citywideTypes: string[];
   caseVisuals?: Record<string, MapVisual>;
   loadCaseReports?: (deadline:number) => Promise<{caseIds:string[];label:string;url:string}[]>;
+  isCitywide?: (hearing: Hearing) => boolean;
+  parseFeature?: (feature: import("geojson").Feature) => Hearing;
+  stageForCase?: (hearing: Hearing) => MapStage;
   loadCases?: () => Promise<HearingFeed>; recordClient?: EnerGovClient;
   presentation?: (hearing: Hearing, plan: Parameters<typeof caseSummary>[1]) => { title: string; summary: string; href: string; hearing?: { startsAt: string; body: string } };
 };
