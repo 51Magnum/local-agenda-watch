@@ -1,29 +1,41 @@
 name: Refresh case timelines
 on:
   schedule:
-    - cron: '17 * * * *'
+    # Denver 05:00/14:00 = 11:00/20:00 UTC in summer, 12:00/21:00 in winter.
+    # The endpoint skips the inactive DST partner before opening the database.
+    - cron: '0 11,12,20,21 * * *'
   workflow_dispatch:
-  deployment_status:
+    inputs:
+      force_full_sweep:
+        description: 'Force discovery and document checks for every active area'
+        type: boolean
+        default: false
 permissions: {}
 concurrency:
   group: case-timeline-ingestion
   cancel-in-progress: false
 jobs:
   refresh:
-    if: github.event_name != 'deployment_status' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Invoke protected timeline worker
+      - name: Invoke meeting-aware scheduler
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: https://www.localagendawatch.com
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          FORCE_FULL_SWEEP: ${{ inputs.force_full_sweep || false }}
         shell: bash
         run: |
           if [ -z "$CRON_SECRET" ]; then
             echo "::notice::Timeline ingestion is paused until the repository CRON_SECRET is configured."
             exit 0
           fi
+          QUERY=""
+          if [ "$MANUAL" = "true" ]; then
+            QUERY="?manual=1"
+            if [ "$FORCE_FULL_SWEEP" = "true" ]; then QUERY="$QUERY&force=1"; fi
+          fi
           curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 330 \
             --header "Authorization: Bearer $CRON_SECRET" \
-            "$SITE_URL/api/cron/case-timeline"
+            "$SITE_URL/api/cron/case-timeline$QUERY"

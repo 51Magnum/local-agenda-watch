@@ -50,11 +50,11 @@ export function recordDocuments(area:AreaDefinition,h:Hearing):SourceDocument[]{
  }
  return docs;
 }
-export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?:number;store?:EvidenceStore;deadline?:number;run?:IngestionRun;feeds?:Record<string,HearingFeed>}={}){
+export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?:number;store?:EvidenceStore;deadline?:number;run?:IngestionRun;feeds?:Record<string,HearingFeed>;caseIdsByArea?:Record<string,string[]>;meetingDatesByArea?:Record<string,string[]>}={}){
  const deadline=options.deadline??Date.now()+(options.budgetMs??100000),state=options.store?await options.store.read():emptyEvidenceState();
  const areaCases=new Map<string,Set<string>>();
  const warnings:string[]=[],documents:SourceDocument[]=[],caseIds:string[]=[],extractedPages=new Map<string,PageText[]>();
- const areas=Object.values(AREAS).filter(a=>a.status==="live"&&a.timeline);
+ const areas=Object.values(AREAS).filter(a=>a.status==="live"&&a.timeline&&(!options.caseIdsByArea||Boolean(options.caseIdsByArea[a.id]?.length)));
  const configured=process.env.TIMELINE_CASE_IDS??"*";
  const selected=options.caseIds??(configured==="*"?undefined:configured.split(",").map(s=>s.trim().toUpperCase()));
  const feeds=await Promise.all(areas.map(async area=>{
@@ -67,11 +67,12 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
  for(const {area,feed} of feeds){
   const all=[...(feed?.active??[]),...(feed?.upcomingOnly??[]),...(feed?.completed??[])];
   const unresolved=new Set(Object.values(state.documents).filter(d=>(d.areaId??"nampa")===area.id&&!d.caseIds.every(id=>publicFields(state,[id],area.id).some(f=>f.key==="councilDecision"&&f.status==="approved"&&["approved","denied","withdrawn"].includes(f.value)))).flatMap(d=>d.caseIds));
-  const eligible=prioritizeCases([...new Map(all.filter(h=>selected?selected.includes(h.appId):!h.decisionRecorded||unresolved.has(h.appId)||h.meetings.some(m=>m.date>=new Date().toISOString().slice(0,10))).map(h=>[h.appId,h])).values()],area.timezone);
-  const ids=[...new Set([...eligible.map(h=>h.appId),...unresolved].filter(id=>!selected||selected.includes(id)))];caseIds.push(...ids);areaCases.set(area.id,new Set(ids));
+  const areaSelected=options.caseIdsByArea?.[area.id]??selected;
+  const eligible=prioritizeCases([...new Map(all.filter(h=>areaSelected?areaSelected.includes(h.appId):!h.decisionRecorded||unresolved.has(h.appId)||h.meetings.some(m=>m.date>=new Date().toISOString().slice(0,10))).map(h=>[h.appId,h])).values()],area.timezone);
+  const ids=[...new Set([...eligible.map(h=>h.appId),...unresolved,...(areaSelected??[])].filter(id=>!areaSelected||areaSelected.includes(id)))];caseIds.push(...ids);areaCases.set(area.id,new Set(ids));
   if(options.run)(options.run.areas??={})[area.id]={cases:ids.length,visited:0,documents:0,extracted:0};
   if(area.timeline?.adapter==="energov-primegov"){
-   if(Date.now()<deadline){const found=await discoverNampaDocuments({store:options.store,feed,caseIds:ids,deadline:Math.min(deadline,Date.now()+20000)});documents.push(...found.documents.map(d=>({...d,areaId:area.id})));warnings.push(...found.warnings);for(const [k,v]of found.extractedPages)extractedPages.set(k,v);if(options.run)options.run.areas![area.id].visited=new Set(found.documents.flatMap(d=>d.caseIds)).size;}
+   if(Date.now()<deadline){const found=await discoverNampaDocuments({store:options.store,feed,caseIds:ids,meetingDates:options.meetingDatesByArea?.[area.id],deadline:Math.min(deadline,Date.now()+20000)});documents.push(...found.documents.map(d=>({...d,areaId:area.id})));warnings.push(...found.warnings);for(const [k,v]of found.extractedPages)extractedPages.set(k,v);if(options.run)options.run.areas![area.id].visited=new Set(found.documents.flatMap(d=>d.caseIds)).size;}
    continue;
   }
   for(const h of eligible){documents.push(...recordDocuments(area,h));if(options.run)options.run.areas![area.id].visited++;
@@ -81,6 +82,7 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
  }
  // OCR completed by the extraction phase is matched here without another OCR call or archive traversal.
  for(const d of Object.values(state.documents)){
+  if(options.caseIdsByArea&&!areaCases.has(d.areaId??"nampa"))continue;
   if(d.kind==="agenda"&&!d.caseIds.length&&d.state==="complete"&&options.store?.pages)d.pages=await options.store.pages(d.id);
   if(d.kind!=="agenda"||d.content!==undefined||d.state!=="complete"||!d.pages.length)continue;
   const areaId=d.areaId??"nampa",ids=areaCases.get(areaId);if(!ids)continue;
@@ -91,7 +93,7 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
   if(d.meeting?.minutesUrl&&allowedSource(d.meeting.minutesUrl,areaId))documents.push({areaId,url:d.meeting.minutesUrl,title:d.meeting.body+" minutes — "+d.meeting.date,kind:"minutes",caseIds:matched});
  }
  // Resume known sources even if this run's case-record discovery stopped early.
- for(const d of Object.values(state.documents))if((d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))||(d.kind==="agenda"&&d.content===undefined&&d.state!=="complete"&&Boolean(d.meeting)))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting});
+ for(const d of Object.values(state.documents))if((d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))||(!options.caseIdsByArea&&d.kind==="agenda"&&d.content===undefined&&d.state!=="complete"&&Boolean(d.meeting)))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting});
  // Probe public portals once per run so blocked hosts are reported even when using cached notices.
  await Promise.all(areas.filter(a=>a.id==="meridian"&&Date.now()<deadline-13000).map(async a=>{if(a.sources.hearingsSchedule)try{await (await sourceRequest(a.sources.hearingsSchedule,a.id)).body?.cancel();}catch{warnings.push(a.id+": hearing notice host unavailable; using cached meeting associations");}}));
  if(options.store){
@@ -110,5 +112,5 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
  // New evidence first; round-robin jurisdictions to avoid one large area's packet backlog monopolizing runs.
  const pending=result.filter(d=>{const old=state.documents[documentId(d)];return !old||old.state!=="complete";}),complete=result.filter(d=>!pending.includes(d));
  const interleave=(docs:SourceDocument[])=>{const groups=areas.map(a=>docs.filter(d=>(d.areaId??"nampa")===a.id).sort((a,b)=>({"pz-decision":0,"council-decision":0,findings:0,"staff-report":1,minutes:2,"case-record":3,agenda:4,other:5}[a.kind])-({"pz-decision":0,"council-decision":0,findings:0,"staff-report":1,minutes:2,"case-record":3,agenda:4,other:5}[b.kind])));const out:SourceDocument[]=[];while(groups.some(g=>g.length))for(const g of groups){const d=g.shift();if(d)out.push(d);}return out;};
- return {documents:[...interleave(pending),...interleave(complete)],warnings,caseIds:[...new Set(caseIds)],extractedPages};
+ return {documents:[...interleave(pending),...interleave(complete)],warnings,caseIds:[...new Set(caseIds)],extractedPages,feeds:Object.fromEntries(feeds.filter(f=>f.feed).map(f=>[f.area.id,f.feed!]))};
 }

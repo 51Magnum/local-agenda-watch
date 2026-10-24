@@ -10,7 +10,7 @@ it("rejects unauthenticated cron invocations even when configuration is absent",
 });
 it("reports a missing extraction key without starting a job", async () => {
   vi.stubEnv("CRON_SECRET", "test-cron-secret"); vi.stubEnv("OPENAI_API_KEY", "");
-  const response = await GET(new Request("http://localhost/api/cron/case-timeline", { headers: { authorization: "Bearer test-cron-secret" } }));
+  const response = await GET(new Request("http://localhost/api/cron/case-timeline?manual=1&force=1", { headers: { authorization: "Bearer test-cron-secret" } }));
   expect(response.status).toBe(503);
 });
 it("protects all review pages and actions and fails closed without configuration", () => {

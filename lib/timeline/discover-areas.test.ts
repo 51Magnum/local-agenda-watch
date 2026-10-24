@@ -9,6 +9,15 @@ import type {EvidenceStore} from "./store";
 import {walkLibrary} from "./libraries";
 import {ingestDocuments,documentId} from "./ingest";
 const emptyFeed=()=>({active:[],completed:[]});
+it("keeps a due case scoped to its jurisdiction when it disappears from the current feed",async()=>{
+ const state=emptyEvidenceState();
+ state.documents.old={id:"old",areaId:"canyon-county",url:"https://agenda.canyoncounty.id.gov/DownloadDocument/1",title:"Decision",kind:"findings",caseIds:["CR2025-0012"],hash:"v1",state:"complete",checkedAt:"",pages:[]};
+ const store:EvidenceStore={read:async()=>state,mutate:async update=>update(state)};
+ const found=await discoverCaseDocuments({store,caseIdsByArea:{"canyon-county":["CR2025-0012"]},feeds:{"canyon-county":emptyFeed()}});
+ expect(found.caseIds).toEqual(["CR2025-0012"]);
+ expect(Object.keys(found.feeds)).toEqual(["canyon-county"]);
+ expect(found.documents.some(d=>d.caseIds.includes("CR2025-0012"))).toBe(true);
+});
 afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();vi.restoreAllMocks();});
 it("defaults to all active jurisdictions and finds county staff reports without a database record",async()=>{
  delete process.env.TIMELINE_CASE_IDS;

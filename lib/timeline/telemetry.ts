@@ -24,4 +24,4 @@ export function currentRun(){return context.getStore()?.run;}
 export function hostWasBlocked(areaId:string,url:string){const host=new URL(url).hostname;return Boolean(context.getStore()?.run.hosts?.some(h=>h.areaId===areaId&&h.host===host&&h.outcome==="blocked"));}
 
 /** Aggregate diagnostics contain no credentials, addresses, quotes, or resident information. */
-export function safeRunSummary(run:IngestionRun){return {startedAt:run.startedAt,finishedAt:run.finishedAt,areas:run.areas,hosts:run.hosts,checked:run.checked,processed:run.processed,errors:run.errors.length,transfer:run.transfer,tokens:tokenTotals(run)};}
+export function safeRunSummary(run:IngestionRun){return {modes:run.modes,startedAt:run.startedAt,finishedAt:run.finishedAt,areas:run.areas,hosts:run.hosts,checked:run.checked,processed:run.processed,errors:run.errors.length,transfer:run.transfer,tokens:tokenTotals(run)};}

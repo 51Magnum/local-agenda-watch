@@ -30,7 +30,7 @@ function dateOnly(value: string | null | undefined): string | undefined {
   return undefined;
 }
 async function officialRequest(url:string){return sourceRequest(url,"nampa");}
-export async function discoverNampaDocuments(options: { caseIds?: string[]; budgetMs?: number; store?: EvidenceStore; deadline?: number; feed?:HearingFeed } = {}) {
+export async function discoverNampaDocuments(options: { caseIds?: string[]; budgetMs?: number; store?: EvidenceStore; deadline?: number; feed?:HearingFeed; meetingDates?:string[] } = {}) {
   const deadline = options.deadline ?? Date.now() + (options.budgetMs ?? 120000);
   const locality = getLocality("nampa")!;
   const cached = options.store ? await options.store.read() : emptyEvidenceState();
@@ -102,7 +102,7 @@ export async function discoverNampaDocuments(options: { caseIds?: string[]; budg
     ...years.map((year) => officialRequest(NAMPA_PRIMEGOV_ORIGIN + "/api/v2/PublicPortal/ListArchivedMeetings?year=" + year).then((r) => r.json()).then(parsePrimeGovMeetings).catch((error) => { warnings.push("Archived agendas unavailable for " + year + ": " + String(error)); return []; })),
   ]);
   const priorityAgendas = new Set(projects.filter((project) => project.caseIds.some((id) => caseIds.includes(id))).flatMap((project) => project.sourceDocuments ?? []).map((source) => source.url.split("#")[0]));
-  const allMeetings = [...new Map(meetingLists.flat().map((meeting) => [meeting.id, meeting])).values()].filter((m) => !/attendance|state of the city/i.test(m.title)).sort((a, b) => Number(priorityAgendas.has(b.htmlAgendaUrl ?? "")) - Number(priorityAgendas.has(a.htmlAgendaUrl ?? "")) || b.date.localeCompare(a.date));
+  const allMeetings = [...new Map(meetingLists.flat().map((meeting) => [meeting.id, meeting])).values()].filter((m) => !/attendance|state of the city/i.test(m.title)&&(!options.meetingDates||options.meetingDates.includes(m.date))).sort((a, b) => Number(priorityAgendas.has(b.htmlAgendaUrl ?? "")) - Number(priorityAgendas.has(a.htmlAgendaUrl ?? "")) || b.date.localeCompare(a.date));
   const agendaOffset=Number(cached.cursors?.["nampa:agendas"]??0)%Math.max(1,allMeetings.length);
   const meetings=[...allMeetings.slice(agendaOffset),...allMeetings.slice(0,agendaOffset)];
   for (let i = 0; i < meetings.length; i += 6) {

@@ -30,6 +30,7 @@ export type IngestDependencies = {
   ocr?: typeof ocrMissingPages;
   extract?: (document: SourceDocument, caseId: string, pages: PageText[]) => Promise<Extraction>;
   budgetMs?: number;
+  onChecked?: (document:SourceDocument)=>void;
   run?: IngestionRun;
   /** Separate checkpoint for native-only previews; never suppresses full extraction. */
   extractionVersion?: string;
@@ -52,6 +53,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       if(document.content===undefined&&stored?.structured&&store.pages){const cached=await store.pages(id);document.content=cached[0]?.text;}
       const bytes = document.content === undefined ? await (dependencies.download ?? downloadDocument)(document.url,areaId) : new TextEncoder().encode(document.content);
       const hash = digest(bytes);
+      dependencies.onChecked?.(document);
       const before = (await store.read()).documents[id];
       const same = before?.hash === hash && before.extractionVersion === extractionVersion;
       if(before?.hash===hash&&!retryDue(before)){run.skipped++;return;}
