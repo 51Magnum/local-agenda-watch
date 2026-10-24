@@ -1,0 +1,8 @@
+"use client";
+import {useState} from "react";
+type Audit={processed:number;remaining:number;areas:{area:string;total:number;kept:number;removed:number;deferred:number}[]};
+export default function ReviewControls(){const [running,setRunning]=useState(false),[message,setMessage]=useState(""),[result,setResult]=useState<Audit>();
+ async function run(){setRunning(true);try{async function post(action:string){const data=new FormData();data.set("action",action);data.set("limit","10");const r=await fetch("/admin/images/action",{method:"POST",body:data});if(!r.ok)throw new Error("Review action failed ("+r.status+")");return r.json();}
+ const purge=await post("purge");let audit:Audit=await post("audit");while(audit.remaining&&audit.processed){setMessage(audit.remaining+" images still to check");setResult(audit);audit=await post("audit");}setResult(audit);setMessage(purge.removedAssets+" unchecked crops purged. "+audit.remaining+" checks deferred. Reload to see the reviewed inventory.");}catch(error){setMessage(error instanceof Error?error.message:"Audit unavailable");}finally{setRunning(false);}}
+ return <div className="space-y-3"><button disabled={running} onClick={run} className="rounded-md border px-4 py-2">{running?"Checking source pages…":"Purge unchecked crops & run privacy audit"}</button><p role="status" className="text-sm">{message}</p>{result&&<table className="text-sm"><thead><tr><th className="pr-5 text-left">Area</th><th className="pr-5">Kept</th><th className="pr-5">Removed</th><th>Deferred</th></tr></thead><tbody>{result.areas.map(a=><tr key={a.area}><td className="pr-5">{a.area}</td><td>{a.kept}</td><td>{a.removed}</td><td>{a.deferred}</td></tr>)}</tbody></table>}</div>;
+}
