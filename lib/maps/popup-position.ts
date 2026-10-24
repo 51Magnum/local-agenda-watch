@@ -7,7 +7,7 @@ export function placeProjectCard(viewport:{width:number;height:number},project:P
  const clamp=(v:number,limit:number)=>Math.max(margin,Math.min(limit,v));
  const cy=(project.top+project.bottom)/2,cx=(project.left+project.right)/2;
  const candidates:CardPlacement[]=[];
- const minWidth=Math.min(300,width),minHeight=Math.min(180,height);
+ const minWidth=Math.min(300,width),minHeight=Math.min(350,height);
  const left=project.left-gap-margin,right=W-margin-project.right-gap,top=project.top-gap-margin,bottom=H-margin-project.bottom-gap;
  if(right>=minWidth){const w=Math.min(width,right);candidates.push({x:clamp(project.right+gap,W-w-margin),y:clamp(cy-height/2,H-height-margin),width:w,height,side:"right",reframe:false});}
  if(left>=minWidth){const w=Math.min(width,left);candidates.push({x:clamp(project.left-gap-w,W-w-margin),y:clamp(cy-height/2,H-height-margin),width:w,height,side:"left",reframe:false});}

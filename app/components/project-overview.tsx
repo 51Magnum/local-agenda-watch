@@ -1,3 +1,4 @@
+import MapSummaryEvidence from "./map-summary-evidence";
 import { residentHref } from "@/lib/areas/record-links";
 import{displayArea}from"@/lib/areas/format";
 import{stageLabel}from"@/lib/areas/registry";
@@ -38,6 +39,7 @@ export function ProjectProposal({ overview, data, terms = ["annexation", "rezone
   if(!overview.summary&&!overview.traffic&&!overview.schools&&!overview.recommendation&&!conditions)return null;
   return <section aria-labelledby="whats-proposed-title" className="space-y-5">
     <h2 id="whats-proposed-title" className="text-2xl font-semibold">What’s proposed</h2>
+    <MapSummaryEvidence fields={data.fields}/>
     {overview.summary&&<p className="max-w-3xl leading-8 text-zinc-700 dark:text-zinc-300">{overview.summary}{overview.summarySource&&<FactSource fact={overview.summarySource} label="proposal summary"/>}</p>}
     {overview.earlierNotice&&<p className="text-sm text-zinc-500">{overview.earlierNotice}</p>}
     <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm leading-7 text-zinc-500">{terms.map(term=><span key={term}><Glossary term={term}/>{term==="annexation"?" brings land into city limits.":term==="rezone"?" sets permitted uses.":" lays out lots and streets."}</span>)}</p>

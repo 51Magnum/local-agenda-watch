@@ -1,9 +1,9 @@
-export const EXTRACTED_KEYS = ["requestSummary", "acres", "units", "zoningRequested", "staffRecommendation", "keyConditions", "trafficSummary", "schoolComment", "applicantCompany", "pzConditions", "pzSpeakersFor", "pzSpeakersAgainst", "pzHearingDate", "pzResult", "pzVote", "councilHearingDate", "councilDecision", "councilVote", "decisionDate"] as const;
+export const EXTRACTED_KEYS = ["popupHeadline", "popupExplanation", "requestSummary", "acres", "units", "zoningRequested", "staffRecommendation", "keyConditions", "trafficSummary", "schoolComment", "applicantCompany", "pzConditions", "pzSpeakersFor", "pzSpeakersAgainst", "pzHearingDate", "pzResult", "pzVote", "councilHearingDate", "councilDecision", "councilVote", "decisionDate"] as const;
 export type ExtractedKey = typeof EXTRACTED_KEYS[number];
 export type FieldKey = ExtractedKey | "appliedDate" | "caseStatus" | "lastActionDate" | "reviewDate";
 export const DECISION_KEYS = new Set<FieldKey>(["pzResult", "pzVote", "pzConditions", "pzSpeakersFor", "pzSpeakersAgainst", "councilDecision", "councilVote", "decisionDate"]);
 export const FIELD_LABELS: Record<FieldKey, string> = {
-  requestSummary: "Request", acres: "Acres", units: "Homes / lots", zoningRequested: "Requested zoning", staffRecommendation: "Staff recommendation", keyConditions: "Main conditions",
+  popupHeadline: "Map headline", popupExplanation: "Map explanation", requestSummary: "Request", acres: "Acres", units: "Homes / lots", zoningRequested: "Requested zoning", staffRecommendation: "Staff recommendation", keyConditions: "Main conditions",
   pzHearingDate: "P&Z hearing", pzResult: "P&Z result", pzVote: "P&Z vote", councilHearingDate: "Council hearing", councilDecision: "Council decision", councilVote: "Council vote", decisionDate: "Decision date",
   trafficSummary: "Traffic and road improvements", schoolComment: "School district comment", applicantCompany: "Applicant company", pzConditions: "P&Z recommended conditions", pzSpeakersFor: "P&Z speakers in support", pzSpeakersAgainst: "P&Z speakers opposed",
   appliedDate: "Applied", caseStatus: "City case status", lastActionDate: "Last city action", reviewDate: "Under review",

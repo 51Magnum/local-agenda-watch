@@ -15,47 +15,11 @@ import {commonStageLabel} from "@/lib/maps/radius";
 import InterestForm from "@/app/components/locations/interest-form";
 import {areaPath,getArea,mapStageLabel} from "@/lib/areas/registry";
 import MapImageViewer from "./map-image-viewer";
-import { isWatching, setWatching, subscribeWatches, watchesFromMapCase } from "@/lib/watches";
-const popupDisposers = new WeakMap<HTMLElement, () => void>();
+
+import { popupContent, popupDisposers } from "./popup-card";
 const empty: FeatureCollection = { type: "FeatureCollection", features: [] };
 function caseFeatures(cases: MapCase[]): FeatureCollection {
   return { type: "FeatureCollection", features: cases.filter((c) => c.geometry && !c.citywide).map((c) => ({ type: "Feature", geometry: c.geometry!, properties: { id: c.id, color: c.statusNote ? "#64748b" : STAGE_COLORS[c.stage], approximate: c.confidence === "approximate" } })) };
-}
-// Use text nodes, rather than HTML strings, for all city-supplied content.
-function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jurisdiction: string, catalog: MapCase[]): HTMLElement {
-  const card = document.createElement("article"); card.className = "law-project-popup";
-  const title = document.createElement("a"); title.href = item.href; title.className = "law-popup-title"; title.textContent = item.title; card.append(title);
-  const watchedProjects = watchesFromMapCase(item.areaId??jurisdiction,item,catalog);
-  const allWatched=()=>watchedProjects.every(isWatching);
-  if(item.members){const label=document.createElement("p");label.className="law-popup-jurisdiction";label.textContent=[...new Set(item.members.map(m=>{const a=getArea(m.areaId);return a?.type==="city"?"City of "+a.name:a?.name??m.areaId;}))].join(" · ");card.append(label);
-   const related=document.createElement("p");for(const m of item.members){const a=document.createElement("a");a.href=m.href;a.textContent=m.caseId+" · "+m.body;related.append(a,document.createElement("br"));}card.append(related);}
-  const watchLabel = document.createElement("label"); watchLabel.className = "law-watch-toggle";
-  const watch = document.createElement("input"); watch.type = "checkbox"; watch.checked = allWatched(); watch.setAttribute("aria-label", "Watch " + item.title);
-  const watchText = document.createElement("span"); watchText.textContent = "Watch"; watchLabel.append(watch, watchText);
-  watchLabel.addEventListener("click", (event) => event.stopPropagation());
-  const watchError = document.createElement("p"); watchError.setAttribute("role", "status"); watchError.hidden = true;
-  watch.addEventListener("change", () => { try { const checked=watch.checked;for(const project of watchedProjects)setWatching(project,checked); watchError.hidden = true; } catch (error) { watch.checked = allWatched(); watchError.textContent = error instanceof Error ? error.message : "Could not save your watch."; watchError.hidden = false; } });
-  popupDisposers.set(card, subscribeWatches(() => { watch.checked = allWatched(); }));
-  if (item.visual) {
-    const exhibit = item.visual;
-    const figure = document.createElement("figure"); figure.className = "law-popup-visual";
-    const enlarge = document.createElement("button"); enlarge.type = "button"; enlarge.className = "law-popup-image-button"; enlarge.setAttribute("aria-label", "Enlarge " + exhibit.label); enlarge.addEventListener("click", (event) => { event.stopPropagation(); onEnlarge(exhibit); });
-    const image = document.createElement("img"); image.src = "/_next/image?" + new URLSearchParams({ url: exhibit.src, w: "384", q: "75" }); image.alt = exhibit.alt; image.width = 260; image.height = 170; image.decoding = "async";
-    // A missing exhibit must not leave a broken image or hide the case details.
-    image.addEventListener("error", () => figure.remove(), { once: true });
-    enlarge.append(image); figure.append(enlarge);
-    const caption = document.createElement("figcaption");
-    const source = document.createElement("a"); source.href = exhibit.sourceUrl; source.target = "_blank"; source.rel = "noopener noreferrer"; source.textContent = exhibit.label; caption.append(source);
-    if (exhibit.note) { const note = document.createElement("span"); note.textContent = exhibit.note; caption.append(note); }
-    figure.append(caption); card.append(figure);
-  }
-  const status = document.createElement("p"); status.className = "law-popup-status"; status.textContent = item.statusNote ?? item.stageBody ?? mapStageLabel(item.stage,getArea(jurisdiction)); card.append(status);
-  if (item.summary) { const summary = document.createElement("p"); summary.textContent = item.summary; card.append(summary); }
-  if (item.nextHearing) { const hearing = document.createElement("p"); hearing.className = "law-popup-hearing"; hearing.textContent = item.nextHearing.label; card.append(hearing); }
-  if (item.confidence === "approximate") { const note = document.createElement("p"); note.textContent = "Approximate boundary"; card.append(note); }
-  const link = document.createElement("a"); link.href = item.href; link.textContent = "View project →";
-  const footer = document.createElement("div"); footer.className = "law-popup-footer"; footer.append(link, watchLabel); card.append(footer, watchError);
-  return card;
 }
 export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPage = false, matchHeightTo, showNearbyList = false, combined }: { combined?:{country:string;state:string}; jurisdiction: string; caseIds?: readonly string[]; compact?: boolean; fullPage?: boolean; matchHeightTo?: string; showNearbyList?: boolean }) {
   const area = getArea(jurisdiction);
@@ -176,6 +140,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         const next = new lib.Popup({ closeButton: true, closeOnClick: false, maxWidth: projectCard ? "none" : "300px", className: projectCard ? "law-case-popup" : "", anchor: projectCard ? "center" : undefined, offset: projectCard ? 0 : 12, focusAfterOpen: pinned }).setLngLat(coordinates).setDOMContent(content).addTo(instance!);
         popup.current = next;
         sizePopup();
+        content.querySelectorAll("img").forEach(image => image.addEventListener("load", sizePopup, {once:true}));
         next.getElement().addEventListener("mouseleave", closeHover);
         next.on("close", () => { popupDisposers.get(content)?.(); popupDisposers.delete(content); if (popup.current === next) { popupProject=undefined; popup.current = null; hovered = ""; pinned = false; } });
       }

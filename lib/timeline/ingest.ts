@@ -108,6 +108,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
             if (["pzSpeakersFor", "pzSpeakersAgainst"].includes(fieldKey) && document.kind !== "minutes") continue;
             if (fieldKey === "pzConditions" && !["pz-decision", "minutes"].includes(document.kind)) continue;
             if (fieldKey === "decisionDate" && document.kind === "pz-decision") continue;
+            if (["popupHeadline", "popupExplanation"].includes(fieldKey) && !["staff-report", "case-record"].includes(document.kind)) continue;
             if (DECISION_KEYS.has(fieldKey) && !["pz-decision", "council-decision", "findings", "minutes"].includes(document.kind)) continue;
             const ocr = pages.find((p) => p.page === value.page)?.method === "ocr";
             facts.push({ areaId, id: digest(id + hash + caseId + key + value.value + value.page), documentId: id, documentHash: hash, caseId, key: fieldKey, value: value.value, page: document.content === undefined ? value.page : null, quote: value.quote,

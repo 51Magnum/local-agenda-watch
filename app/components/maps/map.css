@@ -31,3 +31,20 @@
 
 .law-map-stage-key{max-width:min(320px,calc(100% - 80px))}.law-map-stage-key .law-map-legend{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.law-map-stage-key .law-map-legend span{overflow-wrap:anywhere}.law-map-stage-key .law-map-legend span:has(i){grid-column:auto}.law-search{flex-wrap:wrap}.law-search input{flex:1 1 210px}
 .law-map .law-jurisdiction-chips button[type=button][aria-pressed="true"]{background:#0f766e;color:#fff;border-color:#0f766e}
+
+/* One what-first card for both jurisdiction and regional maps. */
+.law-case-popup .law-popup-title{font-size:clamp(1.25rem,2vw,1.65rem);line-height:1.2;font-weight:750;text-decoration:none;color:inherit}
+.law-project-popup .law-popup-explanation{font-size:.9rem;line-height:1.5;color:inherit;margin:0}
+.law-case-popup .law-popup-visual img{height:160px;max-height:160px}
+.law-case-popup .law-popup-visual figcaption{font-size:.67rem}
+.law-popup-progress{display:flex;flex-wrap:wrap;gap:6px 0;list-style:none;padding:0;margin:4px 0;font-size:.78rem;line-height:1.6}
+.law-popup-progress li{display:inline;color:var(--map-muted)}
+.law-popup-progress li+li:before{content:"›";padding:0 8px;color:var(--map-muted)}
+.law-popup-progress li[data-state="done"]{color:var(--map-muted)}
+.law-popup-progress li[data-state="current"]{color:#0369a1;font-weight:650}
+[data-theme="dark"] .law-popup-progress li[data-state="current"]{color:#7dd3fc}
+.law-popup-progress li[data-state="future"]{opacity:.6}
+.law-popup-footer{flex-wrap:wrap;border-top:1px solid var(--map-border);padding-top:10px;font-size:.7rem;gap:8px 12px}
+.law-popup-project-name{flex:1 1 150px;color:var(--map-muted)}
+.law-case-popup .law-popup-footer .law-watch-toggle{font-size:.75rem;margin-left:0}
+.law-popup-footer>a{white-space:nowrap}

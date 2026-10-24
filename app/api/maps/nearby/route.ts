@@ -1,3 +1,4 @@
+import { enrichMapPopups } from "@/lib/maps/popup-data";
 import {bbox,featureCollection,feature,distance} from "@turf/turf";
 import {AREAS} from "@/lib/areas/registry";
 import {getJurisdiction} from "@/lib/maps/jurisdictions";
@@ -26,7 +27,7 @@ export async function GET(request:Request){
  }
  const snapshots=await Promise.all(areas.map(async area=>{
   const config=getJurisdiction(area.id);if(!config)return;
-  try{const snapshot=await readMapSnapshot(area.id,{bounds,includeFlum:false});if(snapshot)return {area,snapshot,cases:publicMapData(config,snapshot).cases};}catch{}
+  try{const snapshot=await readMapSnapshot(area.id,{bounds,includeFlum:false});if(snapshot)return {area,snapshot,cases:await enrichMapPopups(config,publicMapData(config,snapshot).cases)};}catch{}
   warnings.push(area.name+" project data is temporarily unavailable.");
  }));
  const found=snapshots.filter(s=>s!==undefined),cases=combineRadiusCases(found,coordinates,overview||viewBounds?Math.max(distance(coordinates,[bounds[0],bounds[1]],{units:"miles"}),distance(coordinates,[bounds[2],bounds[3]],{units:"miles"}))+1:r);

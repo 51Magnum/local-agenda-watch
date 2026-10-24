@@ -23,3 +23,8 @@ it("keeps a pinned card inside the canvas when its project is panned offscreen",
  const card=placeProjectCard(viewport,project,desired);expect(card.x).toBeGreaterThanOrEqual(16);expect(card.x+card.width).toBeLessThanOrEqual(1184);expect(card.y).toBeGreaterThanOrEqual(16);expect(card.y+card.height).toBeLessThanOrEqual(634);
  }
 });
+
+it("reframes instead of cutting a complete card down to a tiny gap",()=>{
+ const card=placeProjectCard({width:805,height:990},{left:190,right:620,top:260,bottom:730},{width:402,height:450});
+ expect(card.reframe).toBe(true);expect(card.height).toBe(450);
+});
