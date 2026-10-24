@@ -1,4 +1,5 @@
 "use client";
+import {opensCasePage} from "@/lib/maps/case-interaction";
 import {placeProjectCard} from "@/lib/maps/popup-position";
 import { movingToPopup, type ScreenPoint } from "@/lib/maps/popup-hover";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -179,6 +180,9 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         if(data.overview)instance.fitBounds([[data.jurisdiction.bounds[0],data.jurisdiction.bounds[1]],[data.jurisdiction.bounds[2],data.jurisdiction.bounds[3]]],{padding:35,maxZoom:11,duration:0});
         updateViewport();setReady(true);
       });
+      let lastPointerType = "mouse";
+      instance.getCanvas().addEventListener("pointerdown", event => { lastPointerType = event.pointerType; });
+      instance.getCanvas().addEventListener("touchstart", () => { lastPointerType = "touch"; }, {passive:true});
       instance.on("mousemove", (event) => {
         if (!instance?.getLayer("case-fill")) return;
         if (pinMode.current) { instance.getCanvas().style.cursor = "crosshair"; return; }
@@ -212,6 +216,12 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         if (pinMode.current) { applyMapPin.current?.([event.lngLat.lng, event.lngLat.lat]); return; }
         const hits = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "case-halo", "case-approx-halo", "flum-fill"] });
         const hit = hits.find((f) => f.properties?.id); const item = hit && data.cases.find((c) => c.id === String(hit.properties.id));
+        const input = event.originalEvent as MouseEvent & {sourceCapabilities?:{firesTouchEvents?:boolean}};
+        const touchGenerated = "touches" in input || input.sourceCapabilities?.firesTouchEvents === true;
+        if (item && opensCasePage(compact, lastPointerType, touchGenerated)) {
+          window.location.assign(item.href);
+          return;
+        }
         popup.current?.remove(); pinned = true;
         if (item) { showProject(item); hovered = item.id; }
         else {
@@ -320,7 +330,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       </div>
       <p className={searching ? "sr-only" : "law-live-message"} role="status">{searching ? "Searching..." : searchMessage}</p>
       {results.length > 1 && <div className="law-address-results">{results.map((r, i) => <button key={i} type="button" onClick={() => choose(r)}>{r.label}</button>)}</div>}
-      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover or tap an outline for details."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : flumLoading ? "Loading future land use…" : compact ? "Click a boundary for details" : "Hover or tap a project"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{combined?" · Dashed gray: city limits":""}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
+      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover to preview, click to open a project. On touchscreens, tap to preview."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : flumLoading ? "Loading future land use…" : compact ? "Click a boundary for details" : "Hover to preview · Click to open · Tap to preview"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{combined?" · Dashed gray: city limits":""}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
       {!compact && <div className="law-map-bottom"><span>{mapped.length} projects shown</span>{!fullPage && <a href={areaPath(jurisdiction)+"#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
         {mapInfo}
       </div>}

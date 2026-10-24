@@ -8,10 +8,13 @@ import type{HearingFeed}from"../localities/types";
 export type HomeHearing={id:string;title:string;summary:string;startsAt:string;body:string;href:string;commentUrl?:string};
 export type HomeDecision={id:string;title:string;outcome:string;date?:string;href:string;sourceUrl?:string};
 export type HomeAreaData={id:string;hearings:HomeHearing[];decisions:HomeDecision[]};
-export function homeAreaData(area:AreaDefinition,feed:HearingFeed):HomeAreaData{
+export function homeAreaData(area:AreaDefinition,feed:HearingFeed,now=new Date()):HomeAreaData{
+  const today=new Intl.DateTimeFormat("en-CA",{timeZone:area.timezone,year:"numeric",month:"2-digit",day:"2-digit"}).format(now);
+  const cutoff=new Date(today+"T12:00:00Z");cutoff.setUTCDate(cutoff.getUTCDate()-90);
+  const oldest=cutoff.toISOString().slice(0,10);
   const cases=caseCatalog(feed);const hearings=new Map<string,HomeHearing>();
-  for(const h of cases){const next=getCaseNextHearing(h,feed,new Date(),area.id);if(!next)continue;const href=areaPath(area)+projectPathForCase(h.appId,area.id),key=href+next.startsAt;hearings.set(key,{id:h.appId,title:getProjectForCase(h.appId,area.id)?.name??h.displayTitle??caseDisplayTitle(h),summary:getProjectForCase(h.appId,area.id)?.summary??h.summary??[cleanCaseType(h.appTypeLabel),h.appAcres!=null?h.appAcres.toLocaleString("en-US",{maximumFractionDigits:2})+" acres":undefined].filter(Boolean).join(" · "),startsAt:next.startsAt,body:next.body,href,commentUrl:area.commentInstructionsUrl});}
+  for(const h of cases){const next=getCaseNextHearing(h,feed,now,area.id);if(!next)continue;const href=areaPath(area)+projectPathForCase(h.appId,area.id),key=href+next.startsAt;hearings.set(key,{id:h.appId,title:getProjectForCase(h.appId,area.id)?.name??h.displayTitle??caseDisplayTitle(h),summary:getProjectForCase(h.appId,area.id)?.summary??h.summary??[cleanCaseType(h.appTypeLabel),h.appAcres!=null?h.appAcres.toLocaleString("en-US",{maximumFractionDigits:2})+" acres":undefined].filter(Boolean).join(" · "),startsAt:next.startsAt,body:next.body,href,commentUrl:area.commentInstructionsUrl});}
   const decisions=new Map<string,HomeDecision>();
   for(const h of cases){const result=latestCouncilDecision(h)??(h.decisionRecorded?[...h.meetings].reverse().find(m=>/^(approved|denied)\b/i.test(m.result??"")):undefined);const outcome=result?.result??(/^(approved|denied)$/i.test(h.appStatus)?h.appStatus:undefined);if(!outcome)continue;const name=caseProjectName(h),key=(name??h.appId)+outcome;const item={id:h.appId,title:h.displayTitle??caseDisplayTitle(h),outcome:/^approved/i.test(outcome)?"Approved":"Denied",date:result?.date,sourceUrl:residentHref(result?.sourceUrl)??residentHref(h.externalUrl),href:areaPath(area)+projectPathForCase(h.appId,area.id)};const prior=decisions.get(key);if(!prior||(item.date??"")>(prior.date??""))decisions.set(key,item);}
-  return{id:area.id,hearings:[...hearings.values()].sort((a,b)=>a.startsAt.localeCompare(b.startsAt)).slice(0,4),decisions:[...decisions.values()].sort((a,b)=>(b.date??"").localeCompare(a.date??"")).slice(0,3)};
+  return{id:area.id,hearings:[...hearings.values()].sort((a,b)=>a.startsAt.localeCompare(b.startsAt)).slice(0,4),decisions:[...decisions.values()].filter(d=>d.date&&d.date>=oldest&&d.date<=today).sort((a,b)=>(b.date??"").localeCompare(a.date??"")).slice(0,3)};
 }
