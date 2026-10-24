@@ -59,3 +59,14 @@ it("renders verified automatic Council conditions and neutral counts while keepi
  const row=projectTimelineRows(data).find(r=>r.stage==="Council hearing");expect(row).toMatchObject({support:"0",neutral:"1"});
  expect(projectTimelineRows({...data,fields:data.fields.map(f=>f.key==="councilDecision"?{...f,status:"auto_published" as const,verification:v}:f)}).find(r=>r.stage==="Council hearing")?.text).not.toContain("Approved");
 });
+
+it("separates portal filenames from actual downloadable key documents",()=>{
+ const portal="https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/5294e9de-6a57-4fb3-8200-896ab70302b9?tab=attachments";
+ const report="https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=80b8084c-2c93-4738-8874-617d1c0ea8c8";
+ const documents=projectDocumentList([{id:"SPP-00176-2026",label:"Lake Lowell Estates",portalUrl:portal,retrievalFailed:false,documents:[
+ {label:"Lake Lowell Estates Preliminary Plat Updated.pdf",url:portal,sourceUrl:portal},
+ {label:"Lake Lowell Estates Staff report and plat exhibits",url:report,sourceUrl:report},
+ {label:"Neighborhood Meeting Sign-in Sheet.pdf",url:portal,sourceUrl:portal},
+ ]}], true);
+ expect(documents.key.map(d=>d.url)).toEqual([report]);expect(documents.portal).toHaveLength(1);expect(documents.other).toEqual([]);
+});

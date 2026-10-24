@@ -45,10 +45,21 @@ export function projectDensity(overview: ProjectOverview): string | undefined {
   const homes = numericFact(overview.homes), acres = numericFact(overview.acres);
   return homes && acres ? "~" + (homes / acres).toFixed(1) + " homes/acre" : undefined;
 }
-export function projectDocumentList(groups: ProjectCaseDocuments[]) {
-  const all = uniqueDocumentLinks(groups.flatMap((g) => g.documents));
+export function projectDocumentList(groups: ProjectCaseDocuments[], separatePortalInventory = false) {
+  const inventory = uniqueDocumentLinks(groups.flatMap((g) => g.documents));
+  // A portal attachment tab is not a downloadable document. Keep its filenames
+  // as inventory instead of making multiple misleading PDF links to one portal.
+  const portal = inventory.filter(d => separatePortalInventory && isPortalInventoryUrl(d.url));
+  const all = inventory.filter(d => !separatePortalInventory || !isPortalInventoryUrl(d.url));
   const key = all.filter((d) => /staff[\s_-]*report|decision[\s_-]*letter|reasoned|findings|site[\s_-]*plan|concept|prelim(?:inary)?[\s_-]*plat/i.test(d.label));
   const order = (label: string) => /staff[\s_-]*report/i.test(label) ? 0 : /decision|reasoned|findings/i.test(label) ? 1 : 2;
   key.sort((a,b) => order(a.label)-order(b.label));
-  return { key, other: all.filter((d) => !key.includes(d)) };
+  return { key, other: all.filter((d) => !key.includes(d)), portal };
+}
+
+export function isPortalInventoryUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return /(^|\.)tylerhost\.net$/i.test(url.hostname) && /#\/plan\//i.test(url.hash);
+  } catch { return false; }
 }

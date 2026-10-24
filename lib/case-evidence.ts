@@ -10,6 +10,16 @@ export type CaseVisual = {
 
 /** Verified public document metadata remains available when EnerGov is down. */
 export const CASE_EVIDENCE: Record<string, { documentNames: string[]; address?: string; sourceUrl: string; reportUrl?: string; applicationCopy?: {headline:string;explanation:string;page:number;sourceDate:string}; visuals?: CaseVisual[] }> = {
+  "SPP-00176-2026": {
+    documentNames: ["Lake Lowell Estates · Council staff report, preliminary plat and landscape exhibits · Aug 3, 2026"],
+    sourceUrl: "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=9826",
+    reportUrl: "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=80b8084c-2c93-4738-8874-617d1c0ea8c8",
+  },
+  "ANN-00355-2026": {
+    documentNames: ["Lake Lowell Estates · Council staff report, preliminary plat and landscape exhibits · Aug 3, 2026"],
+    sourceUrl: "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=9826",
+    reportUrl: "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=80b8084c-2c93-4738-8874-617d1c0ea8c8",
+  },
   "ANN-00368-2026": {
     documentNames:["ANN-00368-2026_Americrete Annex_Staff Report PZ"],
     sourceUrl:"https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062",
