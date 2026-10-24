@@ -122,9 +122,13 @@ export async function discoverNampaDocuments(options: { caseIds?: string[]; budg
             if(previous?.hash===hash&&!retryDue(previous))return;
             if(!options.store)pages=await withDocument("nampa",digest(meeting.agendaUrl),async()=>ocrMissingPages(bytes,await extractNativePdfPages(bytes)));
             else {
-              await ingestDocuments(options.store,[{areaId:"nampa",url:meeting.agendaUrl,title:meeting.title+" agenda — "+meeting.date,kind:"agenda",caseIds:[],fields:[]}],{run:currentRun(),budgetMs:Math.max(0,deadline-Date.now()),download:async()=>bytes});
+              await ingestDocuments(options.store,[{areaId:"nampa",url:meeting.agendaUrl,title:meeting.title+" agenda — "+meeting.date,kind:"agenda",caseIds:[],fields:[],meeting:{body:meeting.body,date:meeting.date,isHearing:false,minutesUrl:meeting.minutesUrl}}],{run:currentRun(),budgetMs:Math.max(0,deadline-Date.now()),download:async()=>bytes});
               const saved=(await options.store.read()).documents[digest(meeting.agendaUrl)];
-              if(saved?.hash!==hash||saved.state!=="complete")return;
+              if(saved?.hash!==hash||saved.state!=="complete"){
+                // Enqueue deferred OCR for the larger extraction budget, then match its cached text next run.
+                documents.push({areaId:"nampa",url:meeting.agendaUrl,title:meeting.title+" agenda — "+meeting.date,kind:"agenda",caseIds:[],fields:[],meeting:{body:meeting.body,date:meeting.date,isHearing:false,minutesUrl:meeting.minutesUrl}});
+                return;
+              }
               pages=saved.pages;
             }
           }

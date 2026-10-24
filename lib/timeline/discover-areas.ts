@@ -79,6 +79,16 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
    for(const root of new Set(roots))if(root&&allowedSource(root,area.id)&&/Browse\.aspx|sharepoint\.com|AgendaViewer|MinutesViewer|AgendaOnline|meetings\.municode\.com/i.test(root))libraryJobs.push({area,h,url:root});
   }
  }
+ // OCR completed by the extraction phase is matched here without another OCR call or archive traversal.
+ for(const d of Object.values(state.documents)){
+  if(d.kind!=="agenda"||d.content!==undefined||d.state!=="complete"||!d.pages.length)continue;
+  const areaId=d.areaId??"nampa",ids=areaCases.get(areaId);if(!ids)continue;
+  const text=d.pages.map(p=>p.text).join("\n").toUpperCase();
+  const matched=[...ids].filter(id=>new RegExp("\\b"+id.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","i").test(text));
+  if(!matched.length)continue;
+  documents.push({areaId,url:d.url,title:d.title,kind:"agenda",caseIds:matched,fields:[],meeting:d.meeting});
+  if(d.meeting?.minutesUrl&&allowedSource(d.meeting.minutesUrl,areaId))documents.push({areaId,url:d.meeting.minutesUrl,title:d.meeting.body+" minutes — "+d.meeting.date,kind:"minutes",caseIds:matched});
+ }
  // Resume known sources even if this run's case-record discovery stopped early.
  for(const d of Object.values(state.documents))if(d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting});
  // Probe public portals once per run so blocked hosts are reported even when using cached notices.

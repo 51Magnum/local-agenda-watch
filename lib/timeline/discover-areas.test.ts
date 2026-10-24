@@ -38,3 +38,13 @@ it("descends into an agency subfolder, prefers the final report, and caches its 
  expect((await store.read()).documents[documentId(doc)].pages[0]).toMatchObject({page:1,method:"native"});
  expect((await store.read()).documents[documentId(doc)].hash).toHaveLength(64);
 });
+
+it("matches previously deferred agenda OCR to cases and discovers minutes without calling OCR again",async()=>{
+ const state=emptyEvidenceState(),h=countyFromFeature({properties:{PermitNum:"CR2025-0012"}}),url="https://landhearingsagenda.canyoncounty.id.gov/DownloadDocument/agenda";
+ const d:SourceDocument={areaId:"canyon-county",url,title:"Agenda",caseIds:[],kind:"agenda",fields:[],meeting:{body:"Board of County Commissioners",date:"2026-11-02",isHearing:false,minutesUrl:"https://landhearingsagenda.canyoncounty.id.gov/DownloadDocument/minutes"}};
+ state.documents[documentId(d)]={...d,id:documentId(d),hash:"cached",pages:[{page:1,text:"Public hearing CR2025-0012",method:"ocr"}],checkedAt:"",state:"complete"};
+ const s:EvidenceStore={read:async()=>structuredClone(state),mutate:async fn=>fn(state)};
+ const feeds=Object.fromEntries(Object.keys(AREAS).map(id=>[id,emptyFeed()]));feeds["canyon-county"]={active:[h] as never[],completed:[]};
+ const found=await discoverCaseDocuments({store:s,feeds,deadline:Date.now()+1000});
+ expect(found.documents.find(d=>d.url===url)?.caseIds).toEqual([h.appId]);expect(found.documents.some(d=>d.kind==="minutes"&&d.caseIds.includes(h.appId))).toBe(true);
+});
