@@ -55,7 +55,9 @@ export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: H
   if (outcome && /^(approved|denied|withdrawn)\b/i.test(outcome)) {
     progress.push({ label: outcome.charAt(0).toUpperCase() + outcome.slice(1) + " by " + area.bodies.decision.shortLabel + (finalDate ? ", " + shortDate(finalDate, area) : ""), state: "current" });
   } else if (item.stage === "Decided" || item.stage === "Recorded") {
-    progress.push({ label: item.stage === "Recorded" ? "Recorded" : "Decided", state: "current" });
+    const recordOutcome = hearing?.appStatus.trim().match(/^(approved|denied|withdrawn)\b/i)?.[0];
+    const label = recordOutcome ? recordOutcome.charAt(0).toUpperCase() + recordOutcome.slice(1) + " — city record" + (item.stage === "Recorded" ? " · Recorded" : "") : item.stage === "Recorded" ? "Recorded" : "Decided; outcome not specified in city record";
+    progress.push({ label, state: "current" });
   } else {
     const upcoming = meetings.find(m => m.date >= today && !m.continuedNote);
     if (upcoming) progress.push({ label: meetingLabel(upcoming, area), state: "current" });

@@ -40,3 +40,15 @@ it("removes case codes from fallback names and rejects oversized explanation",()
  expect(popupProjectName("Gas station (CUP-00411-2026)")).toBe("Gas station");
  const model=buildPopupModel(item,AREAS.nampa,undefined,[field("popupExplanation",Array(26).fill("word").join(" "))],now);expect(model.explanation).toBeUndefined();
 });
+
+it("shows an explicit official approval even when no Council meeting result is linked",()=>{
+ const model=buildPopupModel({...item,id:"PANN-00003-2026",title:"Pre-annexation",stage:"Decided"},AREAS.nampa,{appStatus:"Approved",meetings:[]} as unknown as Hearing,[],now);
+ expect(model.progress.at(-1)).toEqual({label:"Approved — city record",state:"current"});
+ expect(JSON.stringify(model)).not.toContain("by Council");expect(model.progress.some(p=>p.state==="future")).toBe(false);
+});
+it("distinguishes a recorded denial from a generic completed status without guessing a date",()=>{
+ const denied=buildPopupModel({...item,stage:"Decided"},AREAS.nampa,{appStatus:"Denied",meetings:[]} as unknown as Hearing,[],now);
+ expect(denied.progress.at(-1)?.label).toBe("Denied — city record");
+ const complete=buildPopupModel({...item,stage:"Decided"},AREAS.nampa,{appStatus:"Complete",meetings:[]} as unknown as Hearing,[],now);
+ expect(complete.progress.at(-1)?.label).toBe("Decided; outcome not specified in city record");
+});
