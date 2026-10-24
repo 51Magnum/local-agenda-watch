@@ -2,7 +2,7 @@ import {withDbTransfer,currentDbTransfer} from "@/lib/db-transfer";
 import { refreshConfiguredMaps } from "@/lib/maps/refresh";
 import { discoverCaseDocuments } from "./discover";
 import { ingestDocuments,digest,documentId } from "./ingest";
-import { extractNativePdfPages } from "./extract";
+import { EXTRACTION_VERSION, extractNativePdfPages } from "./extract";
 import { checkpointRun,safeRunSummary,withRun } from "./telemetry";
 import type { EvidenceStore } from "./store";
 import type { IngestionRun } from "./types";
@@ -22,7 +22,7 @@ export async function refreshTimelines(store:EvidenceStore,{budgetMs=280000,disc
    if(plan?.modes.includes("daily-sweep")){
     const state=await store.read();
     // Daily discovery notices new files; only due hearings re-download already completed PDFs.
-    documents=documents.filter(d=>d.kind==="case-record"||state.documents[documentId(d)]?.state!=="complete"||d.caseIds.some(id=>plan.recheckCaseIdsByArea[d.areaId??"nampa"]?.includes(id)));
+    documents=documents.filter(d=>d.kind==="case-record"||state.documents[documentId(d)]?.state!=="complete"||state.documents[documentId(d)]?.extractionVersion!==EXTRACTION_VERSION||d.caseIds.some(id=>plan.recheckCaseIdsByArea[d.areaId??"nampa"]?.includes(id)));
    }
    if(plan?.modes.length===1&&plan.modes[0]==="pre-hearing")documents=documents.filter(d=>d.kind==="agenda"||d.kind==="staff-report");
    await ingestDocuments(store,documents,{run,budgetMs:Math.max(0,deadline-Date.now()),onChecked:d=>{const ids=checkedCases[d.areaId??"nampa"]??=[];for(const id of d.caseIds)if(!ids.includes(id))ids.push(id);},text:async bytes=>discovery.extractedPages.get(digest(bytes))??extractNativePdfPages(bytes)});

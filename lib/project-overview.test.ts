@@ -49,3 +49,13 @@ it("keeps UTC evening hearings on their Denver calendar day",()=>{
   expect(shortDate("2026-11-03T01:00:00.000Z")).toBe("Nov 2, 2026");expect(hearingDay("2026-11-03T01:00:00.000Z")).toBe("2026-11-02");
   expect(projectTimelineRows({...base,next:{...base.next!,startsAt:"2026-11-03T01:00:00.000Z"}}).find(r=>r.stage==="Council hearing")?.text).toBe("Upcoming: Nov 2, 2026");
 });
+
+it("renders verified automatic Council conditions and neutral counts while keeping outcomes manually gated",()=>{
+ const v={version:1 as const,case:true,body:true,quote:true,value:true,secondPass:true,reasons:[],checkedAt:"2026-10-24"};
+ const auto=(key:import("./timeline/types").FieldKey,value:string)=>({...field(key,value),status:"auto_published" as const,sourceKind:"minutes" as const,verification:v,body:"City Council"});
+ const conditions=auto("councilConditions","Preserve trees.");
+ const data={...base,fields:[field("councilDecision","approved"),field("decisionDate","2026-10-19"),field("councilHearingDate","2026-10-19"),auto("councilSpeakersFor","0"),auto("councilSpeakersNeutral","1"),conditions]};
+ const html=renderToStaticMarkup(createElement(ProjectProposal,{overview:{summary:"A proposal."},data}));expect(html).toContain("City Council conditions");expect(html).toContain("Preserve trees.");
+ const row=projectTimelineRows(data).find(r=>r.stage==="Council hearing");expect(row).toMatchObject({support:"0",neutral:"1"});
+ expect(projectTimelineRows({...data,fields:data.fields.map(f=>f.key==="councilDecision"?{...f,status:"auto_published" as const,verification:v}:f)}).find(r=>r.stage==="Council hearing")?.text).not.toContain("Approved");
+});

@@ -7,6 +7,7 @@ vi.mock("./ingest",async importOriginal=>({...await importOriginal<typeof import
 vi.mock("@/lib/maps/refresh",()=>({refreshConfiguredMaps:vi.fn()}));
 import {discoverCaseDocuments} from "./discover";
 import {documentId,ingestDocuments} from "./ingest";
+import {EXTRACTION_VERSION} from "./extract";
 import {refreshTimelines} from "./refresh";
 const docs:SourceDocument[]=[
  {areaId:"nampa",url:"https://www.cityofnampa.us/staff.pdf",title:"Staff report",kind:"staff-report",caseIds:["CASE"]},
@@ -15,7 +16,7 @@ const docs:SourceDocument[]=[
  {areaId:"nampa",url:"https://www.cityofnampa.us/decision.pdf",title:"Decision",kind:"council-decision",caseIds:["CASE"]},
 ];
 const makeStore=()=>{
- const state=emptyEvidenceState();for(const d of docs)state.documents[documentId(d)]={...d,id:documentId(d),hash:"v1",state:"complete",checkedAt:"2026-10-01",pages:[]};
+ const state=emptyEvidenceState();for(const d of docs)state.documents[documentId(d)]={...d,id:documentId(d),hash:"v1",extractionVersion:EXTRACTION_VERSION,state:"complete",checkedAt:"2026-10-01",pages:[]};
  const store:EvidenceStore={read:async()=>state,mutate:async update=>update(state)};return store;
 };
 const plan:SchedulePlan={slot:"today:am",fullSweep:true,modes:["daily-sweep"],meetingIds:[],recheckCaseIdsByArea:{}};

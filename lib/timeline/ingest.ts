@@ -1,12 +1,12 @@
 import { allowedSource, sourceRequest, isBlockedSource } from "./source-access";
 import { checkpointRun, recordHost, withDocument, withRun } from "./telemetry";
 import { parseEnerGovDocumentReference, downloadEnerGovReference } from "@/lib/sources/energov-document";
+import { correctedKey, bodyLabel, speakerPosition, countSpeakers, verifyCandidate, canAutoApprove, reconcileFields } from "./verification";
 import { explicitReportFacts } from "./report-facts";
 import { createHash } from "node:crypto";
-import { DECISION_KEYS, type EvidenceField, type IngestionRun, type PageText, type SourceDocument } from "./types";
+import { DECISION_KEYS, type EvidenceField, type IngestionRun, type PageText, type SourceDocument, type EvidenceState } from "./types";
 import type { EvidenceStore } from "./store";
-import { extractFields, extractNativePdfPages, ocrMissingPages, validateExtraction, EXTRACTION_VERSION, type Extraction } from "./extract";
-
+import { extractFields, extractNativePdfPages, ocrMissingPages, validateExtraction, EXTRACTION_VERSION, verifySecondPass, type Extraction } from "./extract";
 export const digest = (value: string | Uint8Array) => createHash("sha256").update(value).digest("hex");
 export const officialDocumentUrl = allowedSource;
 export async function downloadDocument(url: string, areaId = "nampa"): Promise<Uint8Array> {
@@ -29,16 +29,23 @@ export type IngestDependencies = {
   text?: (bytes: Uint8Array) => Promise<PageText[]>;
   ocr?: typeof ocrMissingPages;
   extract?: (document: SourceDocument, caseId: string, pages: PageText[]) => Promise<Extraction>;
+  secondPass?: typeof verifySecondPass;
   budgetMs?: number;
   onChecked?: (document:SourceDocument)=>void;
   run?: IngestionRun;
   /** Separate checkpoint for native-only previews; never suppresses full extraction. */
   extractionVersion?: string;
 };
+function saveFact(state:EvidenceState,field:EvidenceField){
+ const existing=state.fields[field.id]??Object.values(state.fields).find(f=>f.documentId===field.documentId&&f.documentHash===field.documentHash&&f.caseId===field.caseId&&f.key===field.key);
+ if(!existing)state.fields[field.id]=field;
+ else if(existing.status==="pending")state.fields[existing.id]={...field,id:existing.id};
+}
 async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocument[], dependencies: IngestDependencies = {}): Promise<IngestionRun> {
   const run: IngestionRun = dependencies.run!;
   const deadline = Date.now() + (dependencies.budgetMs ?? 190000);
   const extractionVersion = dependencies.extractionVersion ?? EXTRACTION_VERSION;
+  const legacy=await store.read();if(reconcileFields(legacy))await store.mutate(reconcileFields);
   const unique = [...new Map(documents.map((d) => [documentId(d), d])).values()];
   for (const document of unique) {
     if (Date.now() > deadline) { run.errors.push("Processing budget reached; remaining documents will be retried on the next run."); break; }
@@ -88,10 +95,10 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
           if (deadline - Date.now() < 50000) throw new Error("Case extraction deferred to next run: processing budget reached");
           const warnings: string[] = [];
           const candidates = await (dependencies.extract ?? extractFields)(document, caseId, pages);
-          const extracted = validateExtraction(candidates, pages, { warnings });
+          const extracted = validateExtraction(candidates, pages, { warnings, retainFlagged: true });
           const explicit = validateExtraction(explicitReportFacts(document, caseId, pages), pages);
           for (const key of Object.keys(explicit) as (keyof Extraction)[]) {
-            if (explicit[key].value !== null && extracted[key].value === null) {
+            if (explicit[key].value !== null && (extracted[key].value === null || warnings.some(w=>w.endsWith(" for "+key)))) {
               extracted[key] = explicit[key];
               for (let i = warnings.length - 1; i >= 0; i--) if (warnings[i].endsWith(" for " + key)) warnings.splice(i, 1);
             }
@@ -102,29 +109,43 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
               if (state.documents[id]?.hash === hash) state.documents[id].validationWarnings = [...(state.documents[id].validationWarnings ?? []), ...warnings.map((warning) => caseId + ": " + warning)];
             });
           }
+          const decisionKeys = Object.keys(extracted).filter(k=>DECISION_KEYS.has(k as EvidenceField["key"]) && extracted[k as keyof Extraction].value!==null) as (keyof Extraction)[];
+          let second:Partial<Extraction>={};
+          if(decisionKeys.length && (dependencies.secondPass || (!dependencies.extract && process.env.OPENAI_API_KEY)) && deadline-Date.now()>45000){
+            try{second=await (dependencies.secondPass??verifySecondPass)(document,caseId,pages,decisionKeys);}catch{warnings.push("Independent pass unavailable; manual review required");}
+          }
           for (const [key, value] of Object.entries(extracted)) {
             if (value.value === null || value.page === null || !value.quote) continue;
-            const fieldKey = key as EvidenceField["key"];
-            if (["pzSpeakersFor", "pzSpeakersAgainst"].includes(fieldKey) && document.kind !== "minutes") continue;
-            if (fieldKey === "pzConditions" && !["pz-decision", "minutes"].includes(document.kind)) continue;
+            const fieldKey = correctedKey(key as EvidenceField["key"],document);
+            if (/Speakers(?:For|Against|Neutral)$/.test(fieldKey) && document.kind !== "minutes") continue;
+            if (/Conditions$/.test(fieldKey) && !["pz-decision", "council-decision", "findings", "minutes"].includes(document.kind)) continue;
             if (fieldKey === "decisionDate" && document.kind === "pz-decision") continue;
             if (["popupHeadline", "popupExplanation"].includes(fieldKey) && !["staff-report", "case-record"].includes(document.kind)) continue;
             if (DECISION_KEYS.has(fieldKey) && !["pz-decision", "council-decision", "findings", "minutes"].includes(document.kind)) continue;
             const ocr = pages.find((p) => p.page === value.page)?.method === "ocr";
-            facts.push({ areaId, id: digest(id + hash + caseId + key + value.value + value.page), documentId: id, documentHash: hash, caseId, key: fieldKey, value: value.value, page: document.content === undefined ? value.page : null, quote: value.quote,
+            const position=speakerPosition(fieldKey);
+            if(position && value.speakers && value.complete)value.value=String(countSpeakers(value.speakers,position));
+            const independent=second[key as keyof Extraction];
+            const independentValue=independent && position && independent.complete && independent.speakers ? String(countSpeakers(independent.speakers,position)) : independent?.value;
+            const independentChecks=independent?.value && independent.quote ? verifyCandidate({areaId,id:"check",documentId:id,documentHash:hash,caseId,key:fieldKey,value:independentValue??"",page:independent.page,quote:independent.quote,confidence:independent.confidence,sourceUrl:document.url,sourceKind:document.kind,status:"pending",createdAt:now},document,pages,{speakers:independent.speakers,complete:independent.complete,secondPass:true}) : undefined;
+            const agrees=!!independentChecks?.case && !!independentChecks.body && !!independentChecks.quote && !!independentChecks.value && !!independent && independent.confidence>=.9 && independentValue===value.value && !!independent.quote && pages.some(p=>p.page===independent.page&&p.text.replace(/\s+/g," ").includes(independent.quote!.replace(/\s+/g," "))) && correctedKey(key as EvidenceField["key"],document)===(key as EvidenceField["key"]);
+            const candidate:EvidenceField={ areaId, body:bodyLabel(document), id: digest(id + hash + caseId + fieldKey + value.value + value.page), documentId: id, documentHash: hash, caseId, key: fieldKey, value: value.value, page: document.content === undefined ? value.page : null, quote: value.quote,
               sourceUrl: document.url, sourceKind: document.kind, confidence: value.confidence,
-              status: !DECISION_KEYS.has(fieldKey) && !ocr && value.confidence >= 0.95 ? "auto_published" : "pending", createdAt: now });
+              status: "pending", createdAt: now };
+            candidate.verification=verifyCandidate(candidate,document,pages,{speakers:value.speakers,complete:value.complete,secondPass:agrees});
+            if(canAutoApprove(candidate) || (!DECISION_KEYS.has(fieldKey)&&!ocr&&value.confidence>=.95&&candidate.verification.case&&candidate.verification.quote&&candidate.verification.body))candidate.status="auto_published";
+            facts.push(candidate);
           }
         }
         await store.mutate((state) => {
           if (state.documents[id]?.hash !== hash) throw new Error("Document changed during extraction");
-          for (const field of facts.filter((f) => f.caseId === caseId)) state.fields[field.id] ??= field;
+          for (const field of facts.filter((f) => f.caseId === caseId)) saveFact(state,field);
           state.documents[id].processedCaseIds = [...new Set([...(state.documents[id].processedCaseIds ?? []), caseId])];
         });
       }
       await store.mutate((state) => {
         if (state.documents[id]?.hash !== hash) throw new Error("Document changed during extraction");
-        for (const field of facts) state.fields[field.id] ??= field;
+        for (const field of facts) saveFact(state,field);
         state.documents[id].failCount=0; state.documents[id].state = "complete"; state.documents[id].extractedAt = now; delete state.documents[id].error;
       });
       run.processed++;
@@ -151,7 +172,6 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
   await checkpointRun(store,run);
   return run;
 }
-
 export async function ingestDocuments(store:EvidenceStore,documents:SourceDocument[],dependencies:IngestDependencies={}):Promise<IngestionRun>{
  const run=dependencies.run??{startedAt:new Date().toISOString(),checked:0,processed:0,skipped:0,errors:[]};
  if(dependencies.run)return ingestDocumentsInRun(store,documents,{...dependencies,run});

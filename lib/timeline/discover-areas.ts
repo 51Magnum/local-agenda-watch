@@ -93,7 +93,7 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
   if(d.meeting?.minutesUrl&&allowedSource(d.meeting.minutesUrl,areaId))documents.push({areaId,url:d.meeting.minutesUrl,title:d.meeting.body+" minutes — "+d.meeting.date,kind:"minutes",caseIds:matched});
  }
  // Resume known sources even if this run's case-record discovery stopped early.
- for(const d of Object.values(state.documents))if((d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))||(!options.caseIdsByArea&&d.kind==="agenda"&&d.content===undefined&&d.state!=="complete"&&Boolean(d.meeting)))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting});
+ for(const d of Object.values(state.documents))if((d.caseIds.some(id=>areaCases.get(d.areaId??"nampa")?.has(id))||(!options.caseIdsByArea&&d.kind==="agenda"&&d.content===undefined&&d.state!=="complete"&&Boolean(d.meeting)))&&AREAS[d.areaId??"nampa"]?.status==="live")documents.push({areaId:d.areaId,url:d.url,title:d.title,kind:d.kind,caseIds:d.caseIds,content:d.content,fields:d.fields,meeting:d.meeting,caseContexts:d.caseContexts});
  // Probe public portals once per run so blocked hosts are reported even when using cached notices.
  await Promise.all(areas.filter(a=>a.id==="meridian"&&Date.now()<deadline-13000).map(async a=>{if(a.sources.hearingsSchedule)try{await (await sourceRequest(a.sources.hearingsSchedule,a.id)).body?.cancel();}catch{warnings.push(a.id+": hearing notice host unavailable; using cached meeting associations");}}));
  if(options.store){
@@ -108,6 +108,11 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
  const merged=new Map<string,SourceDocument>();
  for(const d of documents){const id=documentId(d),old=merged.get(id);merged.set(id,old?{...old,caseIds:[...new Set([...old.caseIds,...d.caseIds])]}:d);}
  const result=[...merged.values()];
+ for(const document of result)if(document.kind==="minutes"){
+  const feed=feeds.find(f=>f.area.id===(document.areaId??"nampa"))?.feed;
+  const meeting=feed?.agendaMeetings?.find(m=>m.minutesUrl===document.url);
+  if(meeting){document.meeting={body:meeting.body,date:meeting.date,isHearing:true};document.caseContexts=meeting.items.map(item=>({caseIds:item.caseIds,title:item.title}));}
+ }
  if(options.store)await options.store.mutate(s=>{for(const d of result){const id=documentId(d);if(!s.documents[id])s.documents[id]={...d,id,hash:"",pages:[],checkedAt:new Date().toISOString(),state:"processing",failCount:0};}});for(const area of areas)if(options.run)options.run.areas![area.id].documents=result.filter(d=>(d.areaId??"nampa")===area.id).length;
  // New evidence first; round-robin jurisdictions to avoid one large area's packet backlog monopolizing runs.
  const pending=result.filter(d=>{const old=state.documents[documentId(d)];return !old||old.state!=="complete";}),complete=result.filter(d=>!pending.includes(d));

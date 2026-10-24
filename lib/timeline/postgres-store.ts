@@ -2,7 +2,7 @@ import {trackedRows} from "@/lib/db-transfer";
 import {Pool,type PoolClient} from "pg";
 import {createHash,randomUUID} from "node:crypto";
 import type {EvidenceStore} from "./store";
-import {emptyEvidenceState,type EvidenceState,type StoredDocument,type EvidenceField} from "./types";
+import {DECISION_KEYS, LOW_STAKES_KEYS,emptyEvidenceState,type EvidenceState,type StoredDocument,type EvidenceField} from "./types";
 import {compactRun,documentMetadata} from "./compact";
 let pool:Pool|undefined,initialized:Promise<void>|undefined;
 const db=()=>pool??=new Pool({connectionString:process.env.DATABASE_URL,max:3,connectionTimeoutMillis:10000});
@@ -50,6 +50,7 @@ async function initialize(){
 }
 export function createPostgresStore({buffered=false}:{buffered?:boolean}={}):EvidenceStore{
  let state:EvidenceState|undefined,loading:Promise<EvidenceState>|undefined;
+ const reviewedBaseline=new Map<string,string>();
  const baseline=new Map<string,string>(),loadedPages=new Set<string>();
  const metrics={readBytes:0,writeBytes:0,queries:0,legacyRowBytes:undefined as number|undefined};
  async function query(client:Pool|PoolClient,sql:string,params:unknown[]=[]){metrics.queries++;metrics.writeBytes+=Buffer.byteLength(json(params));const r=await client.query(sql,params);metrics.readBytes+=Buffer.byteLength(json(trackedRows("timeline",r.rows)));return r;}
@@ -67,7 +68,7 @@ export function createPostgresStore({buffered=false}:{buffered?:boolean}={}):Evi
    await initialize();const s=emptyEvidenceState();
    const results=await Promise.all([query(db(),"SELECT data FROM law_timeline_documents"),query(db(),"SELECT data FROM law_timeline_fields"),query(db(),"SELECT data FROM law_timeline_audit"),query(db(),"SELECT data FROM law_timeline_runs ORDER BY id DESC LIMIT 10"),query(db(),"SELECT id,data FROM law_timeline_meta")]);
    for(const row of results[0].rows){const d={...row.data,pages:[]} as StoredDocument;s.documents[d.id]=d;}
-   for(const row of results[1].rows)s.fields[row.data.id]=row.data;
+   for(const row of results[1].rows){s.fields[row.data.id]=row.data;reviewedBaseline.set(row.data.id,row.data.reviewedAt??"");}
    s.audit=results[2].rows.map(r=>r.data);s.runs=results[3].rows.map(r=>r.data).reverse();
    for(const row of results[4].rows){if(row.id==="progress")Object.assign(s,row.data);if(row.id==="migration-v2")metrics.legacyRowBytes=row.data.legacyRowBytes;}
    for(const [key,value]of entries(s))baseline.set(key,hash(value));state=s;return s;
@@ -84,8 +85,8 @@ export function createPostgresStore({buffered=false}:{buffered?:boolean}={}):Evi
     if(key.startsWith("d:"))await query(client,"INSERT INTO law_timeline_documents VALUES($1,$2,$3,$4,$5::jsonb) ON CONFLICT(id) DO UPDATE SET area_id=excluded.area_id,case_ids=excluded.case_ids,hash=excluded.hash,data=excluded.data",[id,v.areaId??"nampa",v.caseIds,v.hash,json(v)]);
     else if(key.startsWith("f:")){
      const f=value as EvidenceField;
-     const result=await query(client,`INSERT INTO law_timeline_fields SELECT $1,$2,$3,$4,$5,$6,$7::jsonb WHERE EXISTS(SELECT 1 FROM law_timeline_documents WHERE id=$4 AND hash=$5) ON CONFLICT(id) DO UPDATE SET status=excluded.status,data=excluded.data WHERE law_timeline_fields.status NOT IN ('approved','rejected') OR excluded.status IN ('approved','rejected')`,[id,f.areaId??"nampa",f.caseId,f.documentId,f.documentHash,f.status,json(f)]);
-     if(!result.rowCount&&["approved","rejected"].includes(f.status))throw new Error("Source document changed during review");
+     const result=await query(client,`INSERT INTO law_timeline_fields SELECT $1,$2,$3,$4,$5,$6,$7::jsonb WHERE EXISTS(SELECT 1 FROM law_timeline_documents WHERE id=$4 AND hash=$5) ON CONFLICT(id) DO UPDATE SET status=excluded.status,data=excluded.data WHERE coalesce(law_timeline_fields.data->>'reviewedAt','')=$8 AND (law_timeline_fields.status NOT IN ('approved','rejected') OR excluded.status IN ('approved','rejected') OR $9 OR law_timeline_fields.data->>'key' IS DISTINCT FROM excluded.data->>'key')`,[id,f.areaId??"nampa",f.caseId,f.documentId,f.documentHash,f.status,json(f),reviewedBaseline.get(id)??"",state!.audit.some(a=>a.fieldId===id&&a.action==="undo"&&a.at>= (reviewedBaseline.get(id)??"~"))]);
+     if(!result.rowCount)throw new Error("Source document changed during review");
     }
     else if(key.startsWith("a:"))await query(client,"INSERT INTO law_timeline_audit VALUES($1,$2::jsonb) ON CONFLICT DO NOTHING",[id,json(v)]);
     else if(key.startsWith("r:"))await query(client,"INSERT INTO law_timeline_runs VALUES($1,$2::jsonb) ON CONFLICT(id) DO UPDATE SET data=excluded.data",[id,json(v)]);
@@ -93,7 +94,7 @@ export function createPostgresStore({buffered=false}:{buffered?:boolean}={}):Evi
    }
    for(const d of pageChanges){await query(client,`INSERT INTO law_timeline_pages SELECT $1,$2,(p->>'page')::integer,p FROM jsonb_array_elements($3::jsonb) p ON CONFLICT(document_id,hash,page) DO UPDATE SET data=excluded.data`,[d.id,d.hash,json(d.pages)]);}
    await client.query("DELETE FROM law_timeline_runs WHERE id NOT IN (SELECT id FROM law_timeline_runs ORDER BY id DESC LIMIT 10)");
-   await client.query("COMMIT");for(const [k,v]of rows)baseline.set(k,hash(v));for(const d of pageChanges)baseline.set("p:"+d.id,hash({hash:d.hash,pages:d.pages}));
+   await client.query("COMMIT");for(const [k,v]of rows)baseline.set(k,hash(v));for(const f of Object.values(state!.fields))reviewedBaseline.set(f.id,f.reviewedAt??"");for(const d of pageChanges)baseline.set("p:"+d.id,hash({hash:d.hash,pages:d.pages}));
   }catch(error){await client.query("ROLLBACK");throw error;}finally{client.release();}
  }
  return {metrics,read,flush,async mutate(update){if(!state)await read();const result=update(state!);if(!buffered)await flush();return result;},
@@ -106,7 +107,7 @@ export function createPostgresStore({buffered=false}:{buffered?:boolean}={}):Evi
   },
   async readCase(areaId,caseIds){
    await initialize();const s=emptyEvidenceState();
-   const [docs,fields]=await Promise.all([query(db(),"SELECT data-'fields'-'validationWarnings' AS data FROM law_timeline_documents WHERE area_id=$1 AND case_ids && $2::text[]",[areaId,caseIds]),query(db(),"SELECT f.data FROM law_timeline_fields f JOIN law_timeline_documents d ON d.id=f.document_id AND d.hash=f.document_hash WHERE f.area_id=$1 AND f.case_id=ANY($2::text[]) AND d.data->>'state'='complete' AND (f.status='approved' OR (f.status='auto_published' AND NOT(f.data->>'key'=ANY($3::text[]))))",[areaId,caseIds,["pzResult","pzVote","pzConditions","pzSpeakersFor","pzSpeakersAgainst","councilDecision","councilVote","decisionDate"]])]);
+   const [docs,fields]=await Promise.all([query(db(),"SELECT data-'fields'-'validationWarnings' AS data FROM law_timeline_documents WHERE area_id=$1 AND case_ids && $2::text[]",[areaId,caseIds]),query(db(),"SELECT f.data FROM law_timeline_fields f JOIN law_timeline_documents d ON d.id=f.document_id AND d.hash=f.document_hash WHERE f.area_id=$1 AND f.case_id=ANY($2::text[]) AND d.data->>'state'='complete' AND (f.status='approved' OR (f.status='auto_published' AND NOT(f.data->>'key'=ANY($3::text[]))))",[areaId,caseIds,[...DECISION_KEYS].filter(key=>!LOW_STAKES_KEYS.has(key))])]);
    for(const r of docs.rows)s.documents[r.data.id]={...r.data,pages:[]};for(const r of fields.rows)s.fields[r.data.id]=r.data;
    console.info("[timeline:transfer]",json({scope:"public-case-cache-miss",areaId,caseCount:caseIds.length,...metrics}));return s;
   },

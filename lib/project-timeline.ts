@@ -2,15 +2,15 @@ import{displayArea}from"./areas/format";
 import type { ProjectStage } from "./projects";
 import { PROJECT_STAGES } from "./projects";
 import { latestField, type TimelineData } from "./timeline/public";
-import { DECISION_KEYS, evidenceSourceHref, type EvidenceField, type FieldKey } from "./timeline/types";
-export type ProjectTimelineRow = { stage: ProjectStage; date?: string; text: string; source?: string; caseIds?: string[]; vote?: string; support?: string; opposition?: string; sources?: string[] };
+import { DECISION_KEYS, verifiedAutoField, evidenceSourceHref, type EvidenceField, type FieldKey } from "./timeline/types";
+export type ProjectTimelineRow = { stage: ProjectStage; date?: string; text: string; source?: string; caseIds?: string[]; vote?: string; support?: string; opposition?: string; neutral?: string; sources?: string[] };
 export function shortDate(value: string, timezone=displayArea().timezone) {
   return new Intl.DateTimeFormat("en-US", {timeZone:value.length===10?"UTC":timezone,month:"short",day:"numeric",year:"numeric"}).format(new Date(value.length===10?value+"T12:00:00Z":value));
 }
 export function hearingDay(value: string, timezone=displayArea().timezone) { return value.length===10?value:new Intl.DateTimeFormat("en-CA",{timeZone:timezone}).format(new Date(value)); }
 export function projectTimelineRows(data: TimelineData, today = new Intl.DateTimeFormat("en-CA",{timeZone:displayArea(data.areaId).timezone}).format(new Date())): ProjectTimelineRow[] {
   const area=displayArea(data.areaId);const formatDay=(value:string)=>shortDate(value,area.timezone);
-  const fields = data.fields.filter((f) => !DECISION_KEYS.has(f.key) || f.status === "approved");
+  const fields = data.fields.filter((f) => !DECISION_KEYS.has(f.key) || f.status === "approved" || verifiedAutoField(f));
   const rows: ProjectTimelineRow[] = [];
   for (const stage of PROJECT_STAGES) {
     const dateKey: FieldKey = stage === "Submitted" ? "appliedDate" : stage === "Under review" ? "reviewDate" : stage === "P&Z hearing" ? "pzHearingDate" : stage === "Council hearing" ? "councilHearingDate" : "decisionDate";
@@ -35,14 +35,14 @@ export function projectTimelineRows(data: TimelineData, today = new Intl.DateTim
     for(const result of results){
       const related=fields.filter(f=>f.caseId===result.caseId&&f.documentId===result.documentId);
       const day=latestField(related,pz?"pzHearingDate":"decisionDate")?.value??fallbackDay;
-      const sameMeetingMinutes = fields.filter(f => f.caseId === result.caseId && f.sourceKind === "minutes" && fields.some(dateField => dateField.documentId === f.documentId && dateField.caseId === result.caseId && dateField.key === dateKey && dateField.value === day));
+      const sameMeetingMinutes = fields.filter(f => f.caseId === result.caseId && f.sourceKind === "minutes" && fields.some(dateField => dateField.documentId === f.documentId && dateField.caseId === result.caseId && dateField.key === dateKey && dateField.value === day) || f.caseId===result.caseId && f.sourceKind==="minutes" && data.appearances.some(a=>a.sourceUrl===f.sourceUrl&&a.date===day&&body.test(a.body)));
       const voteField=latestField(related,pz?"pzVote":"councilVote")??latestField(sameMeetingMinutes,pz?"pzVote":"councilVote");
-      const supportField=pz?latestField(sameMeetingMinutes,"pzSpeakersFor"):undefined,oppositionField=pz?latestField(sameMeetingMinutes,"pzSpeakersAgainst"):undefined;
-      const vote=voteField?.value,support=supportField?.value,opposition=oppositionField?.value;
-      const sources=[...new Set([result,voteField,supportField,oppositionField].filter((f):f is EvidenceField=>Boolean(f)).map(evidenceSourceHref))];
+      const supportField=latestField(sameMeetingMinutes,pz?"pzSpeakersFor":"councilSpeakersFor"),oppositionField=latestField(sameMeetingMinutes,pz?"pzSpeakersAgainst":"councilSpeakersAgainst"),neutralField=latestField(sameMeetingMinutes,pz?"pzSpeakersNeutral":"councilSpeakersNeutral");
+      const vote=voteField?.value,support=supportField?.value,opposition=oppositionField?.value,neutral=neutralField?.value;
+      const sources=[...new Set([result,voteField,supportField,oppositionField,neutralField].filter((f):f is EvidenceField=>Boolean(f)).map(evidenceSourceHref))];
       const text=pz?result.value==="recommend approval"?"Recommended approval":result.value==="recommend denial"?"Recommended denial":"Hearing continued":result.value.charAt(0).toUpperCase()+result.value.slice(1);
-      const key=JSON.stringify([day,result.value,vote,support,opposition]);const existing=grouped.get(key);
-      if(existing){existing.caseIds!.push(result.caseId);existing.sources=[...new Set([...(existing.sources??[]),...sources])];}else grouped.set(key,{stage,date:day,text:text+(day?", "+formatDay(day):""),source:evidenceSourceHref(result),sources,caseIds:[result.caseId],vote,support,opposition});
+      const key=JSON.stringify([day,result.value,vote,support,opposition,neutral]);const existing=grouped.get(key);
+      if(existing){existing.caseIds!.push(result.caseId);existing.sources=[...new Set([...(existing.sources??[]),...sources])];}else grouped.set(key,{stage,date:day,text:text+(day?", "+formatDay(day):""),source:evidenceSourceHref(result),sources,caseIds:[result.caseId],vote,support,opposition,neutral});
     }
     if(grouped.size){for(const row of grouped.values())rows.push({...row,caseIds:grouped.size>1||results.length<data.caseIds.length?row.caseIds:undefined});}
     if (!pz && data.cityDecisions?.length) {

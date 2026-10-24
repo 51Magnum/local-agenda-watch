@@ -9,6 +9,7 @@ vi.mock("pg",()=>({Pool:class{
  return {...r,rowCount:r.affectedRows??r.rows.length};}
  async connect(){return {query:this.query.bind(this),release:()=>{}};}
 }}));
+import {reviewBatch,undoBatch} from "./review";
 import {createPostgresStore} from "./postgres-store";
 it("migrates inside Postgres, reads metadata once, writes deltas, and fetches only one case without page text",async()=>{
  const db=new PGlite();harness.db=db;
@@ -34,5 +35,11 @@ it("migrates inside Postgres, reads metadata once, writes deltas, and fetches on
  expect((await createPostgresStore().readCase!("nampa",["ONE"])).fields.f1.status).toBe("approved");
  const lease=await store.lease!("ingest",60000);expect(lease).toBeTruthy();expect(await publicStore.lease!("ingest",60000)).toBeNull();await store.release!("ingest",lease!);
  expect(await publicStore.lease!("ingest",60000)).toBeTruthy();
+ const editing=createPostgresStore();const reviewed=await reviewBatch(editing,[{id:"f2",action:"approve",value:"11"}]);
+ expect((await createPostgresStore().read()).fields.f2.value).toBe("11");
+ await undoBatch(createPostgresStore(),reviewed.batchId);
+ expect((await createPostgresStore().read()).fields.f2).toMatchObject({status:"auto_published",value:"10"});
+ const stale=createPostgresStore();await stale.read();await reviewBatch(createPostgresStore(),[{id:"f2",action:"reject"}]);
+ await expect(reviewBatch(stale,[{id:"f2",action:"approve"}])).rejects.toThrow("Source document changed");
  await db.close();
 },30000);
