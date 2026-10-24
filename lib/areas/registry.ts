@@ -1,3 +1,4 @@
+import {IDAHO_CITIES} from "./idaho-cities";
 import type { MultiPolygon, Polygon } from "geojson";
 import nampaBoundary from "./boundaries/nampa.json";
 import canyonBoundary from "./boundaries/canyon-county.json";
@@ -20,6 +21,7 @@ export type AreaDefinition = {
 const cityData="https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer";
 const hearings="https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer";
 export const AREAS:Record<string,AreaDefinition>={
+
   nampa:{id:"nampa",slug:"nampa",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Nampa",type:"city",status:"live",timezone:"America/Denver",center:[-116.5635,43.5739],boundary:nampaBoundary as MultiPolygon,boundaryLabel:"City limits and official area of impact",boundarySources:[cityData+"/6",cityData+"/12"],
     addressSearch:{addressField:"SiteAddres",where:"UPPER(SiteCity) = 'NAMPA' AND SiteState = 'ID'",suffix:"Nampa, ID"},
     flumCompatibility:{
@@ -39,8 +41,8 @@ export const AREAS:Record<string,AreaDefinition>={
   "canyon-county":{id:"canyon-county",slug:"canyon-county",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Canyon County",type:"county",status:"live",timezone:"America/Denver",center:[-116.7,43.63],boundary:canyonBoundary as MultiPolygon,coverageBoundary:canyonJurisdiction as MultiPolygon,boundaryLabel:"Unincorporated Canyon County",coverageNote:"County land-use cases. Incorporated cities have separate planning authorities; a postal city does not determine jurisdiction.",boundarySources:["https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1","https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0"],
     bodies:{planning:{id:"P&Z",label:"Planning & Zoning Commission",shortLabel:"Planning / Examiner",stageLabel:"P&Z hearing"},decision:{id:"Board of County Commissioners",label:"Board of County Commissioners",shortLabel:"Board",stageLabel:"Board hearing"},additional:[{id:"Hearing Examiner",label:"Hearing Examiner",shortLabel:"Examiner",stageLabel:"Hearing Examiner"}]},
     meetingRules:{agendaNotice:"Staff reports are published seven days before the scheduled hearing.",commentInstructions:"Use the case-specific comment deadline and contact shown in the County's hearing record. Confirm how to submit comments and the hearing location in the published notice."},commentInstructionsUrl:"https://landhearingsagenda.canyoncounty.id.gov/Landing",
-    sources:{cases:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0",hearingsSchedule:"https://landhearingsagenda.canyoncounty.id.gov/Landing",geometry:["https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0"],flum:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1",agendas:"https://landhearingsagenda.canyoncounty.id.gov/Landing",parcelFallback:"https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"}}
-
+    sources:{cases:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0",hearingsSchedule:"https://landhearingsagenda.canyoncounty.id.gov/Landing",geometry:["https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0"],flum:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1",agendas:"https://landhearingsagenda.canyoncounty.id.gov/Landing",parcelFallback:"https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"}},
+  ...IDAHO_CITIES,
 };
 export const FEATURED_AREA_ID="nampa";
 export function getArea(id:string){return Object.hasOwn(AREAS,id)?AREAS[id]:undefined;}

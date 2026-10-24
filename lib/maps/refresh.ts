@@ -45,14 +45,13 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
   const [layers, feed, flum, reports] = await Promise.all([
     Promise.all(config.caseGeometry.layers.map(async (url) => { try { return { url, data: await geoQuery(url, config.caseGeometry.where ? { where: config.caseGeometry.where } : {}) }; } catch { warnings.push("A case boundary layer is unavailable; existing cached outlines are retained."); return { url, data: undefined }; } })),
     config.loadCases?.().catch(() => { warnings.push("The case schedule is unavailable; source layer records are shown."); return undefined; }),
-    previous?.flum && Date.now() - Date.parse(previous.flum.updatedAt) < WEEK ? Promise.resolve(previous.flum) : fetchFlum(config).catch(() => { warnings.push("Future land use is temporarily unavailable or out of date."); return previous?.flum; }),
+    previous?.flum && Date.now() - Date.parse(previous.flum.updatedAt) < WEEK ? Promise.resolve(previous.flum) : config.flum.layerUrl ? fetchFlum(config).catch(() => { warnings.push("Future land use is temporarily unavailable or out of date."); return previous?.flum; }) : Promise.resolve(undefined),
     config.loadCaseReports?.(Math.min(deadline-16000,Date.now()+16000)).catch(()=>[]) ?? Promise.resolve([]),
   ]);
   const hearings = new Map(caseCatalog(feed).map((h) => [h.appId, h]));
   const retained = new Set<string>();
   const polygons = new Map<string, { features: Feature[]; url: string; parcel?: unknown }>();
-  for (const layer of layers) for (const item of layer.data?.features ?? []) {
-    const source = config.parseFeature?.(item) ?? hearingFromFeature(config, item); if (!source.appId) continue;
+  for (const layer of layers) for (const item of layer.data?.features ?? []) for (const source of config.parseFeatures?.(item) ?? [config.parseFeature?.(item) ?? hearingFromFeature(config, item)]) { if (!source.appId) continue;
     if (!hearings.has(source.appId)) hearings.set(source.appId, source);
     const existing = polygons.get(source.appId);
     if (!existing || existing.url === layer.url) polygons.set(source.appId, { url: layer.url, features: [...(existing?.features ?? []), item], parcel: config.caseGeometry.fields.parcel ? item.properties?.[config.caseGeometry.fields.parcel] : undefined });
@@ -74,7 +73,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
     let plan = null;
     let geometryUpdatedAt = geometry ? now.toISOString() : undefined;
     if (!citywide && !geometry) {
-      let parcels = parcelNumbers(polygon?.parcel, config.caseGeometry.parcelFallback.ignored);
+      let parcels = config.parcelNumbersForCase?.(hearing) ?? parcelNumbers(polygon?.parcel, config.caseGeometry.parcelFallback.ignored);
       if (!parcels.length && hearing.energovPlanId && config.recordClient && Date.now() < deadline - 16000) {
         try { plan = await config.recordClient.getPlan(hearing.energovPlanId, { revalidate: 3600 }); parcels = parcelNumbers((plan as unknown as Record<string, unknown> | null)?.[config.caseGeometry.parcelFallback.recordField], config.caseGeometry.parcelFallback.ignored); } catch { /* No guessed pin when the city case record cannot be read. */ }
       }

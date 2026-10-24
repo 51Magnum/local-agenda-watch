@@ -1,0 +1,5 @@
+import {createRecordAreaPages} from "./record-pages";
+import {MUNICIPAL_IDS,MUNICIPAL_SOURCES} from "@/lib/sources/municipal-config";
+import {MUNICIPAL_FEEDS} from "@/lib/localities/municipal";
+import {municipalRecord,municipalTitle,municipalSummary,municipalStage} from "@/lib/sources/municipal";
+export const MUNICIPAL_PAGES=Object.fromEntries(MUNICIPAL_IDS.map(id=>[id,createRecordAreaPages({areaId:id,showMap:id!=="middleton",groupMeetings:true,loadFeed:MUNICIPAL_FEEDS[id],record:municipalRecord,title:municipalTitle,summary:municipalSummary,stage:municipalStage,sourceLabel:"Official city planning records and hearing agendas",sourceUrl:MUNICIPAL_SOURCES[id].agendas,dataWindow:MUNICIPAL_SOURCES[id].cases?"Official tracker applications, plus public hearings collected from the last 120 days. Case outcomes come from the city tracker; earlier hearing history may be incomplete.":"Initial coverage from published land-use notices and the last 120 days of collected agendas. This is not a complete inventory; no outcome is inferred from a past hearing."})]));

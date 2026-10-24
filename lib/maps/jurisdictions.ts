@@ -1,3 +1,6 @@
+import {MUNICIPAL_IDS,MUNICIPAL_SOURCES} from "@/lib/sources/municipal-config";
+import {MUNICIPAL_FEEDS} from "@/lib/localities/municipal";
+import {municipalCaseIds,municipalFromFeature,municipalStage,municipalTitle,municipalSummary,MUNICIPAL_TYPES,type MunicipalCase} from "@/lib/sources/municipal";
 import {getMeridianHearings}from "@/lib/localities/meridian";
 import {MERIDIAN_WHERE,MERIDIAN_TYPES,meridianFromFeature,meridianStage,meridianTitle,meridianSummary}from "@/lib/sources/meridian";
 import { getCanyonCountyHearings } from "@/lib/localities/canyon-county";
@@ -12,6 +15,13 @@ import type { JurisdictionConfig, MapVisual } from "./types";
 
 /** Add one configuration entry to enable another jurisdiction's routes and map. */
 export const JURISDICTIONS: Record<string, JurisdictionConfig> = {
+ ...Object.fromEntries(MUNICIPAL_IDS.map(id=>{const s=MUNICIPAL_SOURCES[id];return [id,{
+ area:AREAS[id],id,name:s.name,mapOnHub:true,center:[...s.center],zoom:12,bounds:[...s.bounds],state:{abbreviation:"ID",fips:"16",name:"Idaho"},
+ caseGeometry:{layers:s.cases?[s.cases]:[],...(id==="kuna"?{where:"Active_Application = 'Y' OR Case_No LIKE '%"+String(new Date().getFullYear()).slice(2)+"-%' OR Case_No LIKE '%"+String(new Date().getFullYear()-1).slice(2)+"-%'"}:{}),caseIdField:s.caseField,fields:{type:s.caseField,phase:s.statusField,status:s.statusField,title:s.nameField},parcelFallback:{layerUrl:id==="star"?"https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/Ada_County_Parcels/FeatureServer/142":"",matchField:"PARCEL",recordField:"",ignored:[]}},
+ flum:{layerUrl:s.flum,categoryField:s.flumField,colorSource:"renderer",planName:s.flumLabel,label:s.flumLabel,adoptedDate:null,adoptionSource:s.flumSource,dataNote:"City GIS designation; plan amendments may be newer. No zoning compatibility is inferred.",simplifyTolerance:.00002},
+ addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:s.name+", ID"},stages:{phase:{},status:{},recorded:{phases:[],statuses:[]}},caseTypes:MUNICIPAL_TYPES,citywideTypes:["OA","ORD"],isCitywide:h=>h.citywide===true,loadCases:MUNICIPAL_FEEDS[id],
+ parcelNumbersForCase:id==="star"?h=>(h as MunicipalCase).municipal.parcelIds??[]:undefined,parseFeatures:f=>municipalCaseIds(id,String(f.properties?.[s.caseField]??"")).map(caseId=>municipalFromFeature(id,f,caseId)),stageForCase:municipalStage,presentation:h=>({title:municipalTitle(h),summary:municipalSummary(h),href:areaPath(AREAS[id])+"/plan/"+encodeURIComponent(h.appId)})
+ } satisfies JurisdictionConfig];})),
   nampa: {
     area: AREAS.nampa, id: AREAS.nampa.id, name: AREAS.nampa.name, mapOnHub: true, center: AREAS.nampa.center, zoom: 11, bounds: [-116.85, 43.3, -116.3, 43.85], state: { abbreviation: "ID", fips: "16", name: "Idaho" },
     caseGeometry: { layers: AREAS.nampa.sources.geometry!, caseIdField: "APPID", fields: { type: "APPTYPE", phase: "APPPHASE", status: "APPSTATUS", title: "APPSCOPE", acres: "APPACRES", link: "APPLINK" }, parcelFallback: { layerUrl: AREAS.nampa.sources.parcelFallback!, matchField: "ACCOUNT", recordField: "MainParcelNumber", ignored: ["R1542600000"] } },

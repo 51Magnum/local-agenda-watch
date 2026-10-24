@@ -1,3 +1,4 @@
+vi.mock("@/lib/localities/municipal",()=>({MUNICIPAL_LOCALITIES:Object.fromEntries(["kuna","star","middleton","eagle"].map(id=>[id,{slug:id,tracked:[],getHearings:async()=>({active:[],completed:[]})}])),MUNICIPAL_FEEDS:Object.fromEntries(["kuna","star","middleton","eagle"].map(id=>[id,async()=>({active:[],completed:[]})]))}));
 import * as mapStore from "@/lib/maps/store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";

@@ -19,6 +19,8 @@ export type JurisdictionConfig = {
   caseVisuals?: Record<string, MapVisual>;
   loadCaseReports?: (deadline:number) => Promise<{caseIds:string[];label:string;url:string}[]>;
   isCitywide?: (hearing: Hearing) => boolean;
+  parcelNumbersForCase?: (hearing: Hearing) => string[];
+  parseFeatures?: (feature: import("geojson").Feature) => Hearing[];
   parseFeature?: (feature: import("geojson").Feature) => Hearing;
   stageForCase?: (hearing: Hearing) => MapStage;
   loadCases?: () => Promise<HearingFeed>; recordClient?: EnerGovClient;
