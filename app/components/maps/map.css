@@ -30,3 +30,4 @@
 .law-jurisdiction-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.law-jurisdiction-chips button{border:1px solid var(--map-border,#d4d4d8);border-radius:999px;padding:6px 12px;font-size:.8rem}.law-jurisdiction-chips button[aria-pressed="true"]{background:#0f766e;color:#fff;border-color:#0f766e}.law-popup-jurisdiction{font-weight:600;color:var(--map-muted)}.law-map-stage-key{max-height:calc(100% - 55px);overflow:auto;overscroll-behavior:contain}
 
 .law-map-stage-key{max-width:min(320px,calc(100% - 80px))}.law-map-stage-key .law-map-legend{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.law-map-stage-key .law-map-legend span{overflow-wrap:anywhere}.law-map-stage-key .law-map-legend span:has(i){grid-column:auto}.law-search{flex-wrap:wrap}.law-search input{flex:1 1 210px}
+.law-map .law-jurisdiction-chips button[type=button][aria-pressed="true"]{background:#0f766e;color:#fff;border-color:#0f766e}
