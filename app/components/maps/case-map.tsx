@@ -10,7 +10,7 @@ import { geometryCentroid, nearbyCases } from "@/lib/maps/spatial";
 import { createMapPin, readSharedSearch, searchAddress, searchHash } from "@/lib/maps/address-search";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./map.css";
-import {locationMapUrl} from "@/lib/areas/coverage";
+import {liveAreaAtPoint,locationMapUrl} from "@/lib/areas/coverage";
 import {commonStageLabel} from "@/lib/maps/radius";
 import InterestForm from "@/app/components/locations/interest-form";
 import {areaPath,getArea,mapStageLabel} from "@/lib/areas/registry";
@@ -74,6 +74,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   const searchGeneration = useRef(0);
   const [flumOn, setFlumOn] = useState(false); const [flum, setFlum] = useState<FlumCache>();
   const [address, setAddress] = useState(""); const [searching, setSearching] = useState(false); const [searchMessage, setSearchMessage] = useState(""); const [results, setResults] = useState<AddressResult[]>([]); const [location, setLocation] = useState<AddressResult>();
+  useEffect(()=>{if(!combined||!location)return;const selected=liveAreaAtPoint(location.coordinates);if(selected)try{localStorage.setItem("law:last-area",selected.id);}catch{}},[combined,location]);
   const openProject = useRef<((id: string) => void) | null>(null);
   const container = useRef<HTMLDivElement>(null); const map = useRef<LibreMap | null>(null); const popup = useRef<Popup | null>(null); const [ready, setReady] = useState(false);
   const idsKey = caseIds?.join(",") ?? "";
@@ -100,7 +101,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   }, [jurisdiction,idsKey,combinedKey]);
   useEffect(() => {
     if (compact) return;
-    try { if(getArea(jurisdiction)?.status==="live")localStorage.setItem("law:last-area",jurisdiction); } catch {}
+    try { if(!combined&&getArea(jurisdiction)?.status==="live")localStorage.setItem("law:last-area",jurisdiction); } catch {}
     const restore = () => { const query=new URLSearchParams(window.location.search); setFlumOn(query.get("flum")==="1"); const shared = readSharedSearch(window.location.hash) ?? readSharedSearch("#"+query); if (shared) { if(!combined){const destination=locationMapUrl(shared.coordinates,shared.label);if(destination){window.location.replace(destination+(shared.source==="map"?"&pin=1":"")+(query.get("flum")==="1"?"&flum=1":""));return;}} if(!window.location.hash&&!query.get("q")&&!query.get("address"))shared.source="map"; setLocation(shared); setAddress(shared.source === "map" ? "" : shared.label); setWithinMile(Boolean(combined)||(window.location.hash?new URLSearchParams(window.location.hash.slice(1)):query).get("nearby") === "1"); const r=Number(query.get("r")??1);if(combined&&Number.isFinite(r)&&r>=.25&&r<=10)setRadius(r); } };
     restore(); window.addEventListener("hashchange", restore); return () => window.removeEventListener("hashchange", restore);
   }, [compact,jurisdiction,combined]);

@@ -9,7 +9,7 @@ export const maxDuration=120;
 export async function GET(request:Request){
  const q=new URL(request.url).searchParams,coordinates:[number,number]=[Number(q.get("lng")),Number(q.get("lat"))],r=Number(q.get("r")??1);
  if(!q.get("lng")||!q.get("lat")||!isLonLat(coordinates)||!Number.isFinite(r)||r<.25||r>10)return Response.json({error:"Choose a location and a radius from 0.25 to 10 miles."},{status:400});
- const areas=liveAreasInRadius(coordinates,r).filter(a=>(!q.get("country")||a.country===q.get("country"))&&(!q.get("state")||a.state===q.get("state")));
+ const areas=liveAreasInRadius(coordinates,r);
  const bounds=radiusBounds(coordinates,r),warnings:string[]=[],flum=q.get("layer")==="flum";
  if(flum){
   const layers=await Promise.all(areas.map(async area=>{const config=getJurisdiction(area.id);if(!config?.flum.layerUrl)return;try{const data=await readFlumSnapshot(area.id,{bounds});if(data)return {area,flum:data,categoryField:config.flum.categoryField};}catch{}warnings.push(area.name+" future land use unavailable.");}));
