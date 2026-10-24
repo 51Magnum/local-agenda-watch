@@ -1,7 +1,7 @@
 import {refreshTimelines} from "../lib/timeline/refresh";
 import {acquireLease,getEvidenceStore,releaseLease} from "../lib/timeline/store";
 async function main() {
-  const store = getEvidenceStore();
+  const store = getEvidenceStore({buffered:true});
   const lease = await acquireLease(store, "ingest");
   if (!lease) throw new Error("Another ingestion job is running");
   try {

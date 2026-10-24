@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { createPostgresStore } from "./postgres-store";
 import { mkdir, readFile, writeFile, rename, rmdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -7,19 +7,12 @@ import { emptyEvidenceState, type EvidenceState } from "./types";
 export interface EvidenceStore {
   read(): Promise<EvidenceState>;
   mutate<T>(update: (state: EvidenceState) => T): Promise<T>;
-}
-let pool: Pool | undefined;
-let initialized: Promise<void> | undefined;
-function postgres() {
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 3, connectionTimeoutMillis: 10000 });
-  return pool;
-}
-async function initializeDatabase() {
-  initialized ??= (async () => {
-    await postgres().query("CREATE TABLE IF NOT EXISTS law_evidence (id text PRIMARY KEY, state jsonb NOT NULL)");
-    await postgres().query("INSERT INTO law_evidence (id, state) VALUES ('timeline', $1::jsonb) ON CONFLICT DO NOTHING", [JSON.stringify(emptyEvidenceState())]);
-  })().catch((error) => { initialized = undefined; throw error; });
-  return initialized;
+  flush?():Promise<void>;
+  pages?(id:string):Promise<import("./types").PageText[]>;
+  readCase?(areaId:string,caseIds:string[]):Promise<EvidenceState>;
+  lease?(name:string,milliseconds:number):Promise<string|null>;
+  release?(name:string,token:string):Promise<void>;
+  metrics?:{readBytes:number;writeBytes:number;queries:number;legacyRowBytes?:number};
 }
 export function createFileStore(filename: string): EvidenceStore {
   const lockPath = filename + ".lock";
@@ -49,33 +42,22 @@ export function createFileStore(filename: string): EvidenceStore {
     } finally { await rmdir(lockPath); }
   } };
 }
-export function getEvidenceStore(): EvidenceStore {
+export function getEvidenceStore(options:{buffered?:boolean}={}): EvidenceStore {
   if (!process.env.DATABASE_URL) {
     if (process.env.VERCEL) throw new Error("DATABASE_URL is required for durable timeline storage on Vercel");
     return createFileStore(process.env.TIMELINE_LOCAL_PATH ?? path.join(process.cwd(), ".data", "timeline.json"));
   }
-  return {
-    async read() { await initializeDatabase(); return (await postgres().query("SELECT state FROM law_evidence WHERE id = 'timeline'")).rows[0].state as EvidenceState; },
-    async mutate(update) {
-      await initializeDatabase(); const client = await postgres().connect();
-      try {
-        await client.query("BEGIN");
-        const state = (await client.query("SELECT state FROM law_evidence WHERE id = 'timeline' FOR UPDATE")).rows[0].state as EvidenceState;
-        const result = update(state);
-        await client.query("UPDATE law_evidence SET state = $1::jsonb WHERE id = 'timeline'", [JSON.stringify(state)]);
-        await client.query("COMMIT"); return result;
-      } catch (error) { await client.query("ROLLBACK"); throw error; }
-      finally { client.release(); }
-    },
-  };
+  return createPostgresStore(options);
 }
 export async function acquireLease(store: EvidenceStore, name: string, milliseconds = 900000) {
+  if(store.lease)return store.lease(name,milliseconds);
   return store.mutate((state) => {
     if ((state.leases[name]?.expiresAt ?? 0) > Date.now()) return null;
     const token = randomUUID(); state.leases[name] = { token, expiresAt: Date.now() + milliseconds }; return token;
   });
 }
 export async function releaseLease(store: EvidenceStore, name: string, token: string) {
+  if(store.release){await store.release(name,token);return;}
   await store.mutate((state) => { if (state.leases[name]?.token === token) delete state.leases[name]; });
 }
 

@@ -62,7 +62,7 @@ async function RecordCasePage({params}:{params:Promise<{planNumber:string}>}){
  const overview=config.facts?.(h)??{variant:"nonresidential" as const,request:{value:h.appTypeLabel,url:publicRecordUrl??""}};
  for(const value of Object.values(overview))if(value&&typeof value==="object"&&"url" in value&&!residentHref(value.url))value.url=publicRecordUrl??"";
  const title=titleForCase(h),summary=summaryForCase(h),next=h.decisionRecorded?undefined:getCaseNextHearing(h,feed,new Date(),area.id),href=base+"/plan/"+encodeURIComponent(id);
- let snapshot;try{snapshot=await readMapSnapshot(area.id);}catch{/* Map can load independently. */}
+ let snapshot;try{snapshot=await readMapSnapshot(area.id,{caseIds:[id],includeFlum:false});}catch{/* Map can load independently. */}
  const mapped=snapshot?.cases.find(c=>c.id===id),flum=mapped?.flumCategories.join(" / ");
  const documents=[...new Map([...(h.record.documents??[]),...h.record.events.flatMap(e=>e.documents)].map(d=>[d.url,d])).values()].filter(d=>residentHref(d.url));
  const key=documents.filter(d=>/staff report|FCO|findings|decision|plat|site plan|meeting packet|official application materials|public hearing notice|proposed ordinance|^Agenda$/i.test(d.label+" "+d.filename));

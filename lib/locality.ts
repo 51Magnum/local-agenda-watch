@@ -1,7 +1,7 @@
 import { areaPath } from "@/lib/areas/registry";
-import { headers } from "next/headers";
 
-const APEX_DOMAIN = "localagendawatch.com";
+
+
 const APEX_ORIGIN = "https://www.localagendawatch.com";
 
 export type LocalityContext = {
@@ -17,17 +17,8 @@ export type LocalityContext = {
  * the caller into dynamic rendering.
  */
 export async function getLocalityContext(): Promise<LocalityContext> {
-  const h = await headers();
-  const host = (h.get("host") ?? "").toLowerCase().split(":")[0];
-  const parts = host.split(".");
-  if (parts.length < 3) return { onSubdomain: false, subdomainSlug: null };
-
-  const [subdomain, ...rest] = parts;
-  if (rest.join(".") !== APEX_DOMAIN) {
-    return { onSubdomain: false, subdomainSlug: null };
-  }
-  if (subdomain === "www") return { onSubdomain: false, subdomainSlug: null };
-  return { onSubdomain: true, subdomainSlug: subdomain };
+  // Locality subdomains redirect to canonical area paths in proxy.ts.
+  return {onSubdomain:false,subdomainSlug:null};
 }
 
 /**

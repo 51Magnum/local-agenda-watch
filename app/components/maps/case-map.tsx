@@ -84,9 +84,9 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   }, [data, matchHeightTo]);
   useEffect(() => {
     const abort = new AbortController();
-    fetch("/api/maps/" + encodeURIComponent(jurisdiction), { signal: abort.signal, cache: "no-cache" }).then(async (r) => { if (!r.ok) throw new Error("Map data is temporarily unavailable."); setData(await r.json()); }).catch((e) => { if (!abort.signal.aborted) setError(e.message); });
+    fetch("/api/maps/" + encodeURIComponent(jurisdiction)+(idsKey?"?cases="+encodeURIComponent(idsKey):""), { signal: abort.signal, cache: "no-cache" }).then(async (r) => { if (!r.ok) throw new Error("Map data is temporarily unavailable."); setData(await r.json()); }).catch((e) => { if (!abort.signal.aborted) setError(e.message); });
     return () => abort.abort();
-  }, [jurisdiction]);
+  }, [jurisdiction,idsKey]);
   useEffect(() => {
     if (compact) return;
     try { if(getArea(jurisdiction)?.status==="live")localStorage.setItem("law:last-area",jurisdiction); } catch {}

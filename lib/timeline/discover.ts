@@ -114,6 +114,7 @@ export async function discoverNampaDocuments(options: { caseIds?: string[]; budg
           const bytes = await downloadDocument(meeting.agendaUrl);
           const hash = digest(bytes);
           const previous = cached.documents[digest(meeting.agendaUrl)];
+          if(previous?.hash===hash&&options.store?.pages)previous.pages=await options.store.pages(previous.id);
           const persisted=cached.discoveryText?.[digest(meeting.agendaUrl)];
           let pages:PageText[];
           if(persisted?.hash===hash)pages=persisted.pages;
@@ -132,7 +133,7 @@ export async function discoverNampaDocuments(options: { caseIds?: string[]; budg
               pages=saved.pages;
             }
           }
-          if(options.store)await options.store.mutate(state=>{(state.discoveryText??={})[digest(meeting.agendaUrl!)!]={hash,pages,checkedAt:new Date().toISOString()};});
+          // Pages are stored once with the document; no duplicate discoveryText archive.
           extractedPages.set(hash, pages);
           const text = pages.map((page) => page.text).join("\n");
           const matchedIds = caseIds.filter((caseId) => new RegExp("\\b" + caseId + "\\b", "i").test(text));

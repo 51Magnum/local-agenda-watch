@@ -1,3 +1,4 @@
+import {revalidateTag} from "next/cache";
 import { refreshTimelines } from "@/lib/timeline/refresh";
 import { secretMatches } from "@/lib/timeline/auth";
 import { acquireLease,getEvidenceStore,releaseLease } from "@/lib/timeline/store";
@@ -10,7 +11,7 @@ export async function GET(request: Request) {
   if (!process.env.OPENAI_API_KEY) return Response.json({ error: "OPENAI_API_KEY is not configured" }, { status: 503 });
   let store;
   let lease;
-  try { store = getEvidenceStore(); lease = await acquireLease(store, "ingest"); }
+  try { store = getEvidenceStore({buffered:true}); lease = await acquireLease(store, "ingest"); }
   catch (error) {
     console.error("[timeline:cron] Storage unavailable", error instanceof Error ? error.message : "Unknown error");
     return Response.json({ error: "Timeline storage is not configured or reachable" }, { status: 503 });
@@ -18,8 +19,9 @@ export async function GET(request: Request) {
   if (!lease) return Response.json({ status: "already running" }, { status: 409 });
   try {
     const {run,maps}=await refreshTimelines(store);
+    revalidateTag("case-timeline-v2",{expire:0});
     return Response.json({maps,checked:run.checked,processed:run.processed,skipped:run.skipped,areas:run.areas,hosts:run.hosts,
       tokens:{calls:run.usage?.length??0,input:run.usage?.reduce((n,u)=>n+u.inputTokens,0)??0,output:run.usage?.reduce((n,u)=>n+u.outputTokens,0)??0,total:run.usage?.reduce((n,u)=>n+u.totalTokens,0)??0},
-      errors:run.errors.length}, {headers:{"Cache-Control":"no-store"}});
+      transfer:run.transfer,errors:run.errors.length}, {headers:{"Cache-Control":"no-store"}});
   } finally { await releaseLease(store, "ingest", lease); }
 }

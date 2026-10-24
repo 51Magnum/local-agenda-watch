@@ -11,7 +11,7 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
 export type DocumentKind = "staff-report" | "pz-decision" | "council-decision" | "findings" | "minutes" | "agenda" | "case-record" | "other";
 export type PageText = { page: number; text: string; method: "native" | "ocr" | "structured" };
 export type SourceDocument = { areaId?: string; url: string; title: string; caseIds: string[]; kind: DocumentKind; content?: string; meeting?: { body: string; date: string; isHearing: boolean; minutesUrl?: string }; fields?: Array<{ key: FieldKey; value: string; quote: string; page: number | null }> };
-export type StoredDocument = SourceDocument & { id: string; hash: string; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; failCount?: number; lastAttemptAt?: string; state: "processing" | "complete" | "error" | "failed-permanent" };
+export type StoredDocument = SourceDocument & { id: string; hash: string; structured?:boolean; pageCount?:number; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; failCount?: number; lastAttemptAt?: string; state: "processing" | "complete" | "error" | "failed-permanent" };
 export type EvidenceField = {
   areaId?: string; id: string; documentId: string; documentHash: string; caseId: string; key: FieldKey; value: string;
   sourceUrl: string; page: number | null; quote: string; confidence: number; sourceKind: DocumentKind;
@@ -22,7 +22,7 @@ export type AuditEntry = { fieldId: string; at: string; action: "approve" | "edi
 export type UsageCall = { at: string; areaId: string; documentId?: string; operation: string; inputTokens: number; outputTokens: number; totalTokens: number };
 export type HostCheck = { areaId: string; host: string; outcome: "worked" | "blocked" | "unavailable"; detail?: string };
 export type AreaRunCount = { cases: number; visited: number; documents: number; extracted: number; processed?:number };
-export type IngestionRun = { startedAt: string; finishedAt?: string; checked: number; processed: number; skipped: number; errors: string[]; usage?: UsageCall[]; hosts?: HostCheck[]; areas?: Record<string, AreaRunCount> };
+export type IngestionRun = { startedAt: string; finishedAt?: string; checked: number; processed: number; skipped: number; errors: string[]; tokenTotals?:{calls:number;input:number;output:number;total:number}; transfer?:{readBytes:number;writeBytes:number;queries:number;legacyRowBytes?:number}; usage?: UsageCall[]; hosts?: HostCheck[]; areas?: Record<string, AreaRunCount> };
 export type EvidenceState = { version: 1; documents: Record<string, StoredDocument>; fields: Record<string, EvidenceField>; audit: AuditEntry[]; runs: IngestionRun[]; leases: Record<string, { token: string; expiresAt: number }>; cursor?: string; cursors?: Record<string,string>; folderQueues?: Record<string,string[]>; discoveryText?: Record<string,{hash:string;pages:PageText[];checkedAt:string}>; retryAudit?: {documentId:string;at:string}[] };
 export function emptyEvidenceState(): EvidenceState { return { version: 1, documents: {}, fields: {}, audit: [], runs: [], leases: {} }; }
 /** A report's action heading identifies workflow, not staff's position on approval. */

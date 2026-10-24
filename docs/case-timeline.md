@@ -56,3 +56,14 @@ Under-review dates use only an explicit EnerGov ReviewDate or ReviewStartDate. A
 EnerGov PDFs without a direct URL use the official public FileDownloadService protocol: metadata requested with a FileID header, then ranged downloads using its temporary FileToken. Tokens stay in memory and are never stored or logged. Every download rechecks case ownership, public visibility, and the attendance-sheet filter. IsOnline describes upload origin rather than visibility. Source citations open the official attachment list and retain the physical PDF page label; the portal does not offer a direct PDF page link. Listing a document does not mean it has been processed: decision fields remain pending until the PDF is ingested and a reviewer approves them.
 
 The shared September P&Z report uses the registered PrimeGov attachment as its canonical source. Its explicitly named EnerGov mirror is listed on case pages but is not downloaded a second time. The canonical PDF is still downloaded and hashed on each check, and new filenames remain discoverable.
+
+
+## Transfer-efficient storage (October 2026)
+
+Production timelines use normalized `law_timeline_documents`, `law_timeline_pages`, `law_timeline_fields`, `law_timeline_audit`, `law_timeline_runs`, `law_timeline_meta`, and `law_timeline_leases` tables. The one-time migration runs inside Postgres under a transaction/advisory lock; it preserves the legacy `law_evidence` row as a rollback archive but never reads it during normal operations. Migration logs report its uncompressed JSON size without downloading its content.
+
+A worker session loads metadata/fields once, then reads page text only for documents it needs. Changes remain in memory and only changed rows are flushed every 25 checked documents, immediately after OCR, and at the end. Already-completed unchanged documents cause no document update. Small lease rows coordinate overlapping jobs. Reviews retain their approval/rejection state when a worker checkpoints concurrently.
+
+Only the latest ten run summaries are retained, with aggregate tokens and transfer counters; per-call histories are not stored. Transfer counters measure JSON application payload bytes (not Neon-billed wire bytes), with database reads and writes reported separately. Public case reads select only matching case fields and document metadata, never pages or run/audit logs; a tagged five-minute cache avoids repeat DB reads, and cron/review actions invalidate it. Canonical case/project pages use on-demand ISR without host-header dependencies.
+
+FLUM lives in `law_flum_cache`, independently of case outlines. Project pages and compact maps request only their own cases; the FLUM endpoint reads only its layer. The existing hourly GitHub workflow also runs after a successful Production deployment to verify the new release without manually dispatching a job. No new credentials or permissions are needed.

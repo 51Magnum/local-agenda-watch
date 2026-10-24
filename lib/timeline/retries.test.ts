@@ -3,7 +3,7 @@ import {ingestDocuments,documentId,officialDocumentUrl} from "./ingest";
 import {emptyEvidenceState,EXTRACTED_KEYS,publicFields,type SourceDocument} from "./types";
 import {resetDocumentRetry,type EvidenceStore} from "./store";
 import {structuredResponse,type Extraction} from "./extract";
-import {withRun} from "./telemetry";
+import {checkpointRun,withRun} from "./telemetry";
 import {sourceRequest} from "./source-access";
 const doc:SourceDocument={areaId:"canyon-county",url:"https://landhearingsagenda.canyoncounty.id.gov/DownloadDocument/fixture",title:"Staff report",kind:"staff-report",caseIds:["CR2025-0012"]};
 function store():EvidenceStore{const s=emptyEvidenceState();return{read:async()=>structuredClone(s),mutate:async f=>f(s)};}
@@ -43,11 +43,12 @@ it("all jurisdictions have isolated evidence and mandatory decision review",asyn
  expect(officialDocumentUrl("https://mccmeetings.blob.core.usgovcloudapi.net/meridianid-pubu/file.pdf","meridian")).toBe(true);
  expect(officialDocumentUrl("https://mccmeetings.blob.core.usgovcloudapi.net/other-pubu/file.pdf","meridian")).toBe(false);
 });
-it("checkpoints usage per call before interpreting a failed extraction response",async()=>{
+it("retains usage in memory and checkpoints totals without per-call database logs",async()=>{
  vi.stubEnv("OPENAI_API_KEY","test");vi.stubGlobal("fetch",vi.fn().mockResolvedValue(Response.json({status:"incomplete",usage:{input_tokens:100,output_tokens:20,total_tokens:120}})));
  const s=store(),run={startedAt:"test",checked:0,processed:0,skipped:0,errors:[]};
  await expect(withRun(s,run,()=>structuredResponse("case_evidence",{},[],"test"))).rejects.toThrow("did not complete");
- expect((await s.read()).runs[0].usage?.[0]).toMatchObject({operation:"case_evidence",totalTokens:120});
+ expect((await s.read()).runs).toEqual([]);
+ await checkpointRun(s,run);expect((await s.read()).runs[0].tokenTotals).toMatchObject({calls:1,total:120});expect((await s.read()).runs[0].usage).toBeUndefined();
 });
 it("detects HTTP-200 challenge pages and skips later requests to the same blocked host in a run",async()=>{
  const fetch=vi.fn().mockResolvedValue(new Response("<html>Just a moment cf-chl-token</html>",{headers:{"content-type":"text/html"}}));vi.stubGlobal("fetch",fetch);

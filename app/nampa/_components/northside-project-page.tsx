@@ -21,14 +21,14 @@ export default async function NorthsideProjectPage({record}:{record:RecordData})
   const ctx=await getLocalityContext(),stage=getCaseStage(hearing),next=getCaseNextHearing(hearing,feed);
   const portal=hearing.energovPlanId?locality.energov!.planPortalUrl(hearing.energovPlanId):hearing.externalUrl??locality.portalUrl!;
   const files=hearing.energovPlanId?locality.energov!.planPortalUrl(hearing.energovPlanId,"attachments"):portal;
-  const timeline=buildTimeline(await readTimelineState(),{caseIds:[hearing.appId],stage,next,plans:plan?[{caseId:hearing.appId,plan,sourceUrl:portal}]:[],hearings:[hearing]});
+  const timeline=buildTimeline(await readTimelineState([hearing.appId]),{caseIds:[hearing.appId],stage,next,plans:plan?[{caseId:hearing.appId,plan,sourceUrl:portal}]:[],hearings:[hearing]});
   // Direct city status remains authoritative; extracted outcomes still require review.
   if(stage==="Decided"){timeline.currentStage="Decided";timeline.next=undefined;timeline.statusSource=portal;}
   if(!timeline.appearances.some(a=>a.isHearing&&a.date==="2026-09-29"&&/P&Z|Planning/i.test(a.body)))timeline.appearances.push({date:"2026-09-29",body:"Planning & Zoning",isHearing:true,sourceUrl:CASE_SOURCE});
   const overview=projectOverview(timeline,northsideOverview);
   const summary=caseSummary(hearing,plan,attachments);
   overview.summary=summary+" The staff report describes future warehouse and manufacturing uses; this application requests annexation and zoning rather than approval of a specific building.";
-  const snapshot=await readMapSnapshot("nampa").catch(()=>undefined);
+  const snapshot=await readMapSnapshot("nampa",{caseIds:[hearing.appId],includeFlum:false}).catch(()=>undefined);
   const categories=snapshot?.cases.find(c=>c.id===hearing.appId)?.flumCategories??[];
   const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value, hearing.appId);
   const reports=staffReportLinks(hearing,attachments,files).filter((report,_,all)=>!(report.url===files&&/^staff[\s_-]*report(?:\.pdf)?$/i.test(report.label)&&all.some(other=>other.url!==files)));

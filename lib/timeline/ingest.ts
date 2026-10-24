@@ -49,6 +49,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       const stored=(await store.read()).documents[id];
       if(stored&&!stored.hash&&stored.state!=="failed-permanent"&&!retryDue(stored)){run.skipped++;return;}
       if (!officialDocumentUrl(document.url,areaId)) throw new Error("Invalid official source URL");
+      if(document.content===undefined&&stored?.structured&&store.pages){const cached=await store.pages(id);document.content=cached[0]?.text;}
       const bytes = document.content === undefined ? await (dependencies.download ?? downloadDocument)(document.url,areaId) : new TextEncoder().encode(document.content);
       const hash = digest(bytes);
       const before = (await store.read()).documents[id];
@@ -56,9 +57,9 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       if(before?.hash===hash&&!retryDue(before)){run.skipped++;return;}
       const failCount=before?.hash===hash?before.failCount??0:0;
       if (same && before.state === "complete" && document.caseIds.every((caseId) => before.caseIds.includes(caseId))) {
-        await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].checkedAt = new Date().toISOString(); });
         run.skipped++; return;
       }
+      if(before?.hash===hash&&store.pages&&!before.pages.length)before.pages=await store.pages(id);
       // Invalidate previous evidence before extracting changed bytes, even if extraction later fails.
       await store.mutate((state) => { state.documents[id] = { ...document, id, hash, failCount, lastAttemptAt:new Date().toISOString(), pages: before?.hash === hash ? before.pages : [], checkedAt: new Date().toISOString(), extractionVersion, processedCaseIds: same ? before.processedCaseIds ?? [] : [], state: "processing" }; });
       replaced = true;
@@ -71,6 +72,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         pages = await (dependencies.ocr ?? ocrMissingPages)(bytes, pages);
         await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
       }
+      if(document.content===undefined&&pages.some(p=>p.method==="ocr"))await store.flush?.();
       const facts: EvidenceField[] = [];
       const now = new Date().toISOString();
       for (const caseId of document.caseIds) {
@@ -140,7 +142,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       });
     }
     });
-    await checkpointRun(store,run);
+    if(run.checked%25===0){await checkpointRun(store,run);await store.flush?.();}
   }
   run.finishedAt = new Date().toISOString();
   await checkpointRun(store,run);

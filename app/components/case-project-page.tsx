@@ -44,7 +44,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const stage = allDecided ? "Decided" : activeStages.sort((a,b) => PROJECT_STAGES.indexOf(b)-PROJECT_STAGES.indexOf(a))[0];
   const nextRecord = records.map(r => ({id:r.hearing.appId, hearing:getCaseNextHearing(r.hearing, feed,new Date(),area.id)})).filter(r => r.hearing !== undefined).sort((a,b) => a.hearing!.startsAt.localeCompare(b.hearing!.startsAt))[0];
   const next = nextRecord?.hearing;
-  const state = await readTimelineState();
+  const state = await readTimelineState(caseIds,area.id);
   const timeline = buildTimeline(state, {areaId:area.id,caseIds, stage, next, plans: records.flatMap(r => r.plan ? [{caseId:r.hearing.appId, plan:r.plan, sourceUrl:recordUrls(r).portal}] : []), hearings: records.map(r => r.hearing)});
   if (allDecided) { timeline.currentStage = "Decided"; timeline.next = undefined; timeline.statusSource = recordUrls(record).portal; }
   timeline.cityDecisions = records.flatMap(r => {
@@ -56,7 +56,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const {portal, files} = recordUrls(record);
   const overview = caseProjectOverview(hearing, plan, attachments, timeline, portal, citywide);
   const title = caseDisplayTitle(hearing, plan, attachments);
-  const snapshot = !citywide ? await readMapSnapshot(area.id).catch(() => undefined) : undefined;
+  const snapshot = !citywide ? await readMapSnapshot(area.id,{caseIds,includeFlum:false}).catch(() => undefined) : undefined;
   const hasGeometry = !snapshot || snapshot.cases.some(c => caseIds.includes(c.id) && c.geometry);
   const categories = [...new Set(snapshot?.cases.filter(c => caseIds.includes(c.id)).flatMap(c => c.flumCategories ?? []) ?? [])];
   const landUse = landUseFact(area, categories, overview.zoning?.value, caseIds[0]);

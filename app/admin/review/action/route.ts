@@ -1,3 +1,4 @@
+import {revalidateTag} from "next/cache";
 import { authorizedReviewer, sameOrigin } from "@/lib/timeline/auth";
 import { resetDocumentRetry, getEvidenceStore } from "@/lib/timeline/store";
 import { reviewField } from "@/lib/timeline/review";
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
   if (action !== "approve" && action !== "reject") return new Response("Invalid action", { status: 400 });
   try {
     await reviewField(getEvidenceStore(), { id: String(form.get("id") ?? ""), action, value: String(form.get("value") ?? ""), note: String(form.get("note") ?? "") });
+    revalidateTag("case-timeline-v2",{expire:0});
     return Response.redirect(new URL("/admin/review", request.url), 303);
   } catch (error) { return new Response(error instanceof Error ? error.message : "Review failed", { status: 409 }); }
 }

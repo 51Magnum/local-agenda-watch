@@ -28,7 +28,7 @@ export default async function BraeburnCreekPage() {
   const ctx = await getLocalityContext();
   const locality = getLocality("nampa")!;
   const feed = await locality.getHearings?.().catch(() => undefined);
-  const state = await readTimelineState();
+  const state = await readTimelineState(project.caseIds);
   const plans = await Promise.all(project.cases.map(async (item) => {
     const planId = item.portalUrl.match(/\/plan\/([^?]+)/)?.[1];
     if (!planId || !locality.energov) return null;
@@ -43,7 +43,7 @@ export default async function BraeburnCreekPage() {
   const homes = numericFact(overview.homes), acres = numericFact(overview.acres);
   overview.summary = `Toll Brothers proposes ${homes ?? 487} detached homes on about ${Math.round(acres ?? 138)} acres at Amity & Happy Valley. The applications request annexation, ${overview.zoning?.value ?? "residential zoning"}, and a preliminary subdivision plat.`;
   overview.summarySource = { value: "September staff report", url: BRAEBURN_REPORT, page: 1 };
-  const snapshot = await readMapSnapshot("nampa").catch(() => undefined);
+  const snapshot = await readMapSnapshot("nampa",{caseIds:project.caseIds,includeFlum:false}).catch(() => undefined);
   const categories = [...new Set(snapshot?.cases.filter(c => project.caseIds.includes(c.id)).flatMap(c => c.flumCategories) ?? [])];
   const landUse = landUseFact(getJurisdiction("nampa")!.area!, categories, overview.zoning?.value, project.caseIds[0]);
   const documentList = projectDocumentList(documents);

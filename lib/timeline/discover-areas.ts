@@ -81,6 +81,7 @@ export async function discoverCaseDocuments(options:{caseIds?:string[];budgetMs?
  }
  // OCR completed by the extraction phase is matched here without another OCR call or archive traversal.
  for(const d of Object.values(state.documents)){
+  if(d.kind==="agenda"&&!d.caseIds.length&&d.state==="complete"&&options.store?.pages)d.pages=await options.store.pages(d.id);
   if(d.kind!=="agenda"||d.content!==undefined||d.state!=="complete"||!d.pages.length)continue;
   const areaId=d.areaId??"nampa",ids=areaCases.get(areaId);if(!ids)continue;
   const text=d.pages.map(p=>p.text).join("\n").toUpperCase();
