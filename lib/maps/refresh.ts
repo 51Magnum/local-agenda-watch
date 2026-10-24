@@ -1,6 +1,6 @@
 import { canonicalAreaHref } from "@/lib/areas/registry";
 import { refreshCaseVisual } from "./visuals";
-import { feature, simplify } from "@turf/turf";
+import { bbox, feature, simplify } from "@turf/turf";
 import type { Feature } from "geojson";
 import type { Hearing } from "@/lib/localities/types";
 import { caseCatalog } from "@/lib/case-catalog";
@@ -71,12 +71,14 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
     let geometry = citywide ? null : combinePolygons(polygon?.features ?? []);
     let source: MapCase["source"] = geometry ? "polygon" : "none", confidence: MapCase["confidence"] = citywide ? "citywide" : geometry ? "exact" : "approximate", sourceUrl = geometry ? polygon?.url : undefined;
     let plan = null;
+    let parcelIds=config.parcelNumbersForCase?.(hearing)??parcelNumbers(polygon?.parcel,config.caseGeometry.parcelFallback.ignored);
     let geometryUpdatedAt = geometry ? now.toISOString() : undefined;
     if (!citywide && !geometry) {
       let parcels = config.parcelNumbersForCase?.(hearing) ?? parcelNumbers(polygon?.parcel, config.caseGeometry.parcelFallback.ignored);
       if (!parcels.length && hearing.energovPlanId && config.recordClient && Date.now() < deadline - 16000) {
         try { plan = await config.recordClient.getPlan(hearing.energovPlanId, { revalidate: 3600 }); parcels = parcelNumbers((plan as unknown as Record<string, unknown> | null)?.[config.caseGeometry.parcelFallback.recordField], config.caseGeometry.parcelFallback.ignored); } catch { /* No guessed pin when the city case record cannot be read. */ }
       }
+      parcelIds=parcels;
       if (parcels.length && Date.now() < deadline - 15000) {
         try {
           const fallback = config.caseGeometry.parcelFallback;
@@ -102,7 +104,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
     if (next && stage !== "Decided" && stage !== "Recorded") stage = /council|board/i.test(next.body) ? "Council/Board" : "P&Z";
     const summary = presentation?.summary ?? hearing.appScope ?? hearing.appTypeLabel;
     const oneLine = summary.split(/(?<=\.)\s+/).find((s) => /propos|annexation|plat|permit|rezone|amendment/i.test(s)) ?? summary;
-    cases.push({ id: hearing.appId, title: presentation?.title ?? hearing.appTypeLabel + " — " + hearing.appId, summary: oneLine, type: hearing.appType, typeLabel: config.caseTypes[hearing.appType] ?? hearing.appTypeLabel, stage, ...(isStatusUnclear(hearing) ? { statusNote: "Status unclear, no recent city record" } : {}), href: presentation?.href ?? "/" + config.id + "/plan/" + encodeURIComponent(hearing.appId), ...((stage !== "Decided" && stage !== "Recorded" && next) ? { nextHearing: next } : {}), geometry, centroid: geometry ? geometryCentroid(geometry) : null, source, confidence, sourceUrl, geometryUpdatedAt, visual, visualCheckedAt, citywide, flumCategories: geometry && flum ? flumAtGeometry(geometry, flum.geojson, config.flum.categoryField) : [] });
+    cases.push({ stageBody:meeting?.bodyLabel??[...hearing.meetings].filter(m=>stage!=="Council/Board"||m.body===config.area?.bodies.decision.id).sort((a,b)=>b.date.localeCompare(a.date))[0]?.bodyLabel,bounds:geometry?bbox(geometry).slice(0,4) as [number,number,number,number]:undefined,parcelIds,parcelNamespace:config.caseGeometry.parcelFallback.layerUrl?new URL(config.caseGeometry.parcelFallback.layerUrl).hostname:undefined,id: hearing.appId, title: presentation?.title ?? hearing.appTypeLabel + " — " + hearing.appId, summary: oneLine, type: hearing.appType, typeLabel: config.caseTypes[hearing.appType] ?? hearing.appTypeLabel, stage, ...(isStatusUnclear(hearing) ? { statusNote: "Status unclear, no recent city record" } : {}), href: presentation?.href ?? "/" + config.id + "/plan/" + encodeURIComponent(hearing.appId), ...((stage !== "Decided" && stage !== "Recorded" && next) ? { nextHearing: next } : {}), geometry, centroid: geometry ? geometryCentroid(geometry) : null, source, confidence, sourceUrl, geometryUpdatedAt, visual, visualCheckedAt, citywide, flumCategories: geometry && flum ? flumAtGeometry(geometry, flum.geojson, config.flum.categoryField) : [] });
   }));
   return { version: 1, jurisdiction: config.id, updatedAt: now.toISOString(), cases: cases.sort((a, b) => a.id.localeCompare(b.id)), flum, warnings: [...new Set(warnings)] };
 }

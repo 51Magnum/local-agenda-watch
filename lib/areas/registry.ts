@@ -3,6 +3,7 @@ import {TIMELINE_DOCUMENT_RULES} from "./timeline-rules";
 import {IDAHO_CITIES} from "./idaho-cities";
 import type { MultiPolygon, Polygon } from "geojson";
 import nampaBoundary from "./boundaries/nampa.json";
+import nampaImpact from "./boundaries/nampa-impact.json";
 import canyonBoundary from "./boundaries/canyon-county.json";
 import meridianBoundary from "./boundaries/meridian.json";
 import canyonJurisdiction from "./boundaries/canyon-county-jurisdiction.json";
@@ -26,7 +27,7 @@ const cityData="https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9
 const hearings="https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer";
 export const AREAS:Record<string,AreaDefinition>={
 
-  nampa:{timeline:{adapter:"energov-primegov",hosts:["nampa.primegov.com","www.cityofnampa.us","id-nampa2.civicplus.com","nampaid-energovpub.tylerhost.net"],storage:[{host:"pgwest.blob.core.windows.net",pathPrefix:"/us/id/nampa/"}],documentRules:TIMELINE_DOCUMENT_RULES},id:"nampa",slug:"nampa",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Nampa",type:"city",status:"live",timezone:"America/Denver",center:[-116.5635,43.5739],boundary:nampaBoundary as MultiPolygon,boundaryLabel:"City limits and official area of impact",boundarySources:[cityData+"/6",cityData+"/12"],
+  nampa:{timeline:{adapter:"energov-primegov",hosts:["nampa.primegov.com","www.cityofnampa.us","id-nampa2.civicplus.com","nampaid-energovpub.tylerhost.net"],storage:[{host:"pgwest.blob.core.windows.net",pathPrefix:"/us/id/nampa/"}],documentRules:TIMELINE_DOCUMENT_RULES},id:"nampa",slug:"nampa",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Nampa",type:"city",status:"live",timezone:"America/Denver",center:[-116.5635,43.5739],boundary:nampaBoundary as MultiPolygon,coverageBoundary:nampaImpact as MultiPolygon,boundaryLabel:"Official city limits",boundarySources:[cityData+"/6",cityData+"/12"],
     addressSearch:{addressField:"SiteAddres",where:"UPPER(SiteCity) = 'NAMPA' AND SiteState = 'ID'",suffix:"Nampa, ID"},
     flumCompatibility:{
       zoningCodePattern:"\\b(?:RS\\s*\\d+(?:\\.\\d+)?|RML|RMH|RD|RA|RP|BN|BC|GB[12]?|IP|IL|IH|HC|U)\\b",

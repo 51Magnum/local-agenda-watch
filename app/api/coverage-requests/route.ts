@@ -17,6 +17,8 @@ export async function POST(request:Request){
     const address=typeof data.address==="string"?data.address.trim():"",interests=typeof data.interests==="string"?data.interests.trim():"";
     if(address.length>300||interests.length>1000)return Response.json({error:"Keep the location under 300 characters and interests under 1,000 characters."},{status:400,headers});
     let location=null;if(data.location!=null){const{lat,lng}=data.location;if(typeof lat!=="number"||typeof lng!=="number"||!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return Response.json({error:"Invalid location."},{status:400,headers});location={lat,lng};}
-    await saveCoverageRequest({kind:data.kind,areaRequested,location,email:email||null,address:address||null,interests:interests||null,createdAt:new Date().toISOString()});return Response.json({ok:true},{status:201,headers});
+    const radiusMiles=data.radiusMiles??1;
+    if(typeof radiusMiles!=="number"||!Number.isFinite(radiusMiles)||radiusMiles<.25||radiusMiles>10)return Response.json({error:"Choose a radius from 0.25 to 10 miles."},{status:400,headers});
+    await saveCoverageRequest({kind:data.kind,areaRequested,location,...(data.kind==="follow"&&location?{radiusMiles,jurisdictionScope:"radius" as const}:{}),email:email||null,address:address||null,interests:interests||null,createdAt:new Date().toISOString()});return Response.json({ok:true},{status:201,headers});
   }catch{return Response.json({error:"We couldn't save this yet. Please try again."},{status:503,headers});}
 }

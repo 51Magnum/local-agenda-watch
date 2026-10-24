@@ -28,3 +28,12 @@ it("requires email for the alert waitlist while keeping coverage requests anonym
  expect((await POST(request({kind:"follow",areaRequested:"Example",email:""}))).status).toBe(400);expect(saveCoverageRequest).not.toHaveBeenCalled();
  expect((await POST(request({kind:"coverage",areaRequested:"Example",email:""}))).status).toBe(201);
 });
+
+it("saves a place radius rather than restricting the follow to one jurisdiction",async()=>{
+ const r=await POST(request({kind:"follow",areaRequested:"Victory / Happy Valley",email:"neighbor@example.test",location:{lat:43.5756774,lng:-116.5099174},radiusMiles:2}));
+ expect(r.status).toBe(201);expect(saveCoverageRequest).toHaveBeenCalledWith(expect.objectContaining({radiusMiles:2,jurisdictionScope:"radius"}));
+});
+it("rejects invalid radius values before saving",async()=>{
+ for(const radiusMiles of [0,11,"1"]){expect((await POST(request({kind:"follow",areaRequested:"Example",email:"neighbor@example.test",radiusMiles}))).status).toBe(400);}
+ expect(saveCoverageRequest).not.toHaveBeenCalled();
+});

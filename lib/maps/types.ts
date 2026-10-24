@@ -27,6 +27,8 @@ export type JurisdictionConfig = {
   presentation?: (hearing: Hearing, plan: Parameters<typeof caseSummary>[1]) => { title: string; summary: string; href: string; hearing?: { startsAt: string; body: string } };
 };
 export type MapCase = {
+  areaId?:string; jurisdictionLabel?:string; stageBody?:string; caseIds?:string[]; members?:{areaId:string;caseId:string;title:string;href:string;stage:MapStage;body:string}[];
+  bounds?:[number,number,number,number]; parcelIds?:string[]; parcelNamespace?:string;
   id: string; title: string; summary: string; type: string; typeLabel: string; stage: MapStage; statusNote?: string; href: string;
   nextHearing?: { date: string; body: string; label: string };
   geometry: CaseGeometry | null; centroid: [number, number] | null; source: "polygon" | "parcel match" | "none"; confidence: "exact" | "approximate" | "citywide";
@@ -36,6 +38,6 @@ export type MapCase = {
 export type FlumLegendItem = { value: string; label: string; color: string };
 export type FlumCache = { updatedAt: string; geojson: FeatureCollection<CaseGeometry>; legend: FlumLegendItem[] };
 export type MapSnapshot = { version: 1; jurisdiction: string; updatedAt: string; cases: MapCase[]; flum?: FlumCache; warnings: string[] };
-export type PublicMapData = { jurisdiction: Pick<JurisdictionConfig, "id" | "name" | "center" | "zoom" | "bounds" | "state" | "addressPoints">; flum: JurisdictionConfig["flum"] & { updatedAt?: string; legend: FlumLegendItem[] }; updatedAt: string; cases: MapCase[]; warnings: string[] };
+export type PublicMapData = { areas?:{id:string;name:string}[]; boundaries?:FeatureCollection<CaseGeometry>; jurisdiction: Pick<JurisdictionConfig, "id" | "name" | "center" | "zoom" | "bounds" | "state" | "addressPoints">; flum: JurisdictionConfig["flum"] & { updatedAt?: string; legend: FlumLegendItem[] }; updatedAt: string; cases: MapCase[]; warnings: string[] };
 export type AddressResult = { label: string; coordinates: [number, number]; source: "local" | "Census" | "map" };
 export function isLonLat(position: Position): boolean { return position.length >= 2 && Number.isFinite(position[0]) && Number.isFinite(position[1]) && Math.abs(position[0]) <= 180 && Math.abs(position[1]) <= 90; }

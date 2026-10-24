@@ -21,7 +21,7 @@ it("falls back to Census after the 700ms city timeout and preserves the address 
   const response=await POST(request("17501 Northside Blvd, Nampa, ID"));
   const match=(await response.json()).results[0];
   const url=new URL(locationMapUrl(match.coordinates,match.label)!,"http://localhost");
-  expect(url.pathname).toBe("/us/id/nampa/map");
+  expect(url.pathname).toBe("/us/id/map");
   expect(url.searchParams.get("q")).toBe(match.label);
   expect(url.searchParams.get("nearby")).toBe("1");
   expect(timeout.mock.calls[0][0]).toBe(700);

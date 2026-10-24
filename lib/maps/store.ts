@@ -1,3 +1,4 @@
+import {bbox} from "@turf/turf";
 import {trackedRows} from "@/lib/db-transfer";
 import {revalidateTag,unstable_cache} from "next/cache";
 import { Pool } from "pg";
@@ -15,16 +16,27 @@ function database() {
   return pool;
 }
 function filename(id: string) { if (!/^[a-z0-9-]+$/.test(id)) throw new Error("Invalid map cache ID"); return path.join(process.cwd(), ".data", "maps", id + ".json"); }
-export async function readMapSnapshot(id: string,options:{caseIds?:readonly string[];includeFlum?:boolean}={includeFlum:true}): Promise<MapSnapshot | undefined> {
+export async function readMapSnapshot(id: string,options:{caseIds?:readonly string[];includeFlum?:boolean;bounds?:readonly number[]}={includeFlum:true}): Promise<MapSnapshot | undefined> {
   if (process.env.DATABASE_URL) {
    const db=database();await initialized;
+   if(options.bounds){
+    const query=`SELECT (snapshot-'cases')||jsonb_build_object('cases',coalesce((
+     SELECT jsonb_agg(c) FROM jsonb_array_elements(snapshot->'cases') c
+     CROSS JOIN LATERAL (SELECT coalesce(c->'bounds',(SELECT jsonb_build_array(min((p->>0)::float),min((p->>1)::float),max((p->>0)::float),max((p->>1)::float)) FROM jsonb_path_query(c->'geometry','$.coordinates.** ? (@.type() == "array")') p WHERE jsonb_typeof(p->0)='number' AND jsonb_typeof(p->1)='number')) AS b) bounds
+     WHERE c->'geometry'<>'null'::jsonb AND (b->>0)::float<=($2::float8[])[3] AND (b->>2)::float>=($2::float8[])[1] AND (b->>1)::float<=($2::float8[])[4] AND (b->>3)::float>=($2::float8[])[2]
+     ),'[]'::jsonb)) AS snapshot FROM law_map_cache WHERE jurisdiction=$1`;
+    return trackedRows("maps",(await db.query(query,[id,options.bounds])).rows)[0]?.snapshot as MapSnapshot|undefined;
+   }
    const query=options.caseIds?"SELECT (snapshot-'cases')||jsonb_build_object('cases',coalesce((SELECT jsonb_agg(c) FROM jsonb_array_elements(snapshot->'cases') c WHERE c->>'id'=ANY($2::text[])),'[]'::jsonb)) AS snapshot FROM law_map_cache WHERE jurisdiction=$1":"SELECT snapshot FROM law_map_cache WHERE jurisdiction=$1";
    const snapshot=trackedRows("maps",(await db.query(query,options.caseIds?[id,options.caseIds]:[id])).rows)[0]?.snapshot as MapSnapshot|undefined;
    if(snapshot&&options.includeFlum)snapshot.flum=await readFlumSnapshot(id);
    return snapshot;
   }
   if (process.env.VERCEL) throw new Error("Map storage requires DATABASE_URL");
-  try { return JSON.parse(await readFile(filename(id), "utf8")); } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
+  try { const snapshot=JSON.parse(await readFile(filename(id), "utf8")) as MapSnapshot;
+   if(options.bounds)snapshot.cases=snapshot.cases.filter(c=>{if(!c.geometry)return false;const b=c.bounds??bbox(c.geometry),q=options.bounds!;return b[0]<=q[2]&&b[2]>=q[0]&&b[1]<=q[3]&&b[3]>=q[1];});
+   if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));
+   if(options.includeFlum===false)delete snapshot.flum;return snapshot; } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
 }
 export async function saveMapSnapshot(snapshot: MapSnapshot) {
   if (process.env.DATABASE_URL) {
@@ -39,4 +51,16 @@ export async function saveMapSnapshot(snapshot: MapSnapshot) {
 
 async function loadFlum(id:string):Promise<FlumCache|undefined>{const db=database();await initialized;return trackedRows("flum",(await db.query("SELECT snapshot FROM law_flum_cache WHERE jurisdiction=$1",[id])).rows)[0]?.snapshot;}
 const cachedFlum=unstable_cache(loadFlum,["flum-storage-v2"],{revalidate:604800,tags:["map-flum"]});
-export async function readFlumSnapshot(id:string){if(!process.env.DATABASE_URL)return(await readMapSnapshot(id))?.flum;return process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test"?cachedFlum(id):loadFlum(id);}
+export async function readFlumSnapshot(id:string,options?:{bounds:readonly number[]}){
+ if(!process.env.DATABASE_URL)return(await readMapSnapshot(id))?.flum;
+ if(options?.bounds){
+  const db=database();await initialized;
+  const query=`SELECT (snapshot-'geojson')||jsonb_build_object('geojson',jsonb_build_object('type','FeatureCollection','features',coalesce((
+   SELECT jsonb_agg(f) FROM jsonb_array_elements(snapshot->'geojson'->'features') f
+   CROSS JOIN LATERAL (SELECT coalesce(f->'bbox',(SELECT jsonb_build_array(min((p->>0)::float),min((p->>1)::float),max((p->>0)::float),max((p->>1)::float)) FROM jsonb_path_query(f->'geometry','$.coordinates.** ? (@.type() == "array")') p WHERE jsonb_typeof(p->0)='number' AND jsonb_typeof(p->1)='number')) AS b) bounds
+   WHERE (b->>0)::float<=($2::float8[])[3] AND (b->>2)::float>=($2::float8[])[1] AND (b->>1)::float<=($2::float8[])[4] AND (b->>3)::float>=($2::float8[])[2]
+  ),'[]'::jsonb))) AS snapshot FROM law_flum_cache WHERE jurisdiction=$1`;
+  return trackedRows("flum",(await db.query(query,[id,options.bounds])).rows)[0]?.snapshot as FlumCache|undefined;
+ }
+ return process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test"?cachedFlum(id):loadFlum(id);
+}

@@ -16,7 +16,7 @@ export default function LocationHome({areas,data,caseCount}:{areas:AreaDefinitio
   const visibleAreas=showAllAreas?areas:areas.slice(0,8);
   const[query,setQuery]=useState(""),[searching,setSearching]=useState(false),[message,setMessage]=useState(""),[results,setResults]=useState<Result[]>([]),[uncovered,setUncovered]=useState<Result>();
   const lastArea=useSyncExternalStore(subscribeArea,lastAreaSnapshot,()=>"");const known=areas.some(a=>a.id===lastArea&&a.status==="live");const selected=known?lastArea:FEATURED_AREA_ID;
-  function choose(result:Result){const area=liveAreaAtPoint(result.coordinates),url=locationMapUrl(result.coordinates,result.label);if(area&&url){try{localStorage.setItem("law:last-area",area.id);}catch{}window.location.assign(url);}else{setUncovered(result);setResults([]);setMessage("");}}
+  function choose(result:Result){const area=liveAreaAtPoint(result.coordinates),url=locationMapUrl(result.coordinates,result.label);if(url){try{if(area)localStorage.setItem("law:last-area",area.id);}catch{}window.location.assign(url);}else{setUncovered(result);setResults([]);setMessage("");}}
   const area=areas.find(a=>a.id===selected&&a.status==="live")??areas.find(a=>a.status==="live")!;const local=data.find(d=>d.id===area.id);
   const requestedArea=uncovered?.label.match(/^\d/)?uncovered.label.split(",").slice(1,3).join(", ").trim():uncovered?.label??"";
   return <main className="mx-auto w-full max-w-6xl flex-1 px-6 pb-16 pt-12 sm:pt-20">

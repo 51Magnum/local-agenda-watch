@@ -22,3 +22,9 @@ it("reads legacy database rows and safely filters the private admin list",async(
  const {listCoverageRequests}=await import("./requests");const result=await listCoverageRequests({kind:"follow"});expect(result.items[0]).toMatchObject({id:"old",address:null,interests:null});expect(result.total).toBe(1);
  expect(mocks.query).toHaveBeenCalledWith(expect.stringContaining("WHERE ($1::text IS NULL OR kind=$1)"),["follow",50,0]);
 });
+
+it("resolves a saved radius across both city and county, including legacy coordinate-only follows",async()=>{
+ const {withRadiusScope}=await import("./requests");
+ const saved=withRadiusScope({kind:"follow" as const,areaRequested:"Near Victory / Happy Valley",email:"test@example.test",location:{lat:43.5756774,lng:-116.5099174},createdAt:"2026-10-24"});
+ expect(saved).toMatchObject({radiusMiles:1,jurisdictionScope:"radius",jurisdictions:expect.arrayContaining(["nampa","canyon-county"])});
+});

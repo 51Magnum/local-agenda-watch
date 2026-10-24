@@ -35,6 +35,13 @@ export function setWatching(project: WatchedProject, watching: boolean): void {
 export function watchFromCase(jurisdiction: string, item: MapCase, catalog: MapCase[]): WatchedProject {
   return { jurisdiction, href: item.href, title: item.title, caseIds: [...new Set([item.id, ...catalog.filter((c) => c.href === item.href).map((c) => c.id)])] };
 }
+/** A combined site can represent cases in multiple planning authorities. */
+export function watchesFromMapCase(jurisdiction:string,item:MapCase,catalog:MapCase[]):WatchedProject[]{
+ if(!item.members)return [watchFromCase(jurisdiction,item,catalog)];
+ const projects=new Map<string,WatchedProject>();
+ for(const member of item.members){const key=member.areaId+"|"+member.href,old=projects.get(key);if(old)old.caseIds.push(member.caseId);else projects.set(key,{jurisdiction:member.areaId,href:member.href,title:member.title,caseIds:[member.caseId]});}
+ return [...projects.values()];
+}
 export function resolveWatchedProjects(saved: WatchedProject[], jurisdiction: string, catalog: WatchCatalogEntry[]) {
   return saved.filter((p) => p.jurisdiction === jurisdiction).map((project) => {
     const matches = catalog.filter((c) => c.href === project.href || c.caseIds.some((id) => project.caseIds.includes(id)));
