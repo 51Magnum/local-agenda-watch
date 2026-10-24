@@ -1,4 +1,5 @@
 "use client";
+import {placeProjectCard} from "@/lib/maps/popup-position";
 import { movingToPopup, type ScreenPoint } from "@/lib/maps/popup-hover";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Map as LibreMap, Popup, GeoJSONSource, ExpressionSpecification } from "maplibre-gl";
@@ -114,6 +115,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   useEffect(() => {
     if (!data || !container.current) return;
     let disposed = false, pinned = false, hovered = "";
+    let popupProject: MapCase | undefined, reframing=false;
     let hoverOrigin: ScreenPoint | null = null, previousPointer: ScreenPoint | null = null;
     let instance: LibreMap | undefined; let observer: ResizeObserver | undefined;
     const closeHover = () => { if (!pinned) { popup.current?.remove(); hovered = ""; } };
@@ -129,20 +131,36 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         if (!instance || !popup.current?.getElement().classList.contains("law-case-popup")) return;
         const element = popup.current.getElement(), viewport = instance.getContainer();
         element.style.setProperty("--law-popup-content-height", Math.max(140, viewport.clientHeight * 0.8 - 36) + "px");
-        const bounds = element.getBoundingClientRect(), point = instance.project(popup.current.getLngLat());
-        const clamp = (value: number, half: number, total: number) => Math.max(half + 16, Math.min(total - half - 16, value));
-        popup.current.setOffset([clamp(point.x, bounds.width / 2, viewport.clientWidth) - point.x, clamp(point.y, bounds.height / 2, viewport.clientHeight) - point.y]);
+        if (!popupProject?.geometry) return;
+        const bounds=bbox(popupProject.geometry),nw=instance.project([bounds[0],bounds[3]]),se=instance.project([bounds[2],bounds[1]]);
+        const content=element.querySelector<HTMLElement>(".law-project-popup");
+        const placement=placeProjectCard({width:viewport.clientWidth,height:viewport.clientHeight},{left:nw.x,right:se.x,top:nw.y,bottom:se.y},{width:viewport.clientWidth<650?viewport.clientWidth-32:viewport.clientWidth*.5,height:Math.min(viewport.clientHeight*.8,(content?.scrollHeight??400)+36)});
+        element.style.width=placement.width+"px";
+        element.style.minWidth="0";
+        element.style.setProperty("--law-popup-content-height",Math.max(100,placement.height-36)+"px");
+        const point=instance.project(popup.current.getLngLat());
+        popup.current.setOffset([placement.x+placement.width/2-point.x,placement.y+placement.height/2-point.y]);
+        if(placement.reframe&&!reframing){
+          reframing=true;
+          const padding={top:40,bottom:40,left:40,right:40};
+          if(placement.side==="left"||placement.side==="right")padding[placement.side]=placement.width+52;
+          else padding[placement.side]=placement.height+52;
+          instance.fitBounds([[bounds[0],bounds[1]],[bounds[2],bounds[3]]],{padding,maxZoom:instance.getZoom(),duration:0});
+          reframing=false;
+        }
       }
       function show(content: HTMLElement, coordinates: [number, number], projectCard = false) {
-        popup.current?.remove();
+        const selectedProject=popupProject;
+        popup.current?.remove(); popupProject=selectedProject;
         const next = new lib.Popup({ closeButton: true, closeOnClick: false, maxWidth: projectCard ? "none" : "300px", className: projectCard ? "law-case-popup" : "", anchor: projectCard ? "center" : undefined, offset: projectCard ? 0 : 12, focusAfterOpen: pinned }).setLngLat(coordinates).setDOMContent(content).addTo(instance!);
         popup.current = next;
         sizePopup();
         next.getElement().addEventListener("mouseleave", closeHover);
-        next.on("close", () => { popupDisposers.get(content)?.(); popupDisposers.delete(content); if (popup.current === next) { popup.current = null; hovered = ""; pinned = false; } });
+        next.on("close", () => { popupDisposers.get(content)?.(); popupDisposers.delete(content); if (popup.current === next) { popupProject=undefined; popup.current = null; hovered = ""; pinned = false; } });
       }
       function showProject(item: MapCase) {
         if (!item.geometry || !data) return;
+        popupProject=item;
         show(popupContent(item, setExpandedImage, data.jurisdiction.id, data.cases), item.centroid ?? geometryCentroid(item.geometry), true);
       }
       openProject.current = (id) => {
@@ -173,6 +191,10 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         instance.getCanvas().style.cursor = hit ? "pointer" : "";
         if (compact || pinned) return;
         const pointer = { x: event.originalEvent.clientX, y: event.originalEvent.clientY };
+        // Keep the selected card reachable even when another outline lies in
+        // the pointer corridor between this project and its card.
+        const activeCard=popup.current?.getElement();
+        if(hit&&String(hit.properties.id)!==hovered&&activeCard&&hoverOrigin&&previousPointer&&movingToPopup(hoverOrigin,previousPointer,pointer,activeCard.getBoundingClientRect())){previousPointer=pointer;return;}
         if (!hit) {
           const card = popup.current?.getElement();
           const crossing = card && hoverOrigin && previousPointer && movingToPopup(hoverOrigin, previousPointer, pointer, card.getBoundingClientRect());
