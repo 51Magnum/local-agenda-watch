@@ -20,6 +20,6 @@ export async function refreshTimelines(store:EvidenceStore,{budgetMs=280000,disc
    await ingestDocuments(store,documents,{run,budgetMs:Math.max(0,deadline-Date.now()),text:async bytes=>discovery.extractedPages.get(digest(bytes))??extractNativePdfPages(bytes)});
    return {run,maps,caseIds:discovery.caseIds};
   }catch(error){run.errors.push(error instanceof Error?error.message:"Timeline refresh failed");throw error;}
-  finally{run.finishedAt=new Date().toISOString();await checkpointRun(store,run);await store.flush?.();const total=currentDbTransfer();run.transfer=store.metrics?{...store.metrics,...(total?{readBytes:total.readBytes,byStore:total.byStore}:{}),timelineReadBytes:store.metrics.readBytes}:undefined;await checkpointRun(store,run);await store.flush?.();console.info("[timeline:run]",JSON.stringify(safeRunSummary(run)));}
+  finally{run.finishedAt=new Date().toISOString();await checkpointRun(store,run);await store.flush?.();const total=currentDbTransfer();run.transfer=store.metrics?{...store.metrics,...(total?{readBytes:total.readBytes+Math.max(0,store.metrics.readBytes-(total.byStore.timeline??0)),byStore:{...total.byStore,timeline:store.metrics.readBytes}}:{}),timelineReadBytes:store.metrics.readBytes}:undefined;await checkpointRun(store,run);await store.flush?.();console.info("[timeline:run]",JSON.stringify(safeRunSummary(run)));}
  }));
 }
