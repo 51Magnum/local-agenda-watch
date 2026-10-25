@@ -95,9 +95,9 @@ export default function ProjectPane({
       </button>
       <div className="law-pane-content">
         <section aria-labelledby="question-what">
-          <p className="law-eyebrow" id="question-what">
+          <h2 className="law-question-heading" id="question-what">
             {RESIDENT_QUESTIONS[0]}
-          </p>
+          </h2>
           <h1>{item.popup?.headline ?? item.title}</h1>
           <p className="law-pane-status">
             {item.popup?.progress.find((p) => p.state === "current")?.label ??
@@ -135,7 +135,7 @@ export default function ProjectPane({
         </section>
         <div className="law-pane-expanded">
           <section>
-            <h2>{RESIDENT_QUESTIONS[1]}</h2>
+            <h2 className="law-question-heading">{RESIDENT_QUESTIONS[1]}</h2>
             <p>
               {data.where ||
                 "Location is not confirmed in the available records."}
@@ -145,7 +145,7 @@ export default function ProjectPane({
             )}
           </section>
           <section className="law-pane-section">
-            <h2>{RESIDENT_QUESTIONS[2]}</h2>
+            <h2 className="law-question-heading">{RESIDENT_QUESTIONS[2]}</h2>
             {!data.history.length && (
               <p>No completed steps are confirmed in the available records.</p>
             )}
@@ -164,7 +164,7 @@ export default function ProjectPane({
             </ol>
           </section>
           <section className="law-pane-next">
-            <h2>{RESIDENT_QUESTIONS[3]}</h2>
+            <h2 className="law-question-heading">{RESIDENT_QUESTIONS[3]}</h2>
             {data.next ? (
               <>
                 <strong>{date(data.next.startsAt)}</strong>
@@ -188,7 +188,7 @@ export default function ProjectPane({
             )}
           </section>
           <section className="law-pane-section">
-            <h2>{RESIDENT_QUESTIONS[4]}</h2>
+            <h2 className="law-question-heading">{RESIDENT_QUESTIONS[4]}</h2>
             {!data.impacts.length && !data.conditions.length && (
               <p>No verified impact details are available yet.</p>
             )}
@@ -227,7 +227,7 @@ export default function ProjectPane({
             )}
           </section>
           <section>
-            <h2>{RESIDENT_QUESTIONS[5]}</h2>
+            <h2 className="law-question-heading">{RESIDENT_QUESTIONS[5]}</h2>
             {data.next?.commentDeadline && (
               <p>
                 Comment deadline: {date(data.next.commentDeadline)}

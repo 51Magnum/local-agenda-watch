@@ -14,3 +14,7 @@ body:has(.law-map-home)>header,body:has(.law-map-home)>footer{display:none}
 @media(prefers-reduced-motion:reduce){.law-resident-pane{transition:none}}
 
 .law-resident-pane:focus{outline:none}.law-resident-pane:focus-visible{outline:2px solid #0f766e}.law-map-menu select{display:block;max-width:230px;padding:9px 3px;border-bottom:1px solid #dce4e3}
+
+/* The six resident questions share one strong, recognizable heading style. */
+.law-resident-pane .law-question-heading{font-family:inherit;font-size:18px;font-weight:750;line-height:1.35;letter-spacing:0;text-transform:none;color:#115e59;background:#eef8f5;border-left:4px solid #0f766e;border-radius:0 7px 7px 0;padding:9px 12px;margin:0 0 14px}
+.dark .law-resident-pane .law-question-heading{color:#99f6e4;background:#123b39;border-left-color:#5eead4}

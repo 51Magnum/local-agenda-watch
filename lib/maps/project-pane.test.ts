@@ -47,8 +47,11 @@ it("always renders the six questions without accordions, including honest missin
       }),
     ),
   );
-  for (const question of RESIDENT_QUESTIONS)
-    expect($.text()).toContain(question);
+  expect(
+    $("h2.law-question-heading")
+      .map((_, el) => $(el).text())
+      .get(),
+  ).toEqual([...RESIDENT_QUESTIONS]);
   expect($("details")).toHaveLength(0);
   expect($.text()).toContain("Location is not confirmed");
   expect($.text()).toContain("No verified impact details");
