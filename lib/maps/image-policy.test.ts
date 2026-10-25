@@ -27,3 +27,11 @@ it("keeps a manually selected image ahead of later automated plans and fallback 
  expect(displayedImageReviews([fallback,automatic,manual] as ImageReview[]).map(r=>r.id)).toEqual(["manual","auto","fallback"]);
  expect(approvedImageCheck({...check,type:"project area map"})).toBe(false);
 });
+
+it("a case-specific stronger-check hold blocks old checks but keeps generated maps and newly verified plans",()=>{
+ const base={id:"image",areaId:"meridian",caseIds:["H-2026-0032"],sourceUrl:"source",outcome:"accepted",checkedAt:"2026-10-25",visual:{approval:check}} as ImageReview;
+ const hold={...base,id:"hold",sourceUrl:"image-policy:vision-high-v2",hidden:true,minimumReviewerVersion:"vision-high-v2",outcome:"blocked" as const};
+ expect(displayedImageReviews([base,hold])).toEqual([]);
+ expect(displayedImageReviews([{...base,visual:{...base.visual!,approval:{...check,reviewerVersion:"vision-high-v2"}}},hold])).toHaveLength(1);
+ expect(displayedImageReviews([{...base,visual:{...base.visual!,approval:{...check,type:"project area map",generated:"gis-boundary-v1"}}},hold])).toHaveLength(1);
+});
