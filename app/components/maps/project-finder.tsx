@@ -20,7 +20,7 @@ export default function ProjectFinder({ onSelect }: { onSelect: (project: Projec
     }}>
       <label htmlFor="project-finder">Find a project</label>
       <small id="project-search-help">Part of a name, case number, city/county or project type.</small>
-      <div><input id="project-finder" aria-describedby="project-search-help" placeholder="e.g. Braeburn or Nampa plat" minLength={2} maxLength={100} required value={query} onChange={(e) => setQuery(e.target.value)} />
+      <div><input id="project-finder" aria-describedby="project-search-help" placeholder="Project name, city or type" minLength={2} maxLength={100} required value={query} onChange={(e) => setQuery(e.target.value)} />
       <button disabled={busy}>{busy ? "Searching…" : "Find"}</button></div>
     </form>
     <p role="status">{message}</p>
