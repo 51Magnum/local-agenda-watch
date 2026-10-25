@@ -31,7 +31,7 @@ export async function processImageQueue(options:{budgetMs?:number;target?:{areaI
   const discoveryDeadline=Math.min(deadline-60000,Date.now()+70000);
   if(config.loadCaseDocuments&&Date.now()<discoveryDeadline){const found=await config.loadCaseDocuments(job.caseId,{hearing,feed,job,deadline:discoveryDeadline,checkpoint});job.documents=found.documents;job.discoveryComplete=found.complete;await checkpoint();}
   job.documents.sort((a,b)=>visualPriority(a.title)-visualPriority(b.title)||(b.date??sourceImageDate(b.title)??"").localeCompare(a.date??sourceImageDate(a.title)??""));
-  for(const doc of job.documents){if(Date.now()>deadline-3000)break;const key=digest(doc.url);if(resuming&&job.scans[key]?.complete&&job.scans[key]?.version==="graphics-area-v2")continue;if(Date.parse(job.scans[key]?.retryAt??"")>Date.now())continue;try{
+  for(const doc of job.documents){if(Date.now()>deadline-3000)break;const key=digest(doc.url);if(resuming&&job.scans[key]?.complete&&job.scans[key]?.version==="graphics-area-v3")continue;if(Date.parse(job.scans[key]?.retryAt??"")>Date.now())continue;try{
    const bytes=doc.attachmentId&&config.recordClient?.downloadPublicAttachment?await config.recordClient.downloadPublicAttachment(doc.attachmentId):await downloadDocument(doc.url,job.areaId,{maxBytes:128000000,timeoutMs:Math.min(120000,Math.max(1000,deadline-Date.now()-10000))});job.checked++;
    const documentDeadline=Math.min(deadline-1500,Date.now()+85000);
    const candidate=async(result:ScanResult)=>{const id=createHash("sha256").update(IMAGE_CHECK_VERSION+job.areaId+doc.url+result.approval.pageHash+String(result.page??0)).digest("hex"),src="/api/maps/"+job.areaId+"/visual/"+id;

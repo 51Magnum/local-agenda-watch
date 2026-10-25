@@ -5,6 +5,10 @@ on:
     - cron: '15 11,12 * * *'
   workflow_dispatch:
     inputs:
+      withdraw:
+        description: "Withdraw automatic document-image selections for targeted cases"
+        type: boolean
+        default: false
       fallback_only:
         description: "For targeted cases, only retry their aerial boundary maps"
         type: boolean
@@ -19,7 +23,7 @@ on:
         default: 40
 permissions: {}
 concurrency:
-  group: case-image-${{ inputs.test_cases && 'verification' || 'backfill' }}
+  group: case-image-${{ inputs.withdraw && 'privacy' || (inputs.test_cases && 'verification' || 'backfill') }}
   cancel-in-progress: false
 jobs:
   images:
@@ -31,6 +35,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
           CASES: ${{ inputs.cases || 40 }}
+          WITHDRAW: ${{ inputs.withdraw || false }}
           FALLBACK_ONLY: ${{ inputs.fallback_only || false }}
           TEST_CASES: ${{ inputs.test_cases || '' }}
         shell: bash
@@ -53,7 +58,7 @@ jobs:
               if ! [[ "$AREA" =~ ^[a-z-]+$ && "$CASE" =~ ^[A-Z0-9-]+$ ]]; then exit 1; fi
               INDEX=$((INDEX+1))
               FILE="test-$INDEX.json"
-              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" --data-urlencode "fallback=$FALLBACK_ONLY" --data-urlencode "resume=1" "$BASE" > "$FILE" &
+              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" --data-urlencode "fallback=$FALLBACK_ONLY" --data-urlencode "resume=1" --data-urlencode "withdraw=$WITHDRAW" "$BASE" > "$FILE" &
               PIDS+=("$!")
               FILES+=("$FILE")
               if [ "${#PIDS[@]}" -ge 2 ]; then

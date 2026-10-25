@@ -31,7 +31,7 @@ export function graphicsScore(text:string,ops:{fnArray:ArrayLike<number>;argsArr
 
 export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:{deadline:number;analyzeOnly?:boolean;sourceDate?:string;caseId?:string;packet?:boolean;progress?:DocumentScan;checkpoint?:(scan:DocumentScan)=>Promise<void>;candidate?:(result:ScanResult)=>Promise<void>}):Promise<{complete:boolean;progress:DocumentScan;best?:ScanResult}>{
  const hash=createHash("sha256").update(bytes).digest("hex");
- const progress=options.progress?.hash===hash&&options.progress.version==="graphics-area-v2"?options.progress:{version:"graphics-area-v2",hash,nextPage:1,candidates:[],classified:[],complete:false};
+ const progress=options.progress?.hash===hash&&options.progress.version==="graphics-area-v3"?options.progress:{version:"graphics-area-v3",hash,nextPage:1,candidates:[],classified:[],complete:false};
  const save=async()=>options.checkpoint?.(progress);
  if(forbiddenImageDocument.test(title)){progress.complete=true;await save();return {complete:true,progress};}
  let best:ScanResult|undefined;
