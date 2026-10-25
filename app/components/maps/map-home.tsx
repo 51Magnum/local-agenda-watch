@@ -3,6 +3,7 @@ import FLUM_TILES from "@/public/flum/manifest.json";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Map as LibreMap, GeoJSONSource } from "maplibre-gl";
+import * as maplibre from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import { bbox, circle, distance } from "@turf/turf";
 import dynamic from "next/dynamic";
@@ -274,7 +275,7 @@ export default function MapHome() {
       return r.json();
     });
     void metadata.catch(() => {});
-    import("maplibre-gl").then(
+    Promise.resolve(maplibre).then(
       (lib) => {
         if (disposed || !container.current) return;
         lib.setWorkerUrl("/maplibre/worker.mjs");
