@@ -30,6 +30,7 @@ export async function GET(request: Request) {
   // Re-read under the scheduler lease so simultaneous invocations cannot both claim the same slot.
   snapshot=await readSchedule();plan=planSchedule(snapshot,AREAS,now,{manual,force});
   if(!plan)return skipped("This slot completed while waiting for the scheduler lease",true);
+  if(force)for(const tag of [...Object.values(AREAS).filter(a=>a.status==="live").map(a=>a.id+":cases"),"nampa:pz:active","nampa:pz:completed","nampa:scheduled","nampa:primegov"])revalidateTag(tag,{expire:0});
   if(discoverOnly)plan.modes.push("source-discovery-only");
   console.info("[timeline:scheduler]",JSON.stringify({modes:plan.modes,meetings:plan.meetingIds.length,fullSweep:plan.fullSweep}));
   let store;
