@@ -106,7 +106,7 @@ async function detail(
     ),
     impacts: PaneData["impacts"] = [...evidence.impacts];
   const content=(await readProjectContent(areaId,[caseId]))[caseId];
-  for(const impact of content?.impacts??[])if(!impacts.some(i=>i.label===impact.label))impacts.push(impact);
+  for(const impact of content?.reportVerified?content.impacts:[])if(!impacts.some(i=>i.label===impact.label))impacts.push(impact);
   if (landUse)
     impacts.unshift({
       label: "Land-use plan",

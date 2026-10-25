@@ -1,7 +1,7 @@
 import {Pool} from "pg";
 import {readFile,writeFile,mkdir} from "node:fs/promises";
 import path from "node:path";
-export type ProjectContent={fingerprint:string;headline:string;explanation?:string;aiGenerated:boolean;status:"ready"|"fallback"|"deferred";checkedAt:string;retryAt?:string;source?:{url:string;page:number};impacts:{label:string;value:string;url:string}[]};
+export type ProjectContent={fingerprint:string;headline:string;explanation?:string;aiGenerated:boolean;reportVerified?:boolean;status:"ready"|"fallback"|"deferred";checkedAt:string;retryAt?:string;source?:{url:string;page:number};impacts:{label:string;value:string;url:string}[]};
 let pool:Pool|undefined,ready:Promise<unknown>|undefined;
 async function db(){pool??=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:10000});ready??=pool.query("CREATE TABLE IF NOT EXISTS law_project_content(area_id text NOT NULL,case_id text NOT NULL,data jsonb NOT NULL,PRIMARY KEY(area_id,case_id))");await ready;return pool;}
 const file=()=>path.join(process.cwd(),".data","project-content.json");
