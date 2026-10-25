@@ -44,7 +44,7 @@ it("flags stale sweeps and unresolved hearings while preserving last-success dat
 });
 
 it("turns a continued-from note on a future County hearing into a sourced timeline row",()=>{
- const rows=continuanceHistory([{date:"2026-12-15",note:"Continued from October 8, 2026",sourceUrl:"https://county.example/hearing"}],"2026-12-15");
+ const rows=continuanceHistory([{date:"2026-12-15",note:"Continued from October 8, 2026",sourceUrl:"https://county.example/hearing"},{date:"2026-12-15",note:"Continued from 10/8/26",sourceUrl:"https://county.example/hearing"}],"2026-12-15");
  expect(rows).toEqual([{label:"Continued from Oct 8 to Dec 15",source:"https://county.example/hearing"}]);
 });
 
