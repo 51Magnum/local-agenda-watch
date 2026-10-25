@@ -4,11 +4,14 @@ import sharp from "sharp";
 import {getDocumentProxy,renderPageAsImage,definePDFJSModule} from "unpdf";
 import {classifyImagePage} from "./classify-image";
 import {allowedImageTitle,forbiddenImageDocument,approvedImageCheck,type ImageCheck} from "./image-policy";
-export type PageCandidate={page:number;title:string;score:number};
+export type PageCandidate={page:number;title:string;score:number;sourceDate?:string};
 export type DocumentScan={version?:string;hash:string;nextPage:number;candidates:PageCandidate[];classified:number[];complete:boolean;previousCaption?:string;inCase?:boolean;matched?:boolean;retryAt?:string;lastExhibit?:string;exhibitCaption?:string;captionPage?:number};
 export type ScanResult={page?:number;image:Buffer;approval:ImageCheck};
 let ready:Promise<void>|undefined;
 export function visualPriority(title:string){return /site[ _-]*(?:plan|layout)/i.test(title)?0:/concept|plat|lot[ _-]*layout/i.test(title)?1:/landscape/i.test(title)?2:/elevation|rendering/i.test(title)?3:/vicinity|aerial/i.test(title)?4:5;}
+export function pageSourceDate(parts:string[]):string|undefined {
+ for(const part of parts){const text=part.trim().replace(/^(?:drawing date|prepared|revised|revision|date)\s*[:.-]?\s*/i,"");if(!/^(?:[A-Za-z]{3,9} \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})$/.test(text))continue;const date=new Date(text);if(Number.isFinite(date.getTime()))return date.toISOString().slice(0,10);}
+}
 export function pageCaption(parts:string[]){
  const caption=parts.find(s=>s.length<180&&forbiddenImageDocument.test(s)&&/sign[ _-]*in|neighborhood meeting|attendance|affidavit|mailing list|comment letter|^\s*(?:notice (?:of|public)|application form|form)\b/i.test(s));
  if(caption&&parts.slice(0,12).includes(caption))return caption;
@@ -52,7 +55,7 @@ export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:
    if(eligible&&(!caption||!forbiddenImageDocument.test(caption))){
     const ops=await p.getOperatorList(),viewport=p.getViewport?.({scale:1}),score=graphicsScore(text,ops,OPS,(viewport?.width??612)*(viewport?.height??792));
     const candidateTitle=(caption&&visualPriority(caption)<5?caption:exhibit&&exhibit===progress.lastExhibit&&page-(progress.captionPage??0)<=2?progress.exhibitCaption:undefined)??caption??(previous&&allowedImageTitle(previous)?previous:allowedImageTitle(title)?title:"Map or plan exhibit");
-    if(score>=20){progress.candidates.push({page,title:candidateTitle,score:score+((text.length<1200||(viewport?.width??0)>1000||(viewport?.height??0)>1400)&&visualPriority(candidateTitle)<5?800-visualPriority(candidateTitle)*150:0)});progress.candidates.sort((a,b)=>b.score-a.score||a.page-b.page);progress.candidates=progress.candidates.slice(0,8);}
+    if(score>=20){progress.candidates.push({page,title:candidateTitle,sourceDate:pageSourceDate(parts)??options.sourceDate,score:score+((text.length<1200||(viewport?.width??0)>1000||(viewport?.height??0)>1400)&&visualPriority(candidateTitle)<5?800-visualPriority(candidateTitle)*150:0)});progress.candidates.sort((a,b)=>b.score-a.score||a.page-b.page);progress.candidates=progress.candidates.slice(0,8);}
    }
    progress.previousCaption=caption;progress.nextPage=page+1;p.cleanup();if(page%10===0)await save();
   }
@@ -61,7 +64,7 @@ export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:
   // At most eight full pages per document go to vision. No cropping before privacy review.
   for(const c of progress.candidates){if(progress.classified.includes(c.page))continue;if(Date.now()>=options.deadline-1000){await save();return {complete:false,progress,best};}
    const image=await sharp(new Uint8Array(await renderPageAsImage(pdf,c.page,{canvasImport:()=>import("@napi-rs/canvas"),width:1600}))).webp({quality:82}).toBuffer();
-   const approval=await classifyImagePage(image,c.title,options.sourceDate,options.deadline),result={page:c.page,image,approval};await options.candidate?.(result);
+   const approval=await classifyImagePage(image,c.title,c.sourceDate??options.sourceDate,options.deadline),result={page:c.page,image,approval};await options.candidate?.(result);
    if(!["unchecked","classification unavailable"].includes(approval.type))progress.classified.push(c.page);else progress.retryAt=new Date(Date.parse(approval.checkedAt)+86400000).toISOString();
    if(approvedImageCheck(approval)&&(!best||visualPriority(approval.type)<visualPriority(best.approval.type)))best=result;
    await save();

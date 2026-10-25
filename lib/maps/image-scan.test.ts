@@ -1,7 +1,7 @@
 import {expect,it,vi,beforeEach} from "vitest";
 import sharp from "sharp";
 import {getDocumentProxy,renderPageAsImage} from "unpdf";
-import {scanDocumentVisuals,pageCaption,graphicsScore} from "./image-scan";
+import {scanDocumentVisuals,pageCaption,pageSourceDate,graphicsScore} from "./image-scan";
 import {classifyImagePage} from "./classify-image";
 import {IMAGE_CHECK_VERSION} from "./image-policy";
 vi.mock("unpdf",()=>({getDocumentProxy:vi.fn(),renderPageAsImage:vi.fn(),definePDFJSModule:vi.fn().mockResolvedValue(undefined)}));
@@ -23,4 +23,8 @@ it("scans beyond page 40 and finds a graphics-only exhibit without text, sending
 it("does not mark a timed-out scan complete",async()=>{
  vi.mocked(getDocumentProxy).mockResolvedValue({numPages:90,destroy:async()=>{}} as never);
  const result=await scanDocumentVisuals(new TextEncoder().encode("%PDF-1.7"),"Staff report",{deadline:Date.now()-1});expect(result.complete).toBe(false);expect(result.progress.nextPage).toBe(1);expect(classifyImagePage).not.toHaveBeenCalled();
+});
+
+it("uses a drawing's explicit date before the containing report's date",()=>{
+ expect(pageSourceDate(["Site Plan","July 6, 2026"])).toBe("2026-07-06");expect(pageSourceDate(["Date: 09/29/2026"])).toBe("2026-09-29");expect(pageSourceDate(["Hearing may be held next month"])).toBeUndefined();
 });

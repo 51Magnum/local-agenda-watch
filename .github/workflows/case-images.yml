@@ -15,7 +15,7 @@ on:
         default: 40
 permissions: {}
 concurrency:
-  group: case-image-backfill
+  group: case-image-${{ inputs.test_cases && 'verification' || 'backfill' }}
   cancel-in-progress: false
 jobs:
   images:
@@ -40,12 +40,25 @@ jobs:
           curl --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" "$BASE?coverage=1" > before.json
           if [ -n "$TEST_CASES" ]; then
             IFS=',' read -ra TARGETS <<< "$TEST_CASES"
+            PIDS=()
+            FILES=()
+            INDEX=0
             for TARGET in "${TARGETS[@]}"; do
               IFS=':' read -r AREA CASE <<< "$TARGET"
               if ! [[ "$AREA" =~ ^[a-z-]+$ && "$CASE" =~ ^[A-Z0-9-]+$ ]]; then exit 1; fi
-              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" "$BASE" > result.json || exit 1
-              cat result.json; echo
+              INDEX=$((INDEX+1))
+              FILE="test-$INDEX.json"
+              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" "$BASE" > "$FILE" &
+              PIDS+=("$!")
+              FILES+=("$FILE")
+              if [ "${#PIDS[@]}" -ge 2 ]; then
+                for PID in "${PIDS[@]}"; do wait "$PID" || exit 1; done
+                for FILE in "${FILES[@]}"; do cat "$FILE"; echo; done
+                PIDS=(); FILES=()
+              fi
             done
+            for PID in "${PIDS[@]}"; do wait "$PID" || exit 1; done
+            for FILE in "${FILES[@]}"; do cat "$FILE"; echo; done
             curl --fail-with-body --silent --show-error --max-time 90 -H "Authorization: Bearer $CRON_SECRET" "$BASE?coverage=1" > after.json
             echo 'Before:'; cat before.json; echo
             echo 'After:'; cat after.json; echo
