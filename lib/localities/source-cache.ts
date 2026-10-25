@@ -7,8 +7,8 @@ import type {HearingFeed} from "./types";
 let pool:Pool|undefined,initialized:Promise<unknown>|undefined;
 function database(){pool??=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:10000});initialized??=pool.query("CREATE TABLE IF NOT EXISTS law_source_cache (area text PRIMARY KEY, snapshot jsonb NOT NULL)").catch(e=>{initialized=undefined;throw e;});return pool;}
 function file(area:string){if(!/^[a-z0-9-]+$/.test(area))throw new Error("Invalid source cache area");return path.join(process.cwd(),".data",area+"-feed.json");}
-export async function readSourceFeed(area:string):Promise<HearingFeed|undefined>{
- if(process.env.DATABASE_URL){const db=database();await initialized;return trackedRows("sources",(await db.query("SELECT snapshot FROM law_source_cache WHERE area=$1",[area])).rows)[0]?.snapshot;}
+export async function readSourceFeed(area:string,options:{omitPdfCache?:boolean}={}):Promise<HearingFeed|undefined>{
+ if(process.env.DATABASE_URL){const db=database();await initialized;return trackedRows("sources",(await db.query(options.omitPdfCache?"SELECT snapshot-'pdfCache' AS snapshot FROM law_source_cache WHERE area=$1":"SELECT snapshot FROM law_source_cache WHERE area=$1",[area])).rows)[0]?.snapshot;}
  if(process.env.VERCEL)return;
  try{return JSON.parse(await readFile(file(area),"utf8"));}catch(e){if((e as NodeJS.ErrnoException).code!=="ENOENT")throw e;}
 }
