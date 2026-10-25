@@ -16,6 +16,7 @@ import {
 } from "@/lib/maps/types";
 import {
   gridCells,
+  snapBounds,
   zoomTier,
   CASE_OUTLINE_ZOOM,
   caseInFilter,
@@ -78,6 +79,9 @@ export default function MapHome() {
     features = useRef(new Map<string, MapCase>()),
     selectedRef = useRef<string | undefined>(undefined),
     openRef = useRef<(c: MapCase) => void>(() => {}),
+    boundaryCache = useRef(new Map<string, Promise<{
+      polygons: FeatureCollection; labels: FeatureCollection; uncovered: FeatureCollection;
+    }>>()),
     cache = useRef(new Map<string, ViewportData>()),
     inflight = useRef(new Map<string, Promise<ViewportData>>()),
     revision = useRef("initial"),
@@ -91,7 +95,7 @@ export default function MapHome() {
     [selected, setSelected] = useState<string>(),
     [pane, setPane] = useState<PaneData>(),
     [paneError, setPaneError] = useState(""),
-    [loading, setLoading] = useState(false),
+    [loading, setLoading] = useState(true),
     [flumLoading, setFlumLoading] = useState(false),
     [message, setMessage] = useState(""),
     [flumOn, setFlumOn] = useState(false),
@@ -263,10 +267,15 @@ export default function MapHome() {
     const restore = () => setSelected(projectFromUrl());
     restore();
     window.addEventListener("popstate", restore);
-    Promise.all([import("maplibre-gl"), import("pmtiles")]).then(
-      ([lib, { Protocol }]) => {
+    // Start metadata alongside the renderer, rather than after it downloads.
+    const metadata = fetch("/api/map/meta").then((r) => {
+      if (!r.ok) throw Error("Map metadata unavailable");
+      return r.json();
+    });
+    void metadata.catch(() => {});
+    import("maplibre-gl").then(
+      (lib) => {
         if (disposed || !container.current) return;
-        lib.addProtocol("pmtiles", new Protocol().tile);
         lib.setWorkerUrl("/maplibre/worker.mjs");
         let center: [number, number] = [-116.5, 43.6],
           initialZoom = 10;
@@ -314,6 +323,7 @@ export default function MapHome() {
           maxZoom: 19,
           renderWorldCopies: false,
           attributionControl: false,
+          pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         });
         map.current = m;
         m.scrollZoom.setWheelZoomRate(1 / 900);
@@ -325,7 +335,7 @@ export default function MapHome() {
           new lib.AttributionControl({ compact: true }),
           "bottom-right",
         );
-        m.on("load", () => {
+        m.once("style.load", () => {
           if (disposed) return;
           m.addSource("law-boundaries", {
             type: "geojson",
@@ -384,21 +394,6 @@ export default function MapHome() {
                 "Future land use tiles could not load. Try reloading the map.",
               );
             }
-          });
-          m.addSource("law-flum", {
-            type: "vector",
-            url:
-              "pmtiles://" +
-              new URL(FLUM_TILES.url, window.location.origin).href,
-          });
-          m.addLayer({
-            id: "law-flum",
-            type: "fill",
-            source: "law-flum",
-            "source-layer": FLUM_TILES.sourceLayer,
-            minzoom: FLUM_TILES.minZoom,
-            layout: { visibility: "none" },
-            paint: { "fill-color": ["get", "color"], "fill-opacity": 0.35 },
           });
           m.addSource("law-ring", { type: "geojson", data: empty });
           m.addLayer({
@@ -706,8 +701,7 @@ export default function MapHome() {
             loadRef.current();
           }, 300);
         });
-        fetch("/api/map/meta")
-          .then((r) => r.json())
+        metadata
           .then((data) => {
             setAreas(data.areas ?? []);
             revision.current = data.revision ?? "initial";
@@ -761,25 +755,22 @@ export default function MapHome() {
         cells = gridCells(bounds, z);
       setZoom(z);
       setLoading(true);
-      fetch(
-        "/api/map/boundaries?" +
-          new URLSearchParams({ bbox: bounds.join(",") }),
-      )
-        .then((r) => r.json())
-        .then((d) => {
-          if (current === generation.current && !destroyed.current) {
-            (m.getSource("law-boundaries") as GeoJSONSource)?.setData(
-              d.polygons,
-            );
-            (m.getSource("law-area-labels") as GeoJSONSource)?.setData(
-              d.labels,
-            );
-            (m.getSource("law-uncovered") as GeoJSONSource)?.setData(
-              d.uncovered,
-            );
-          }
-        })
-        .catch(() => {});
+      const boundaryKey = snapBounds(bounds, z).join(",");
+      let boundaryRequest = boundaryCache.current.get(boundaryKey);
+      if (!boundaryRequest) {
+        boundaryRequest = fetch("/api/map/boundaries?" + new URLSearchParams({ bbox: boundaryKey }))
+          .then((r) => { if (!r.ok) throw Error("Boundaries unavailable"); return r.json(); });
+        boundaryCache.current.set(boundaryKey, boundaryRequest);
+        if (boundaryCache.current.size > 24) boundaryCache.current.delete(boundaryCache.current.keys().next().value!);
+        void boundaryRequest.catch(() => boundaryCache.current.delete(boundaryKey));
+      }
+      void boundaryRequest.then((d) => {
+        if (current === generation.current && !destroyed.current) {
+          (m.getSource("law-boundaries") as GeoJSONSource)?.setData(d.polygons);
+          (m.getSource("law-area-labels") as GeoJSONSource)?.setData(d.labels);
+          (m.getSource("law-uncovered") as GeoJSONSource)?.setData(d.uncovered);
+        }
+      }).catch(() => {});
       try {
         const responses = await Promise.all(
           cells.map(async (cell) => {
@@ -883,11 +874,22 @@ export default function MapHome() {
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
-    m.setLayoutProperty(
-      "law-flum",
-      "visibility",
-      flumOn && zoom >= FLUM_TILES.minZoom ? "visible" : "none",
-    );
+    let cancelled = false;
+    const showFlum = flumOn && zoom >= FLUM_TILES.minZoom;
+    if (showFlum && !m.getSource("law-flum")) {
+      setFlumLoading(true);
+      void import("pmtiles").then(async ({ Protocol }) => {
+        const lib = await import("maplibre-gl");
+        if (cancelled || destroyed.current || m.getSource("law-flum")) return;
+        lib.addProtocol("pmtiles", new Protocol().tile);
+        m.addSource("law-flum", { type: "vector", url: "pmtiles://" + new URL(FLUM_TILES.url, window.location.origin).href });
+        m.addLayer({ id: "law-flum", type: "fill", source: "law-flum", "source-layer": FLUM_TILES.sourceLayer, minzoom: FLUM_TILES.minZoom,
+          paint: { "fill-color": ["get", "color"], "fill-opacity": 0.35 } }, "law-ring");
+      }).catch(() => { if (!cancelled) { setFlumLoading(false); setMessage("Future land use could not load. Try again."); } });
+    } else if (m.getLayer("law-flum")) {
+      m.setLayoutProperty("law-flum", "visibility", showFlum ? "visible" : "none");
+    }
+    if (!showFlum) setFlumLoading(false);
     m.setPaintProperty(
       "law-fill",
       "fill-opacity",
@@ -895,6 +897,7 @@ export default function MapHome() {
     );
     for (const id of ["law-boundaries", "law-area-labels"])
       m.setLayoutProperty(id, "visibility", boundariesOn ? "visible" : "none");
+    return () => { cancelled = true; };
   }, [ready, flumOn, boundariesOn, zoom]);
   useEffect(() => {
     if (!place || !ready || !map.current) return;
@@ -1018,7 +1021,7 @@ export default function MapHome() {
     <main className="law-map-home">
       <h1 className="sr-only">Development projects near you</h1>
       <header className="law-map-header">
-        <Link href="/" className="law-map-brand">
+        <Link href="/" prefetch={false} className="law-map-brand">
           Local Agenda <strong>Watch</strong>
           <small>What’s being built near you?</small>
         </Link>

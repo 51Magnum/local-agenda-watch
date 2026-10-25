@@ -20,12 +20,14 @@ export function zoomTier(zoom: number) {
   return zoom < 9 ? 8 : Math.min(18, Math.floor(zoom));
 }
 export function gridSize(zoom: number) {
-  return 360 / 2 ** Math.max(0, zoomTier(zoom) - 2);
+  return 360 / 2 ** Math.max(0, zoomTier(zoom));
 }
 export function snapBounds(bounds: Bounds, zoom: number): Bounds {
   const s = gridSize(zoom),
-    lo = (x: number) => Math.floor(x / s + 1e-6) * s,
-    hi = (x: number) => Math.ceil(x / s - 1e-6) * s;
+    // Coordinates are serialized to seven decimals; use an absolute tolerance
+    // so re-snapping small cells cannot grow them or cause redirect loops.
+    lo = (x: number) => Math.floor((x + 1e-7) / s) * s,
+    hi = (x: number) => Math.ceil((x - 1e-7) / s) * s;
   return [
     Math.max(-180, lo(bounds[0])),
     Math.max(-85, lo(bounds[1])),
