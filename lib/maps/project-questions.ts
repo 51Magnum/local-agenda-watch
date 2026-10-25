@@ -11,6 +11,8 @@ export const RESIDENT_QUESTIONS = [
   "How can I act",
 ] as const;
 export type PaneData = {
+  documents?: {label:string;url:string}[];
+  parcels?: string[];
   officialRecords?: { label: string; url: string }[];
   relatedCases?: {
     areaId: string;
@@ -51,7 +53,12 @@ export function questionEvidence(
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
   const impacts = [
     ["Traffic", "trafficSummary"],
-    ["Schools", "schoolComment"],
+    ["School capacity", "schoolComment"],
+    ["Nearby schools", "nearbySchools"],
+    ["Density and surroundings", "densityContext"],
+    ["Building height", "buildingHeight"],
+    ["Parks and open space", "parksOpenSpace"],
+    ["Construction timing", "constructionTiming"],
   ].flatMap(([label, key]) => {
     const f = fields
       .filter((f) => f.sourceKind === "staff-report" && f.key === key)

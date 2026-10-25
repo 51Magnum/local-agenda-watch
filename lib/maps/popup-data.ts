@@ -1,3 +1,4 @@
+import {readProjectContent} from "@/lib/project-content-store";
 import {protectMapCase,residentialCase} from "@/lib/residential-privacy";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { publicImageReviews, displayedImageReviews } from "./image-review-store";
@@ -17,6 +18,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
     config.loadCases?.().catch(() => undefined),
     publicImageReviews(config.id,cases.map(c=>c.id)).catch(()=>[]),
   ]);
+  const content=await readProjectContent(config.id,cases.map(c=>c.id));
   const catalog = new Map(caseCatalog(feed).map(h => [h.appId, h]));
   const overrides=await privacyOverrides();
   return cases.map(item => {
@@ -46,6 +48,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
         if (applicant && !extractedCopy.explanation) { popup.explanation = applicant[1] + " wants to add this land to " + config.area!.name + " and build a neighborhood of single-family homes."; popup.aiGenerated = false; }
       }
     }
+    const enriched=content[item.id];if(enriched&&(enriched.status==="ready"||!project&&!popup.explanation)){popup.headline=enriched.headline;popup.explanation=enriched.explanation??popup.explanation;popup.aiGenerated=enriched.aiGenerated;}
     const copy=popupApplicationCopy(fields),reviewed=config.reviewedApplications?.[item.id];
     const newer=fields.some(f=>f.sourceKind==="staff-report"&&f.sourceUrl.split("#")[0]!==reviewed?.reportUrl&&f.createdAt.slice(0,10)>(reviewed?.sourceDate??""));
     if(reviewed&&!newer){

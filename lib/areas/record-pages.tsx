@@ -20,7 +20,7 @@ import { caseCatalog } from "@/lib/case-catalog";
 import { getCaseNextHearing } from "@/lib/case-details";
 import type {PublicCaseRecord,RecordEvent} from "@/lib/localities/record-types";
 import { areaPath, AREAS } from "./registry";
-import { areaDate, areaTime } from "./format";
+import { areaDate, areaTime, hearingDateTime } from "./format";
 import { readMapSnapshot } from "@/lib/maps/store";
 import { hearingCalendar } from "@/lib/projects";
 type RecordCase=Hearing&{record:PublicCaseRecord};
@@ -50,7 +50,7 @@ function allEvents(cases:RecordCase[]){
 function Warning({unavailable,lastUpdated}:{unavailable?:boolean;lastUpdated?:string}){return unavailable?<p role="status" className="rounded-lg border border-amber-400 p-4 text-sm">Some official sources are temporarily unavailable. Cached records may be out of date.{lastUpdated?" Last updated: "+date(lastUpdated)+".":""} <a href={config.sourceUrl} className="underline">Check the official hearing calendar</a>.</p>:null;}
 function MeetingCard({event,cases}:{event:RecordEvent;cases:RecordCase[]}) {
  const related=[...new Map(cases.filter(c=>event.caseIds.includes(c.appId)).map(c=>[titleForCase(c).replace(/[’]/g,"'").toLowerCase(),c])).values()];
- return <article className="space-y-3 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800"><p className="text-sm font-semibold text-sky-700 dark:text-sky-400">{date(event.date)}{event.time?" · "+areaTime(event.startsAt,area):""}</p><h3 className="font-semibold">{event.body==="P&Z"?area.bodies.planning.label:event.body}</h3><ul className="space-y-2">{related.map(c=><li key={c.appId}><Link href={base+"/plan/"+encodeURIComponent(c.appId)} className="text-sm underline underline-offset-4">{titleForCase(c)}</Link></li>)}</ul><p className="text-sm">{event.result??(event.date<new Intl.DateTimeFormat("en-CA",{timeZone:area.timezone}).format(new Date())?"Result pending official record":"Hearing scheduled")}</p>{event.deadline&&<p className="text-sm text-zinc-500">Written-comment deadline: {date(event.deadline)} (time not specified)</p>}<Source url={event.sourceUrl} className="inline-block text-sm underline underline-offset-4">Official hearing, documents &amp; comment details →</Source></article>;
+ return <article className="space-y-3 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800"><p className="text-sm font-semibold text-sky-700 dark:text-sky-400">{hearingDateTime(event.time?event.startsAt:event.date,area.timezone)}</p><h3 className="font-semibold">{event.body==="P&Z"?area.bodies.planning.label:event.body}</h3><ul className="space-y-2">{related.map(c=><li key={c.appId}><Link href={base+"/plan/"+encodeURIComponent(c.appId)} className="text-sm underline underline-offset-4">{titleForCase(c)}</Link></li>)}</ul><p className="text-sm">{event.result??(event.date<new Intl.DateTimeFormat("en-CA",{timeZone:area.timezone}).format(new Date())?"Result pending official record":"Hearing scheduled")}</p>{event.deadline&&<p className="text-sm text-zinc-500">Written-comment deadline: {date(event.deadline)} (time not specified)</p>}<Source url={event.sourceUrl} className="inline-block text-sm underline underline-offset-4">Official hearing, documents &amp; comment details →</Source></article>;
 }
 async function RecordHub() {
  const feed=await loadFeed(), cases=catalog(feed), today=new Intl.DateTimeFormat("en-CA",{timeZone:area.timezone}).format(new Date());

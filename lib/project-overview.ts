@@ -20,7 +20,7 @@ export const braeburnOverview: ProjectOverview = {
   acres: { value: "138.03", url: BRAEBURN_REPORT, page: 24 },
   zoning: { value: "RS4, RS6 and RS7 (Single-Family Residential)", url: BRAEBURN_REPORT, page: 1 },
   applicant: { value: "Toll Brothers", url: BRAEBURN_REPORT, page: 1 },
-  traffic: { value: "The staff report calls for 10-foot paths, drainage and traffic-study-related widening along Amity Avenue and Happy Valley Road, plus full pavement widening on Cruse Lane/Pit Lane.", url: BRAEBURN_REPORT, page: 2 },
+  traffic: { value: "The traffic study, still in final review, identifies a signal at Amity & School Access D, a roundabout at Cruse/Amity, and frontage paths and widening.", url: BRAEBURN_REPORT, page: 2 },
   earlierNotice: "Updated from March notice (~500 homes on 137 acres).",
 };
 export function sourcedField(field?: EvidenceField): SourcedFact | undefined {

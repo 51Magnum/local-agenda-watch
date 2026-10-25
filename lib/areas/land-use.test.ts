@@ -15,7 +15,7 @@ it("compares every requested district using the jurisdiction's sourced mapping",
   expect(landUseFact(AREAS.nampa,["Industrial"],"IL (Light Industrial)")?.value).toContain("consistent with requested IL zoning");
 });
 it("shows only designations without mapping or zoning and leaves mixed sites unclassified", () => {
-  expect(landUseFact(AREAS.nampa,["Unmapped category"],"IL")?.value).toBe("Unmapped category");
+  expect(landUseFact(AREAS.nampa,["Unmapped category"],"IL")?.value).toBe("Unmapped Category");
   expect(landUseFact({...AREAS.nampa,flumCompatibility:undefined},["Industrial"],"IL")?.value).toBe("Industrial");
   expect(landUseFact(AREAS.nampa,["Industrial"])?.value).toBe("Industrial");
   expect(landUseFact(AREAS.nampa,["Industrial","Medium Density Residential"],"IL")?.value).toBe("Mixed: Industrial; Medium Density Residential");

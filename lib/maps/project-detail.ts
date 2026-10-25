@@ -1,4 +1,6 @@
-import {residentialCase,redactResidence,protectMapCase} from "@/lib/residential-privacy";
+import {readProjectContent} from "@/lib/project-content-store";
+import {projectLocation} from "./project-location";
+import {residentialCase,redactResidence,protectMapCase,privateResidentialDocument} from "@/lib/residential-privacy";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { officialProjectRecords, residentPaneHref } from "./project-records";
 import { unstable_cache } from "next/cache";
@@ -103,6 +105,8 @@ async function detail(
       caseId,
     ),
     impacts: PaneData["impacts"] = [...evidence.impacts];
+  const content=(await readProjectContent(areaId,[caseId]))[caseId];
+  for(const impact of content?.impacts??[])if(!impacts.some(i=>i.label===impact.label))impacts.push(impact);
   if (landUse)
     impacts.unshift({
       label: "Land-use plan",
@@ -121,6 +125,9 @@ async function detail(
       value: overview.schools.value,
       url: factHref(overview.schools),
     });
+  if(project?.slug==="braeburn-creek"){
+    impacts.push({label:"Happy Valley Road",value:"The traffic study calls for a center left-turn lane and a southbound turn lane. A five-lane section at School Access B / future Site Access C is identified for 2038 total traffic conditions; final study review may change requirements.",url:braeburnOverview.traffic!.url+"#page=1"},{label:"Nearby school",value:"Columbia High School is immediately west of the site. This identifies the neighboring school, not a verified capacity commitment.",url:braeburnOverview.traffic!.url+"#page=1"},{label:"Proposed open space",value:"The applicant proposes nearly 21.4 acres of qualified open space (15.5% of the site).",url:braeburnOverview.traffic!.url+"#page=25"},{label:"Proposed construction timing",value:"The applicant describes construction over approximately seven years; no opening date is confirmed.",url:braeburnOverview.traffic!.url+"#page=21"});
+  }
   const homes = Number(
       overview.homes?.value.match(/^[\d,.]+/)?.[0].replace(/,/g, ""),
     ),
@@ -139,6 +146,8 @@ async function detail(
       url: overview.acres?.url,
     });
   const progress = item.popup?.progress ?? [];
+  const filedDate=fields.find(f=>f.key==="appliedDate")?.value??record?.appliedDate??(project?.slug==="braeburn-creek"?"2026-07-31":undefined);
+  if(filedDate){const filed=progress.find(p=>/^Filed\b/.test(p.label));if(filed)filed.label="Filed · "+new Intl.DateTimeFormat("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}).format(new Date(filedDate.slice(0,10)+"T12:00:00Z"));}
   const closed = participationClosed({ ...item, appStatus: hearing?.appStatus });
   const expiredDeadlineMessage = expiredCommentDeadline(next?.commentDeadline, next?.startsAt, next?.body ?? area.bodies.decision.label, area.timezone);
   const officialRecords = officialProjectRecords(
@@ -160,6 +169,8 @@ async function detail(
   const result:PaneData = {
     item,
     officialRecords,
+    documents:[...new Map([...(record?.documents??[]),...(project?.sourceDocuments??[])].filter(d=>(!sensitive||!privateResidentialDocument(d.label))&&residentPaneHref(area,d.url)).map(d=>[d.url,{label:d.label,url:residentPaneHref(area,d.url)!}])).values()],
+    parcels:sensitive?undefined:item.parcelIds,
     relatedCases: await Promise.all((item.members??[]).map(async m=>{
       const h=m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId):undefined;
       const relatedRecord=h?await config.recordForCase?.(h):undefined;
@@ -175,7 +186,7 @@ async function detail(
     caseIds: ids,
     where: item.citywide
       ? "Citywide change — " + area.name
-      : (project?.location ?? record?.address),
+      : await projectLocation(item,area.name,project?.location ?? record?.address),
     history: [
       ...continuances.map(row=>({...row,source:residentPaneHref(area,row.source)})),
       ...progress
@@ -220,6 +231,6 @@ async function detail(
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v6"],
+  ["map-project-questions-v7"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );

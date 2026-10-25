@@ -34,7 +34,7 @@ it("Meridian uses P&Z and City Council and has no invented outcome",()=>{
 });
 it("a newer application without published short copy never borrows older numbers",()=>{
  const model=buildPopupModel(item,AREAS.nampa,undefined,[field("popupHeadline","500 new homes on 137 acres",{documentId:"old",createdAt:"2026-03-01"}),field("requestSummary","Updated application",{documentId:"new",createdAt:"2026-09-01"})],now);
- expect(model.headline).toBe("Braeburn Creek annexation");expect(JSON.stringify(model)).not.toContain("500");
+ expect(model.headline).toBe("Braeburn Creek Annexation");expect(JSON.stringify(model)).not.toContain("500");
 });
 it("removes case codes from fallback names and rejects oversized explanation",()=>{
  expect(popupProjectName("Gas station (CUP-00411-2026)")).toBe("Gas station");

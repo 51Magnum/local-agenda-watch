@@ -19,7 +19,7 @@ afterEach(()=>vi.useRealTimers());
 const params=()=>Promise.resolve({planNumber:"SD2025-0002"});
 it("renders a County project with its Board date, actual deadline, linked history and deduplicated reports",async()=>{
  const html=renderToStaticMarkup(await CountyCasePage({params:params()}));
- expect(html).toContain("Pheasant Heights");expect(html).toContain("Thursday, October 29, 2026");expect(html).toContain("1:30 PM MDT");expect(html).toContain("The posted comment deadline (Oct 19) has passed.");expect(html).toContain("Recommended Approval");expect(html).not.toContain("City Council");expect(html).not.toContain("Nampa");expect(html.match(/href="https:\/\/landhearingsagenda.canyoncounty.id.gov\/DownloadDocument\/1467"/g)).toHaveLength(1);
+ expect(html).toContain("Pheasant Heights");expect(html).toContain("Thu, Oct 29, 2026");expect(html).toContain("1:30 PM MDT");expect(html).toContain("The posted comment deadline (Oct 19) has passed.");expect(html).toContain("Recommended Approval");expect(html).not.toContain("City Council");expect(html).not.toContain("Nampa");expect(html.match(/href="https:\/\/landhearingsagenda.canyoncounty.id.gov\/DownloadDocument\/1467"/g)).toHaveLength(1);
 });
 it("sets canonical case metadata and a calendar using the County hearing's actual time",async()=>{
  const meta=await CountyCaseMetadata({params:params()});expect(meta.alternates?.canonical).toBe("https://www.localagendawatch.com/us/id/canyon-county/plan/SD2025-0002");

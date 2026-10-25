@@ -1,3 +1,5 @@
+import {readProjectContent} from "@/lib/project-content-store";
+import {cleanResidentTitle} from "@/lib/resident-copy";
 import {residentialCase,protectMapCase,blockAddress,PRIVACY_TAG} from "@/lib/residential-privacy";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { Pool } from "pg";
@@ -38,6 +40,7 @@ INSERT INTO law_map_cases SELECT jurisdiction,c->>'id',(b->>0)::float,(b->>1)::f
 INSERT INTO law_map_index_meta VALUES('seed-v1',now()) ON CONFLICT DO NOTHING;`;
 export function indexedDecisionDate(h: {
   meetings: { date: string; body: string; result?: string }[];
+  meridian?: {authority:string;action:string;actionDate?:string};
   county?: { decisionDate?: string };
   record?: { decisionDate?: string };
 }) {
@@ -49,6 +52,7 @@ export function indexedDecisionDate(h: {
           /^(approved|denied)/i.test(m.result ?? ""),
       )
       .sort((a, b) => b.date.localeCompare(a.date))[0]?.date ??
+    (h.meridian?.authority==="City Council"&&/^(approved|denied)$/i.test(h.meridian.action)?h.meridian.actionDate:undefined) ??
     h.county?.decisionDate ??
     h.record?.decisionDate
   );
@@ -242,6 +246,7 @@ async function loadViewport(
           ),
         ];
         const state = await readTimelineState(ids, a.id);
+        const content=await readProjectContent(a.id,ids);
         for (const c of matches) {
           const id = c.members?.[0]?.caseId ?? c.id.split(":").at(-1)!,
             project = getProjectForCase(id, a.id),
@@ -249,11 +254,11 @@ async function loadViewport(
             copy = popupApplicationCopy(fields);
           c.popup = {
             headline:
-              copy.headline ??
+              content[id]?.headline ?? copy.headline ??
               JURISDICTIONS[a.id]?.reviewedApplications?.[id]?.headline ??
               project?.name ??
               c.title,
-            projectName: project?.name ?? c.title,
+            projectName: project?.name ?? cleanResidentTitle(c.title),
             progress: [],
           };
         }

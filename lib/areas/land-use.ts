@@ -1,3 +1,4 @@
+import {titleCase} from "@/lib/resident-copy";
 import { areaPath, type AreaDefinition } from "./registry";
 import type { SourcedFact } from "../project-overview";
 
@@ -8,7 +9,7 @@ export function landUseFact(area: AreaDefinition, categories: string[], zoning?:
   const unique = [...new Set(categories.filter(Boolean))];
   if (!unique.length || !area.sources.flum) return undefined;
   const fact: LandUseFact = {
-    value: (unique.length > 1 ? "Mixed: " : "") + unique.join("; "),
+    value: (unique.length > 1 ? "Mixed: " : "") + unique.map(titleCase).join("; "),
     url: areaPath(area) + "/map?flum=1"+(caseId?"&case="+encodeURIComponent(caseId):""),
     mapHref: areaPath(area) + "/map?flum=1"+(caseId?"&case="+encodeURIComponent(caseId):""),
   };

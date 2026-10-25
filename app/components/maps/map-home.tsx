@@ -1100,6 +1100,7 @@ export default function MapHome() {
             </button>
           ))}
         </nav>
+        {filter==="decided"&&<p className="law-undated-decisions" role="status">{cases.filter(c=>["Decided","Recorded"].includes(c.stage)&&!c.decisionDate).length} decided projects in this map view excluded because no decision date is verified.</p>}
         <div className="law-explorer-controls">
           <button aria-expanded={legend} aria-controls="map-progress-legend" onClick={() => { setLegend(!legend); setLayers(false); }}>
             Legend
@@ -1200,10 +1201,10 @@ export default function MapHome() {
             onClose={closePane}
             onImage={setImage}
             savedPlace={
-              savedPlace && visiblePane.item.centroid
+              (place ?? savedPlace) && visiblePane.item.centroid
                 ? {
                     distance: distance(
-                      savedPlace.coordinates,
+                      (place ?? savedPlace)!.coordinates,
                       visiblePane.item.centroid,
                       { units: "miles" },
                     ),

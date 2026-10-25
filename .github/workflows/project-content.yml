@@ -1,0 +1,26 @@
+name: Enrich resident project content
+on:
+  schedule:
+    # After the daily sweep, inside both summer and winter Denver morning windows.
+    - cron: '30 13 * * *'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: resident-project-content
+  cancel-in-progress: false
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Resume each live area's content backfill
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        shell: bash
+        run: |
+          test -n "$CRON_SECRET" || { echo '::error::CRON_SECRET is missing'; exit 1; }
+          for area in nampa meridian canyon-county kuna eagle star middleton; do
+            curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 290 \
+              --header "Authorization: Bearer $CRON_SECRET" \
+              "https://www.localagendawatch.com/api/cron/project-content?area=$area"
+          done

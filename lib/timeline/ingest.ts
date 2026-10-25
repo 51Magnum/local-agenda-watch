@@ -155,7 +155,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       const message = document.title + ": " + (error instanceof Error ? error.message : "Processing failed"); run.errors.push(message);
       console.error("[timeline:ingest]", message);
       if(isBlockedSource(error)){recordHost(areaId,document.url,"blocked","Access challenge; no retry consumed");run.skipped++;return;}
-      const deferred=/deferred to next run|processing budget reached/i.test(message);
+      const deferred=/deferred to next run|processing budget reached|AI work deferred/i.test(message);
       await store.mutate((state) => {
         const current=state.documents[id];
         if(deferred){if(current)current.error=message;return;}

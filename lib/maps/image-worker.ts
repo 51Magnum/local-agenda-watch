@@ -15,7 +15,14 @@ import {isBlockedSource} from "@/lib/timeline/source-access";
 import type {Hearing} from "@/lib/localities/types";
 import type {MapVisual} from "./types";
 export async function seedImageQueue(){let total=0;for(const a of Object.values(JURISDICTIONS).filter(a=>a.area?.status==="live")){const cases=await mapImageCases(a.id);await enqueueImages(cases.map(c=>({areaId:a.id,caseId:c.id})));total+=cases.length;}return total;}
-export async function imageCoverage(){const rows=await imageReviews(),active=displayedImageReviews(rows),result=[];for(const area of Object.values(JURISDICTIONS)){const cases=await mapImageCases(area.id);let real=0,fallback=0;for(const c of cases){const v=active.find(r=>r.areaId===area.id&&r.caseIds.includes(c.id))?.visual;if(v?.approval?.generated)fallback++;else if(v)real++;}result.push({area:area.id,cases:cases.length,geometry:cases.filter(c=>c.hasGeometry&&!c.citywide).length,real,fallback,empty:cases.length-real-fallback});}return result;}
+export async function imageCoverage(){
+ const rows=await imageReviews(),active=displayedImageReviews(rows),result=[];
+ for(const area of Object.values(JURISDICTIONS).filter(a=>a.area?.status==="live")){
+ const cases=await mapImageCases(area.id);let plans=0,aerial=0,fallback=0;
+ for(const c of cases){const v=active.find(r=>r.areaId===area.id&&r.caseIds.includes(c.id))?.visual;if(v?.approval?.generated)fallback++;else if(v?.approval?.type==="vicinity/aerial exhibit")aerial++;else if(v)plans++;}
+ result.push({area:area.id,cases:cases.length,geometry:cases.filter(c=>c.hasGeometry&&!c.citywide).length,plans,aerial,real:plans+aerial,fallback,empty:cases.length-plans-aerial-fallback});
+ }return result;
+}
 export async function processImageQueue(options:{budgetMs?:number;target?:{areaId:string;caseId:string};fallbackOnly?:boolean}={}){
  const started=Date.now(),deadline=started+(options.budgetMs??250000);const job=await claimImageJob(options.target,options.fallbackOnly);if(!job)return {status:"idle",checked:0};
  const config=JURISDICTIONS[job.areaId],resuming=job.status==="deferred"||job.status==="blocked";job.attempts++;job.errors=[];job.checked=0;

@@ -35,7 +35,7 @@ export const braeburnCreek: Project = {
   slug: "braeburn-creek",
   title: "Braeburn Creek: proposed homes at Amity & Happy Valley",
   location: "Northeast corner of E. Amity Ave & S. Happy Valley Rd, Nampa",
-  summary: "The source aerial map shows largely agricultural land at Amity & Happy Valley. Toll Brothers’ September application proposes 487 detached homes on about 138 acres; the March neighborhood notice described roughly 500 homes on 137 acres. The applications request annexation and zoning plus a preliminary subdivision plat.",
+  summary: "The source aerial map shows largely agricultural land at Amity & Happy Valley. Toll Brothers’ application filed July 31, 2026, proposes 487 detached homes on about 138 acres; the March neighborhood notice described roughly 500 homes on 137 acres. The applications request annexation and zoning plus a preliminary subdivision plat.",
   caseIds: ["ANN-00371-2026", "SPP-00184-2026"],
   cases: [
     { id: "ANN-00371-2026", label: "Annexation and zoning", portalUrl: "https://nampaid-energovpub.tylerhost.net/Apps/SelfService#/plan/885c7660-323f-4486-9d09-75d47c42968f" },

@@ -1,6 +1,6 @@
 import { expiredCommentDeadline } from "@/lib/participation";
 import {residentHref} from "@/lib/areas/record-links";
-import {displayArea,areaDate,areaTime} from "@/lib/areas/format";
+import {displayArea,areaDate,areaTime,hearingDateTime} from "@/lib/areas/format";
 import { type ProjectHearing } from "@/lib/projects";
 
 export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise = false, areaId }: { hearing?: ProjectHearing; calendarHref: string; emptyMessage?: string; concise?: boolean; areaId?: string }) {
@@ -9,7 +9,7 @@ export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise =
   return <section aria-labelledby="next-step-title" className="rounded-2xl border border-sky-300 bg-sky-50 p-6 dark:border-sky-700 dark:bg-sky-950/40">
     <h2 id="next-step-title" className="text-xl font-semibold">Next step</h2>
     {hearing ? <>
-      <p className="mt-3 text-2xl font-semibold">{formatDate(hearing.startsAt)}</p>
+      <p className="mt-3 text-2xl font-semibold">{hearingDateTime(hearing.startsAt,area.timezone)}</p>
       <dl className="mt-5 grid gap-5 sm:grid-cols-2">
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Public hearing</dt><dd className="mt-1 font-medium">{hearing.startsAt.length > 10 ? formatTime(hearing.startsAt) + " ("+area.timezone+")" : "Time not confirmed"}</dd></div>
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Decision-making body</dt><dd className="mt-1 font-medium">{hearing.body}</dd></div>

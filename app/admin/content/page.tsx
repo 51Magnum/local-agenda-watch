@@ -1,0 +1,4 @@
+import {headers} from "next/headers";
+import {authorizedReviewer} from "@/lib/timeline/auth";
+export const dynamic="force-dynamic";
+export default async function ContentAdmin(){if(!authorizedReviewer((await headers()).get("authorization")))return <main>Admin access required.</main>;return <main className="p-8 space-y-4"><a href="/admin">Admin overview</a><h1 className="text-2xl font-semibold">Resident project content</h1><p>Scan active cases across every live area. Unchanged source fingerprints reuse cached copy. Unsupported or unavailable summaries keep a clean official title.</p><p>AI requests use the server-only OpenAI configuration. Work resumes across bounded runs; unchanged document fingerprints reuse cached results.</p><form action="/admin/content/action" method="post"><button className="rounded border p-3">Run content backfill</button></form></main>;}

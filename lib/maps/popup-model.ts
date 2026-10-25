@@ -1,3 +1,4 @@
+import {cleanResidentTitle,cleanResidentProse} from "@/lib/resident-copy";
 import type { AreaDefinition } from "@/lib/areas/registry";
 import type { Hearing, ScheduledMeeting } from "@/lib/localities/types";
 import type { EvidenceField } from "@/lib/timeline/types";
@@ -26,18 +27,18 @@ export function popupApplicationCopy(fields: EvidenceField[]) {
   const units = fact("units"), acres = fact("acres");
   const count = units?.match(/^[\d,]+/)?.[0], size = acres?.match(/^[\d,.]+$/)?.[0];
   const numericHeadline = count && size && /homes|single.family|dwell|residential/i.test(units!) ? count + " new homes on " + size + " acres" : undefined;
-  const headline = generated && words(generated) < 8 && !caseCode.test(generated) ? generated : numericHeadline;
+  const headline = generated && words(generated) <= 16 && !caseCode.test(generated) ? generated : numericHeadline;
   caseCode.lastIndex = 0;
   const requestSentence = fact("requestSummary")?.split(/(?<=[.!?])\s+/)[0];
-  const explanation = fact("popupExplanation") ?? (requestSentence && words(requestSentence) <= 25 && !/parcel|section|township|landowner|representing|\bR\d{6,}|\b[A-Z]{2,4}-\d/i.test(requestSentence) ? requestSentence : undefined);
-  return { headline, explanation: explanation && words(explanation) <= 25 ? explanation : undefined, source: applicationFields.find(f => f.documentId === document && f.key === (fact("popupExplanation") ? "popupExplanation" : "requestSummary")) };
+  const explanation = fact("popupExplanation") ?? (requestSentence && words(requestSentence) <= 60 && !/parcel|section|township|landowner|representing|\bR\d{6,}|\b[A-Z]{2,4}-\d/i.test(requestSentence) ? requestSentence : undefined);
+  return { headline, explanation: explanation && words(explanation) <= 60 ? explanation : undefined, source: applicationFields.find(f => f.documentId === document && f.key === (fact("popupExplanation") ? "popupExplanation" : "requestSummary")) };
 }
 /** Only public evidence is passed in; pending AI decisions never enter the model. */
 export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: Hearing, fields: EvidenceField[] = [], now = new Date()): NonNullable<MapCase["popup"]> {
   const newest = (key: string) => fields.filter(f => f.key === key).sort((a,b) => (b.reviewedAt ?? b.createdAt).localeCompare(a.reviewedAt ?? a.createdAt))[0];
-  const projectName = popupProjectName(item.title);
+  const projectName = cleanResidentTitle(popupProjectName(hearing?.displayTitle??item.title),item.typeLabel);
   const copy = popupApplicationCopy(fields);
-  const headline = copy.headline ?? projectName, explanation = copy.explanation;
+  const headline = copy.headline ?? projectName, explanation = copy.explanation ? cleanResidentProse(copy.explanation) : undefined;
   const progress: NonNullable<MapCase["popup"]>["progress"] = [];
   const meetings = [...(hearing?.meetings ?? [])].sort((a,b) => a.date.localeCompare(b.date));
   const latestDecisionMeeting = [...meetings].reverse().find(m => (m.body === area.bodies.decision.id || /council|commissioners/i.test(m.body)) && m.result);
@@ -53,10 +54,10 @@ export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: H
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: area.timezone }).format(now);
   if (pzDate && pzDate <= today) progress.push({ label: planningBody + (pzResult ? " " + pzResult.replace(/^recommend /i, "recommended ").replace(/^approved$/i, "recommended approval").replace(/^denied$/i, "recommended denial") : " met; result pending") + " (" + shortDate(pzDate, area) + ")", state: pzResult ? "done" : "past" });
   if (outcome && /^(approved|denied|withdrawn)\b/i.test(outcome)) {
-    progress.push({ label: outcome.charAt(0).toUpperCase() + outcome.slice(1) + " by " + area.bodies.decision.shortLabel + (finalDate ? ", " + shortDate(finalDate, area) : ""), state: "current" });
+    progress.push({ label: outcome.charAt(0).toUpperCase() + outcome.slice(1).toLowerCase() + " by " + area.bodies.decision.shortLabel + (finalDate ? ", " + shortDate(finalDate, area) : ""), state: "current" });
   } else if (item.stage === "Decided" || item.stage === "Recorded") {
     const recordOutcome = hearing?.appStatus.trim().match(/^(approved|denied|withdrawn)\b/i)?.[0];
-    const label = recordOutcome ? recordOutcome.charAt(0).toUpperCase() + recordOutcome.slice(1) + " — city record" + (item.stage === "Recorded" ? " · Recorded" : "") : item.stage === "Recorded" ? "Recorded" : "Decided; outcome not specified in city record";
+    const label = recordOutcome ? recordOutcome.charAt(0).toUpperCase() + recordOutcome.slice(1).toLowerCase() + " — "+area.type+" record" + (item.stage === "Recorded" ? " · Recorded" : "") : item.stage === "Recorded" ? "Recorded" : "Decided; outcome not specified in "+area.type+" record";
     progress.push({ label, state: "current" });
   } else {
     const upcoming = meetings.find(m => m.date >= today && !m.continuedNote);
@@ -65,5 +66,5 @@ export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: H
     else progress.push({ label: "Under review, no hearing set yet", state: "current" });
     progress.push({ label: "Decision", state: "future" });
   }
-  return { headline, ...(explanation && words(explanation) <= 25 ? { explanation, aiGenerated: true } : {}), projectName, progress };
+  return { headline, ...(explanation && words(explanation) <= 60 ? { explanation, aiGenerated: true } : {}), projectName, progress };
 }

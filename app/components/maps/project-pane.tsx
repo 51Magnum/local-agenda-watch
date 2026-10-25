@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- approved private-source images use our existing cached visual endpoint. */
+import {hearingDateTime} from "@/lib/areas/format";
 import { useEffect, useRef, useState } from "react";
 import type { PaneData } from "@/lib/maps/project-questions";
 import type { MapVisual } from "@/lib/maps/types";
@@ -11,7 +12,9 @@ export default function ProjectPane({
   onImage,
   savedPlace,
   onWatch,
+  page = false,
 }: {
+  page?: boolean;
   data: PaneData;
   onClose: () => void;
   onImage: (v: MapVisual) => void;
@@ -58,7 +61,7 @@ export default function ProjectPane({
     <aside
       ref={ref}
       tabIndex={-1}
-      className={"law-resident-pane " + size}
+      className={"law-resident-pane " + (page?"law-project-page ":"") + size}
       aria-label="Project details"
       data-size={size}
     >
@@ -94,11 +97,12 @@ export default function ProjectPane({
         ×
       </button>
       <div className="law-pane-content">
+        <h1>{item.popup?.projectName ?? item.title}</h1>
         <section aria-labelledby="question-what">
           <h2 className="law-question-heading" id="question-what">
             {RESIDENT_QUESTIONS[0]}
           </h2>
-          <h1>{item.popup?.headline ?? item.title}</h1>
+          {item.popup?.headline && item.popup.headline !== item.popup.projectName && <p className="law-proposal-headline">{item.popup.headline}</p>}
           <p className="law-pane-status">
             {item.popup?.progress.find((p) => p.state === "current")?.label ??
               item.stage}
@@ -112,6 +116,7 @@ export default function ProjectPane({
           </p>
           <div className="law-pane-expanded">
             {item.popup?.explanation && <p>{item.popup.explanation}</p>}
+            {page && item.popup?.aiGenerated && <p className="text-xs text-zinc-500">AI-generated summary; check the linked official records.</p>}
             {item.visual && (
               <figure>
                 <button
@@ -141,7 +146,7 @@ export default function ProjectPane({
                 "Location is not confirmed in the available records."}
             </p>
             {savedPlace && (
-              <p>{savedPlace.distance.toFixed(1)} mi from your saved place</p>
+              <p>{savedPlace.distance.toFixed(1)} mi from your place</p>
             )}
           </section>
           <section className="law-pane-section">
@@ -167,10 +172,7 @@ export default function ProjectPane({
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[3]}</h2>
             {data.next ? (
               <>
-                <strong>{date(data.next.startsAt)}</strong>
-                {data.next.startsAt.length > 10 && (
-                  <p>{time(data.next.startsAt)}</p>
-                )}
+                <strong>{hearingDateTime(data.next.startsAt,data.area.timezone)}</strong>
                 <p>{data.next.body}</p>
                 <p>{data.next.location}</p>
                 <small>{data.next.role}</small>
@@ -313,6 +315,8 @@ export default function ProjectPane({
             >
               Report an error
             </a>
+            {!!data.documents?.length && <section><h2>Source documents</h2><ul>{data.documents.map(d=><li key={d.url}><a href={d.url} target="_blank" rel="noreferrer">{d.label}</a></li>)}</ul></section>}
+            {!!data.parcels?.length && <details><summary>Parcel details</summary><p>{data.parcels.join(", ")}</p></details>}
             {!!data.relatedCases?.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).length && <section aria-label="Also on this site">
               <h2>Also on this site</h2>
               <ul>{data.relatedCases.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).map(c => <li key={c.areaId+"/"+c.caseId}>
