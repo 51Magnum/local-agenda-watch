@@ -1,0 +1,52 @@
+name: Prepare public map tiles
+on:
+  workflow_run:
+    workflows: [Refresh case timelines]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-map-tile-export
+  cancel-in-progress: false
+jobs:
+  export:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check whether optional export is configured
+        id: gate
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ -z "$BLOB_READ_WRITE_TOKEN" ] || [ -z "$CRON_SECRET" ]; then echo '::notice::PMTiles preparation is disabled until Blob access is configured.'; exit 0; fi
+          if [ "$MANUAL" != 'true' ] && [ "$(TZ=America/Denver date +%H)" != '05' ]; then exit 0; fi
+          echo 'enabled=true' >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.enabled == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install pinned PMTiles compiler
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential libsqlite3-dev zlib1g-dev
+          git clone https://github.com/felt/tippecanoe.git /tmp/law-tippecanoe
+          git -C /tmp/law-tippecanoe checkout 4f2621186acfec33b63ddf636f665623c0fef2dd
+          make -C /tmp/law-tippecanoe -j2
+          echo '/tmp/law-tippecanoe' >> "$GITHUB_PATH"
+      - name: Export public geometry and upload immutable archive
+        if: steps.gate.outputs.enabled == 'true'
+        env:
+          CASE_EXPORT_URL: https://www.localagendawatch.com/api/cron/map-export
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          npm ci --ignore-scripts
+          npx tsx scripts/export-map-tiles.ts --upload

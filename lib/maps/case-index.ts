@@ -316,3 +316,61 @@ export const mapManifest = unstable_cache(manifest, ["map-manifest-v1"], {
   revalidate: 3600,
   tags: [MAP_INDEX_TAG],
 });
+
+/** Authenticated export is paged below the serverless response limit; only public map properties leave Neon. */
+export async function exportMapFeatures(cursor = "") {
+  const [areaId = "", caseId = ""] = cursor.split(":");
+  if (!process.env.DATABASE_URL)
+    throw new Error("Export requires the configured database");
+  const db = await database();
+  const rows = (
+    await db.query(
+      "SELECT area_id,case_id,data->'geometry' AS geometry,data->>'title' AS title,data->>'stage' AS stage,data->>'href' AS href,data->'nextHearing'->>'date' AS next_date FROM law_map_cases WHERE area_id=ANY($1::text[]) AND (area_id,case_id)>($2,$3) AND data->'geometry' IS NOT NULL AND data->'geometry'<>'null'::jsonb AND NOT coalesce((data->>'citywide')::boolean,false) ORDER BY area_id,case_id LIMIT 500",
+      [
+        Object.values(AREAS)
+          .filter((a) => a.status === "live")
+          .map((a) => a.id),
+        areaId,
+        caseId,
+      ],
+    )
+  ).rows;
+  const features: import("geojson").Feature[] = [];
+  let bytes = 0,
+    nextCursor: string | undefined;
+  for (const r of rows) {
+    let geometry = r.geometry;
+    try {
+      geometry = simplify(feature(geometry), {
+        tolerance: 0.00002,
+        highQuality: false,
+      }).geometry;
+    } catch {}
+    const f = {
+      type: "Feature" as const,
+      geometry,
+      properties: {
+        id: r.area_id + ":" + r.case_id,
+        area: r.area_id,
+        title: r.title,
+        stage: r.stage,
+        href: canonicalAreaHref(r.area_id, r.href),
+        nextDate: r.next_date,
+      },
+    };
+    const size = Buffer.byteLength(JSON.stringify(f));
+    if (size > 3000000)
+      throw Error("An export feature exceeds the response budget");
+    if (features.length && bytes + size > 2500000) break;
+    features.push(f);
+    bytes += size;
+    nextCursor = r.area_id + ":" + r.case_id;
+  }
+  return {
+    features,
+    nextCursor:
+      features.length < rows.length || rows.length === 500
+        ? nextCursor
+        : undefined,
+  };
+}

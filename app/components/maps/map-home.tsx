@@ -370,24 +370,28 @@ export default function MapHome() {
         m.addSource("law-polygons", { type: "geojson", data: empty });
         m.addLayer({
           id: "law-fill",
+          minzoom: 14,
           type: "fill",
           source: "law-polygons",
           paint: { "fill-color": ["get", "color"], "fill-opacity": 0.16 },
         });
         m.addLayer({
           id: "law-halo",
+          minzoom: 14,
           type: "line",
           source: "law-polygons",
           paint: { "line-color": "#ffffff", "line-width": 6 },
         });
         m.addLayer({
           id: "law-outline",
+          minzoom: 14,
           type: "line",
           source: "law-polygons",
           paint: { "line-color": ["get", "color"], "line-width": 3 },
         });
         m.addLayer({
           id: "law-approximate",
+          minzoom: 14,
           type: "line",
           source: "law-polygons",
           filter: ["==", ["get", "approximate"], true],
@@ -406,6 +410,8 @@ export default function MapHome() {
         });
         m.addLayer({
           id: "law-clusters",
+          minzoom: 9,
+          maxzoom: 14,
           type: "circle",
           source: "law-points",
           filter: ["has", "point_count"],
@@ -418,17 +424,22 @@ export default function MapHome() {
         });
         m.addLayer({
           id: "law-cluster-count",
+          minzoom: 9,
+          maxzoom: 14,
           type: "symbol",
           source: "law-points",
           filter: ["has", "point_count"],
           layout: {
             "text-field": ["get", "point_count_abbreviated"],
             "text-size": 12,
+            "text-font": ["Noto Sans Regular"],
           },
           paint: { "text-color": "#ffffff" },
         });
         m.addLayer({
           id: "law-dots",
+          minzoom: 9,
+          maxzoom: 14,
           type: "circle",
           source: "law-points",
           filter: ["!", ["has", "point_count"]],
@@ -452,6 +463,7 @@ export default function MapHome() {
         });
         m.addLayer({
           id: "law-summary-dots",
+          maxzoom: 9,
           type: "circle",
           source: "law-summaries",
           paint: {
@@ -463,11 +475,13 @@ export default function MapHome() {
         });
         m.addLayer({
           id: "law-summary-count",
+          maxzoom: 9,
           type: "symbol",
           source: "law-summaries",
           layout: {
             "text-field": ["to-string", ["get", "count"]],
             "text-size": 13,
+            "text-font": ["Noto Sans Regular"],
           },
           paint: { "text-color": "#fff" },
         });
@@ -479,7 +493,7 @@ export default function MapHome() {
         m.getCanvas().style.cursor = "";
       };
       m.on("mousemove", (e) => {
-        if (!m.isStyleLoaded() || e.originalEvent.buttons) {
+        if (!m.getSource("law-polygons") || e.originalEvent.buttons) {
           hideTip();
           return;
         }
@@ -661,7 +675,8 @@ export default function MapHome() {
     };
     loadRef.current = async () => {
       const m = map.current;
-      if (!m || !m.isStyleLoaded() || revision.current === "initial") return;
+      if (!m || !m.getSource("law-polygons") || revision.current === "initial")
+        return;
       const current = ++generation.current,
         z = zoomTier(m.getZoom()),
         b = m.getBounds(),

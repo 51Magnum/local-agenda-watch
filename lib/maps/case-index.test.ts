@@ -25,7 +25,7 @@ vi.mock("next/cache", () => ({
 vi.mock("@/lib/timeline/public", () => ({
   readTimelineState: async () => ({ version: 1, documents: {}, fields: {} }),
 }));
-import { cachedViewport } from "./case-index";
+import { cachedViewport, exportMapFeatures } from "./case-index";
 it("indexes old snapshots once, deduplicates across areas, returns only lightweight features and performs no SQL on repeated cached views", async () => {
   const db = new PGlite();
   h.db = db;
@@ -92,6 +92,11 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     expect(points.cases[0].geometry).toBeNull();
     expect(points.cases[0].centroid![0]).toBeCloseTo(c.centroid[0], 6);
     expect(points.cases[0].centroid![1]).toBeCloseTo(c.centroid[1], 6);
+    const exported = await exportMapFeatures();
+    expect(exported.features).toHaveLength(2);
+    expect(JSON.stringify(exported)).not.toContain("Narrative must not travel");
+    expect(JSON.stringify(exported)).not.toContain("visual");
+    expect(exported.nextCursor).toBeUndefined();
     const overview = await cachedViewport([-180, -85, 180, 85], 8);
     expect(overview.cases).toEqual([]);
     expect(overview.summaries.find((s) => s.id === "nampa")?.count).toBe(1);
