@@ -1,3 +1,4 @@
+import {redactResidence,blockAddress} from "@/lib/residential-privacy";
 import { approvedCaseImages } from "@/lib/maps/image-review-store";
 import ReviewedImageGallery from "@/app/components/reviewed-image-gallery";
 import { landUseFact } from "@/lib/areas/land-use";
@@ -41,12 +42,12 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const siblings = (await Promise.all(related.map(h => getCaseRecord(h.appId,area.id)))).filter((r): r is RecordData => r !== null);
   const records = [record, ...siblings];
   const caseIds = records.map(r => r.hearing.appId);
-  const reviewedImages=await approvedCaseImages(area.id,caseIds).catch(()=>[]);
+  const reviewedImages=record.residentialPrivacy?[]:await approvedCaseImages(area.id,caseIds).catch(()=>[]);
   const allDecided = records.every(r => getCaseStage(r.hearing) === "Decided");
   const activeStages = records.map(r => getCaseStage(r.hearing)).filter(s => s !== "Decided");
   const stage = allDecided ? "Decided" : activeStages.sort((a,b) => PROJECT_STAGES.indexOf(b)-PROJECT_STAGES.indexOf(a))[0];
   const nextRecord = records.map(r => ({id:r.hearing.appId, hearing:getCaseNextHearing(r.hearing, feed,new Date(),area.id)})).filter(r => r.hearing !== undefined).sort((a,b) => a.hearing!.startsAt.localeCompare(b.hearing!.startsAt))[0];
-  const next = nextRecord?.hearing;
+  const next = /^(withdrawn|denied|approved)\b/i.test(hearing.appStatus)?undefined:nextRecord?.hearing;
   const state = await readTimelineState(caseIds,area.id);
   const timeline = buildTimeline(state, {areaId:area.id,caseIds, stage, next, plans: records.flatMap(r => r.plan ? [{caseId:r.hearing.appId, plan:r.plan, sourceUrl:recordUrls(r).portal}] : []), hearings: records.map(r => r.hearing)});
   if (allDecided) { timeline.currentStage = "Decided"; timeline.next = undefined; timeline.statusSource = recordUrls(record).portal; }
@@ -57,7 +58,8 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   const decided = allDecided || timeline.finalDecisionApproved;
   const unclear = records.every(r => isStatusUnclear(r.hearing));
   const {portal, files} = recordUrls(record);
-  const overview = caseProjectOverview(hearing, plan, attachments, timeline, portal, citywide);
+  const rawOverview = caseProjectOverview(hearing, plan, attachments, timeline, portal, citywide);
+  const overview = record.residentialPrivacy?redactResidence(rawOverview):rawOverview;
   const title = caseDisplayTitle(hearing, plan, attachments);
   const snapshot = !citywide ? await readMapSnapshot(area.id,{caseIds,includeFlum:false}).catch(() => undefined) : undefined;
   const hasGeometry = !snapshot || snapshot.cases.some(c => caseIds.includes(c.id) && c.geometry);
@@ -79,7 +81,7 @@ export default async function CaseProjectPage({record}: {record: RecordData}) {
   });
   const documents = projectDocumentList(groups, true);
   const status = unclear ? getCaseStatus(hearing) : decided ? (getCaseStatus(hearing).startsWith("Decided") ? getCaseStatus(hearing) : "Decided") : next ? (/Council|Board/i.test(next.body)?"Council hearing":"P&Z hearing")+" · "+shortDate(next.startsAt,area.timezone) : stage === "Council hearing" ? area.bodies.decision.shortLabel+" date not set" : stageLabel(stage,area);
-  const location = citywide ? "Citywide · "+area.name+", "+area.stateName : caseLocation(hearing,plan);
+  const location = citywide ? "Citywide · "+area.name+", "+area.stateName : record.residentialPrivacy?blockAddress(caseLocation(hearing,plan)??""):caseLocation(hearing,plan);
   const terms: ("annexation"|"rezone"|"preliminary plat")[] = [];
   if (records.some(r => r.hearing.appType === "ANN")) terms.push("annexation");
   if (records.some(r => ["ANN","ZMA"].includes(r.hearing.appType))) terms.push("rezone");

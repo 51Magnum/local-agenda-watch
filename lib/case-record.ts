@@ -1,3 +1,5 @@
+import {residentialCase,redactResidence,privateResidentialDocument} from "./residential-privacy";
+import {privacyOverrides} from "./residential-privacy-store";
 import{FEATURED_AREA_ID}from"./areas/registry";
 import { caseCatalog } from "./case-catalog";
 import { cache } from "react";
@@ -18,5 +20,6 @@ export const getCaseRecord = cache(async (planNumber: string,areaId=FEATURED_ARE
     locality.energov.getPlan(hearing.energovPlanId).catch((err: unknown) => { console.error("[case-record] Plan unavailable", err); return null; }),
     locality.energov.getPlanAttachments(hearing.energovPlanId).catch((err: unknown) => { console.error("[case-record] Attachments unavailable", err); attachmentsUnavailable = true; return []; }),
   ]) : [null, []];
-  return { locality, feed, hearing, plan, attachments, attachmentsUnavailable };
+  const residentialPrivacy=residentialCase(areaId,hearing.appId,{hearing,plan},await privacyOverrides());
+  return { locality, feed, hearing:residentialPrivacy?redactResidence(hearing):hearing, plan:residentialPrivacy?redactResidence(plan):plan, attachments:residentialPrivacy?redactResidence(attachments.filter(a=>!privateResidentialDocument(a.FileName+" "+a.Notes))):attachments, attachmentsUnavailable, residentialPrivacy };
 });

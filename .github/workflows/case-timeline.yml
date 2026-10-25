@@ -1,15 +1,18 @@
 name: Refresh case timelines
 on:
   schedule:
-    # Denver 05:00/14:00 = 11:00/20:00 UTC in summer, 12:00/21:00 in winter.
-    # The endpoint skips the inactive DST partner before opening the database.
-    - cron: '0 11,12,20,21 * * *'
+    # Both UTC times stay inside the Denver AM/PM windows in either season.
+    - cron: '0 12,21 * * *'
   workflow_dispatch:
     inputs:
-      force_full_sweep:
-        description: 'Force discovery and document checks for every active area'
+      force:
+        description: 'Bypass the time window and force a full source sweep'
         type: boolean
         default: false
+      site_url:
+        description: "Production or this repository's Vercel preview URL"
+        type: string
+        default: 'https://www.localagendawatch.com'
 permissions: {}
 concurrency:
   group: case-timeline-ingestion
@@ -22,20 +25,37 @@ jobs:
       - name: Invoke meeting-aware scheduler
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: https://www.localagendawatch.com
+          SITE_URL: ${{ inputs.site_url || 'https://www.localagendawatch.com' }}
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
-          FORCE_FULL_SWEEP: ${{ inputs.force_full_sweep || false }}
+          FORCE_FULL_SWEEP: ${{ inputs.force || false }}
         shell: bash
         run: |
           if [ -z "$CRON_SECRET" ]; then
-            echo "::notice::Timeline ingestion is paused until the repository CRON_SECRET is configured."
-            exit 0
+            echo "::error::CRON_SECRET is missing; no sweep ran."
+            exit 1
+          fi
+          if ! [[ "$SITE_URL" =~ ^https://(www\.localagendawatch\.com|local-agenda-watch-[a-z0-9-]+-shane-s-projects-e4093d06\.vercel\.app)/?$ ]]; then
+            echo "::error::Only the official production site or repository previews are allowed."
+            exit 1
           fi
           QUERY=""
           if [ "$MANUAL" = "true" ]; then
             QUERY="?manual=1"
             if [ "$FORCE_FULL_SWEEP" = "true" ]; then QUERY="$QUERY&force=1"; fi
           fi
-          curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 330 \
+          curl --output response.json --fail-with-body --silent --show-error --connect-timeout 15 --max-time 330 \
             --header "Authorization: Bearer $CRON_SECRET" \
             "$SITE_URL/api/cron/case-timeline$QUERY"
+
+          cat response.json
+          jq -e '(.status == "completed") or (.status == "skipped" and .alreadyCompleted == true)' response.json || {
+            echo "::error::Scheduler did not complete or confirm an already-completed slot."
+            exit 1
+          }
+      - name: Preserve scheduler run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timeline-sweep-result
+          path: response.json
+          if-no-files-found: ignore

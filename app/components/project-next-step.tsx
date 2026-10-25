@@ -1,9 +1,11 @@
+import { expiredCommentDeadline } from "@/lib/participation";
 import {residentHref} from "@/lib/areas/record-links";
 import {displayArea,areaDate,areaTime} from "@/lib/areas/format";
 import { type ProjectHearing } from "@/lib/projects";
 
 export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise = false, areaId }: { hearing?: ProjectHearing; calendarHref: string; emptyMessage?: string; concise?: boolean; areaId?: string }) {
   const area=displayArea(areaId);const formatDate=(v:string)=>areaDate(v,area);const formatTime=(v:string)=>areaTime(v,area);
+  const expired=expiredCommentDeadline(hearing?.commentDeadline,hearing?.startsAt,hearing?.body??area.bodies.decision.label,area.timezone);
   return <section aria-labelledby="next-step-title" className="rounded-2xl border border-sky-300 bg-sky-50 p-6 dark:border-sky-700 dark:bg-sky-950/40">
     <h2 id="next-step-title" className="text-xl font-semibold">Next step</h2>
     {hearing ? <>
@@ -12,11 +14,11 @@ export function ProjectNextStep({ hearing, calendarHref, emptyMessage, concise =
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Public hearing</dt><dd className="mt-1 font-medium">{hearing.startsAt.length > 10 ? formatTime(hearing.startsAt) + " ("+area.timezone+")" : "Time not confirmed"}</dd></div>
         <div><dt className="text-sm text-zinc-500 dark:text-zinc-400">Decision-making body</dt><dd className="mt-1 font-medium">{hearing.body}</dd></div>
         <div className="sm:col-span-2"><dt className="text-sm text-zinc-500 dark:text-zinc-400">Location</dt><dd className="mt-1">{hearing.location}</dd></div>
-        <div className="sm:col-span-2 border-t border-sky-200 pt-4 dark:border-sky-800"><dt className="text-sm font-semibold">Written-comment deadline{area.meetingRules.decisionCommentDeadlineHour!=null?" (portal)":""}</dt><dd className="mt-1">{hearing.commentDeadline ? formatDate(hearing.commentDeadline) + (hearing.commentDeadline.length>10 ? " at " + formatTime(hearing.commentDeadline) : " (time not specified)") : "Not confirmed. Check the official hearing notice."}</dd>
-          {hearing.commentDeadline && !concise && <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Based on {area.bodies.decision.label} meeting rules; confirm with the published agenda.</p>}
+        <div className="sm:col-span-2 border-t border-sky-200 pt-4 dark:border-sky-800"><dt className="text-sm font-semibold">Written-comment deadline{area.meetingRules.decisionCommentDeadlineHour!=null?" (portal)":""}</dt><dd className="mt-1">{expired ? expired : hearing.commentDeadline ? formatDate(hearing.commentDeadline) + (hearing.commentDeadline.length>10 ? " at " + formatTime(hearing.commentDeadline) : " (time not specified)") : "Not confirmed. Check the official hearing notice."}</dd>
+          {!expired && hearing.commentDeadline && !concise && <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Based on {area.bodies.decision.label} meeting rules; confirm with the published agenda.</p>}
         </div>
       </dl>
-      <p className="mt-5 text-sm leading-6">{area.meetingRules.commentInstructions}</p>
+      <p className="mt-5 text-sm leading-6">{!expired && area.meetingRules.commentInstructions}</p>
       <div className="mt-5 flex flex-wrap gap-4 text-sm font-medium">
         <a href={area.commentInstructionsUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">How to comment — official instructions</a>
         {hearing.startsAt.length > 10 && <a href={calendarHref} className="underline underline-offset-4">Add hearing to calendar (.ics)</a>}

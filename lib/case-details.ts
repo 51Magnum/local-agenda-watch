@@ -159,7 +159,7 @@ export function caseMetaDescription(hearing: Hearing, title: string, next?: Proj
 }
 /** Resident attendance sheets are accessible at the city, but omitted here. */
 export function isPrivateDocument(label: string): boolean {
-  return /\bsign[\s_-]*in\b|\bsignin\b|attendance[\s_-]*(?:sheet|list|roster)|\bsign[\s_-]*up[\s_-]*sheet\b/i.test(label.replace(/_/g, " "));
+  return /affidavit|\bsign[\s_-]*in\b|\bsignin\b|attendance[\s_-]*(?:sheet|list|roster)|\bsign[\s_-]*up[\s_-]*sheet\b/i.test(label.replace(/_/g, " "));
 }
 
 function nameFromCityRecord(hearing: Hearing): string | undefined {

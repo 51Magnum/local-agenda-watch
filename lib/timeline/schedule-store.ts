@@ -40,3 +40,8 @@ export async function releaseSchedule(token:string,state?:ScheduleState){
  if(state){const temporary=filename()+"."+token+".tmp";await writeFile(temporary,JSON.stringify(state),{mode:0o600});await rename(temporary,filename());}
  await rm(filename()+".lease",{force:true});
 }
+
+export async function scheduleSlotCompleted(slot:string){
+ if(!process.env.DATABASE_URL)return Boolean((await readSchedule()).slots[slot]);
+ const db=await database();return Boolean((await db.query("SELECT coalesce(data->'slots' ? $1,false) AS completed FROM law_timeline_schedule WHERE id='meetings'",[slot])).rows[0]?.completed);
+}

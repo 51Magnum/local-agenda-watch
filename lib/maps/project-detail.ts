@@ -1,3 +1,5 @@
+import {residentialCase,redactResidence,protectMapCase} from "@/lib/residential-privacy";
+import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { officialProjectRecords, residentPaneHref } from "./project-records";
 import { unstable_cache } from "next/cache";
 import { getJurisdiction } from "./jurisdictions";
@@ -25,10 +27,12 @@ import {
   type PaneData,
 } from "./project-questions";
 import { MAP_INDEX_TAG, siteMembers } from "./case-index";
+import { participationClosed, expiredCommentDeadline } from "@/lib/participation";
 
 async function detail(
   areaId: string,
   caseId: string,
+  followLead = true,
 ): Promise<PaneData | null> {
   const config = getJurisdiction(areaId),
     area = config?.area;
@@ -39,6 +43,9 @@ async function detail(
     }),
     raw = snapshot?.cases[0];
   if (!raw) return null;
+  const members = await siteMembers(raw, areaId);
+  const lead = members?.[0];
+  if (followLead && lead && (lead.areaId !== areaId || lead.caseId !== caseId)) return detail(lead.areaId, lead.caseId, false);
   const project = getProjectForCase(caseId, areaId),
     ids = project?.caseIds ?? [caseId];
   const [items, feed, state] = await Promise.all([
@@ -61,7 +68,7 @@ async function detail(
         label: progressOutcome(p.label),
       })),
     };
-  item.members = await siteMembers(item, areaId);
+  item.members = members;
   item.areaId = areaId;
   item.href = canonicalAreaHref(areaId, item.href);
   const next =
@@ -131,6 +138,8 @@ async function detail(
       url: overview.acres?.url,
     });
   const progress = item.popup?.progress ?? [];
+  const closed = participationClosed({ ...item, appStatus: hearing?.appStatus });
+  const expiredDeadlineMessage = expiredCommentDeadline(next?.commentDeadline, next?.startsAt, next?.body ?? area.bodies.decision.label, area.timezone);
   const officialRecords = officialProjectRecords(
     area,
     caseCatalog(feed).filter((h) => ids.includes(h.appId)),
@@ -145,11 +154,13 @@ async function detail(
       ),
     ],
   );
-  return {
+  const sensitive=residentialCase(areaId,caseId,{hearing,record,item},await privacyOverrides());
+  const result:PaneData = {
     item,
     officialRecords,
     relatedCases: item.members?.map((m) => ({
       ...m,
+      status: (m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId)?.appStatus:undefined)??m.status,
       label: AREAS[m.areaId]?.name ?? m.areaId,
     })),
     area: {
@@ -164,6 +175,11 @@ async function detail(
       ? "Citywide change — " + area.name
       : (project?.location ?? record?.address),
     history: [
+      ...(hearing?.meetings ?? []).filter(m => m.continuedNote || /continued/i.test(m.result ?? "")).map(m => {
+        const fmt = (d:string) => new Intl.DateTimeFormat("en-US", {month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(d+"T12:00:00Z"));
+        const to = next?.startsAt.slice(0,10);
+        return { label: to && to > m.date ? `Continued from ${fmt(m.date)} to ${fmt(to)}` : `${fmt(m.date)} · ${m.continuedNote ?? m.result}`, source: residentPaneHref(area,m.sourceUrl) };
+      }),
       ...progress
         .filter((p) => p.state === "done" || p.state === "past")
         .map((p) => ({ label: p.label })),
@@ -184,11 +200,13 @@ async function detail(
         : undefined,
     impacts: impacts.map((f) => ({ ...f, url: residentPaneHref(area, f.url) })),
     conditions: evidence.conditions,
-    commentUrl: area.residentAccess?.commentUrl ?? area.commentInstructionsUrl,
+    participationClosed: closed,
+    expiredDeadlineMessage,
+    commentUrl: closed ? undefined : expiredDeadlineMessage ? residentPaneHref(area, next?.sourceUrl) ?? area.residentAccess?.commentUrl ?? area.commentInstructionsUrl : area.residentAccess?.commentUrl ?? area.commentInstructionsUrl,
     commentLinkLabel: area.residentAccess?.commentUrl
       ? "Open meeting portal"
       : "How to comment",
-    commentInstructions: area.meetingRules.commentInstructions,
+    commentInstructions: closed || expiredDeadlineMessage ? undefined : area.meetingRules.commentInstructions,
     calendarHref:
       next && next.startsAt.length > 10
         ? item.href + "/hearing.ics"
@@ -199,9 +217,11 @@ async function detail(
         .sort()
         .at(-1) ?? snapshot!.updatedAt,
   };
+  if(sensitive){result.item=protectMapCase(areaId,{...result.item,residentialPrivacy:true},await privacyOverrides());result.where=result.where?redactResidence(result.where)+" · Approximate area shown to protect a residential location.":"Approximate residential area; exact address withheld.";return redactResidence(result);}
+  return result;
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v3"],
+  ["map-project-questions-v4"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );

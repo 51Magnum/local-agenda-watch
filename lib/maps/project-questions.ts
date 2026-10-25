@@ -16,7 +16,7 @@ export type PaneData = {
     areaId: string;
     caseId: string;
     href: string;
-    label: string;
+    label: string; title?: string; stage?: string; date?: string; status?: string;
   }[];
   item: MapCase;
   area: {
@@ -34,6 +34,8 @@ export type PaneData = {
   commentUrl?: string;
   commentLinkLabel?: string;
   commentInstructions?: string;
+  participationClosed?: boolean;
+  expiredDeadlineMessage?: string;
   calendarHref?: string;
   updatedAt: string;
   caseIds: string[];

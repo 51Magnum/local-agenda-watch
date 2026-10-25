@@ -26,18 +26,30 @@ export function sameSite(a:MapCase,b:MapCase){
  if(!a.geometry||!b.geometry||!boxesOverlap(a.geometry,b.geometry))return false;
  try{const overlap=intersect(featureCollection([feature(a.geometry),feature(b.geometry)]));if(!overlap)return false;const shared=area(overlap);return shared/(area(a.geometry)+area(b.geometry)-shared)>.8;}catch{return false;}
 }
+/** Pick one case consistently for title, color, link, next step and stage. */
+export function compareSiteLead(a:MapCase,b:MapCase,now=new Date()){
+ const today=now.toISOString().slice(0,10);
+ const rank=(c:MapCase)=>/withdrawn|cancelled|canceled/i.test(c.recordStatus??c.statusNote??"")?3:c.nextHearing&&c.nextHearing.date>=today&&!["Decided","Recorded"].includes(c.stage)?0:["Decided","Recorded"].includes(c.stage)?2:1;
+ const ar=rank(a),br=rank(b);if(ar!==br)return ar-br;
+ if(ar===0)return a.nextHearing!.date.localeCompare(b.nextHearing!.date);
+ const date=(c:MapCase)=>c.decisionDate??c.caseDate??(c.id.match(/20\d{2}/)?.[0]??"");
+ return date(b).localeCompare(date(a));
+}
 /** Namespaced identifiers prevent identical case numbers in different cities colliding. */
-export function combineRadiusCases(input:{area:AreaDefinition;cases:MapCase[]}[],coordinates:[number,number],miles:number){
+export function combineRadiusCases(input:{area:AreaDefinition;cases:MapCase[]}[],coordinates:[number,number],miles:number,now=new Date()){
  const groups:MapCase[]=[];
  for(const {area:a,cases}of [...input].sort((a,b)=>Number(a.area.type==="county")-Number(b.area.type==="county")))for(const c of nearbyCases(cases,coordinates,miles)){
-  const body=c.stageBody??c.nextHearing?.body??stageBody(c.stage,a),member={areaId:a.id,caseId:c.id,title:c.title,href:canonicalAreaHref(a.id,c.href),stage:c.stage,body};
+  const body=c.stageBody??c.nextHearing?.body??stageBody(c.stage,a),member={areaId:a.id,caseId:c.id,title:c.title,href:canonicalAreaHref(a.id,c.href),stage:c.stage,body,date:c.nextHearing?.date??c.decisionDate??c.caseDate,status:c.recordStatus};
   const candidate={...c,id:a.id+":"+c.id,areaId:a.id,jurisdictionLabel:jurisdictionLabel(a),stageBody:body,caseIds:[c.id],members:[member],href:member.href};
   const existing=groups.find(g=>sameSite(g,candidate));
   if(!existing){groups.push(candidate);continue;}
-  existing.members!.push(member);existing.caseIds=[...new Set([...existing.caseIds!,c.id])];
-  if(existing.geometry&&c.geometry)try{existing.geometry=union(featureCollection([feature(existing.geometry),feature(c.geometry)]))?.geometry??existing.geometry;existing.centroid=geometryCentroid(existing.geometry);}catch{/* Preserve verified primary shape if the official rings cannot be merged. */}
-  existing.visual??=c.visual;
-  if(c.nextHearing&&(!existing.nextHearing||c.nextHearing.date<existing.nextHearing.date))existing.nextHearing=c.nextHearing;
+  let geometry=existing.geometry;
+  if(geometry&&c.geometry)try{geometry=union(featureCollection([feature(geometry),feature(c.geometry)]))?.geometry??geometry;}catch{/* Preserve verified geometry on malformed rings. */}
+  const members=[...existing.members!,member],ids=[...new Set([...existing.caseIds!,c.id])];
+  if(compareSiteLead(candidate,existing,now)<0)Object.assign(existing,candidate);
+  const leadId=existing.id.split(":").at(-1);
+  existing.members=members.sort((x,y)=>Number(y.caseId===leadId&&y.areaId===existing.areaId)-Number(x.caseId===leadId&&x.areaId===existing.areaId));
+  existing.caseIds=ids;existing.geometry=geometry;if(geometry)existing.centroid=geometryCentroid(geometry);
  }
  return nearbyCases(groups,coordinates,miles);
 }

@@ -6,9 +6,9 @@ const watch=(date="2026-10-19"):MeetingWatch=>({id:"meeting",areaId:"nampa",body
 const state=(m=watch())=>({...emptySchedule(),meetings:[m]});
 const plan=(date:string,m=watch())=>planSchedule(state(m),AREAS,new Date(date));
 describe("Denver scheduler",()=>{
- it("keeps both local times across DST and skips the inactive UTC partners",()=>{
+ it("accepts delayed runs across DST inside the AM and PM windows",()=>{
   expect(schedulerWindow(new Date("2026-10-24T11:00:00Z"))?.period).toBe("am");
-  expect(schedulerWindow(new Date("2026-10-24T12:00:00Z"))).toBeNull();
+  expect(schedulerWindow(new Date("2026-10-24T12:00:00Z"))?.period).toBe("am");
   expect(schedulerWindow(new Date("2026-10-24T20:32:00Z"))?.period).toBe("pm");
   expect(schedulerWindow(new Date("2026-11-02T11:00:00Z"))).toBeNull();
   expect(schedulerWindow(new Date("2026-11-02T12:00:00Z"))?.period).toBe("am");
@@ -63,4 +63,14 @@ describe("Denver scheduler",()=>{
   expect(finishSchedule(s,p,{},emptyEvidenceState(),AREAS,new Date("2026-11-09T12:00:00Z"),{}).meetings[0].lastChecked).toBeUndefined();
   expect(finishSchedule(s,p,{},emptyEvidenceState(),AREAS,new Date("2026-11-09T12:00:00Z"),{nampa:["ANN-ONE"]}).meetings[0].lastChecked).toBe("2026-11-09");
  });
+});
+
+it("accepts all delayed window hours and retains one durable slot",()=>{
+ for(const utc of [11,12,13,14,15])expect(schedulerWindow(new Date(`2026-10-25T${utc}:59:00Z`))?.period).toBe("am");
+ expect(schedulerWindow(new Date("2026-10-25T16:00:00Z"))).toBeNull();
+ for(const utc of [20,21,22,23])expect(schedulerWindow(new Date(`2026-10-25T${utc}:59:00Z`))?.period).toBe("pm");
+ expect(schedulerWindow(new Date("2026-10-26T00:59:00Z"))?.period).toBe("pm");
+ expect(schedulerWindow(new Date("2026-10-26T01:00:00Z"))).toBeNull();
+ const s=emptySchedule();s.slots["2026-10-25:am"]="done";expect(planSchedule(s,AREAS,new Date("2026-10-25T15:00:00Z"))).toBeNull();
+ expect(planSchedule(s,AREAS,new Date("2026-10-25T18:00:00Z"),{manual:true,force:true})?.fullSweep).toBe(true);
 });

@@ -1,3 +1,5 @@
+import {residentialCase,protectMapCase,blockAddress,PRIVACY_TAG} from "@/lib/residential-privacy";
+import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { Pool } from "pg";
 import { bbox, simplify, feature } from "@turf/turf";
 import { unstable_cache, revalidateTag } from "next/cache";
@@ -21,11 +23,12 @@ export const projectDirectory = unstable_cache(async () => {
   if (!process.env.DATABASE_URL) return [];
   const db = await database();
   const result = await db.query(
-    `SELECT area_id AS "areaId",case_id AS "caseId",data->>'title' AS title,data->>'typeLabel' AS "typeLabel",data->'caseIds' AS "caseIds" FROM law_map_cases WHERE area_id=ANY($1::text[]) ORDER BY area_id,case_id`,
+    `SELECT area_id AS "areaId",case_id AS "caseId",data->>'title' AS title,data->>'typeLabel' AS "typeLabel",data->'caseIds' AS "caseIds",data->>'summary' AS "internalSummary",data->'residentialPrivacy' AS "residentialPrivacy" FROM law_map_cases WHERE area_id=ANY($1::text[]) ORDER BY area_id,case_id`,
     [areas.map((a) => a.id)],
   );
-  return result.rows.map((row) => ({ ...row, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
-}, ["project-search-directory-v1"], { revalidate: 3600, tags: [MAP_INDEX_TAG] });
+  const overrides=await privacyOverrides();
+  return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?blockAddress(row.title):row.title, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
+}, ["project-search-directory-v1"], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
 let pool: Pool, ready: Promise<void> | undefined;
 const schema = `CREATE TABLE IF NOT EXISTS law_map_cases(area_id text NOT NULL,case_id text NOT NULL,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,lng double precision,lat double precision,data jsonb NOT NULL,PRIMARY KEY(area_id,case_id));
 CREATE INDEX IF NOT EXISTS law_map_cases_centroid ON law_map_cases(lng,lat);
@@ -205,6 +208,7 @@ async function loadViewport(
             a.bounds[3] >= b[1],
         )
       : [];
+  const overrides = await privacyOverrides();
   const grouped = combineRadiusCases(
     areas.map((area) => ({
       area,
@@ -256,7 +260,7 @@ async function loadViewport(
       }),
     );
   return {
-    cases: grouped.slice(0, 1000).map((c) => publicFeature(c, c.areaId!, zoom)),
+    cases: grouped.slice(0, 1000).map((c) => protectMapCase(c.areaId!, { ...publicFeature(c, c.areaId!, zoom), residentialPrivacy:residentialCase(c.areaId!,c.id.split(":").at(-1)!,c,overrides) }, overrides)),
     summaries,
     truncated: rows.length > 1000,
     updatedAt: new Date().toISOString(),
@@ -265,8 +269,8 @@ async function loadViewport(
 }
 export const cachedViewport = unstable_cache(
   loadViewport,
-  ["viewport-cases-v2"],
-  { revalidate: 3600, tags: [MAP_INDEX_TAG] },
+  ["viewport-cases-v3"],
+  { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] },
 );
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
@@ -326,7 +330,7 @@ async function manifest() {
 }
 export const mapManifest = unstable_cache(manifest, ["map-manifest-v1"], {
   revalidate: 3600,
-  tags: [MAP_INDEX_TAG],
+  tags: [MAP_INDEX_TAG, PRIVACY_TAG],
 });
 
 /** Authenticated export is paged below the serverless response limit; only public map properties leave Neon. */

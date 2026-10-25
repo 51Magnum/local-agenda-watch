@@ -1,3 +1,5 @@
+import {protectMapCase,residentialCase} from "@/lib/residential-privacy";
+import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { publicImageReviews, displayedImageReviews } from "./image-review-store";
 import { caseCatalog } from "@/lib/case-catalog";
 import { getProjectForCase } from "@/lib/projects";
@@ -16,6 +18,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
     publicImageReviews(config.id,cases.map(c=>c.id)).catch(()=>[]),
   ]);
   const catalog = new Map(caseCatalog(feed).map(h => [h.appId, h]));
+  const overrides=await privacyOverrides();
   return cases.map(item => {
     const project = getProjectForCase(item.id, config.id);
     const ids = project?.caseIds ?? [item.id];
@@ -55,6 +58,6 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
     }
     let visual=displayedImageReviews(reviews).find(r=>r.caseIds.includes(item.id))?.visual;
     if(visual&&reviewed&&visual.sourceUrl.split("#")[0]===reviewed.reportUrl&&!visual.approval?.sourceDate)visual={...visual,label:visual.label+" · "+new Intl.DateTimeFormat("en-US",{month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(reviewed.sourceDate+"T12:00:00Z"))};
-    return {...item,popup,visual};
+    return protectMapCase(config.id,{...item,popup,visual,residentialPrivacy:residentialCase(config.id,item.id,{item,hearing},overrides)},overrides);
   });
 }

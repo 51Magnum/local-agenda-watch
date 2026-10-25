@@ -228,7 +228,7 @@ export default function ProjectPane({
           </section>
           <section>
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[5]}</h2>
-            {data.next?.commentDeadline && (
+            {!data.participationClosed && !data.expiredDeadlineMessage && data.next?.commentDeadline && (
               <p>
                 Comment deadline: {date(data.next.commentDeadline)}
                 {data.next.commentDeadline.length > 10
@@ -236,14 +236,16 @@ export default function ProjectPane({
                   : ""}
               </p>
             )}
-            {data.commentInstructions && <p>{data.commentInstructions}</p>}
+            {data.participationClosed && <p>This case is closed. See the official record for the outcome and any published appeal information.</p>}
+            {data.expiredDeadlineMessage && <p>{data.expiredDeadlineMessage}</p>}
+            {!data.participationClosed && data.commentInstructions && <p>{data.commentInstructions}</p>}
             <div className="law-pane-actions">
-              {data.commentUrl && (
+              {!data.participationClosed && data.commentUrl && (
                 <a href={data.commentUrl} target="_blank" rel="noreferrer">
                   {data.commentLinkLabel ?? "How to comment"} ↗
                 </a>
               )}
-              {data.calendarHref && (
+              {!data.participationClosed && data.calendarHref && (
                 <a href={data.calendarHref}>Add to calendar</a>
               )}
               <button onClick={onWatch}>Watch this place</button>
@@ -311,6 +313,13 @@ export default function ProjectPane({
             >
               Report an error
             </a>
+            {!!data.relatedCases?.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).length && <section aria-label="Also on this site">
+              <h2>Also on this site</h2>
+              <ul>{data.relatedCases.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).map(c => <li key={c.areaId+"/"+c.caseId}>
+                <span>{c.caseId} · {c.title ?? c.label}</span>
+                {" · "}{c.status ?? c.stage}{c.date ? " · "+date(c.date) : ""}
+              </li>)}</ul>
+            </section>}
             <p className="law-case-references">
               Case numbers:{" "}
               {data.relatedCases?.length

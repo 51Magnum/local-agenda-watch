@@ -1,3 +1,4 @@
+vi.mock("@/lib/residential-privacy-store",()=>({privacyOverrides:async()=>({})}));
 import {expect,it,vi} from "vitest";
 import {PGlite} from "@electric-sql/pglite";
 import {createHash} from "node:crypto";

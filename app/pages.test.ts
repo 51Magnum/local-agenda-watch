@@ -333,10 +333,9 @@ describe("case parity, hub cleanup and SEO", () => {
     expect(robots().sitemap).toBe("https://www.localagendawatch.com/sitemap.xml");
   });
 
-  it("Contact uses the configured placeholder with no personal email or GitHub link", () => {
-    const html = renderToStaticMarkup(createElement(ContactPage));
-    expect(html).toContain("Contact details coming soon.");
-    expect(html).not.toContain("mailto:"); expect(html).not.toContain("github.com");
+  it("Contact provides correction and privacy routes instead of a placeholder",async()=>{
+    const html=renderToStaticMarkup(await ContactPage({searchParams:Promise.resolve({project:"nampa/CUP-00412-2026"})}));
+    expect(html).toContain("hello@localagendawatch.com");expect(html).toContain("corrections@localagendawatch.com");expect(html).toContain("privacy@localagendawatch.com");expect(html).toContain("nampa/CUP-00412-2026");expect(html).not.toContain("Contact details coming soon");
   });
 });
 

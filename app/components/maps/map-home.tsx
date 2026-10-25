@@ -182,6 +182,13 @@ export default function MapHome() {
             ]),
           ];
         }
+        const canonical = data.area.id + "/" + data.item.id;
+        if (canonical !== selected) {
+          const url = new URL(window.location.href); url.searchParams.set("project", canonical);
+          window.history.replaceState({ ...window.history.state, lawPane: true }, "", url);
+          selectedRef.current = canonical;
+          setSelected(canonical);
+        }
         setPane(data);
       })
       .catch((e) => {
