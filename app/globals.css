@@ -24,5 +24,51 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Keep the box outlined in both states; the checkmark carries selection. */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-content: center;
+  box-sizing: border-box;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 2px solid #64748b;
+  border-radius: 3px;
+  background: transparent;
+  color: #0f766e;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 5px;
+  height: 9px;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg) scale(0);
+}
+
+input[type="checkbox"]:checked { border-color: currentColor; }
+input[type="checkbox"]:checked::before { transform: translateY(-1px) rotate(45deg); }
+input[type="checkbox"]:indeterminate::before {
+  width: 9px;
+  height: 0;
+  border-width: 0 0 2px;
+  transform: none;
+}
+input[type="checkbox"]:focus-visible { outline: 3px solid #0284c7; outline-offset: 3px; }
+input[type="checkbox"]:disabled { opacity: .45; cursor: default; }
+:root[data-theme="dark"] input[type="checkbox"] { border-color: #a1a1aa; color: #5eead4; }
+:root[data-theme="dark"] input[type="checkbox"]:checked { border-color: currentColor; }
+
+@media (forced-colors: active) {
+  input[type="checkbox"] { appearance: auto; -webkit-appearance: auto; }
+  input[type="checkbox"]::before { content: none; }
+}
+
 .law-coverage-popup{pointer-events:none}
 .law-coverage-popup .maplibregl-popup-content{color:#171717;font-size:12px;line-height:1.5;border-radius:8px;padding:8px 12px}
