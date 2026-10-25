@@ -46,6 +46,7 @@ export async function publishCaseImage(areaId:string,caseIds:string[],visual:Map
 export function imageRank(type:string){return ["site plan","concept plan","preliminary plat","landscape plan","building elevation","rendering","vicinity/aerial exhibit","project area map"].indexOf(type)<0?99:["site plan","concept plan","preliminary plat","landscape plan","building elevation","rendering","vicinity/aerial exhibit","project area map"].indexOf(type);}
 export async function selectImage(id:string){
  const row=await readImageReview(id);if(!row||!approvedImageCheck(row.visual?.approval))throw new Error("Only privacy-approved images may be selected");
+ if((await imageReviews(row.areaId,row.caseIds)).some(h=>h.minimumReviewerVersion&&!row.visual?.approval?.generated&&row.visual?.approval?.reviewerVersion!==h.minimumReviewerVersion))throw new Error("This image needs the current privacy check before selection");
  if(process.env.DATABASE_URL){const db=await database();await db.query("UPDATE law_image_reviews SET data=CASE WHEN id=$1 THEN data||'{\"manual\":true,\"selected\":true,\"hidden\":false}'::jsonb ELSE data||'{\"selected\":false}'::jsonb END WHERE area_id=$2 AND case_ids && $3",[id,row.areaId,row.caseIds]);}
 
  else await mutate(s=>{for(const r of Object.values(s.reviews))if(r.areaId===row.areaId&&r.caseIds.some(c=>row.caseIds.includes(c)))r.selected=false;Object.assign(s.reviews[id],{manual:true,selected:true,hidden:false});});
