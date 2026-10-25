@@ -90,7 +90,9 @@ jobs:
           for ((i=0; i<COUNT; i++)); do
             QUERY=''
             if [ "$i" -eq 0 ]; then QUERY='?seed=1'; fi
-            curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 290 -H "Authorization: Bearer $CRON_SECRET" "$BASE$QUERY" > result.json || exit 1
+            HTTP=$(curl --silent --show-error --connect-timeout 15 --max-time 290 -w '%{http_code}' -o result.json -H "Authorization: Bearer $CRON_SECRET" "$BASE$QUERY") || HTTP=000
+            if [ "$HTTP" = '401' ] || [ "$HTTP" = '403' ]; then echo '::error::Image queue authorization failed.'; exit 1; fi
+            if [ "$HTTP" != '200' ]; then echo "::warning::Image invocation deferred (HTTP $HTTP); saved checkpoints will resume after its lease expires."; continue; fi
             cat result.json
             echo
             if grep -q '"status":"idle"' result.json; then break; fi

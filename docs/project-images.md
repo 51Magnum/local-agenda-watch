@@ -17,3 +17,5 @@ A fallback is generated only from known case geometry over attributed aerial ima
 The workflow logs per-case results and before/after coverage. Run `npm test` for long-PDF, retry, manual-pick, source privacy and PostgreSQL queue regression checks.
 
 Vision explicitly returns handwriting, signature, context-map and plan/map flags. Handwriting/signatures are rejected even on genuine plans; topography/zoning/land-use maps are context, not proposed site plans. Candidate pages with transient failures remain unavailable. A case-specific minimum-review hold can withdraw older automatic checks without removing its safe fallback; new checks must meet that version before publishing. Rejected candidate images are retained only as small admin-only thumbnails. Public metadata queries exclude hidden/rejected rows and enforce source withdrawals in SQL.
+
+Downloads use a total deadline across EnerGov byte ranges and redirect hops. A timed-out source invocation leaves its checkpoints/lease for retry; the scheduled backfill continues with the next case rather than abandoning the batch.
