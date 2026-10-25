@@ -1,4 +1,5 @@
 import type { MapCase } from "./types";
+export const CASE_OUTLINE_ZOOM = 11;
 export type Bounds = [number, number, number, number];
 export type MapSummary = {
   id: string;

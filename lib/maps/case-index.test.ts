@@ -88,7 +88,9 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     const calls = h.calls;
     await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
     expect(h.calls).toBe(calls);
-    const points = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 12);
+    const shapes = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 11);
+    expect(shapes.cases[0].geometry).not.toBeNull();
+    const points = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 10);
     expect(points.cases[0].geometry).toBeNull();
     expect(points.cases[0].centroid![0]).toBeCloseTo(c.centroid[0], 6);
     expect(points.cases[0].centroid![1]).toBeCloseTo(c.centroid[1], 6);

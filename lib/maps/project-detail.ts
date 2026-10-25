@@ -1,3 +1,4 @@
+import { officialProjectRecords } from "./project-records";
 import { unstable_cache } from "next/cache";
 import { getJurisdiction } from "./jurisdictions";
 import { readMapSnapshot } from "./store";
@@ -132,6 +133,11 @@ async function detail(
   const progress = item.popup?.progress ?? [];
   return {
     item,
+    officialRecords: officialProjectRecords(
+      area,
+      caseCatalog(feed).filter((h) => ids.includes(h.appId)),
+      record,
+    ),
     relatedCases: item.members?.map((m) => ({
       ...m,
       label: AREAS[m.areaId]?.name ?? m.areaId,
@@ -180,6 +186,6 @@ async function detail(
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v1"],
+  ["map-project-questions-v2"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );

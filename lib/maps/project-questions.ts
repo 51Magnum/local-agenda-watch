@@ -11,6 +11,7 @@ export const RESIDENT_QUESTIONS = [
   "How can I act",
 ] as const;
 export type PaneData = {
+  officialRecords?: { label: string; url: string }[];
   relatedCases?: {
     areaId: string;
     caseId: string;

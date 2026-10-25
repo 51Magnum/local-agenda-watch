@@ -17,6 +17,7 @@ import {
 import {
   gridCells,
   zoomTier,
+  CASE_OUTLINE_ZOOM,
   caseInFilter,
   type ViewportData,
   type Bounds,
@@ -370,28 +371,50 @@ export default function MapHome() {
         m.addSource("law-polygons", { type: "geojson", data: empty });
         m.addLayer({
           id: "law-fill",
-          minzoom: 14,
+          minzoom: CASE_OUTLINE_ZOOM,
           type: "fill",
           source: "law-polygons",
           paint: { "fill-color": ["get", "color"], "fill-opacity": 0.16 },
         });
         m.addLayer({
           id: "law-halo",
-          minzoom: 14,
+          minzoom: CASE_OUTLINE_ZOOM,
           type: "line",
           source: "law-polygons",
-          paint: { "line-color": "#ffffff", "line-width": 6 },
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              CASE_OUTLINE_ZOOM,
+              3.5,
+              14,
+              6,
+            ],
+          },
         });
         m.addLayer({
           id: "law-outline",
-          minzoom: 14,
+          minzoom: CASE_OUTLINE_ZOOM,
           type: "line",
           source: "law-polygons",
-          paint: { "line-color": ["get", "color"], "line-width": 3 },
+          paint: {
+            "line-color": ["get", "color"],
+            "line-width": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              CASE_OUTLINE_ZOOM,
+              1.5,
+              14,
+              3,
+            ],
+          },
         });
         m.addLayer({
           id: "law-approximate",
-          minzoom: 14,
+          minzoom: CASE_OUTLINE_ZOOM,
           type: "line",
           source: "law-polygons",
           filter: ["==", ["get", "approximate"], true],
@@ -406,12 +429,12 @@ export default function MapHome() {
           data: empty,
           cluster: true,
           clusterRadius: 45,
-          clusterMaxZoom: 13,
+          clusterMaxZoom: CASE_OUTLINE_ZOOM - 1,
         });
         m.addLayer({
           id: "law-clusters",
           minzoom: 9,
-          maxzoom: 14,
+          maxzoom: 24,
           type: "circle",
           source: "law-points",
           filter: ["has", "point_count"],
@@ -425,7 +448,7 @@ export default function MapHome() {
         m.addLayer({
           id: "law-cluster-count",
           minzoom: 9,
-          maxzoom: 14,
+          maxzoom: 24,
           type: "symbol",
           source: "law-points",
           filter: ["has", "point_count"],
@@ -439,7 +462,7 @@ export default function MapHome() {
         m.addLayer({
           id: "law-dots",
           minzoom: 9,
-          maxzoom: 14,
+          maxzoom: 24,
           type: "circle",
           source: "law-points",
           filter: ["!", ["has", "point_count"]],
@@ -765,9 +788,11 @@ export default function MapHome() {
         (m.getSource("law-points") as GeoJSONSource).setData({
           type: "FeatureCollection",
           features:
-            z >= 9 && z < 14
+            z >= 9
               ? shown
-                  .filter((c) => c.centroid)
+                  .filter(
+                    (c) => c.centroid && (z < CASE_OUTLINE_ZOOM || !c.geometry),
+                  )
                   .map((c) => ({
                     type: "Feature",
                     geometry: { type: "Point", coordinates: c.centroid! },

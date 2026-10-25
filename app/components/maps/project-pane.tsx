@@ -246,9 +246,20 @@ export default function ProjectPane({
             </small>
           </section>
           <footer>
-            <a href={item.href} className="law-full-project">
-              Full project page →
-            </a>
+            {!!data.officialRecords?.length && (
+              <section aria-label="Official project records">
+                <h2>Official project records</h2>
+                <ul>
+                  {data.officialRecords.map((r) => (
+                    <li key={r.url}>
+                      <a href={r.url} target="_blank" rel="noreferrer">
+                        {r.label} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
             <div className="law-pane-actions">
               <button
                 onClick={async () => {
@@ -298,7 +309,15 @@ export default function ProjectPane({
                 <ul>
                   {data.relatedCases.map((c) => (
                     <li key={c.areaId + c.caseId}>
-                      {c.label} · <a href={c.href}>{c.caseId}</a>
+                      {c.label} ·{" "}
+                      <a
+                        href={
+                          "/?project=" +
+                          encodeURIComponent(c.areaId + "/" + c.caseId)
+                        }
+                      >
+                        {c.caseId}
+                      </a>
                     </li>
                   ))}
                 </ul>

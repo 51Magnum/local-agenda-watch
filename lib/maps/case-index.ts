@@ -8,6 +8,7 @@ import { trackedRows } from "@/lib/db-transfer";
 import type { MapCase, MapSnapshot } from "./types";
 import {
   bufferedBounds,
+  CASE_OUTLINE_ZOOM,
   caseInFilter,
   type Bounds,
   type MapSummary,
@@ -116,7 +117,7 @@ export async function syncCaseIndex(snapshot: MapSnapshot) {
 }
 function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
   let geometry = c.geometry;
-  if (geometry && zoom >= 14)
+  if (geometry && zoom >= CASE_OUTLINE_ZOOM)
     try {
       geometry = simplify(feature(geometry), {
         tolerance: 360 / 2 ** (zoom + 10),
@@ -147,7 +148,7 @@ function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
     nextHearing: c.nextHearing,
     decisionDate: c.decisionDate,
     href: canonicalAreaHref(areaId, c.href),
-    geometry: zoom >= 14 ? geometry : null,
+    geometry: zoom >= CASE_OUTLINE_ZOOM ? geometry : null,
     centroid: c.centroid,
     bounds: c.bounds,
     source: c.source,
@@ -253,7 +254,7 @@ async function loadViewport(
 }
 export const cachedViewport = unstable_cache(
   loadViewport,
-  ["viewport-cases-v1"],
+  ["viewport-cases-v2"],
   { revalidate: 3600, tags: [MAP_INDEX_TAG] },
 );
 async function manifest() {
