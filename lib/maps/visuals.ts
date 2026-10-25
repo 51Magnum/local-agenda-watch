@@ -11,7 +11,7 @@ export function previewCandidate(title:string){return allowedImageTitle(title);}
 export function sourceImageDate(title:string):string|undefined {
  const compact=title.match(/(?:^|[_ -])([01]\d)([0-3]\d)(2\d)(?=[_. -]|$)/);if(compact){const value="20"+compact[3]+"-"+compact[1]+"-"+compact[2];if(Number.isFinite(Date.parse(value))&&new Date(value+"T12:00:00Z").toISOString().slice(0,10)===value)return value;}
  const iso=title.match(/\b(20\d{2})[-_](0[1-9]|1[0-2])(?:[-_](0[1-9]|[12]\d|3[01]))?\b/);if(iso)return iso[1]+"-"+iso[2]+(iso[3]?"-"+iso[3]:"");
- const month=title.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(?:\d{1,2},?\s+)?(20\d{2})\b/i);
+ const month=title.replace(/_/g," ").replace(/([A-Za-z]{3,9})(20\d{2})/g,"$1 $2").match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(?:\d{1,2},?\s+)?(20\d{2})\b/i);
  if(month)return month[2]+"-"+String(["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"].indexOf(month[1].slice(0,3).toLowerCase())+1).padStart(2,"0");
 }
 export async function extractDocumentVisual(bytes:Uint8Array,title:string,deadline=Date.now()+90000):Promise<{image:Buffer;page?:number;approval:ImageCheck}|undefined>{

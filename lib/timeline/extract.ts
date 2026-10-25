@@ -68,12 +68,12 @@ export async function extractFields(document: SourceDocument, caseId: string, pa
   return value as Extraction;
 }
 export async function extractNativePdfPages(bytes: Uint8Array): Promise<PageText[]> {
-  const { getDocumentProxy, extractText } = await import("unpdf");
-  const pdf = await getDocumentProxy(new Uint8Array(bytes));
+  const { getDocumentProxy } = await import("unpdf");
+  const pdf = await getDocumentProxy(new Uint8Array(bytes)),pages:PageText[]=[];
   try {
-    if (pdf.numPages > 200) throw new Error("PDF exceeds 200-page processing limit; split for review");
-    const result = await extractText(pdf, { mergePages: false });
-    return result.text.map((text, i) => ({ page: i + 1, text, method: "native" }));
+    // Sequential extraction bounds decoded-image/font memory in large meeting packets.
+    for(let n=1;n<=pdf.numPages;n++){const page=await pdf.getPage(n),content=await page.getTextContent();pages.push({page:n,text:content.items.map(item=>"str" in item?item.str:"").join(" "),method:"native"});page.cleanup();await pdf.cleanup();}
+    return pages;
   } finally { await pdf.loadingTask.destroy(); }
 }
 export async function ocrMissingPages(bytes: Uint8Array, pages: PageText[]): Promise<PageText[]> {

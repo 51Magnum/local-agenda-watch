@@ -59,7 +59,8 @@ export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:
     const candidateTitle=(caption&&visualPriority(caption)<5?caption:exhibit&&exhibit===progress.lastExhibit&&page-(progress.captionPage??0)<=2?progress.exhibitCaption:undefined)??caption??(previous&&allowedImageTitle(previous)?previous:allowedImageTitle(title)?title:"Map or plan exhibit");
     if(score>=20){progress.candidates.push({page,title:candidateTitle,sourceDate:pageSourceDate(parts)??options.sourceDate,score:score+((text.length<1200||(viewport?.width??0)>1000||(viewport?.height??0)>1400)&&visualPriority(candidateTitle)<5?800-visualPriority(candidateTitle)*150:0)});progress.candidates.sort((a,b)=>b.score-a.score||a.page-b.page);progress.candidates=progress.candidates.slice(0,8);}
    }
-   progress.previousCaption=caption;progress.nextPage=page+1;p.cleanup();if(page%10===0)await save();
+   progress.previousCaption=caption;progress.nextPage=page+1;p.cleanup();if(typeof pdf.cleanup==="function")await pdf.cleanup();if(page%10===0)await save();
+   if(page%20===0&&process.memoryUsage().rss>650*1024*1024){await save();return {complete:false,progress};}
   }
   await save();
   if(options.analyzeOnly)return {complete:false,progress};
