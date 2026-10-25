@@ -61,7 +61,9 @@ export function bufferedBounds([w, s, e, n]: Bounds): Bounds {
 export function caseInFilter(
   c: MapCase,
   filter: string,
-  today = new Date().toISOString().slice(0, 10),
+  today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: c.timezone ?? "UTC",
+  }).format(new Date()),
 ) {
   if (filter === "hearings")
     return Boolean(c.nextHearing && c.nextHearing.date >= today);
@@ -70,12 +72,15 @@ export function caseInFilter(
       c.stage === "Decided" &&
       Boolean(
         c.decisionDate &&
+        c.decisionDate <= today &&
         c.decisionDate >=
           new Date(Date.parse(today) - 30 * 86400000)
             .toISOString()
             .slice(0, 10),
       )
     );
+  if (c.uses && ["homes", "business"].includes(filter))
+    return c.uses.includes(filter);
   if (filter === "homes")
     return /residen|homes|housing|subdiv|\bplat\b|lots|dwell/i.test(
       c.title + " " + c.typeLabel + " " + c.summary,

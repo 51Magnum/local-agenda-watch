@@ -8,6 +8,7 @@ import { trackedRows } from "@/lib/db-transfer";
 import type { MapCase, MapSnapshot } from "./types";
 import {
   bufferedBounds,
+  caseInFilter,
   type Bounds,
   type MapSummary,
   type ViewportData,
@@ -125,6 +126,15 @@ function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
   return {
     id: c.id.includes(":") ? c.id : areaId + ":" + c.id,
     areaId,
+    timezone: AREAS[areaId]?.timezone,
+    uses: ["homes", "business"].filter((f) => caseInFilter(c, f)),
+    popup: c.popup
+      ? {
+          headline: c.popup.headline,
+          projectName: c.popup.projectName,
+          progress: [],
+        }
+      : undefined,
     members: c.members,
     caseIds: c.caseIds,
     jurisdictionLabel: c.jurisdictionLabel,
@@ -191,6 +201,48 @@ async function loadViewport(
     [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2],
     25000,
   );
+  // Lightweight public extraction metadata is cached with the viewport; no images, source feeds or page text are loaded here.
+  const [
+    { readTimelineState },
+    { publicFields },
+    { popupApplicationCopy },
+    { getProjectForCase },
+    { JURISDICTIONS },
+  ] = await Promise.all([
+    import("@/lib/timeline/public"),
+    import("@/lib/timeline/types"),
+    import("./popup-model"),
+    import("@/lib/projects"),
+    import("./jurisdictions"),
+  ]);
+  if (zoom >= 9)
+    await Promise.all(
+      areas.map(async (a) => {
+        const matches = grouped.filter((c) => c.areaId === a.id);
+        if (!matches.length) return;
+        const ids = [
+          ...new Set(
+            matches.flatMap((c) => c.caseIds ?? [c.id.split(":").at(-1)!]),
+          ),
+        ];
+        const state = await readTimelineState(ids, a.id);
+        for (const c of matches) {
+          const id = c.members?.[0]?.caseId ?? c.id.split(":").at(-1)!,
+            project = getProjectForCase(id, a.id),
+            fields = publicFields(state, project?.caseIds ?? [id], a.id),
+            copy = popupApplicationCopy(fields);
+          c.popup = {
+            headline:
+              copy.headline ??
+              JURISDICTIONS[a.id]?.reviewedApplications?.[id]?.headline ??
+              project?.name ??
+              c.title,
+            projectName: project?.name ?? c.title,
+            progress: [],
+          };
+        }
+      }),
+    );
   return {
     cases: grouped.slice(0, 1000).map((c) => publicFeature(c, c.areaId!, zoom)),
     summaries,

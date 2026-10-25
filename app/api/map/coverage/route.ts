@@ -1,5 +1,6 @@
 import { isLonLat } from "@/lib/maps/types";
-import { liveAreasInRadius } from "@/lib/maps/radius";
+import { AREAS } from "@/lib/areas/registry";
+import { circle, booleanIntersects, feature } from "@turf/turf";
 export async function POST(request: Request) {
   try {
     const d = await request.json();
@@ -12,7 +13,18 @@ export async function POST(request: Request) {
     )
       return Response.json({ error: "Invalid location" }, { status: 400 });
     return Response.json(
-      { areas: liveAreasInRadius(d.coordinates, d.radius).map((a) => a.name) },
+      {
+        areas: Object.values(AREAS)
+          .filter(
+            (a) =>
+              a.status === "live" &&
+              booleanIntersects(
+                circle(d.coordinates, d.radius, { units: "miles" }),
+                feature(a.coverageBoundary ?? a.boundary),
+              ),
+          )
+          .map((a) => a.name),
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch {

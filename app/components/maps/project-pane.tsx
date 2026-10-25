@@ -274,7 +274,7 @@ export default function ProjectPane({
               </label>
             </div>
             <p>
-              Updated automatically from city records · last checked{" "}
+              Updated automatically from official records · last checked{" "}
               {date(data.updatedAt)}
             </p>
             <a

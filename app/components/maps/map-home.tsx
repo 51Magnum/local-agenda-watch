@@ -223,6 +223,13 @@ export default function MapHome() {
     destroyed.current = false;
     let disposed = false,
       timer: ReturnType<typeof setTimeout> | undefined;
+    if (projectFromUrl() && !window.history.state?.lawPane) {
+      const shared = new URL(window.location.href),
+        base = new URL(shared);
+      base.searchParams.delete("project");
+      window.history.replaceState({ lawMapBase: true }, "", base);
+      window.history.pushState({ lawPane: true }, "", shared);
+    }
     const restore = () => setSelected(projectFromUrl());
     restore();
     window.addEventListener("popstate", restore);
@@ -322,6 +329,13 @@ export default function MapHome() {
             "text-halo-color": "#ffffff",
             "text-halo-width": 2,
           },
+        });
+        m.addSource("law-uncovered", { type: "geojson", data: empty });
+        m.addLayer({
+          id: "law-uncovered",
+          type: "fill",
+          source: "law-uncovered",
+          paint: { "fill-color": "#64748b", "fill-opacity": 0.16 },
         });
         m.addSource("law-flum", { type: "geojson", data: empty });
         m.addLayer({
@@ -643,23 +657,25 @@ export default function MapHome() {
         cells = gridCells(bounds, z);
       setZoom(z);
       setLoading(true);
-      if (z >= 9)
-        fetch(
-          "/api/map/boundaries?" +
-            new URLSearchParams({ bbox: bounds.join(",") }),
-        )
-          .then((r) => r.json())
-          .then((d) => {
-            if (current === generation.current && !destroyed.current) {
-              (m.getSource("law-boundaries") as GeoJSONSource)?.setData(
-                d.polygons,
-              );
-              (m.getSource("law-area-labels") as GeoJSONSource)?.setData(
-                d.labels,
-              );
-            }
-          })
-          .catch(() => {});
+      fetch(
+        "/api/map/boundaries?" +
+          new URLSearchParams({ bbox: bounds.join(",") }),
+      )
+        .then((r) => r.json())
+        .then((d) => {
+          if (current === generation.current && !destroyed.current) {
+            (m.getSource("law-boundaries") as GeoJSONSource)?.setData(
+              d.polygons,
+            );
+            (m.getSource("law-area-labels") as GeoJSONSource)?.setData(
+              d.labels,
+            );
+            (m.getSource("law-uncovered") as GeoJSONSource)?.setData(
+              d.uncovered,
+            );
+          }
+        })
+        .catch(() => {});
       try {
         const responses = await Promise.all(
           cells.map(async (cell) => {

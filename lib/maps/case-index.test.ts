@@ -22,6 +22,9 @@ vi.mock("next/cache", () => ({
     };
   },
 }));
+vi.mock("@/lib/timeline/public", () => ({
+  readTimelineState: async () => ({ version: 1, documents: {}, fields: {} }),
+}));
 import { cachedViewport } from "./case-index";
 it("indexes old snapshots once, deduplicates across areas, returns only lightweight features and performs no SQL on repeated cached views", async () => {
   const db = new PGlite();
@@ -69,7 +72,7 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
           {
             ...c,
             id: area === "nampa" ? "ONE" : "TWO",
-              bounds:area==="nampa"?c.bounds:undefined,
+            bounds: area === "nampa" ? c.bounds : undefined,
             href: "/" + area + "/plan/ONE",
           },
         ],

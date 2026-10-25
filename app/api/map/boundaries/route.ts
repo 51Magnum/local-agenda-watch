@@ -1,6 +1,12 @@
 import { AREAS } from "@/lib/areas/registry";
-import { bbox, simplify, feature } from "@turf/turf";
-import { parseMapBounds } from "@/lib/maps/radius";
+import {
+  bbox,
+  simplify,
+  feature,
+  difference,
+  featureCollection,
+} from "@turf/turf";
+import { parseMapBounds, boundsPolygon } from "@/lib/maps/radius";
 export async function GET(request: Request) {
   const b = parseMapBounds(new URL(request.url).searchParams.get("bbox"));
   if (!b) return Response.json({ error: "Invalid bounds" }, { status: 400 });
@@ -8,8 +14,27 @@ export async function GET(request: Request) {
     const x = bbox(a.boundary);
     return x[0] <= b[2] && x[2] >= b[0] && x[1] <= b[3] && x[3] >= b[1];
   });
+  let uncovered: unknown = { type: "FeatureCollection", features: [] };
+  try {
+    const shape = difference(
+      featureCollection([
+        boundsPolygon(b),
+        ...areas
+          .filter((a) => a.status === "live")
+          .map((a) =>
+            simplify(feature(a.coverageBoundary ?? a.boundary), {
+              tolerance: Math.max(0.0001, Math.min(0.01, (b[2] - b[0]) / 2500)),
+            }),
+          ),
+      ]),
+    );
+    if (shape) uncovered = { type: "FeatureCollection", features: [shape] };
+  } catch {
+    /* Malformed coverage geometry must not shade a tracked project. */
+  }
   return Response.json(
     {
+      uncovered,
       polygons: {
         type: "FeatureCollection",
         features: areas.map((a) => ({
