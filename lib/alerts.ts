@@ -1,4 +1,5 @@
 import { hearingDateTime } from "./areas/format";
+import {getProjectForCase} from "./projects";
 import { Pool } from "pg";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { AREAS } from "./areas/registry";
@@ -226,7 +227,7 @@ export function watchMatches(target: StoredWatchTarget, rows: MapCase[]) {
     : rows.filter(
         (c) =>
           c.areaId === target.areaId &&
-          (c.id === target.caseId || c.caseIds?.includes(target.caseId)),
+          (c.id === target.caseId || c.caseIds?.includes(target.caseId)||getProjectForCase(target.caseId,target.areaId)?.caseIds.includes(c.id)),
       );
 }
 export const watchFingerprint = (c: MapCase) =>

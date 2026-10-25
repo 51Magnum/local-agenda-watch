@@ -1,4 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- ImageResponse uses Satori img elements, not the Next Image component. */
+import sharp from "sharp";
+import { outlineThumbnail } from "@/lib/maps/og-thumbnail";
 import { ImageResponse } from "next/og";
 import { projectDetail } from "@/lib/maps/project-detail";
 import { AREAS } from "@/lib/areas/registry";
@@ -26,6 +28,26 @@ export async function GET(request: Request) {
   const color =
       colors[Math.max(0, Object.keys(AREAS).indexOf(area)) % colors.length],
     image = data.item.visual;
+  let imageUrl = outlineThumbnail(data.item.geometry);
+  if (image)
+    try {
+      const response = await fetch(new URL(image.src, SITE_ORIGIN), {
+        cache: "no-store",
+        signal: AbortSignal.timeout(8000),
+      });
+      if (
+        response.ok &&
+        response.headers.get("content-type")?.startsWith("image/")
+      ) {
+        const png = await sharp(Buffer.from(await response.arrayBuffer()))
+          .resize(420, 630, { fit: "cover" })
+          .png()
+          .toBuffer();
+        imageUrl = "data:image/png;base64," + png.toString("base64");
+      }
+    } catch {
+      /* Keep the actual project outline when an approved asset is unavailable. */
+    }
   return new ImageResponse(
     <div
       style={{
@@ -42,7 +64,7 @@ export async function GET(request: Request) {
           display: "flex",
           flexDirection: "column",
           padding: 48,
-          width: image ? "64%" : "100%",
+          width: imageUrl ? "64%" : "100%",
           justifyContent: "space-between",
         }}
       >
@@ -65,7 +87,7 @@ export async function GET(request: Request) {
               ? data.next.body +
                 " · " +
                 hearingDateTime(data.next.startsAt, data.area.timezone)
-              : data.item.stage === "Decided"
+              : ["Decided", "Recorded"].includes(data.item.stage)
                 ? "Decision recorded"
                 : "Under review"}
           </div>
@@ -74,10 +96,10 @@ export async function GET(request: Request) {
           </div>
         </div>
       </div>
-      {image && (
+      {imageUrl && (
         <img
-          src={new URL(image.src, SITE_ORIGIN).href}
-          alt={image.alt}
+          src={imageUrl}
+          alt={image?.alt ?? "Project outline (not a site plan)"}
           width={420}
           height={630}
           style={{ objectFit: "cover" }}

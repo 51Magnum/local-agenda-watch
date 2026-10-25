@@ -16,7 +16,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
   const [state, feed, reviews] = await Promise.all([
     readTimelineState([...new Set(cases.flatMap(c => getProjectForCase(c.id, config.id)?.caseIds ?? [c.id]))], config.id),
     config.loadCases?.().catch(() => undefined),
-    publicImageReviews(config.id,cases.map(c=>c.id)).catch(()=>[]),
+    publicImageReviews(config.id,[...new Set(cases.flatMap(c=>getProjectForCase(c.id,config.id)?.caseIds??[c.id]))]).catch(()=>[]),
   ]);
   const content=await readProjectContent(config.id,cases.map(c=>c.id));
   const catalog = new Map(caseCatalog(feed).map(h => [h.appId, h]));
@@ -60,7 +60,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
       if(Date.now()-(fallbackLogs.get(key)??0)>300000){fallbackLogs.set(key,Date.now());console.info("[map-popup:copy-fallback]",JSON.stringify({areaId:config.id,caseId:item.id,missingHeadline:!copy.headline,missingExplanation:!copy.explanation,reason:fields.some(f=>f.sourceKind==="staff-report")?"latest application copy absent or invalid":"no published application extraction",fallback:reviewed&&!newer?"source-reviewed application":project?"authored project or project name":"project name"}));}
       if(fallbackLogs.size>2000)fallbackLogs.clear();
     }
-    let visual=displayedImageReviews(reviews).find(r=>r.caseIds.includes(item.id))?.visual;
+    let visual=displayedImageReviews(reviews).find(r=>r.caseIds.some(id=>ids.includes(id)))?.visual;
     if(visual&&reviewed&&visual.sourceUrl.split("#")[0]===reviewed.reportUrl&&!visual.approval?.sourceDate)visual={...visual,label:visual.label+" · "+new Intl.DateTimeFormat("en-US",{month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(reviewed.sourceDate+"T12:00:00Z"))};
     return protectMapCase(config.id,{...item,popup,visual,residentialPrivacy:residentialCase(config.id,item.id,{item,hearing},overrides)},overrides);
   });
