@@ -120,18 +120,17 @@ export default function MapHome() {
     selectedRef.current = selected;
   }, [selected]);
   function closePane() {
-    if (window.history.state?.lawPane) window.history.back();
-    else {
-      const u = new URL(window.location.href);
-      u.searchParams.delete("project");
-      window.history.replaceState(
-        { ...window.history.state, lawPane: false },
-        "",
-        u,
-      );
-      setSelected(undefined);
-      setPane(undefined);
-    }
+    const u = new URL(window.location.href);
+    u.searchParams.delete("project");
+    window.history.replaceState(
+      { ...window.history.state, lawPane: false },
+      "",
+      u,
+    );
+    selectedRef.current = undefined;
+    setSelected(undefined);
+    setPane(undefined);
+    setPaneError("");
     map.current?.getCanvas().focus();
   }
   useEffect(() => {
