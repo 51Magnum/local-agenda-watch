@@ -27,6 +27,7 @@ import {
 } from "@/lib/maps/viewport";
 
 import type { PaneData } from "@/lib/maps/project-questions";
+import { unpackViewport } from "@/lib/maps/viewport-wire";
 import ThemeSelector from "../theme-selector";
 import ProjectFinder from "./project-finder";
 const InterestForm = dynamic(() => import("../locations/interest-form"));
@@ -277,6 +278,7 @@ export default function MapHome() {
       (lib) => {
         if (disposed || !container.current) return;
         lib.setWorkerUrl("/maplibre/worker.mjs");
+        if (window.innerWidth < 700) lib.setWorkerCount(1);
         let center: [number, number] = [-116.5, 43.6],
           initialZoom = 10;
         const saved = readPlace();
@@ -654,7 +656,7 @@ export default function MapHome() {
               return;
             }
           }
-          if (flumRef.current) {
+          if (flumRef.current && m.getLayer("law-flum")) {
             const f = m.queryRenderedFeatures(e.point, {
               layers: ["law-flum"],
             })[0];
@@ -784,12 +786,13 @@ export default function MapHome() {
                     bbox: cell.join(","),
                     zoom: String(z),
                     v: revision.current,
+                    compact: "1",
                   }),
               )
                 .then(async (r) => {
                   if (!r.ok)
                     throw Error("Map data is temporarily unavailable.");
-                  const data = (await r.json()) as ViewportData;
+                  const data = unpackViewport(await r.json());
                   cache.current.set(key, data);
                   if (cache.current.size > 100)
                     cache.current.delete(cache.current.keys().next().value!);

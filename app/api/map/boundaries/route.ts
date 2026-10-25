@@ -5,6 +5,8 @@ import {
   feature,
   difference,
   featureCollection,
+  bboxClip,
+  truncate,
 } from "@turf/turf";
 import { parseMapBounds, boundsPolygon } from "@/lib/maps/radius";
 export async function GET(request: Request) {
@@ -28,7 +30,7 @@ export async function GET(request: Request) {
           ),
       ]),
     );
-    if (shape) uncovered = { type: "FeatureCollection", features: [shape] };
+    if (shape) uncovered = { type: "FeatureCollection", features: [truncate(bboxClip(shape, b), { precision: 5 })] };
   } catch {
     /* Malformed coverage geometry must not shade a tracked project. */
   }
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
       polygons: {
         type: "FeatureCollection",
         features: areas.map((a) => ({
-          ...simplify(feature(a.boundary), { tolerance: 0.0003 }),
+          ...truncate(bboxClip(simplify(feature(a.boundary), { tolerance: 0.0003 }), b), { precision: 5 }),
           properties: { id: a.id, name: a.name },
         })),
       },
