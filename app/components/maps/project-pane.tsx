@@ -95,7 +95,13 @@ export default function ProjectPane({
             {item.popup?.progress.find((p) => p.state === "current")?.label ??
               item.stage}
           </p>
-          <p className="law-pane-jurisdiction">{data.area.name}</p>
+          <p className="law-pane-jurisdiction">
+            {item.popup?.projectName &&
+            item.popup.projectName !== (item.popup?.headline ?? item.title)
+              ? item.popup.projectName + " · "
+              : ""}
+            {data.area.name}
+          </p>
           <div className="law-pane-expanded">
             {item.popup?.explanation && <p>{item.popup.explanation}</p>}
             {item.visual && (
