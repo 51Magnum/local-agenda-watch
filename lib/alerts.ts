@@ -14,10 +14,11 @@ export type WatchTarget =
       coordinates: [number, number];
       radiusMiles: number;
     };
+type StoredWatchTarget = WatchTarget | { kind: "pending"; label: string };
 type Subscription = {
   id: string;
   email: string;
-  target: WatchTarget;
+  target: StoredWatchTarget;
   state: Record<string, string> | null;
   unsubscribe_token: string;
 };
@@ -134,7 +135,7 @@ export async function sendAlertMail({
 }
 export async function subscribeAlert(
   email: string,
-  target: WatchTarget,
+  target: StoredWatchTarget,
   ip: string,
   origin = SITE_ORIGIN,
 ) {
@@ -178,7 +179,11 @@ export async function subscribeAlert(
         "Confirm that you want a daily email when " +
         (target.kind === "project"
           ? "this project changes: " + target.caseId
-          : target.label + " changes within " + target.radiusMiles + " miles") +
+          : target.kind === "place"
+            ? target.label + " changes within " + target.radiusMiles + " miles"
+            : "your interest in " +
+              target.label +
+              ". After confirmation, choose a project or address on the map before alerts can start") +
         ".\n\n" +
         url +
         "\n\nThis link expires in 48 hours. No alerts start until you confirm.",
@@ -199,10 +204,10 @@ export async function confirmAlert(token: string) {
   const r = await (
     await alertsDb()
   ).query(
-    `UPDATE law_alert_subscriptions SET confirmed_at=coalesce(confirmed_at,now()) WHERE scope=$2 AND confirm_hash=$1 AND confirm_expires>now() AND unsubscribed_at IS NULL RETURNING id`,
+    `UPDATE law_alert_subscriptions SET confirmed_at=coalesce(confirmed_at,now()) WHERE scope=$2 AND confirm_hash=$1 AND confirm_expires>now() AND unsubscribed_at IS NULL RETURNING target`,
     [hash(token), alertScope()],
   );
-  return !!r.rows.length;
+  return r.rows[0]?.target as StoredWatchTarget | undefined;
 }
 export async function unsubscribeAlert(token: string) {
   if (!/^[\w-]{43}$/.test(token)) return false;
@@ -214,7 +219,8 @@ export async function unsubscribeAlert(token: string) {
   );
   return !!r.rows.length;
 }
-export function watchMatches(target: WatchTarget, rows: MapCase[]) {
+export function watchMatches(target: StoredWatchTarget, rows: MapCase[]) {
+  if (target.kind === "pending") return [];
   return target.kind === "place"
     ? nearbyCases(rows, target.coordinates, target.radiusMiles)
     : rows.filter(
@@ -240,7 +246,7 @@ export async function sendDigests() {
   const db = await alertsDb(),
     subs = (
       await db.query(
-        `SELECT id,email,target,state,unsubscribe_token FROM law_alert_subscriptions WHERE scope=$1 AND confirmed_at IS NOT NULL AND unsubscribed_at IS NULL AND (last_sent IS NULL OR last_sent<CURRENT_DATE) ORDER BY email,id LIMIT 250`,
+        `SELECT id,email,target,state,unsubscribe_token FROM law_alert_subscriptions WHERE scope=$1 AND confirmed_at IS NOT NULL AND target->>'kind'<>'pending' AND unsubscribed_at IS NULL AND (last_sent IS NULL OR last_sent<CURRENT_DATE) ORDER BY email,id LIMIT 250`,
         [alertScope()],
       )
     ).rows as Subscription[];

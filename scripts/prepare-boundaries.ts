@@ -10,7 +10,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 const areas = Object.values(AREAS),
   shapes = areas.map((a) => ({
     ...truncate(simplify(feature(a.boundary), { tolerance: 0.0006 }), {
-      precision: 6,
+      precision: 5,
     }),
     properties: { id: a.id, name: a.name },
   }));
@@ -42,7 +42,7 @@ try {
   );
   if (shape)
     uncovered = featureCollection([
-      truncate(shape, { precision: 6 }),
+      truncate(shape, { precision: 5 }),
     ]) as typeof uncovered;
 } catch {
   /* Leave unshaded if invalid. */

@@ -22,7 +22,9 @@ export async function POST(request: Request) {
   const ok = await confirmAlert(token);
   return new Response(
     ok
-      ? "Alerts confirmed. You can close this page."
+      ? ok.kind === "pending"
+        ? "Your email is confirmed. Choose a project or address on the map to start alerts: https://www.localagendawatch.com/"
+        : "Alerts confirmed. You can close this page."
       : "This link expired or is no longer active.",
     { status: ok ? 200 : 400, headers: { "Cache-Control": "no-store" } },
   );

@@ -13,7 +13,7 @@ async function sendWaitlist() {
   const db = await alertsDb(),
     rows = (
       await db.query(
-        `SELECT id,email,area_requested,latitude,longitude,radius_miles FROM law_coverage_requests r WHERE kind='follow' AND email IS NOT NULL AND latitude IS NOT NULL AND longitude IS NOT NULL AND NOT EXISTS(SELECT 1 FROM law_alert_waitlist w WHERE w.id=r.id) ORDER BY created_at LIMIT 25`,
+        `SELECT DISTINCT ON(lower(email)) id,email,area_requested,latitude,longitude,radius_miles FROM law_coverage_requests r WHERE kind='follow' AND email IS NOT NULL AND NOT EXISTS(SELECT 1 FROM law_alert_waitlist w JOIN law_coverage_requests old ON old.id=w.id WHERE lower(old.email)=lower(r.email)) ORDER BY lower(email),created_at LIMIT 25`,
       )
     ).rows;
   for (const row of rows) {
@@ -24,12 +24,14 @@ async function sendWaitlist() {
     if (!claim.rows.length) continue;
     await subscribeAlert(
       row.email,
-      {
-        kind: "place",
-        label: row.area_requested,
-        coordinates: [Number(row.longitude), Number(row.latitude)],
-        radiusMiles: Number(row.radius_miles ?? 1),
-      },
+      row.latitude != null && row.longitude != null
+        ? {
+            kind: "place",
+            label: row.area_requested,
+            coordinates: [Number(row.longitude), Number(row.latitude)],
+            radiusMiles: Number(row.radius_miles ?? 1),
+          }
+        : { kind: "pending", label: row.area_requested },
       "waitlist:" + row.id,
     );
     await db.query("UPDATE law_alert_waitlist SET sent_at=now() WHERE id=$1", [
@@ -50,9 +52,9 @@ export default async function AlertsAdmin() {
       </p>
       <p>
         Existing waitlist entries receive no email unless the owner approves and
-        enables ALERTS_WAITLIST_CONFIRMATIONS_ENABLED. This button sends one
-        confirmation to each eligible entry with a saved map location. Entries
-        without coordinates need a chosen place first.
+        enables ALERTS_WAITLIST_CONFIRMATIONS_ENABLED. This sends one
+        confirmation per email. Entries without a saved location are asked to
+        choose a project or address before alerts start.
       </p>
       <form action={sendWaitlist}>
         <button
