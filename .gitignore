@@ -47,3 +47,6 @@ next-env.d.ts
 
 # Generated MapLibre assets (copied from the installed package before dev/build)
 /public/maplibre/
+
+# Offline FLUM preparation test bytecode
+/scripts/__pycache__/

@@ -198,9 +198,14 @@ async function main() {
     join(destination, "manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n",
   );
-  // Only remove old generated archives in this exact output directory.
+  // Retain the previous archive for maps already open during an update.
+  // Only remove older generated archives in this exact output directory.
   for (const name of await readdir(destination))
-    if (/^flum-[a-f0-9]{16}\.pmtiles$/.test(name) && name !== archive)
+    if (
+      /^flum-[a-f0-9]{16}\.pmtiles$/.test(name) &&
+      name !== archive &&
+      "/flum/" + name !== previous?.url
+    )
       await unlink(join(destination, name));
   console.log(
     JSON.stringify({
