@@ -82,7 +82,7 @@ export function caseInFilter(
   if (c.uses && ["homes", "business"].includes(filter))
     return c.uses.includes(filter);
   if (filter === "homes")
-    return /residen|homes|housing|subdiv|\bplat\b|lots|dwell/i.test(
+    return /residen|homes|housing|dwell|single.family|multi.family|townhom|apartmen/i.test(
       c.title + " " + c.typeLabel + " " + c.summary,
     );
   if (filter === "business")

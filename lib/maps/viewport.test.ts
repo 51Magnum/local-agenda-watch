@@ -34,3 +34,16 @@ it("requires a real final-decision date for the last-30-days filter", () => {
     caseInFilter({ ...c, decisionDate: "2026-09-01" }, "decided", "2026-10-25"),
   ).toBe(false);
 });
+
+it("does not label industrial plats as homes or future dates as past decisions", () => {
+  const c = {
+    stage: "Decided",
+    title: "Industrial preliminary plat",
+    typeLabel: "Preliminary plat",
+    summary: "Warehouse construction",
+    decisionDate: "2026-11-02",
+  } as MapCase;
+  expect(caseInFilter(c, "homes", "2026-10-25")).toBe(false);
+  expect(caseInFilter(c, "business", "2026-10-25")).toBe(true);
+  expect(caseInFilter(c, "decided", "2026-10-25")).toBe(false);
+});

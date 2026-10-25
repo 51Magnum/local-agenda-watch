@@ -514,6 +514,7 @@ export default function MapHome() {
       m.getCanvas().addEventListener("mouseleave", hideTip);
       m.on("movestart", hideTip);
       m.on("click", async (e) => {
+        if (!m.getLayer("law-dots")) return;
         hideTip();
         const hit = m.queryRenderedFeatures(e.point, {
           layers: [
