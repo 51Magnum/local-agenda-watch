@@ -1,3 +1,4 @@
+import {normalizeMapStage} from "./maps/refresh";
 import {caseReportPages} from "./timeline/report-pages";
 import {downloadDocument,digest} from "./timeline/ingest";
 import {extractNativePdfChunk,ocrMissingPages} from "./timeline/extract";
@@ -21,18 +22,20 @@ export async function enrichProjectContent({budgetMs=240000,areaId,caseId}:{budg
  for(const config of Object.values(JURISDICTIONS).filter(c=>c.area?.status==="live"&&(!areaId||c.id===areaId))){
   const lease=await acquireLease(store,"resident-content:"+config.id,300000);if(!lease)continue;
   try{
-  const feed=await config.loadCases?.(),cases=caseCatalog(feed).filter(h=>(caseId?h.appId===caseId:!["Decided","Recorded"].includes(config.stageForCase?.(h)??(h.decisionRecorded?"Decided":"In review"))&&!/^(?:withdrawn|expired)/i.test(h.appStatus))).sort((a,b)=>(a.meetings.find(m=>m.date>=new Date().toISOString().slice(0,10))?.date??"9999").localeCompare(b.meetings.find(m=>m.date>=new Date().toISOString().slice(0,10))?.date??"9999"));
+  const feed=await config.loadCases?.(),cases=caseCatalog(feed).filter(h=>(caseId?h.appId===caseId:!["Decided","Recorded"].includes(normalizeMapStage(config,h))&&!/^(?:withdrawn|expired)/i.test(h.appStatus))).sort((a,b)=>(a.meetings.find(m=>m.date>=new Date().toISOString().slice(0,10))?.date??"9999").localeCompare(b.meetings.find(m=>m.date>=new Date().toISOString().slice(0,10))?.date??"9999"));
   await backfillDecisionDates(config.id,feed);
   const counts={area:config.id,active:cases.length,checked:0,generated:0,cached:0,fallback:0,deferred:0};report.push(counts);const old=await readProjectContent(config.id,cases.map(h=>h.appId));
   for(const h of cases){if(Date.now()>deadline-5000)break;
    const state=store.readCase?await store.readCase(config.id,[h.appId]):await store.read();
    const docs=Object.values(state.documents).filter(d=>(d.areaId??"nampa")===config.id&&d.caseIds.includes(h.appId)&&["staff-report","case-record"].includes(d.kind)).sort((a,b)=>Number(a.kind!=="staff-report")-Number(b.kind!=="staff-report")||(sourceImageDate(b.title)??"").localeCompare(sourceImageDate(a.title)??"")||b.checkedAt.localeCompare(a.checkedAt));
-   if(!docs.some(d=>d.kind==="case-record")){
-    const detail=h as typeof h&{meridian?:{lots?:number}},source={caseId:h.appId,title:h.displayTitle??h.appScope,request:h.description??h.summary??h.appScope,type:h.appTypeLabel,acres:h.appAcres,lots:detail.meridian?.lots};
-    const text=JSON.stringify(source);if((source.request?.length??0)>20||source.lots){const hash=digest(text);docs.push({id:"feed:"+config.id+":"+h.appId,hash,areaId:config.id,url:h.externalUrl??config.area!.sources.cases??"",title:h.appId+" official filing record",kind:"case-record",caseIds:[h.appId],state:"complete",checkedAt:feed?.refreshedAt??new Date().toISOString(),pages:[{page:1,text,method:"structured"}]});}
+   const agenda=(feed?.agendaMeetings??[]).flatMap(m=>m.items.filter(i=>i.caseIds.includes(h.appId)).map(i=>({title:i.title,date:m.date,url:m.agendaUrl??m.sourceUrl}))).sort((a,b)=>b.date.localeCompare(a.date))[0];
+   if(!docs.some(d=>d.kind==="case-record")||agenda){
+    const detail=h as typeof h&{meridian?:{lots?:number}},source={caseId:h.appId,title:h.displayTitle??h.appScope,request:h.description??h.summary??agenda?.title??h.appScope,type:h.appTypeLabel,acres:h.appAcres,lots:detail.meridian?.lots};
+    const text=JSON.stringify(source);if((source.request?.length??0)>20||source.lots){const hash=digest(text);docs.push({id:"feed:"+config.id+":"+h.appId,hash,areaId:config.id,url:!h.description&&!h.summary&&agenda?agenda.url:h.externalUrl??config.area!.sources.cases??"",title:h.appId+" official filing record",kind:"case-record",caseIds:[h.appId],state:"complete",checkedAt:feed?.refreshedAt??new Date().toISOString(),pages:[{page:1,text,method:"structured"}]});}
    }
+   docs.sort((a,b)=>Number(a.kind!=="staff-report")-Number(b.kind!=="staff-report")||Number(b.id.startsWith("feed:"))-Number(a.id.startsWith("feed:")));
    const fingerprint=createHash("sha256").update("resident-content-v1"+JSON.stringify([h.displayTitle,h.appScope,h.description,docs.map(d=>[d.id,d.hash])])).digest("hex");
-   if(old[h.appId]?.fingerprint===fingerprint&&(old[h.appId].status!=="deferred"||Date.parse(old[h.appId].retryAt??"")>Date.now())&&!docs.some(d=>d.contentNextPage!=null&&d.contentNextPage<=(d.contentTotalPages??0))){counts.cached++;continue;}
+   if(old[h.appId]?.fingerprint===fingerprint&&(old[h.appId].status!=="deferred"||Date.parse(old[h.appId].retryAt??"")>Date.now())&&!docs.some(d=>d.contentNextPage!=null&&d.contentNextPage<=(d.contentTotalPages??0))){counts.cached++;if(old[h.appId].status==="deferred")counts.deferred++;continue;}
    counts.checked++;const copy=popupApplicationCopy(publicFields(state,[h.appId],config.id));
    const value:ProjectContent={fingerprint,headline:copy.headline??cleanResidentTitle(h.displayTitle??h.appScope??h.appTypeLabel,h.appTypeLabel),explanation:copy.explanation,aiGenerated:Boolean(copy.explanation),status:copy.explanation?"ready":"fallback",checkedAt:new Date().toISOString(),impacts:[]};
    let doc=docs[0];
