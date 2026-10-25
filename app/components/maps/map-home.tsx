@@ -1,4 +1,5 @@
 "use client";
+import FLUM_TILES from "@/public/flum/manifest.json";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Map as LibreMap, GeoJSONSource } from "maplibre-gl";
@@ -12,11 +13,9 @@ import {
   type MapCase,
   type MapVisual,
   type AddressResult,
-  type FlumCache,
 } from "@/lib/maps/types";
 import {
   gridCells,
-  snapBounds,
   zoomTier,
   CASE_OUTLINE_ZOOM,
   caseInFilter,
@@ -80,8 +79,6 @@ export default function MapHome() {
     openRef = useRef<(c: MapCase) => void>(() => {}),
     cache = useRef(new Map<string, ViewportData>()),
     inflight = useRef(new Map<string, Promise<ViewportData>>()),
-    flumCache = useRef(new Map<string, FlumCache>()),
-    flumInflight = useRef(new Map<string, Promise<FlumCache>>()),
     revision = useRef("initial"),
     destroyed = useRef(false),
     lastTooltip = useRef("");
@@ -98,7 +95,6 @@ export default function MapHome() {
     [message, setMessage] = useState(""),
     [flumOn, setFlumOn] = useState(false),
     [boundariesOn, setBoundariesOn] = useState(true),
-    [flum, setFlum] = useState<FlumCache>(),
     [menu, setMenu] = useState(false),
     [dialog, setDialog] = useState<"watch" | "coverage">(),
     [image, setImage] = useState<MapVisual>(),
@@ -115,9 +111,11 @@ export default function MapHome() {
     flumRef = useRef(flumOn);
   useEffect(() => {
     filterRef.current = filter;
-    flumRef.current = flumOn;
     loadRef.current();
-  }, [filter, flumOn]);
+  }, [filter]);
+  useEffect(() => {
+    flumRef.current = flumOn;
+  }, [flumOn]);
   useEffect(() => {
     selectedRef.current = selected;
   }, [selected]);
@@ -265,355 +263,368 @@ export default function MapHome() {
     const restore = () => setSelected(projectFromUrl());
     restore();
     window.addEventListener("popstate", restore);
-    import("maplibre-gl").then((lib) => {
-      if (disposed || !container.current) return;
-      lib.setWorkerUrl("/maplibre/worker.mjs");
-      let center: [number, number] = [-116.5, 43.6],
-        initialZoom = 10;
-      const saved = readPlace();
-      if (saved) {
-        setSavedPlace(saved);
-        setPlace(saved);
-        center = saved.coordinates;
-        initialZoom = 13;
-      } else
-        try {
-          const view = JSON.parse(localStorage.getItem(VIEW_KEY) ?? "null");
-          if (view && isLonLat(view.center) && Number.isFinite(view.zoom)) {
-            center = view.center;
-            initialZoom = Math.max(2, Math.min(18, view.zoom));
-          }
-        } catch {}
-      const u = new URL(window.location.href),
-        lng = Number(u.searchParams.get("lng")),
-        lat = Number(u.searchParams.get("lat"));
-      if (
-        u.searchParams.has("lng") &&
-        u.searchParams.has("lat") &&
-        isLonLat([lng, lat])
-      ) {
-        const p = {
-          label: u.searchParams.get("q") ?? "Map pin",
-          coordinates: [lng, lat] as [number, number],
-          radius: Math.max(
-            0.25,
-            Math.min(10, Number(u.searchParams.get("r")) || 1),
-          ),
+    Promise.all([import("maplibre-gl"), import("pmtiles")]).then(
+      ([lib, { Protocol }]) => {
+        if (disposed || !container.current) return;
+        lib.addProtocol("pmtiles", new Protocol().tile);
+        lib.setWorkerUrl("/maplibre/worker.mjs");
+        let center: [number, number] = [-116.5, 43.6],
+          initialZoom = 10;
+        const saved = readPlace();
+        if (saved) {
+          setSavedPlace(saved);
+          setPlace(saved);
+          center = saved.coordinates;
+          initialZoom = 13;
+        } else
+          try {
+            const view = JSON.parse(localStorage.getItem(VIEW_KEY) ?? "null");
+            if (view && isLonLat(view.center) && Number.isFinite(view.zoom)) {
+              center = view.center;
+              initialZoom = Math.max(2, Math.min(18, view.zoom));
+            }
+          } catch {}
+        const u = new URL(window.location.href),
+          lng = Number(u.searchParams.get("lng")),
+          lat = Number(u.searchParams.get("lat"));
+        if (
+          u.searchParams.has("lng") &&
+          u.searchParams.has("lat") &&
+          isLonLat([lng, lat])
+        ) {
+          const p = {
+            label: u.searchParams.get("q") ?? "Map pin",
+            coordinates: [lng, lat] as [number, number],
+            radius: Math.max(
+              0.25,
+              Math.min(10, Number(u.searchParams.get("r")) || 1),
+            ),
+          };
+          setPlace(p);
+          setAddress(p.label);
+          center = p.coordinates;
+          initialZoom = 13;
+        }
+        const m = new lib.Map({
+          container: container.current,
+          style: "https://tiles.openfreemap.org/styles/liberty",
+          center,
+          zoom: initialZoom,
+          minZoom: 2,
+          maxZoom: 19,
+          renderWorldCopies: false,
+          attributionControl: false,
+        });
+        map.current = m;
+        m.scrollZoom.setWheelZoomRate(1 / 900);
+        m.addControl(
+          new lib.NavigationControl({ showCompass: false }),
+          "top-right",
+        );
+        m.addControl(
+          new lib.AttributionControl({ compact: true }),
+          "bottom-right",
+        );
+        m.on("load", () => {
+          if (disposed) return;
+          m.addSource("law-boundaries", {
+            type: "geojson",
+            data: { type: "FeatureCollection", features: [] },
+          });
+          m.addLayer({
+            id: "law-boundaries",
+            type: "line",
+            source: "law-boundaries",
+            paint: {
+              "line-color": "#0f766e",
+              "line-opacity": 0.35,
+              "line-width": 1.2,
+            },
+          });
+          m.addSource("law-area-labels", {
+            type: "geojson",
+            data: { type: "FeatureCollection", features: [] },
+          });
+          m.addLayer({
+            id: "law-area-labels",
+            type: "symbol",
+            source: "law-area-labels",
+            minzoom: 9,
+            maxzoom: 14,
+            layout: {
+              "text-field": ["get", "name"],
+              "text-size": 12,
+              "text-font": ["Noto Sans Regular"],
+            },
+            paint: {
+              "text-color": "#0f766e",
+              "text-halo-color": "#ffffff",
+              "text-halo-width": 2,
+            },
+          });
+          m.addSource("law-uncovered", { type: "geojson", data: empty });
+          m.addLayer({
+            id: "law-uncovered",
+            type: "fill",
+            source: "law-uncovered",
+            paint: { "fill-color": "#64748b", "fill-opacity": 0.16 },
+          });
+          m.on("dataloading", (e) => {
+            if ("sourceId" in e && e.sourceId === "law-flum" && flumRef.current)
+              setFlumLoading(true);
+          });
+          m.on("sourcedata", (e) => {
+            if (e.sourceId === "law-flum" && m.isSourceLoaded("law-flum"))
+              setFlumLoading(false);
+          });
+          m.on("error", (e) => {
+            if ("sourceId" in e && e.sourceId === "law-flum") {
+              setFlumLoading(false);
+              setMessage(
+                "Future land use tiles could not load. Try reloading the map.",
+              );
+            }
+          });
+          m.addSource("law-flum", {
+            type: "vector",
+            url:
+              "pmtiles://" +
+              new URL(FLUM_TILES.url, window.location.origin).href,
+          });
+          m.addLayer({
+            id: "law-flum",
+            type: "fill",
+            source: "law-flum",
+            "source-layer": FLUM_TILES.sourceLayer,
+            minzoom: FLUM_TILES.minZoom,
+            layout: { visibility: "none" },
+            paint: { "fill-color": ["get", "color"], "fill-opacity": 0.35 },
+          });
+          m.addSource("law-ring", { type: "geojson", data: empty });
+          m.addLayer({
+            id: "law-ring",
+            type: "line",
+            source: "law-ring",
+            paint: {
+              "line-color": "#0f766e",
+              "line-width": 2,
+              "line-dasharray": [3, 2],
+            },
+          });
+          m.addSource("law-polygons", { type: "geojson", data: empty });
+          m.addLayer({
+            id: "law-fill",
+            minzoom: CASE_OUTLINE_ZOOM,
+            type: "fill",
+            source: "law-polygons",
+            paint: {
+              "fill-color": ["get", "color"],
+              "fill-opacity": PROJECT_FILL_OPACITY,
+            },
+          });
+          m.addLayer({
+            id: "law-halo",
+            minzoom: CASE_OUTLINE_ZOOM,
+            type: "line",
+            source: "law-polygons",
+            paint: {
+              "line-color": "#ffffff",
+              "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                CASE_OUTLINE_ZOOM,
+                3.5,
+                14,
+                6,
+              ],
+            },
+          });
+          m.addLayer({
+            id: "law-outline",
+            minzoom: CASE_OUTLINE_ZOOM,
+            type: "line",
+            source: "law-polygons",
+            paint: {
+              "line-color": ["get", "color"],
+              "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                CASE_OUTLINE_ZOOM,
+                1.5,
+                14,
+                3,
+              ],
+            },
+          });
+          m.addLayer({
+            id: "law-approximate",
+            minzoom: CASE_OUTLINE_ZOOM,
+            type: "line",
+            source: "law-polygons",
+            filter: ["==", ["get", "approximate"], true],
+            paint: {
+              "line-color": "#ffffff",
+              "line-width": 2,
+              "line-dasharray": [3, 2],
+            },
+          });
+          m.addSource("law-points", {
+            type: "geojson",
+            data: empty,
+            cluster: true,
+            clusterRadius: 45,
+            clusterMaxZoom: CASE_OUTLINE_ZOOM - 1,
+          });
+          m.addLayer({
+            id: "law-clusters",
+            minzoom: 9,
+            maxzoom: 24,
+            type: "circle",
+            source: "law-points",
+            filter: ["has", "point_count"],
+            paint: {
+              "circle-color": "#0f766e",
+              "circle-radius": 20,
+              "circle-stroke-width": 2,
+              "circle-stroke-color": "#fff",
+            },
+          });
+          m.addLayer({
+            id: "law-cluster-count",
+            minzoom: 9,
+            maxzoom: 24,
+            type: "symbol",
+            source: "law-points",
+            filter: ["has", "point_count"],
+            layout: {
+              "text-field": ["get", "point_count_abbreviated"],
+              "text-size": 12,
+              "text-font": ["Noto Sans Regular"],
+            },
+            paint: { "text-color": "#ffffff" },
+          });
+          m.addLayer({
+            id: "law-dots",
+            minzoom: 9,
+            maxzoom: 24,
+            type: "circle",
+            source: "law-points",
+            filter: ["!", ["has", "point_count"]],
+            paint: {
+              "circle-radius": 7,
+              "circle-color": ["get", "color"],
+              "circle-stroke-width": 2,
+              "circle-stroke-color": "#ffffff",
+            },
+          });
+          m.addSource("law-summaries", {
+            type: "geojson",
+            data: empty,
+            cluster: true,
+            clusterRadius: 38,
+            clusterMaxZoom: 8,
+            clusterProperties: {
+              count: ["+", ["get", "count"]],
+              upcoming: ["+", ["get", "upcoming"]],
+            },
+          });
+          m.addLayer({
+            id: "law-summary-dots",
+            maxzoom: 9,
+            type: "circle",
+            source: "law-summaries",
+            paint: {
+              "circle-radius": 25,
+              "circle-color": "#0f766e",
+              "circle-stroke-color": "#fff",
+              "circle-stroke-width": 2,
+            },
+          });
+          m.addLayer({
+            id: "law-summary-count",
+            maxzoom: 9,
+            type: "symbol",
+            source: "law-summaries",
+            layout: {
+              "text-field": ["to-string", ["get", "count"]],
+              "text-size": 13,
+              "text-font": ["Noto Sans Regular"],
+            },
+            paint: { "text-color": "#fff" },
+          });
+          setReady(true);
+          loadRef.current();
+        });
+        const hideTip = () => {
+          if (tooltip.current) tooltip.current.hidden = true;
+          m.getCanvas().style.cursor = "";
         };
-        setPlace(p);
-        setAddress(p.label);
-        center = p.coordinates;
-        initialZoom = 13;
-      }
-      const m = new lib.Map({
-        container: container.current,
-        style: "https://tiles.openfreemap.org/styles/liberty",
-        center,
-        zoom: initialZoom,
-        minZoom: 2,
-        maxZoom: 19,
-        renderWorldCopies: false,
-        attributionControl: false,
-      });
-      map.current = m;
-      m.scrollZoom.setWheelZoomRate(1 / 900);
-      m.addControl(
-        new lib.NavigationControl({ showCompass: false }),
-        "top-right",
-      );
-      m.addControl(
-        new lib.AttributionControl({ compact: true }),
-        "bottom-right",
-      );
-      m.on("load", () => {
-        if (disposed) return;
-        m.addSource("law-boundaries", {
-          type: "geojson",
-          data: { type: "FeatureCollection", features: [] },
-        });
-        m.addLayer({
-          id: "law-boundaries",
-          type: "line",
-          source: "law-boundaries",
-          paint: {
-            "line-color": "#0f766e",
-            "line-opacity": 0.35,
-            "line-width": 1.2,
-          },
-        });
-        m.addSource("law-area-labels", {
-          type: "geojson",
-          data: { type: "FeatureCollection", features: [] },
-        });
-        m.addLayer({
-          id: "law-area-labels",
-          type: "symbol",
-          source: "law-area-labels",
-          minzoom: 9,
-          maxzoom: 14,
-          layout: {
-            "text-field": ["get", "name"],
-            "text-size": 12,
-            "text-font": ["Noto Sans Regular"],
-          },
-          paint: {
-            "text-color": "#0f766e",
-            "text-halo-color": "#ffffff",
-            "text-halo-width": 2,
-          },
-        });
-        m.addSource("law-uncovered", { type: "geojson", data: empty });
-        m.addLayer({
-          id: "law-uncovered",
-          type: "fill",
-          source: "law-uncovered",
-          paint: { "fill-color": "#64748b", "fill-opacity": 0.16 },
-        });
-        m.addSource("law-flum", { type: "geojson", data: empty });
-        m.addLayer({
-          id: "law-flum",
-          type: "fill",
-          source: "law-flum",
-          paint: { "fill-color": ["get", "color"], "fill-opacity": 0.35 },
-        });
-        m.addSource("law-ring", { type: "geojson", data: empty });
-        m.addLayer({
-          id: "law-ring",
-          type: "line",
-          source: "law-ring",
-          paint: {
-            "line-color": "#0f766e",
-            "line-width": 2,
-            "line-dasharray": [3, 2],
-          },
-        });
-        m.addSource("law-polygons", { type: "geojson", data: empty });
-        m.addLayer({
-          id: "law-fill",
-          minzoom: CASE_OUTLINE_ZOOM,
-          type: "fill",
-          source: "law-polygons",
-          paint: {
-            "fill-color": ["get", "color"],
-            "fill-opacity": PROJECT_FILL_OPACITY,
-          },
-        });
-        m.addLayer({
-          id: "law-halo",
-          minzoom: CASE_OUTLINE_ZOOM,
-          type: "line",
-          source: "law-polygons",
-          paint: {
-            "line-color": "#ffffff",
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              CASE_OUTLINE_ZOOM,
-              3.5,
-              14,
-              6,
-            ],
-          },
-        });
-        m.addLayer({
-          id: "law-outline",
-          minzoom: CASE_OUTLINE_ZOOM,
-          type: "line",
-          source: "law-polygons",
-          paint: {
-            "line-color": ["get", "color"],
-            "line-width": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              CASE_OUTLINE_ZOOM,
-              1.5,
-              14,
-              3,
-            ],
-          },
-        });
-        m.addLayer({
-          id: "law-approximate",
-          minzoom: CASE_OUTLINE_ZOOM,
-          type: "line",
-          source: "law-polygons",
-          filter: ["==", ["get", "approximate"], true],
-          paint: {
-            "line-color": "#ffffff",
-            "line-width": 2,
-            "line-dasharray": [3, 2],
-          },
-        });
-        m.addSource("law-points", {
-          type: "geojson",
-          data: empty,
-          cluster: true,
-          clusterRadius: 45,
-          clusterMaxZoom: CASE_OUTLINE_ZOOM - 1,
-        });
-        m.addLayer({
-          id: "law-clusters",
-          minzoom: 9,
-          maxzoom: 24,
-          type: "circle",
-          source: "law-points",
-          filter: ["has", "point_count"],
-          paint: {
-            "circle-color": "#0f766e",
-            "circle-radius": 20,
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#fff",
-          },
-        });
-        m.addLayer({
-          id: "law-cluster-count",
-          minzoom: 9,
-          maxzoom: 24,
-          type: "symbol",
-          source: "law-points",
-          filter: ["has", "point_count"],
-          layout: {
-            "text-field": ["get", "point_count_abbreviated"],
-            "text-size": 12,
-            "text-font": ["Noto Sans Regular"],
-          },
-          paint: { "text-color": "#ffffff" },
-        });
-        m.addLayer({
-          id: "law-dots",
-          minzoom: 9,
-          maxzoom: 24,
-          type: "circle",
-          source: "law-points",
-          filter: ["!", ["has", "point_count"]],
-          paint: {
-            "circle-radius": 7,
-            "circle-color": ["get", "color"],
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#ffffff",
-          },
-        });
-        m.addSource("law-summaries", {
-          type: "geojson",
-          data: empty,
-          cluster: true,
-          clusterRadius: 38,
-          clusterMaxZoom: 8,
-          clusterProperties: {
-            count: ["+", ["get", "count"]],
-            upcoming: ["+", ["get", "upcoming"]],
-          },
-        });
-        m.addLayer({
-          id: "law-summary-dots",
-          maxzoom: 9,
-          type: "circle",
-          source: "law-summaries",
-          paint: {
-            "circle-radius": 25,
-            "circle-color": "#0f766e",
-            "circle-stroke-color": "#fff",
-            "circle-stroke-width": 2,
-          },
-        });
-        m.addLayer({
-          id: "law-summary-count",
-          maxzoom: 9,
-          type: "symbol",
-          source: "law-summaries",
-          layout: {
-            "text-field": ["to-string", ["get", "count"]],
-            "text-size": 13,
-            "text-font": ["Noto Sans Regular"],
-          },
-          paint: { "text-color": "#fff" },
-        });
-        setReady(true);
-        loadRef.current();
-      });
-      const hideTip = () => {
-        if (tooltip.current) tooltip.current.hidden = true;
-        m.getCanvas().style.cursor = "";
-      };
-      m.on("mousemove", (e) => {
-        if (!m.getSource("law-polygons") || e.originalEvent.buttons) {
-          hideTip();
-          return;
-        }
-        const hit = m.queryRenderedFeatures(e.point, {
-          layers: [
-            "law-fill",
-            "law-outline",
-            "law-dots",
-            "law-summary-dots",
-            "law-clusters",
-          ],
-        })[0];
-        if (!hit) {
-          hideTip();
-          return;
-        }
-        m.getCanvas().style.cursor = "pointer";
-        const c = features.current.get(String(hit.properties?.id)),
-          text = c
-            ? (c.popup?.headline ?? c.title) +
-              (c.nextHearing ? " · " + c.nextHearing.label : "")
-            : hit.layer.id === "law-summary-dots"
-              ? hit.properties?.name +
-                " · " +
-                hit.properties?.count +
-                " active · " +
-                hit.properties?.upcoming +
-                " upcoming hearings"
-              : "Click to zoom";
-        if (tooltip.current) {
-          if (lastTooltip.current !== text) {
-            tooltip.current.textContent = text;
-            lastTooltip.current = text;
-          }
-          tooltip.current.hidden = false;
-          tooltip.current.style.left =
-            Math.max(
-              8,
-              Math.min(e.point.x + 16, m.getContainer().clientWidth - 280),
-            ) + "px";
-          tooltip.current.style.top = Math.max(8, e.point.y - 48) + "px";
-        }
-      });
-      m.getCanvas().addEventListener("mouseleave", hideTip);
-      m.on("movestart", hideTip);
-      m.on("click", async (e) => {
-        if (!m.getLayer("law-dots")) return;
-        hideTip();
-        const hit = m.queryRenderedFeatures(e.point, {
-          layers: [
-            "law-dots",
-            "law-clusters",
-            "law-fill",
-            "law-outline",
-            "law-summary-dots",
-          ],
-        })[0];
-        if (hit) {
-          if (hit.layer.id === "law-clusters") {
-            const z = await (
-              m.getSource("law-points") as GeoJSONSource
-            ).getClusterExpansionZoom(Number(hit.properties?.cluster_id));
-            m.easeTo({
-              center: (
-                hit.geometry as unknown as { coordinates: [number, number] }
-              ).coordinates,
-              zoom: z,
-            });
+        m.on("mousemove", (e) => {
+          if (!m.getSource("law-polygons") || e.originalEvent.buttons) {
+            hideTip();
             return;
           }
-          if (hit.layer.id === "law-summary-dots") {
-            if (hit.properties?.cluster_id) {
+          const hit = m.queryRenderedFeatures(e.point, {
+            layers: [
+              "law-fill",
+              "law-outline",
+              "law-dots",
+              "law-summary-dots",
+              "law-clusters",
+            ],
+          })[0];
+          if (!hit) {
+            hideTip();
+            return;
+          }
+          m.getCanvas().style.cursor = "pointer";
+          const c = features.current.get(String(hit.properties?.id)),
+            text = c
+              ? (c.popup?.headline ?? c.title) +
+                (c.nextHearing ? " · " + c.nextHearing.label : "")
+              : hit.layer.id === "law-summary-dots"
+                ? hit.properties?.name +
+                  " · " +
+                  hit.properties?.count +
+                  " active · " +
+                  hit.properties?.upcoming +
+                  " upcoming hearings"
+                : "Click to zoom";
+          if (tooltip.current) {
+            if (lastTooltip.current !== text) {
+              tooltip.current.textContent = text;
+              lastTooltip.current = text;
+            }
+            tooltip.current.hidden = false;
+            tooltip.current.style.left =
+              Math.max(
+                8,
+                Math.min(e.point.x + 16, m.getContainer().clientWidth - 280),
+              ) + "px";
+            tooltip.current.style.top = Math.max(8, e.point.y - 48) + "px";
+          }
+        });
+        m.getCanvas().addEventListener("mouseleave", hideTip);
+        m.on("movestart", hideTip);
+        m.on("click", async (e) => {
+          if (!m.getLayer("law-dots")) return;
+          hideTip();
+          const hit = m.queryRenderedFeatures(e.point, {
+            layers: [
+              "law-dots",
+              "law-clusters",
+              "law-fill",
+              "law-outline",
+              "law-summary-dots",
+            ],
+          })[0];
+          if (hit) {
+            if (hit.layer.id === "law-clusters") {
               const z = await (
-                m.getSource("law-summaries") as GeoJSONSource
-              ).getClusterExpansionZoom(Number(hit.properties.cluster_id));
+                m.getSource("law-points") as GeoJSONSource
+              ).getClusterExpansionZoom(Number(hit.properties?.cluster_id));
               m.easeTo({
                 center: (
                   hit.geometry as unknown as { coordinates: [number, number] }
@@ -622,77 +633,93 @@ export default function MapHome() {
               });
               return;
             }
-            const bounds = JSON.parse(String(hit.properties?.bounds ?? "null"));
-            if (bounds)
-              m.fitBounds(bounds as Bounds, { padding: 65, maxZoom: 12 });
-            return;
+            if (hit.layer.id === "law-summary-dots") {
+              if (hit.properties?.cluster_id) {
+                const z = await (
+                  m.getSource("law-summaries") as GeoJSONSource
+                ).getClusterExpansionZoom(Number(hit.properties.cluster_id));
+                m.easeTo({
+                  center: (
+                    hit.geometry as unknown as { coordinates: [number, number] }
+                  ).coordinates,
+                  zoom: z,
+                });
+                return;
+              }
+              const bounds = JSON.parse(
+                String(hit.properties?.bounds ?? "null"),
+              );
+              if (bounds)
+                m.fitBounds(bounds as Bounds, { padding: 65, maxZoom: 12 });
+              return;
+            }
+            const c = features.current.get(String(hit.properties?.id));
+            if (c) {
+              openRef.current(c);
+              return;
+            }
           }
-          const c = features.current.get(String(hit.properties?.id));
-          if (c) {
-            openRef.current(c);
-            return;
+          if (flumRef.current) {
+            const f = m.queryRenderedFeatures(e.point, {
+              layers: ["law-flum"],
+            })[0];
+            if (f) {
+              setMessage(
+                String(f.properties?.jurisdiction) +
+                  " · " +
+                  String(f.properties?.category),
+              );
+              return;
+            }
           }
-        }
-        if (flumRef.current) {
-          const f = m.queryRenderedFeatures(e.point, {
-            layers: ["law-flum"],
-          })[0];
-          if (f) {
-            setMessage(
-              String(f.properties?.jurisdiction) +
-                " · " +
-                String(f.properties?.category),
-            );
-            return;
-          }
-        }
-        const response = await fetch("/api/map/coverage", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            coordinates: [e.lngLat.lng, e.lngLat.lat],
-            radius: 0.01,
-          }),
-        });
-        const covered = await response.json();
-        if (!covered.areas?.length) {
-          setCoverage([]);
-          setPlace({
-            label: "Selected map location",
-            coordinates: [e.lngLat.lng, e.lngLat.lat],
-            radius: 1,
+          const response = await fetch("/api/map/coverage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              coordinates: [e.lngLat.lng, e.lngLat.lat],
+              radius: 0.01,
+            }),
           });
-          setDialog("coverage");
-        }
-      });
-      m.on("moveend", () => {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-          try {
-            localStorage.setItem(
-              VIEW_KEY,
-              JSON.stringify({
-                center: m.getCenter().toArray(),
-                zoom: m.getZoom(),
-              }),
-            );
-          } catch {}
-          loadRef.current();
-        }, 300);
-      });
-      fetch("/api/map/meta")
-        .then((r) => r.json())
-        .then((data) => {
-          setAreas(data.areas ?? []);
-          revision.current = data.revision ?? "initial";
-          cache.current.clear();
-          loadRef.current();
-        })
-        .catch(() => {
-          revision.current = "unavailable";
-          loadRef.current();
+          const covered = await response.json();
+          if (!covered.areas?.length) {
+            setCoverage([]);
+            setPlace({
+              label: "Selected map location",
+              coordinates: [e.lngLat.lng, e.lngLat.lat],
+              radius: 1,
+            });
+            setDialog("coverage");
+          }
         });
-    });
+        m.on("moveend", () => {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            try {
+              localStorage.setItem(
+                VIEW_KEY,
+                JSON.stringify({
+                  center: m.getCenter().toArray(),
+                  zoom: m.getZoom(),
+                }),
+              );
+            } catch {}
+            loadRef.current();
+          }, 300);
+        });
+        fetch("/api/map/meta")
+          .then((r) => r.json())
+          .then((data) => {
+            setAreas(data.areas ?? []);
+            revision.current = data.revision ?? "initial";
+            cache.current.clear();
+            loadRef.current();
+          })
+          .catch(() => {
+            revision.current = "unavailable";
+            loadRef.current();
+          });
+      },
+    );
     return () => {
       disposed = true;
       destroyed.current = true;
@@ -734,7 +761,6 @@ export default function MapHome() {
         cells = gridCells(bounds, z);
       setZoom(z);
       setLoading(true);
-      setFlumLoading(false);
       fetch(
         "/api/map/boundaries?" +
           new URLSearchParams({ bbox: bounds.join(",") }),
@@ -845,63 +871,11 @@ export default function MapHome() {
                 }))
               : [],
         });
-        if (flumRef.current && z >= 9) {
-          setFlumLoading(true);
-          // Case grid cells are deliberately broad. Land-use clipping needs a
-          // much tighter viewport so it does not process whole neighboring cities.
-          const planBounds = snapBounds(bounds, Math.min(18, z + 3)),
-            key = planBounds.join(",") + "@" + revision.current;
-          let layer = flumCache.current.get(key);
-          if (!layer) {
-            let pending = flumInflight.current.get(key);
-            if (!pending) {
-              pending = fetch(
-                "/api/maps/nearby?" +
-                  new URLSearchParams({
-                    bbox: planBounds.join(","),
-                    layer: "flum",
-                  }),
-              )
-                .then(async (r) => {
-                  if (!r.ok)
-                    throw Error(
-                      "Future land use is temporarily unavailable. Try again.",
-                    );
-                  const result = (await r.json()) as FlumCache;
-                  flumCache.current.set(key, result);
-                  if (flumCache.current.size > 24)
-                    flumCache.current.delete(
-                      flumCache.current.keys().next().value!,
-                    );
-                  return result;
-                })
-                .finally(() => flumInflight.current.delete(key));
-              flumInflight.current.set(key, pending);
-            }
-            layer = await pending;
-          }
-          if (layer && current === generation.current) {
-            setFlum(layer);
-            (m.getSource("law-flum") as GeoJSONSource).setData({
-              ...layer.geojson,
-              features: layer.geojson.features.map((f) => ({
-                ...f,
-                properties: {
-                  ...f.properties,
-                  color:
-                    layer!.legend.find((l) => l.value === f.properties?.group)
-                      ?.color ?? "#a1a1aa",
-                },
-              })),
-            });
-          }
-        }
       } catch (e) {
         if (current === generation.current) setMessage((e as Error).message);
       } finally {
         if (current === generation.current) {
           setLoading(false);
-          setFlumLoading(false);
         }
       }
     };
@@ -912,7 +886,7 @@ export default function MapHome() {
     m.setLayoutProperty(
       "law-flum",
       "visibility",
-      flumOn && zoom >= 9 ? "visible" : "none",
+      flumOn && zoom >= FLUM_TILES.minZoom ? "visible" : "none",
     );
     m.setPaintProperty(
       "law-fill",
@@ -1135,7 +1109,7 @@ export default function MapHome() {
             {flumOn && (
               <>
                 <strong>Future land use</strong>
-                {flum?.legend.map((l) => (
+                {FLUM_TILES.legend.map((l) => (
                   <p key={l.value}>
                     <span style={{ background: l.color }} />
                     {l.label}
@@ -1165,7 +1139,7 @@ export default function MapHome() {
             </label>
             {flumOn && (
               <small>
-                {zoom < 9
+                {zoom < FLUM_TILES.minZoom
                   ? "Zoom in to see land-use plans."
                   : "Published plan coverage; county plan elsewhere."}
               </small>
@@ -1281,7 +1255,7 @@ export default function MapHome() {
             ))}
           </details>
         )}
-        {loading && (
+        {(loading || (flumOn && flumLoading)) && (
           <p className="law-map-loading" role="status">
             {flumLoading ? "Loading future land use…" : "Loading projects…"}
           </p>

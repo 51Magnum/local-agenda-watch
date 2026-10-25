@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "hash": "d2258ab25c0de462",
+  "url": "/flum/flum-d2258ab25c0de462.pmtiles",
+  "sourceLayer": "flum",
+  "bounds": [
+    -117.031575,
+    43.293428,
+    -116.214185,
+    43.877706
+  ],
+  "minZoom": 5,
+  "maxZoom": 14,
+  "updatedAt": "2026-10-23T11:16:20.417Z",
+  "sourceDates": {
+    "nampa": "2026-10-23T11:16:20.417Z",
+    "meridian": "2026-10-24T00:22:51.756Z",
+    "canyon-county": "2026-10-24T00:04:50.423Z",
+    "kuna": "2026-10-24T01:15:58.380Z",
+    "eagle": "2026-10-24T01:15:53.485Z"
+  },
+  "features": 11300,
+  "tiles": 883,
+  "maxTileBytes": 97252,
+  "legend": [
+    {
+      "value": "Residential low",
+      "label": "Residential low",
+      "color": "#fde68a"
+    },
+    {
+      "value": "Residential med",
+      "label": "Residential med",
+      "color": "#fb923c"
+    },
+    {
+      "value": "Residential high",
+      "label": "Residential high",
+      "color": "#ef4444"
+    },
+    {
+      "value": "Commercial",
+      "label": "Commercial",
+      "color": "#ec4899"
+    },
+    {
+      "value": "Industrial",
+      "label": "Industrial",
+      "color": "#a78bfa"
+    },
+    {
+      "value": "Ag/Rural",
+      "label": "Ag/Rural",
+      "color": "#bef264"
+    },
+    {
+      "value": "Mixed use",
+      "label": "Mixed use",
+      "color": "#38bdf8"
+    },
+    {
+      "value": "Public/Open",
+      "label": "Public/Open",
+      "color": "#34d399"
+    },
+    {
+      "value": "Residential (density unspecified)",
+      "label": "Residential (density unspecified)",
+      "color": "#fcd34d"
+    },
+    {
+      "value": "Other / unspecified",
+      "label": "Other / unspecified",
+      "color": "#a1a1aa"
+    }
+  ]
+}

@@ -52,6 +52,17 @@ export async function saveMapSnapshot(snapshot: MapSnapshot) {
 
 async function loadFlum(id:string):Promise<FlumCache|undefined>{const db=database();await initialized;return trackedRows("flum",(await db.query("SELECT snapshot FROM law_flum_cache WHERE jurisdiction=$1",[id])).rows)[0]?.snapshot;}
 const cachedFlum=unstable_cache(loadFlum,["flum-storage-v2"],{revalidate:604800,tags:["map-flum"]});
+/** Bounded, authenticated offline export; public map views never call this. */
+export async function exportFlumPage(id:string,offset:number){
+ if(!process.env.DATABASE_URL){const data=await readFlumSnapshot(id);const features=data?.geojson.features.slice(offset,offset+250)??[];return{updatedAt:data?.updatedAt,legend:data?.legend??[],features,nextOffset:data&&offset+features.length<data.geojson.features.length?offset+features.length:undefined};}
+ const db=database();await initialized;
+ const result=await db.query(`SELECT snapshot->>'updatedAt' AS "updatedAt",snapshot->'legend' AS legend,jsonb_array_length(snapshot->'geojson'->'features') AS total,
+ coalesce((SELECT jsonb_agg(f ORDER BY n) FROM jsonb_array_elements(snapshot->'geojson'->'features') WITH ORDINALITY AS items(f,n) WHERE n>$2 AND n<=$2+250),'[]'::jsonb) AS features
+ FROM law_flum_cache WHERE jurisdiction=$1`,[id,offset]);
+ const row=trackedRows("flum-export",result.rows)[0];
+ if(!row)return{features:[],legend:[]};
+ return{updatedAt:row.updatedAt,legend:row.legend,features:row.features,nextOffset:offset+row.features.length<row.total?offset+row.features.length:undefined};
+}
 export async function readFlumSnapshot(id:string,options?:{bounds:readonly number[]}){
  if(!process.env.DATABASE_URL)return(await readMapSnapshot(id))?.flum;
  if(options?.bounds){

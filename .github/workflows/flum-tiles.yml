@@ -1,0 +1,43 @@
+name: Prepare land-use tiles
+on:
+  schedule:
+    # Weekly, after the morning source refresh. User views never run geometry jobs.
+    - cron: '30 15 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: prepared-flum-tiles
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: npm ci --ignore-scripts
+      - run: python -m pip install -r scripts/flum-requirements.txt
+      - run: python -m unittest discover -s scripts -p test_flum_geometry.py
+      - name: Prepare complete replacement from published planning snapshots
+        env:
+          FLUM_EXPORT_URL: https://www.localagendawatch.com/api/cron/flum-export
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$CRON_SECRET" || { echo 'Configure the existing cron secret before running this export.'; exit 1; }
+          npx tsx scripts/prepare-flum-tiles.ts
+      - name: Publish prepared static assets through the normal deployment
+        run: |
+          git add public/flum
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Refresh prepared public land-use tiles'
+          git push origin HEAD:main
