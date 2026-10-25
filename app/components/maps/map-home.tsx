@@ -27,6 +27,7 @@ import {
 
 import type { PaneData } from "@/lib/maps/project-questions";
 import ThemeSelector from "../theme-selector";
+import ProjectFinder from "./project-finder";
 const InterestForm = dynamic(() => import("../locations/interest-form"));
 const ProjectPane = dynamic(() => import("./project-pane"));
 import MapImageViewer from "./map-image-viewer";
@@ -1156,34 +1157,16 @@ export default function MapHome() {
         )}
         {menu && (
           <nav className="law-map-menu" aria-label="Site menu">
-            <label>
-              Find a project
-              <select
-                aria-label="Find a project"
-                defaultValue=""
-                onChange={(e) => {
-                  const c = cases.find((c) => c.id === e.target.value);
-                  if (c) {
-                    openRef.current(c);
-                    setMenu(false);
-                  }
-                }}
-              >
-                <option value="">Choose a visible project</option>
-                {cases.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <h2>Areas we cover</h2>
-            {areas.map((a) => (
-              <Link key={a.id} href={a.href}>
-                {a.name}, {a.stateAbbreviation}
-              </Link>
-            ))}
-            <Link href="/us">Browse by state</Link>
+            <ProjectFinder onSelect={(project) => {
+              const key = project.areaId + "/" + project.caseId;
+              if (key !== selectedRef.current) {
+                const url = new URL(window.location.href);
+                url.searchParams.set("project", key);
+                window.history.pushState({ ...window.history.state, lawPane: true }, "", url);
+                setSelected(key);
+              }
+              setMenu(false);
+            }} />
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
             <Link href="/privacy">Privacy</Link>
@@ -1274,8 +1257,6 @@ export default function MapHome() {
         )}
         <footer className="law-map-footer">
           <span>Independent summary; official records control.</span>
-          <Link href="/us">Areas we cover</Link>
-          <Link href="/privacy">Privacy</Link>
           <button
             onClick={() => {
               setDialog("coverage");

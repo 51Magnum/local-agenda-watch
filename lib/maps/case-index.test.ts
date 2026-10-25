@@ -25,7 +25,7 @@ vi.mock("next/cache", () => ({
 vi.mock("@/lib/timeline/public", () => ({
   readTimelineState: async () => ({ version: 1, documents: {}, fields: {} }),
 }));
-import { cachedViewport, exportMapFeatures, siteMembers } from "./case-index";
+import { cachedViewport, exportMapFeatures, siteMembers, projectDirectory } from "./case-index";
 it("indexes old snapshots once, deduplicates across areas, returns only lightweight features and performs no SQL on repeated cached views", async () => {
   const db = new PGlite();
   h.db = db;
@@ -107,6 +107,13 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     const overview = await cachedViewport([-180, -85, 180, 85], 8);
     expect(overview.cases).toEqual([]);
     expect(overview.summaries.find((s) => s.id === "nampa")?.count).toBe(1);
+    const directory = await projectDirectory();
+    expect(directory).toHaveLength(2);
+    expect(directory[0].title).toBe("Example homes");
+    expect(JSON.stringify(directory)).not.toMatch(/geometry|Narrative must not travel|visual|coordinates/);
+    const directoryCalls = h.calls;
+    await projectDirectory();
+    expect(h.calls).toBe(directoryCalls);
   } finally {
     vi.unstubAllEnvs();
     await db.close();

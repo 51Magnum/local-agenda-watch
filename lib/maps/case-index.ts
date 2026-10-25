@@ -15,6 +15,17 @@ import {
   type ViewportData,
 } from "./viewport";
 export const MAP_INDEX_TAG = "map-case-index-v1";
+/** Compact, cached directory: never read polygon, image or document payloads for search. */
+export const projectDirectory = unstable_cache(async () => {
+  const areas = Object.values(AREAS).filter((a) => a.status === "live");
+  if (!process.env.DATABASE_URL) return [];
+  const db = await database();
+  const result = await db.query(
+    `SELECT area_id AS "areaId",case_id AS "caseId",data->>'title' AS title,data->>'typeLabel' AS "typeLabel",data->'caseIds' AS "caseIds" FROM law_map_cases WHERE area_id=ANY($1::text[]) ORDER BY area_id,case_id`,
+    [areas.map((a) => a.id)],
+  );
+  return result.rows.map((row) => ({ ...row, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
+}, ["project-search-directory-v1"], { revalidate: 3600, tags: [MAP_INDEX_TAG] });
 let pool: Pool, ready: Promise<void> | undefined;
 const schema = `CREATE TABLE IF NOT EXISTS law_map_cases(area_id text NOT NULL,case_id text NOT NULL,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,lng double precision,lat double precision,data jsonb NOT NULL,PRIMARY KEY(area_id,case_id));
 CREATE INDEX IF NOT EXISTS law_map_cases_centroid ON law_map_cases(lng,lat);
