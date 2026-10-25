@@ -134,33 +134,35 @@ export default function ProjectPane({
           </div>
         </section>
         <div className="law-pane-expanded">
-          {(data.where || savedPlace) && (
-            <section>
-              <h2>{RESIDENT_QUESTIONS[1]}</h2>
-              {data.where && <p>{data.where}</p>}
-              {savedPlace && (
-                <p>{savedPlace.distance.toFixed(1)} mi from your saved place</p>
-              )}
-            </section>
-          )}
-          {data.history.length > 0 && (
-            <details className="law-pane-section">
-              <summary>{RESIDENT_QUESTIONS[2]}</summary>
-              <ol className="law-pane-timeline">
-                {data.history.map((row, i) => (
-                  <li key={i}>
-                    {row.label}
-                    {row.source && (
-                      <a href={row.source} target="_blank" rel="noreferrer">
-                        {" "}
-                        Source
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </details>
-          )}
+          <section>
+            <h2>{RESIDENT_QUESTIONS[1]}</h2>
+            <p>
+              {data.where ||
+                "Location is not confirmed in the available records."}
+            </p>
+            {savedPlace && (
+              <p>{savedPlace.distance.toFixed(1)} mi from your saved place</p>
+            )}
+          </section>
+          <section className="law-pane-section">
+            <h2>{RESIDENT_QUESTIONS[2]}</h2>
+            {!data.history.length && (
+              <p>No completed steps are confirmed in the available records.</p>
+            )}
+            <ol className="law-pane-timeline">
+              {data.history.map((row, i) => (
+                <li key={i}>
+                  {row.label}
+                  {row.source && (
+                    <a href={row.source} target="_blank" rel="noreferrer">
+                      {" "}
+                      Source
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
           <section className="law-pane-next">
             <h2>{RESIDENT_QUESTIONS[3]}</h2>
             {data.next ? (
@@ -185,39 +187,45 @@ export default function ProjectPane({
               </p>
             )}
           </section>
-          {(data.impacts.length > 0 || data.conditions.length > 0) && (
-            <details className="law-pane-section">
-              <summary>{RESIDENT_QUESTIONS[4]}</summary>
-              {data.impacts.map((f) => (
-                <div key={f.label}>
-                  <h3>{f.label}</h3>
-                  <p>
-                    {f.value} {f.url && <a href={f.url}>Source</a>}
-                  </p>
-                </div>
-              ))}
-              {data.conditions.length > 0 && (
-                <>
-                  <h3>Conditions</h3>
-                  <ul>
-                    {data.conditions.slice(0, 5).map((c, i) => (
-                      <li key={i}>{c}</li>
-                    ))}
-                  </ul>
-                  {data.conditions.length > 5 && (
-                    <details>
-                      <summary>Show all conditions</summary>
-                      <ul>
-                        {data.conditions.slice(5).map((c, i) => (
-                          <li key={i}>{c}</li>
-                        ))}
-                      </ul>
-                    </details>
+          <section className="law-pane-section">
+            <h2>{RESIDENT_QUESTIONS[4]}</h2>
+            {!data.impacts.length && !data.conditions.length && (
+              <p>No verified impact details are available yet.</p>
+            )}
+            {data.impacts.map((f) => (
+              <div key={f.label}>
+                <h3>{f.label}</h3>
+                <p>
+                  {f.value}{" "}
+                  {f.url && (
+                    <a href={f.url} target="_blank" rel="noreferrer">
+                      Source
+                    </a>
                   )}
-                </>
-              )}
-            </details>
-          )}
+                </p>
+              </div>
+            ))}
+            {data.conditions.length > 0 && (
+              <>
+                <h3>Conditions</h3>
+                <ul>
+                  {data.conditions.slice(0, 5).map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+                {data.conditions.length > 5 && (
+                  <details>
+                    <summary>Show all conditions</summary>
+                    <ul>
+                      {data.conditions.slice(5).map((c, i) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </>
+            )}
+          </section>
           <section>
             <h2>{RESIDENT_QUESTIONS[5]}</h2>
             {data.next?.commentDeadline && (
@@ -232,7 +240,7 @@ export default function ProjectPane({
             <div className="law-pane-actions">
               {data.commentUrl && (
                 <a href={data.commentUrl} target="_blank" rel="noreferrer">
-                  How to comment ↗
+                  {data.commentLinkLabel ?? "How to comment"} ↗
                 </a>
               )}
               {data.calendarHref && (
@@ -303,28 +311,14 @@ export default function ProjectPane({
             >
               Report an error
             </a>
-            <details>
-              <summary>Case references</summary>
-              {data.relatedCases?.length ? (
-                <ul>
-                  {data.relatedCases.map((c) => (
-                    <li key={c.areaId + c.caseId}>
-                      {c.label} ·{" "}
-                      <a
-                        href={
-                          "/?project=" +
-                          encodeURIComponent(c.areaId + "/" + c.caseId)
-                        }
-                      >
-                        {c.caseId}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                data.caseIds.join(" · ")
-              )}
-            </details>
+            <p className="law-case-references">
+              Case numbers:{" "}
+              {data.relatedCases?.length
+                ? data.relatedCases
+                    .map((c) => c.label + " · " + c.caseId)
+                    .join("; ")
+                : data.caseIds.join(" · ")}
+            </p>
             {error && <p role="status">{error}</p>}
           </footer>
         </div>

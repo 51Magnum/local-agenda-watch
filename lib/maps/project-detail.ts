@@ -1,4 +1,4 @@
-import { officialProjectRecords } from "./project-records";
+import { officialProjectRecords, residentPaneHref } from "./project-records";
 import { unstable_cache } from "next/cache";
 import { getJurisdiction } from "./jurisdictions";
 import { readMapSnapshot } from "./store";
@@ -131,13 +131,23 @@ async function detail(
       url: overview.acres?.url,
     });
   const progress = item.popup?.progress ?? [];
+  const officialRecords = officialProjectRecords(
+    area,
+    caseCatalog(feed).filter((h) => ids.includes(h.appId)),
+    record,
+    [
+      ...(project?.sourceDocuments ?? []).map((d) => ({
+        caseIds: d.caseIds,
+        url: d.sourceUrl,
+      })),
+      ...(feed?.agendaMeetings ?? []).flatMap((m) =>
+        m.items.map((i) => ({ caseIds: i.caseIds, url: m.sourceUrl })),
+      ),
+    ],
+  );
   return {
     item,
-    officialRecords: officialProjectRecords(
-      area,
-      caseCatalog(feed).filter((h) => ids.includes(h.appId)),
-      record,
-    ),
+    officialRecords,
     relatedCases: item.members?.map((m) => ({
       ...m,
       label: AREAS[m.areaId]?.name ?? m.areaId,
@@ -157,7 +167,10 @@ async function detail(
       ...progress
         .filter((p) => p.state === "done" || p.state === "past")
         .map((p) => ({ label: p.label })),
-      ...evidence.history,
+      ...evidence.history.map((row) => ({
+        ...row,
+        source: residentPaneHref(area, row.source),
+      })),
     ],
     next:
       next && !["Decided", "Recorded"].includes(item.stage)
@@ -169,9 +182,12 @@ async function detail(
                 : "Recommendation or hearing; check the official notice for authority",
           }
         : undefined,
-    impacts,
+    impacts: impacts.map((f) => ({ ...f, url: residentPaneHref(area, f.url) })),
     conditions: evidence.conditions,
-    commentUrl: area.commentInstructionsUrl,
+    commentUrl: area.residentAccess?.commentUrl ?? area.commentInstructionsUrl,
+    commentLinkLabel: area.residentAccess?.commentUrl
+      ? "Open meeting portal"
+      : "How to comment",
     commentInstructions: area.meetingRules.commentInstructions,
     calendarHref:
       next && next.startsAt.length > 10
@@ -186,6 +202,6 @@ async function detail(
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v2"],
+  ["map-project-questions-v3"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );

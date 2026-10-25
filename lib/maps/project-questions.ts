@@ -32,6 +32,7 @@ export type PaneData = {
   impacts: { label: string; value: string; url?: string }[];
   conditions: string[];
   commentUrl?: string;
+  commentLinkLabel?: string;
   commentInstructions?: string;
   calendarHref?: string;
   updatedAt: string;
