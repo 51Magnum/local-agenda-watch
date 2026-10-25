@@ -29,9 +29,11 @@ export function graphicsScore(text:string,ops:{fnArray:ArrayLike<number>;argsArr
  return Math.max(0,Math.min(largest,1)*300+Math.min(total,1)*80+Math.min(Math.log2(paths+1)*12,160)-text.length/50);
 }
 
-export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:{deadline:number;analyzeOnly?:boolean;sourceDate?:string;caseId?:string;packet?:boolean;progress?:DocumentScan;checkpoint?:(scan:DocumentScan)=>Promise<void>;candidate?:(result:ScanResult)=>Promise<void>}):Promise<{complete:boolean;progress:DocumentScan;best?:ScanResult}>{
+export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:{deadline:number;analyzeOnly?:boolean;sourceDate?:string;caseId?:string;packetCaseIds?:string[];packet?:boolean;progress?:DocumentScan;checkpoint?:(scan:DocumentScan)=>Promise<void>;candidate?:(result:ScanResult)=>Promise<void>}):Promise<{complete:boolean;progress:DocumentScan;best?:ScanResult}>{
  const hash=createHash("sha256").update(bytes).digest("hex");
  const progress=options.progress?.hash===hash&&options.progress.version==="graphics-area-v3"?options.progress:{version:"graphics-area-v3",hash,nextPage:1,candidates:[],classified:[],complete:false};
+ const names=[...new Set([...(options.packetCaseIds??[]),...(options.caseId?[options.caseId]:[])])].sort((a,b)=>b.length-a.length);
+ const casePattern=options.packetCaseIds?.length?new RegExp("\\b(?:"+names.map(s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")\\b","gi"):undefined;
  const save=async()=>options.checkpoint?.(progress);
  if(forbiddenImageDocument.test(title)){progress.complete=true;await save();return {complete:true,progress};}
  let best:ScanResult|undefined;
@@ -48,7 +50,7 @@ export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:
    const p=await pdf.getPage(page),parts=(await p.getTextContent()).items.map(i=>"str" in i?i.str:"").filter(Boolean),text=parts.join(" ");
    // Packets are containers for unrelated cases: only a case's own contiguous section is eligible.
    let eligible=true;
-   if(options.packet&&options.caseId){const ids=[...new Set(text.match(/\b(?:[A-Z]{2,6}-\d{5}-\d{4}|(?:H|SHP|ZOA|CPAM|PUD|FP|PP|AZ|CUP)-\d{4}-\d{4}|[A-Z]{2,4}\d{4}-\d{2,5}(?:-(?:APL|MOD))?)\b/g)??[])];if(ids.includes(options.caseId)&&ids.length<=5){progress.inCase=true;progress.matched=true;}else if(ids.length&& !ids.includes(options.caseId))progress.inCase=false;eligible=progress.inCase===true;}
+   if(options.packet&&options.caseId){const ids=[...new Set((text.match(casePattern??/\b(?:[A-Z]{2,6}-\d{5}-\d{4}|(?:H|SHP|ZOA|CPAM|PUD|FP|PP|AZ|CUP)-\d{4}-\d{4}|[A-Z]{2,4}\d{4}-\d{2,5}(?:-(?:APL|MOD))?)\b/g)??[]).map(id=>id.toUpperCase()))];if(ids.includes(options.caseId.toUpperCase())&&ids.length<=5){progress.inCase=true;progress.matched=true;}else if(ids.length&& !ids.includes(options.caseId.toUpperCase()))progress.inCase=false;eligible=progress.inCase===true;}
    const caption=pageCaption(parts),previous=progress.previousCaption;
    const exhibit=parts.find(s=>/^Exhibit\s+(?:[A-Z]\.)?\d+(?:\.\d+)*$/i.test(s.trim()))?.trim();
    if(caption&&visualPriority(caption)<5){progress.exhibitCaption=caption;progress.lastExhibit=exhibit;progress.captionPage=page;}

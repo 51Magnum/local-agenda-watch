@@ -28,3 +28,8 @@ it("does not mark a timed-out scan complete",async()=>{
 it("uses a drawing's explicit date before the containing report's date",()=>{
  expect(pageSourceDate(["Site Plan","July 6, 2026"])).toBe("2026-07-06");expect(pageSourceDate(["Date: 09/29/2026"])).toBe("2026-09-29");expect(pageSourceDate(["Hearing may be held next month"])).toBeUndefined();
 });
+
+it("isolates packet sections using the area's case IDs rather than one city's numbering scheme",async()=>{
+ const {OPS}=await import("pdfjs-dist/legacy/build/pdf.mjs");vi.mocked(getDocumentProxy).mockResolvedValue({numPages:4,getPage:async(n:number)=>({getTextContent:async()=>({items:n===1?[{str:"26-04-PP"}]:n===3?[{str:"26-05-PP"}]:[{str:"Site plan"}]}),getOperatorList:async()=>({fnArray:[OPS.transform,OPS.paintImageXObject],argsArray:[[612,0,0,792,0,0],["img",2200,3300]]}),cleanup:()=>{}}),destroy:async()=>{}} as never);
+ const result=await scanDocumentVisuals(new TextEncoder().encode("%PDF-1.7"),"Meeting packet",{deadline:Date.now()+60000,analyzeOnly:true,packet:true,caseId:"26-04-PP",packetCaseIds:["26-04-PP","26-05-PP"]});expect(result.progress.candidates.map(c=>c.page)).toContain(2);expect(result.progress.candidates.map(c=>c.page)).not.toContain(4);
+});
