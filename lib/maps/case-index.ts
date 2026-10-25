@@ -205,8 +205,8 @@ async function loadViewport(
     if (zoom >= 9)
       rows = (
         await db.query(
-          `SELECT data->>'areaId' AS area_id,CASE WHEN $5::int<14 THEN data-'visual'-'geometry' ELSE data-'visual' END AS data FROM law_map_sites WHERE data->>'areaId'=ANY($6::text[]) AND min_lng<=$3 AND max_lng>=$1 AND min_lat<=$4 AND max_lat>=$2 AND $5::int>=9 AND NOT coalesce((data->>'citywide')::boolean,false) ORDER BY site_id LIMIT 1001`,
-          [...b, zoom, areas.map((a) => a.id)],
+          `SELECT data->>'areaId' AS area_id,CASE WHEN $5::int<$7::int THEN data-'visual'-'geometry' ELSE data-'visual' END AS data FROM law_map_sites WHERE data->>'areaId'=ANY($6::text[]) AND min_lng<=$3 AND max_lng>=$1 AND min_lat<=$4 AND max_lat>=$2 AND $5::int>=9 AND NOT coalesce((data->>'citywide')::boolean,false) ORDER BY site_id LIMIT 1001`,
+          [...b, zoom, areas.map((a) => a.id), CASE_OUTLINE_ZOOM],
         )
       ).rows;
   } else if (zoom >= 9)
@@ -238,7 +238,7 @@ async function loadViewport(
     bounds: b,
   };
 }
-export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v6-sites"],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
+export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v7-outlines11"],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";
