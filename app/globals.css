@@ -74,7 +74,7 @@ input[type="checkbox"]:disabled { opacity: .45; cursor: default; }
 .law-coverage-popup .maplibregl-popup-content{color:#171717;font-size:12px;line-height:1.5;border-radius:8px;padding:8px 12px}
 
 .law-proposal-headline{font-size:1.15rem;font-weight:700;line-height:1.4}
-.law-resident-pane.law-project-page{height:auto;position:relative;inset:auto;width:100%;max-width:none;max-height:none;margin-top:1.5rem;transform:none;border:0;box-shadow:none;border-radius:0;overflow:visible}
+.law-resident-pane.law-project-page{color:#171717;height:auto;position:relative;inset:auto;width:100%;max-width:none;max-height:none;margin-top:1.5rem;transform:none;border:0;box-shadow:none;border-radius:0;overflow:visible}
 .law-project-page .law-pane-content{max-height:none;overflow:visible;padding:0}
 .law-project-page .law-pane-expanded{display:block}
 .law-project-page .law-sheet-handle,.law-project-page .law-pane-close{display:none}
