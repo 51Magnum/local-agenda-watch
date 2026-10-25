@@ -178,6 +178,10 @@ export default function MapHome() {
       m.easeTo({ padding: 0, duration: 200 });
       return;
     }
+    // Selection changes before its details arrive. Never position the camera
+    // using the previous project's pane, or finish its in-flight animation.
+    m.stop();
+    if (!pane || selected !== pane.area.id + "/" + pane.item.id) return;
     const center = pane?.item.centroid;
     if (center) {
       const mobile = window.innerWidth < 700;
