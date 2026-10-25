@@ -1,0 +1,4 @@
+output/
+.data/
+.env*
+!.env.example
