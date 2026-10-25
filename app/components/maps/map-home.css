@@ -31,3 +31,7 @@ body:has(.law-map-home)>header,body:has(.law-map-home)>footer{display:none}
   .law-explorer-stage>.law-map-legend,.law-layer-panel{top:112px;left:10px;right:auto;width:min(290px,calc(100% - 64px));min-width:0;max-height:calc(100% - 160px);overflow:auto;overscroll-behavior:contain}
   .law-layer-panel label{align-items:center;min-height:36px}
 }
+
+/* Keep participation links comfortably clickable beside their neighbors. */
+.law-pane-actions>a{display:inline-flex;align-items:center;min-height:32px;padding:4px 0}
+

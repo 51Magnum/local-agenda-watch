@@ -4,6 +4,7 @@ import {projectJsonLd} from "@/lib/project-seo-jsonld";
 import {useState} from "react";
 import type {PaneData} from "@/lib/maps/project-questions";
 import ProjectPane from "./project-pane";
+import "./map-home.css";
 import type {MapVisual} from "@/lib/maps/types";
 export default function ProjectPage({data}:{data:PaneData}){
  const [image,setImage]=useState<MapVisual>();
