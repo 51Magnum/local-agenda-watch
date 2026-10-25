@@ -28,8 +28,8 @@ export function sameSite(a:MapCase,b:MapCase){
 }
 /** Pick one case consistently for title, color, link, next step and stage. */
 export function compareSiteLead(a:MapCase,b:MapCase,now=new Date()){
- const today=now.toISOString().slice(0,10);
- const rank=(c:MapCase)=>/withdrawn|cancelled|canceled/i.test(c.recordStatus??c.statusNote??"")?3:c.nextHearing&&c.nextHearing.date>=today&&!["Decided","Recorded"].includes(c.stage)?0:["Decided","Recorded"].includes(c.stage)?2:1;
+ const today=(c:MapCase)=>new Intl.DateTimeFormat("en-CA",{timeZone:c.timezone??"America/Denver"}).format(now);
+ const rank=(c:MapCase)=>/withdrawn|cancelled|canceled/i.test(c.recordStatus??c.statusNote??"")?3:c.nextHearing&&c.nextHearing.date>=today(c)&&!["Decided","Recorded"].includes(c.stage)?0:["Decided","Recorded"].includes(c.stage)?2:1;
  const ar=rank(a),br=rank(b);if(ar!==br)return ar-br;
  if(ar===0)return a.nextHearing!.date.localeCompare(b.nextHearing!.date);
  const date=(c:MapCase)=>c.decisionDate??c.caseDate??(c.id.match(/20\d{2}/)?.[0]??"");
@@ -40,7 +40,7 @@ export function combineRadiusCases(input:{area:AreaDefinition;cases:MapCase[]}[]
  const groups:MapCase[]=[];
  for(const {area:a,cases}of [...input].sort((a,b)=>Number(a.area.type==="county")-Number(b.area.type==="county")))for(const c of nearbyCases(cases,coordinates,miles)){
   const body=c.stageBody??c.nextHearing?.body??stageBody(c.stage,a),member={areaId:a.id,caseId:c.id,title:c.title,href:canonicalAreaHref(a.id,c.href),stage:c.stage,body,date:c.nextHearing?.date??c.decisionDate??c.caseDate,status:c.recordStatus};
-  const candidate={...c,id:a.id+":"+c.id,areaId:a.id,jurisdictionLabel:jurisdictionLabel(a),stageBody:body,caseIds:[c.id],members:[member],href:member.href};
+  const candidate={...c,timezone:a.timezone,id:a.id+":"+c.id,areaId:a.id,jurisdictionLabel:jurisdictionLabel(a),stageBody:body,caseIds:[c.id],members:[member],href:member.href};
   const existing=groups.find(g=>sameSite(g,candidate));
   if(!existing){groups.push(candidate);continue;}
   let geometry=existing.geometry;

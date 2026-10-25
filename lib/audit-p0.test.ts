@@ -47,3 +47,9 @@ it("turns a continued-from note on a future County hearing into a sourced timeli
  const rows=continuanceHistory([{date:"2026-12-15",note:"Continued from October 8, 2026",sourceUrl:"https://county.example/hearing"}],"2026-12-15");
  expect(rows).toEqual([{label:"Continued from Oct 8 to Dec 15",source:"https://county.example/hearing"}]);
 });
+
+it("keeps a same-day Denver hearing active after UTC midnight",()=>{
+ const hearing=item("HEARING",{stage:"Council/Board",nextHearing:{date:"2026-10-25",body:"City Council",label:"Tonight"}});
+ const newer=item("NEWER",{caseDate:"2026-10-26"});
+ expect(combineRadiusCases([{area:AREAS.meridian,cases:[newer,hearing]}],[-116.5,43.5],1,new Date("2026-10-26T01:00:00Z"))[0].title).toBe("HEARING");
+});
