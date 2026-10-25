@@ -48,7 +48,7 @@ export async function scanDocumentVisuals(bytes:Uint8Array,title:string,options:
    const p=await pdf.getPage(page),parts=(await p.getTextContent()).items.map(i=>"str" in i?i.str:"").filter(Boolean),text=parts.join(" ");
    // Packets are containers for unrelated cases: only a case's own contiguous section is eligible.
    let eligible=true;
-   if(options.packet&&options.caseId){const ids=[...new Set(text.match(/\b(?:H|SHP|ZOA|CPAM|PUD|FP|PP|AZ|CUP)-\d{4}-\d{4}\b/g)??[])];if(ids.includes(options.caseId)&&ids.length<=2){progress.inCase=true;progress.matched=true;}else if(ids.length&& !ids.includes(options.caseId))progress.inCase=false;eligible=progress.inCase===true;}
+   if(options.packet&&options.caseId){const ids=[...new Set(text.match(/\b(?:[A-Z]{2,6}-\d{5}-\d{4}|(?:H|SHP|ZOA|CPAM|PUD|FP|PP|AZ|CUP)-\d{4}-\d{4}|[A-Z]{2,4}\d{4}-\d{2,5}(?:-(?:APL|MOD))?)\b/g)??[])];if(ids.includes(options.caseId)&&ids.length<=5){progress.inCase=true;progress.matched=true;}else if(ids.length&& !ids.includes(options.caseId))progress.inCase=false;eligible=progress.inCase===true;}
    const caption=pageCaption(parts),previous=progress.previousCaption;
    const exhibit=parts.find(s=>/^Exhibit\s+(?:[A-Z]\.)?\d+(?:\.\d+)*$/i.test(s.trim()))?.trim();
    if(caption&&visualPriority(caption)<5){progress.exhibitCaption=caption;progress.lastExhibit=exhibit;progress.captionPage=page;}

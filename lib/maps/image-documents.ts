@@ -14,7 +14,7 @@ import type {ImageDocument,ImageJob} from "./image-job-store";
 export type ImageDocumentContext={hearing:Hearing;feed?:HearingFeed;job:ImageJob;deadline:number;checkpoint:()=>Promise<void>};
 export async function loadCaseDocuments(areaId:string,caseId:string,ctx:ImageDocumentContext){
  const config=getJurisdiction(areaId)!,area=AREAS[areaId],documents:ImageDocument[]=[...ctx.job.documents];let complete=true;
- const add=(d:ImageDocument)=>{if(areaId==="meridian"&&/packet/i.test(d.title+" "+d.url))d={...d,packet:true};try{const u=new URL(d.url),direct=u.searchParams.get("u");if(u.hostname==="meetings.municode.com"&&direct&&allowedSource(direct,areaId))d={...d,url:direct};}catch{}if(!forbiddenImageDocument.test(d.title)&&allowedSource(d.url,areaId)&&!documents.some(v=>v.url===d.url))documents.push(d);};
+ const add=(d:ImageDocument)=>{if(/packet/i.test(d.title+" "+d.url))d={...d,packet:true};try{const u=new URL(d.url),direct=u.searchParams.get("u");if(u.hostname==="meetings.municode.com"&&direct&&allowedSource(direct,areaId))d={...d,url:direct};}catch{}if(!forbiddenImageDocument.test(d.title)&&allowedSource(d.url,areaId)){const i=documents.findIndex(v=>v.url===d.url);if(i<0)documents.push(d);else documents[i]={...documents[i],...d};}};
  for(const d of recordDocuments(area,ctx.hearing).filter(d=>d.content===undefined))add({title:d.title,url:d.url,packet:areaId==="meridian"&&/packet/i.test(d.title),date:ctx.hearing.meetings.find(m=>m.packetUrl===d.url)?.date});
  const evidence=CASE_EVIDENCE[caseId];if(areaId==="nampa"&&evidence?.reportUrl)add({url:evidence.reportUrl,title:evidence.documentNames[0]});
  for(const d of getProjectForCase(caseId,areaId)?.sourceDocuments??[])if(d.caseIds.includes(caseId))add({url:d.url,title:d.label});
@@ -38,5 +38,5 @@ export async function loadCaseDocuments(areaId:string,caseId:string,ctx:ImageDoc
    if(cursor<meetings.length)complete=false;else ctx.job.discoveryCursor=0;
   }catch(e){complete=false;ctx.job.errors.push("PrimeGov: "+(e instanceof Error?e.message:"blocked"));}
  }
- return {documents,complete};
+ return {documents:documents.filter(d=>!forbiddenImageDocument.test(d.title)&&(allowedImageTitle(d.title)||/staff[ _-]*report|hearing[ _-]*materials|packet/i.test(d.title))),complete};
 }
