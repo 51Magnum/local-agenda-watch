@@ -88,3 +88,12 @@ export function questionEvidence(
     history,
   };
 }
+
+/** Compact source outcomes never carry unchecked tallies; approved votes have their own sourced history rows. */
+export function progressOutcome(label: string) {
+  return label
+    .replace(/\b(?:vote[ds]?\s*)?\d+\s*[-–]\s*\d+(?:\s*[-–]\s*\d+)?\b/gi, "")
+    .replace(/\bunanimous(?:ly)?\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}

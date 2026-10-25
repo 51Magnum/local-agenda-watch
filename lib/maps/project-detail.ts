@@ -18,7 +18,11 @@ import {
 } from "@/lib/project-overview";
 import { landUseFact } from "@/lib/areas/land-use";
 import { canonicalAreaHref } from "@/lib/areas/registry";
-import { questionEvidence, type PaneData } from "./project-questions";
+import {
+  questionEvidence,
+  progressOutcome,
+  type PaneData,
+} from "./project-questions";
 import { MAP_INDEX_TAG } from "./case-index";
 
 async function detail(
@@ -48,6 +52,14 @@ async function detail(
         ? await config.recordForCase?.(hearing)
         : undefined,
     fields = publicFields(state, ids, areaId);
+  if (item.popup)
+    item.popup = {
+      ...item.popup,
+      progress: item.popup.progress.map((p) => ({
+        ...p,
+        label: progressOutcome(p.label),
+      })),
+    };
   item.areaId = areaId;
   item.href = canonicalAreaHref(areaId, item.href);
   const next =

@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
-import { questionEvidence, RESIDENT_QUESTIONS } from "./project-questions";
+import {
+  questionEvidence,
+  progressOutcome,
+  RESIDENT_QUESTIONS,
+} from "./project-questions";
 import { AREAS } from "@/lib/areas/registry";
 import type { EvidenceField } from "@/lib/timeline/types";
 it("organizes the resident experience around exactly the six guiding questions", () => {
@@ -29,4 +33,13 @@ it("never places unapproved testimony or votes in the resident pane", () => {
   expect(data.history[0].label).toContain("City Council");
   expect(data.history[0].source).toContain("#page=4");
   expect(questionEvidence([], AREAS.nampa).impacts).toEqual([]);
+});
+
+it("keeps unchecked vote tallies out of compact source outcomes", () => {
+  expect(progressOutcome("P&Z recommended approval 4–1 (Sep 29)")).toBe(
+    "P&Z recommended approval (Sep 29)",
+  );
+  expect(progressOutcome("Approved unanimously by Council, Oct 19")).toBe(
+    "Approved by Council, Oct 19",
+  );
 });
