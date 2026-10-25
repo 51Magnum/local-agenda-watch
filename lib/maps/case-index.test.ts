@@ -25,7 +25,7 @@ vi.mock("next/cache", () => ({
 vi.mock("@/lib/timeline/public", () => ({
   readTimelineState: async () => ({ version: 1, documents: {}, fields: {} }),
 }));
-import { cachedViewport, exportMapFeatures } from "./case-index";
+import { cachedViewport, exportMapFeatures, siteMembers } from "./case-index";
 it("indexes old snapshots once, deduplicates across areas, returns only lightweight features and performs no SQL on repeated cached views", async () => {
   const db = new PGlite();
   h.db = db;
@@ -92,6 +92,11 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     expect(points.cases[0].geometry).toBeNull();
     expect(points.cases[0].centroid![0]).toBeCloseTo(c.centroid[0], 6);
     expect(points.cases[0].centroid![1]).toBeCloseTo(c.centroid[1], 6);
+    const linked = await siteMembers(c as never, "nampa");
+    expect(linked?.map((m) => m.areaId).sort()).toEqual([
+      "canyon-county",
+      "nampa",
+    ]);
     const exported = await exportMapFeatures();
     expect(exported.features).toHaveLength(2);
     expect(JSON.stringify(exported)).not.toContain("Narrative must not travel");

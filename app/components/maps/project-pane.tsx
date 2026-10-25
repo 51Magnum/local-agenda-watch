@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PaneData } from "@/lib/maps/project-questions";
 import type { MapVisual } from "@/lib/maps/types";
 import { RESIDENT_QUESTIONS } from "@/lib/maps/project-questions";
-import { isWatching, setWatching } from "@/lib/watches";
+import { isWatching, setWatching, watchesFromMapCase } from "@/lib/watches";
 export default function ProjectPane({
   data,
   onClose,
@@ -18,12 +18,20 @@ export default function ProjectPane({
   savedPlace?: { distance: number };
   onWatch: () => void;
 }) {
+  const targets = data.item.members?.length
+    ? watchesFromMapCase(data.area.id, data.item, [data.item])
+    : [
+        {
+          jurisdiction: data.area.id,
+          href: data.item.href,
+          title: data.item.popup?.projectName ?? data.item.title,
+          caseIds: data.caseIds,
+        },
+      ];
   const ref = useRef<HTMLElement>(null),
     start = useRef<number | null>(null);
   const [size, setSize] = useState<"peek" | "half" | "full">("half"),
-    [watch, setWatch] = useState(() =>
-      isWatching({ jurisdiction: data.area.id, href: data.item.href }),
-    ),
+    [watch, setWatch] = useState(() => targets.every(isWatching)),
     [copied, setCopied] = useState(false),
     [error, setError] = useState("");
   const item = data.item;
@@ -261,15 +269,8 @@ export default function ProjectPane({
                   checked={watch}
                   onChange={(e) => {
                     try {
-                      setWatching(
-                        {
-                          jurisdiction: data.area.id,
-                          href: item.href,
-                          title: item.popup?.projectName ?? item.title,
-                          caseIds: data.caseIds,
-                        },
-                        e.target.checked,
-                      );
+                      for (const target of targets)
+                        setWatching(target, e.target.checked);
                       setWatch(e.target.checked);
                     } catch (e) {
                       setError((e as Error).message);
@@ -293,7 +294,17 @@ export default function ProjectPane({
             </a>
             <details>
               <summary>Case references</summary>
-              {data.caseIds.join(" · ")}
+              {data.relatedCases?.length ? (
+                <ul>
+                  {data.relatedCases.map((c) => (
+                    <li key={c.areaId + c.caseId}>
+                      {c.label} · <a href={c.href}>{c.caseId}</a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                data.caseIds.join(" · ")
+              )}
             </details>
             {error && <p role="status">{error}</p>}
           </footer>

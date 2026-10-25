@@ -374,3 +374,40 @@ export async function exportMapFeatures(cursor = "") {
         : undefined,
   };
 }
+
+/** Resolve linked site references on the server so shared links do not depend on map features arriving first. */
+export async function siteMembers(item: MapCase, areaId: string) {
+  if (!item.geometry || item.citywide) return;
+  const b = (item.bounds ?? bbox(item.geometry)).slice(0, 4) as Bounds,
+    areas = Object.values(AREAS).filter((a) => a.status === "live");
+  let rows: { area_id: string; data: MapCase }[] = [];
+  if (process.env.DATABASE_URL) {
+    const db = await database();
+    rows = (
+      await db.query(
+        "SELECT area_id,data-'visual'-'popup' AS data FROM law_map_cases WHERE area_id=ANY($1::text[]) AND min_lng<=$4 AND max_lng>=$2 AND min_lat<=$5 AND max_lat>=$3 ORDER BY area_id,case_id LIMIT 1000",
+        [areas.map((a) => a.id), ...b],
+      )
+    ).rows;
+  } else
+    for (const area of areas) {
+      const snapshot = await readMapSnapshot(area.id, {
+        bounds: b,
+        includeFlum: false,
+      });
+      rows.push(
+        ...(snapshot?.cases ?? []).map((data) => ({ area_id: area.id, data })),
+      );
+    }
+  const groups = combineRadiusCases(
+    areas.map((area) => ({
+      area,
+      cases: rows.filter((r) => r.area_id === area.id).map((r) => r.data),
+    })),
+    item.centroid ?? [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2],
+    25000,
+  );
+  return groups.find((g) =>
+    g.members?.some((m) => m.areaId === areaId && m.caseId === item.id),
+  )?.members;
+}

@@ -11,6 +11,12 @@ export const RESIDENT_QUESTIONS = [
   "How can I act",
 ] as const;
 export type PaneData = {
+  relatedCases?: {
+    areaId: string;
+    caseId: string;
+    href: string;
+    label: string;
+  }[];
   item: MapCase;
   area: {
     id: string;
@@ -43,7 +49,9 @@ export function questionEvidence(
     ["Traffic", "trafficSummary"],
     ["Schools", "schoolComment"],
   ].flatMap(([label, key]) => {
-    const f = fact(key);
+    const f = fields
+      .filter((f) => f.sourceKind === "staff-report" && f.key === key)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     return f
       ? [
           {

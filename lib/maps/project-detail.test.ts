@@ -5,6 +5,10 @@ const h = vi.hoisted(() => ({
   record: vi.fn(),
 }));
 vi.mock("next/cache", () => ({ unstable_cache: (f: unknown) => f }));
+vi.mock("./case-index", () => ({
+  MAP_INDEX_TAG: "test-index",
+  siteMembers: async () => undefined,
+}));
 vi.mock("./jurisdictions", () => ({ getJurisdiction: () => h.config }));
 vi.mock("./store", () => ({
   readMapSnapshot: async () => ({
@@ -47,14 +51,12 @@ import { projectDetail } from "./project-detail";
 import { AREAS } from "@/lib/areas/registry";
 function config() {
   h.citywide = false;
-  h.record = vi
-    .fn()
-    .mockReturnValue({
-      address: "Ruth Lane and Happy Valley Road",
-      events: [],
-      sourceStatus: "In review",
-      approvalStatus: "",
-    });
+  h.record = vi.fn().mockReturnValue({
+    address: "Ruth Lane and Happy Valley Road",
+    events: [],
+    sourceStatus: "In review",
+    approvalStatus: "",
+  });
   h.config = {
     id: "canyon-county",
     area: AREAS["canyon-county"],

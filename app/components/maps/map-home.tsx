@@ -153,7 +153,7 @@ export default function MapHome() {
             c.id === area + ":" + id ||
             c.members?.some((m) => m.areaId === area && m.caseId === id),
         );
-        if (loaded?.members) {
+        if (loaded?.members && !data.item.members?.length) {
           data.item.members = loaded.members;
           data.caseIds = [
             ...new Set([

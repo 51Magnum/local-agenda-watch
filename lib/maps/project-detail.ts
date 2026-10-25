@@ -17,13 +17,13 @@ import {
   factHref,
 } from "@/lib/project-overview";
 import { landUseFact } from "@/lib/areas/land-use";
-import { canonicalAreaHref } from "@/lib/areas/registry";
+import { AREAS, canonicalAreaHref } from "@/lib/areas/registry";
 import {
   questionEvidence,
   progressOutcome,
   type PaneData,
 } from "./project-questions";
-import { MAP_INDEX_TAG } from "./case-index";
+import { MAP_INDEX_TAG, siteMembers } from "./case-index";
 
 async function detail(
   areaId: string,
@@ -60,6 +60,7 @@ async function detail(
         label: progressOutcome(p.label),
       })),
     };
+  item.members = await siteMembers(item, areaId);
   item.areaId = areaId;
   item.href = canonicalAreaHref(areaId, item.href);
   const next =
@@ -131,6 +132,10 @@ async function detail(
   const progress = item.popup?.progress ?? [];
   return {
     item,
+    relatedCases: item.members?.map((m) => ({
+      ...m,
+      label: AREAS[m.areaId]?.name ?? m.areaId,
+    })),
     area: {
       id: area.id,
       name: (area.type === "city" ? "City of " : "") + area.name,
