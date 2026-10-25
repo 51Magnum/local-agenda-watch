@@ -17,20 +17,20 @@ export async function seedImageQueue(){let total=0;for(const a of Object.values(
 export async function imageCoverage(){const rows=await imageReviews(),active=displayedImageReviews(rows),result=[];for(const area of Object.values(JURISDICTIONS)){const cases=await mapImageCases(area.id);let real=0,fallback=0;for(const c of cases){const v=active.find(r=>r.areaId===area.id&&r.caseIds.includes(c.id))?.visual;if(v?.approval?.generated)fallback++;else if(v)real++;}result.push({area:area.id,cases:cases.length,geometry:cases.filter(c=>c.hasGeometry&&!c.citywide).length,real,fallback,empty:cases.length-real-fallback});}return result;}
 export async function processImageQueue(options:{budgetMs?:number;target?:{areaId:string;caseId:string};fallbackOnly?:boolean}={}){
  const started=Date.now(),deadline=started+(options.budgetMs??250000);const job=await claimImageJob(options.target,options.fallbackOnly);if(!job)return {status:"idle",checked:0};
- const config=JURISDICTIONS[job.areaId];job.attempts++;job.errors=[];job.checked=0;
- const checkpoint=()=>saveImageJob(job);let accepted=0,blocked=false;
+ const config=JURISDICTIONS[job.areaId],resuming=job.status==="deferred"||job.status==="blocked";job.attempts++;job.errors=[];job.checked=0;
+ const checkpoint=()=>saveImageJob(job);let accepted=0,blocked=false,fallbackFailed=false;
  try{
   const snapshot=await readMapSnapshot(job.areaId,{caseIds:[job.caseId],includeFlum:false}),item=snapshot?.cases[0];if(!config||!item)throw new Error("Case map metadata unavailable");
   const prior=displayedImageReviews(await imageReviews(job.areaId,[job.caseId]));
   // A fallback is safe to publish immediately, while official-source discovery continues.
-  if(!prior.length&&item.geometry)try{await fallbackCaseImage(job.areaId,item);}catch(e){job.errors.push("Fallback: "+(e instanceof Error?e.message:"unavailable"));}
-  if(options.fallbackOnly){job.fallbackReady=true;return {status:"fallback pass",area:job.areaId,caseId:job.caseId,checked:0,hasGeometry:Boolean(item.geometry)};}
+  if(!prior.length&&item.geometry)try{await fallbackCaseImage(job.areaId,item);}catch(e){fallbackFailed=true;job.errors.push("Fallback: "+(e instanceof Error?e.message:"unavailable"));}
+  if(options.fallbackOnly){job.fallbackReady=!fallbackFailed;job.fallbackRetryAt=fallbackFailed?new Date(Date.now()+86400000).toISOString():undefined;return {status:"fallback pass",area:job.areaId,caseId:job.caseId,checked:0,hasGeometry:Boolean(item.geometry),errors:job.errors};}
   const feed=await config.loadCases?.().catch(()=>undefined);
   const hearing=[...(feed?.active??[]),...(feed?.completed??[]),...(feed?.upcomingOnly??[])].find(h=>h.appId===job.caseId)??({appId:item.id,appType:item.type,appTypeLabel:item.typeLabel,appStatus:"",appPhase:"Review",appPhaseRaw:"Review",appScope:item.summary,meetings:[],energovPlanId:null,externalUrl:null,appAcres:null} as Hearing);
   const discoveryDeadline=Math.min(deadline-60000,Date.now()+70000);
   if(config.loadCaseDocuments&&Date.now()<discoveryDeadline){const found=await config.loadCaseDocuments(job.caseId,{hearing,feed,job,deadline:discoveryDeadline,checkpoint});job.documents=found.documents;job.discoveryComplete=found.complete;await checkpoint();}
   job.documents.sort((a,b)=>visualPriority(a.title)-visualPriority(b.title)||(b.date??sourceImageDate(b.title)??"").localeCompare(a.date??sourceImageDate(a.title)??""));
-  for(const doc of job.documents){if(Date.now()>deadline-3000)break;const key=digest(doc.url);if(Date.parse(job.scans[key]?.retryAt??"")>Date.now())continue;try{
+  for(const doc of job.documents){if(Date.now()>deadline-3000)break;const key=digest(doc.url);if(resuming&&job.scans[key]?.complete&&job.scans[key]?.version==="graphics-area-v2")continue;if(Date.parse(job.scans[key]?.retryAt??"")>Date.now())continue;try{
    const bytes=doc.attachmentId&&config.recordClient?.downloadPublicAttachment?await config.recordClient.downloadPublicAttachment(doc.attachmentId):await downloadDocument(doc.url,job.areaId,{maxBytes:128000000,timeoutMs:Math.min(120000,Math.max(1000,deadline-Date.now()-10000))});job.checked++;
    const documentDeadline=Math.min(deadline-1500,Date.now()+85000);
    const candidate=async(result:ScanResult)=>{const id=createHash("sha256").update(IMAGE_CHECK_VERSION+job.areaId+doc.url+result.approval.pageHash+String(result.page??0)).digest("hex"),src="/api/maps/"+job.areaId+"/visual/"+id;

@@ -5,6 +5,10 @@ on:
     - cron: '15 11,12 * * *'
   workflow_dispatch:
     inputs:
+      fallback_only:
+        description: "For targeted cases, only retry their aerial boundary maps"
+        type: boolean
+        default: false
       test_cases:
         description: "Optional comma-separated area:case pairs to verify instead of the full backfill"
         type: string
@@ -27,6 +31,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
           CASES: ${{ inputs.cases || 40 }}
+          FALLBACK_ONLY: ${{ inputs.fallback_only || false }}
           TEST_CASES: ${{ inputs.test_cases || '' }}
         shell: bash
         run: |
@@ -48,7 +53,7 @@ jobs:
               if ! [[ "$AREA" =~ ^[a-z-]+$ && "$CASE" =~ ^[A-Z0-9-]+$ ]]; then exit 1; fi
               INDEX=$((INDEX+1))
               FILE="test-$INDEX.json"
-              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" "$BASE" > "$FILE" &
+              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" --data-urlencode "fallback=$FALLBACK_ONLY" --data-urlencode "resume=1" "$BASE" > "$FILE" &
               PIDS+=("$!")
               FILES+=("$FILE")
               if [ "${#PIDS[@]}" -ge 2 ]; then
