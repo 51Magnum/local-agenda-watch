@@ -63,18 +63,18 @@ describe("Nampa page", () => {
   });
 });
 
-describe("homepage count", () => {
-  it("renders a count from current case data rather than the old hardcoded value", async () => {
-    vi.spyOn(nampa, "getHearings").mockResolvedValue(feed);
+describe("map-first homepage", () => {
+  it("renders the map shell without fetching every locality feed", async () => {
+    const source=vi.spyOn(nampa, "getHearings").mockResolvedValue(feed);
     const html = renderToStaticMarkup(await Home());
-    expect(html).toContain("2 cases tracked");
-    expect(html).not.toContain("1 cases tracked");
+    expect(html).toContain("Development projects map");
+    expect(source).not.toHaveBeenCalled();
   });
 
   it("avoids displaying a misleading count if the application feed fails", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(nampa, "getHearings").mockRejectedValue(new Error("GIS unavailable"));
-    expect(renderToStaticMarkup(await Home())).toContain("Case counts temporarily unavailable");
+    expect(renderToStaticMarkup(await Home())).toContain("Development projects map");
   });
 });
 
@@ -390,7 +390,7 @@ describe("site-review regressions", () => {
     const hub = renderToStaticMarkup(await NampaHub());
     const home = renderToStaticMarkup(await Home());
     expect(hub).toContain("Recently decided");
-    expect(hub).toContain("(18)"); expect(home).toContain("18 cases tracked");
+    expect(hub).toContain("(18)"); expect(home).toContain("Development projects map");
     for (const url of (await sitemap()).map((e) => e.url).filter((u) => u.includes("/plan/"))) expect(hub).toContain('href="' + new URL(url).pathname + '"');
   });
   it("shows missing Council dates and stale unlinked Wilson Landing honestly", async () => {

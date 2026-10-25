@@ -43,6 +43,7 @@ export async function saveMapSnapshot(snapshot: MapSnapshot) {
    const db=database();await initialized;const {flum,...cases}=snapshot;
    await db.query("INSERT INTO law_map_cache (jurisdiction,snapshot) VALUES ($1,$2::jsonb) ON CONFLICT (jurisdiction) DO UPDATE SET snapshot=excluded.snapshot",[snapshot.jurisdiction,JSON.stringify(cases)]);
    if(flum){const result=await db.query("INSERT INTO law_flum_cache VALUES($1,$2::jsonb) ON CONFLICT(jurisdiction) DO UPDATE SET snapshot=excluded.snapshot WHERE law_flum_cache.snapshot->>'updatedAt' IS DISTINCT FROM excluded.snapshot->>'updatedAt'",[snapshot.jurisdiction,JSON.stringify(flum)]);if(result.rowCount&&process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test")revalidateTag("map-flum",{expire:0});}
+   const {syncCaseIndex}=await import("./case-index");await syncCaseIndex(snapshot);
    return;
   }
   if (process.env.VERCEL) throw new Error("Map storage requires DATABASE_URL");

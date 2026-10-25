@@ -32,7 +32,7 @@ export type MapCase = {
   popup?: { headline: string; explanation?: string; aiGenerated?: boolean; projectName: string; progress: { label: string; state: "done" | "past" | "current" | "future" }[] };
   areaId?:string; jurisdictionLabel?:string; stageBody?:string; caseIds?:string[]; members?:{areaId:string;caseId:string;title:string;href:string;stage:MapStage;body:string}[];
   bounds?:[number,number,number,number]; parcelIds?:string[]; parcelNamespace?:string;
-  id: string; title: string; summary: string; type: string; typeLabel: string; stage: MapStage; statusNote?: string; href: string;
+  decisionDate?: string; id: string; title: string; summary: string; type: string; typeLabel: string; stage: MapStage; statusNote?: string; href: string;
   nextHearing?: { date: string; body: string; label: string };
   geometry: CaseGeometry | null; centroid: [number, number] | null; source: "polygon" | "parcel match" | "none"; confidence: "exact" | "approximate" | "citywide";
   visual?: MapVisual; visualCheckedAt?: string;

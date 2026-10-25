@@ -1,0 +1,298 @@
+"use client";
+/* eslint-disable @next/next/no-img-element -- approved private-source images use our existing cached visual endpoint. */
+import { useEffect, useRef, useState } from "react";
+import type { PaneData } from "@/lib/maps/project-questions";
+import type { MapVisual } from "@/lib/maps/types";
+import { RESIDENT_QUESTIONS } from "@/lib/maps/project-questions";
+import { isWatching, setWatching } from "@/lib/watches";
+export default function ProjectPane({
+  data,
+  onClose,
+  onImage,
+  savedPlace,
+  onWatch,
+}: {
+  data: PaneData;
+  onClose: () => void;
+  onImage: (v: MapVisual) => void;
+  savedPlace?: { distance: number };
+  onWatch: () => void;
+}) {
+  const ref = useRef<HTMLElement>(null),
+    start = useRef<number | null>(null);
+  const [size, setSize] = useState<"peek" | "half" | "full">("half"),
+    [watch, setWatch] = useState(() =>
+      isWatching({ jurisdiction: data.area.id, href: data.item.href }),
+    ),
+    [copied, setCopied] = useState(false),
+    [error, setError] = useState("");
+  const item = data.item;
+  useEffect(() => {
+    ref.current?.focus({ preventScroll: true });
+  }, [item.id, item.href, data.area.id]);
+  const date = (v: string) =>
+    new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: v.length === 10 ? "UTC" : data.area.timezone,
+    }).format(new Date(v.length === 10 ? v + "T12:00:00Z" : v));
+  const time = (v: string) =>
+    new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: data.area.timezone,
+    }).format(new Date(v)) +
+    (data.area.timezone === "America/Denver"
+      ? " Mountain Time"
+      : " " + data.area.timezone);
+  return (
+    <aside
+      ref={ref}
+      tabIndex={-1}
+      className={"law-resident-pane " + size}
+      aria-label="Project details"
+      data-size={size}
+    >
+      <div
+        className="law-sheet-handle"
+        onTouchStart={(e) => {
+          start.current = e.touches[0].clientY;
+        }}
+        onTouchEnd={(e) => {
+          if (start.current == null) return;
+          const delta = e.changedTouches[0].clientY - start.current;
+          if (Math.abs(delta) > 25)
+            setSize(delta < 0 ? "full" : size === "full" ? "half" : "peek");
+          start.current = null;
+        }}
+      >
+        <button
+          aria-label={"Expand project details, currently " + size}
+          onClick={() =>
+            setSize(
+              size === "peek" ? "half" : size === "half" ? "full" : "peek",
+            )
+          }
+        >
+          <span />
+        </button>
+      </div>
+      <button
+        className="law-pane-close"
+        onClick={onClose}
+        aria-label="Close project details"
+      >
+        ×
+      </button>
+      <div className="law-pane-content">
+        <section aria-labelledby="question-what">
+          <p className="law-eyebrow" id="question-what">
+            {RESIDENT_QUESTIONS[0]}
+          </p>
+          <h1>{item.popup?.headline ?? item.title}</h1>
+          <p className="law-pane-status">
+            {item.popup?.progress.find((p) => p.state === "current")?.label ??
+              item.stage}
+          </p>
+          <p className="law-pane-jurisdiction">{data.area.name}</p>
+          <div className="law-pane-expanded">
+            {item.popup?.explanation && <p>{item.popup.explanation}</p>}
+            {item.visual && (
+              <figure>
+                <button
+                  className="law-pane-image"
+                  onClick={() => onImage(item.visual!)}
+                  aria-label="Enlarge project image"
+                >
+                  <img
+                    src={
+                      item.visual.src +
+                      (item.visual.src.includes("?") ? "&" : "?") +
+                      "preview=main-v1"
+                    }
+                    alt={item.visual.alt}
+                  />
+                </button>
+                <figcaption>{item.visual.label}</figcaption>
+              </figure>
+            )}
+          </div>
+        </section>
+        <div className="law-pane-expanded">
+          {(data.where || savedPlace) && (
+            <section>
+              <h2>{RESIDENT_QUESTIONS[1]}</h2>
+              {data.where && <p>{data.where}</p>}
+              {savedPlace && (
+                <p>{savedPlace.distance.toFixed(1)} mi from your saved place</p>
+              )}
+            </section>
+          )}
+          {data.history.length > 0 && (
+            <details className="law-pane-section">
+              <summary>{RESIDENT_QUESTIONS[2]}</summary>
+              <ol className="law-pane-timeline">
+                {data.history.map((row, i) => (
+                  <li key={i}>
+                    {row.label}
+                    {row.source && (
+                      <a href={row.source} target="_blank" rel="noreferrer">
+                        {" "}
+                        Source
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
+          <section className="law-pane-next">
+            <h2>{RESIDENT_QUESTIONS[3]}</h2>
+            {data.next ? (
+              <>
+                <strong>{date(data.next.startsAt)}</strong>
+                {data.next.startsAt.length > 10 && (
+                  <p>{time(data.next.startsAt)}</p>
+                )}
+                <p>{data.next.body}</p>
+                <p>{data.next.location}</p>
+                <small>{data.next.role}</small>
+              </>
+            ) : (
+              <p>
+                {item.stage === "Decided"
+                  ? (item.popup?.progress.find((p) => p.state === "current")
+                      ?.label ??
+                    "Decision recorded; outcome not specified in the available record")
+                  : item.stage === "Recorded"
+                    ? "Recorded in official records."
+                    : "No hearing is confirmed in the available records."}
+              </p>
+            )}
+          </section>
+          {(data.impacts.length > 0 || data.conditions.length > 0) && (
+            <details className="law-pane-section">
+              <summary>{RESIDENT_QUESTIONS[4]}</summary>
+              {data.impacts.map((f) => (
+                <div key={f.label}>
+                  <h3>{f.label}</h3>
+                  <p>
+                    {f.value} {f.url && <a href={f.url}>Source</a>}
+                  </p>
+                </div>
+              ))}
+              {data.conditions.length > 0 && (
+                <>
+                  <h3>Conditions</h3>
+                  <ul>
+                    {data.conditions.slice(0, 5).map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                  </ul>
+                  {data.conditions.length > 5 && (
+                    <details>
+                      <summary>Show all conditions</summary>
+                      <ul>
+                        {data.conditions.slice(5).map((c, i) => (
+                          <li key={i}>{c}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </>
+              )}
+            </details>
+          )}
+          <section>
+            <h2>{RESIDENT_QUESTIONS[5]}</h2>
+            {data.next?.commentDeadline && (
+              <p>
+                Comment deadline: {date(data.next.commentDeadline)}
+                {data.next.commentDeadline.length > 10
+                  ? " · " + time(data.next.commentDeadline)
+                  : ""}
+              </p>
+            )}
+            {data.commentInstructions && <p>{data.commentInstructions}</p>}
+            <div className="law-pane-actions">
+              {data.commentUrl && (
+                <a href={data.commentUrl} target="_blank" rel="noreferrer">
+                  How to comment ↗
+                </a>
+              )}
+              {data.calendarHref && (
+                <a href={data.calendarHref}>Add to calendar</a>
+              )}
+              <button onClick={onWatch}>Watch this place</button>
+            </div>
+            <small>
+              Dates can change. Confirm with the official notice. Alerts are
+              coming soon.
+            </small>
+          </section>
+          <footer>
+            <a href={item.href} className="law-full-project">
+              Full project page →
+            </a>
+            <div className="law-pane-actions">
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  } catch {
+                    setError("Copy the URL from your address bar.");
+                  }
+                }}
+              >
+                {copied ? "Link copied" : "Share"}
+              </button>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={watch}
+                  onChange={(e) => {
+                    try {
+                      setWatching(
+                        {
+                          jurisdiction: data.area.id,
+                          href: item.href,
+                          title: item.popup?.projectName ?? item.title,
+                          caseIds: data.caseIds,
+                        },
+                        e.target.checked,
+                      );
+                      setWatch(e.target.checked);
+                    } catch (e) {
+                      setError((e as Error).message);
+                    }
+                  }}
+                />{" "}
+                Watch project
+              </label>
+            </div>
+            <p>
+              Updated automatically from city records · last checked{" "}
+              {date(data.updatedAt)}
+            </p>
+            <a
+              href={
+                "/contact?project=" +
+                encodeURIComponent(data.area.id + "/" + data.caseIds[0])
+              }
+            >
+              Report an error
+            </a>
+            <details>
+              <summary>Case references</summary>
+              {data.caseIds.join(" · ")}
+            </details>
+            {error && <p role="status">{error}</p>}
+          </footer>
+        </div>
+      </div>
+    </aside>
+  );
+}

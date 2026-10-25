@@ -2,7 +2,7 @@
 import Link from "next/link";
 import {useId,useState} from "react";
 import {AREAS} from "@/lib/areas/registry";
-export default function InterestForm({kind="coverage",areaName="",coordinates,radiusMiles=1,place=false}:{radiusMiles?:number;place?:boolean;kind?:"coverage"|"follow";areaName?:string;coordinates?:[number,number]}){
+export default function InterestForm({kind="coverage",areaName="",coordinates,radiusMiles=1,place=false,onSaved}:{onSaved?:()=>void;radiusMiles?:number;place?:boolean;kind?:"coverage"|"follow";areaName?:string;coordinates?:[number,number]}){
  const areas=Object.values(AREAS).map(a=>({id:a.id,label:a.name+", "+a.stateAbbreviation})).sort((a,b)=>a.label.localeCompare(b.label));
  const [customArea,setCustomArea]=useState(Boolean(areaName&&areaName!=="Any area"&&!areas.some(a=>a.label===areaName)));
  const id=useId(),[area,setArea]=useState(areaName==="Any area"?"":areaName),[address,setAddress]=useState(""),[interests,setInterests]=useState(""),[email,setEmail]=useState(""),[website,setWebsite]=useState(""),[message,setMessage]=useState(""),[saving,setSaving]=useState(false),[saved,setSaved]=useState(false);
@@ -12,7 +12,7 @@ export default function InterestForm({kind="coverage",areaName="",coordinates,ra
   try{
    const response=await fetch("/api/coverage-requests",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind,areaRequested:area,email,address,interests,website,radiusMiles,location:coordinates&&(place||area===areaName&&!address.trim())?{lng:coordinates[0],lat:coordinates[1]}:null})});
    const result=await response.json();if(!response.ok)throw new Error(result.error);
-   setSaved(true);setMessage(kind==="follow"?"Your interest in "+area.trim()+" is saved. This is a waitlist; project alerts are not active yet.":"Your coverage request for "+area.trim()+" is saved. Submitting a request does not start project alerts.");
+   setSaved(true);onSaved?.();setMessage(kind==="follow"?"Your interest in "+area.trim()+" is saved. This is a waitlist; project alerts are not active yet.":"Your coverage request for "+area.trim()+" is saved. Submitting a request does not start project alerts.");
   }catch(error){setMessage(error instanceof Error?error.message:"Please try again.");}finally{setSaving(false);}
  }}>
   {!saved&&<>
