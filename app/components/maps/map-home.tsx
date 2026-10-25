@@ -93,6 +93,7 @@ export default function MapHome() {
     [coverage, setCoverage] = useState<string[]>([]);
   const [ready, setReady] = useState(false),
     [cases, setCases] = useState<MapCase[]>([]),
+    [undatedDecisions,setUndatedDecisions] = useState(0),
     [filter, setFilter] = useState("all"),
     [selected, setSelected] = useState<string>(),
     [pane, setPane] = useState<PaneData>(),
@@ -819,6 +820,7 @@ export default function MapHome() {
         features.current = found;
         const all = [...found.values()],
           visible = all.filter((c) => caseInFilter(c, filterRef.current));
+        setUndatedDecisions(all.filter(c=>["Decided","Recorded"].includes(c.stage)&&!c.decisionDate).length);
         setCases(visible);
         setLimited(responses.some((r) => r.truncated) || visible.length > 1000);
         const shown = visible.slice(0, 1000);
@@ -1100,7 +1102,7 @@ export default function MapHome() {
             </button>
           ))}
         </nav>
-        {filter==="decided"&&<p className="law-undated-decisions" role="status">{cases.filter(c=>["Decided","Recorded"].includes(c.stage)&&!c.decisionDate).length} decided projects in this map view excluded because no decision date is verified.</p>}
+        {filter==="decided"&&<p className="law-undated-decisions" role="status">{undatedDecisions} decided projects in this map view excluded because no decision date is verified.</p>}
         <div className="law-explorer-controls">
           <button aria-expanded={legend} aria-controls="map-progress-legend" onClick={() => { setLegend(!legend); setLayers(false); }}>
             Legend

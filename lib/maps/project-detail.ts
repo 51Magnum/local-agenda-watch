@@ -210,6 +210,7 @@ async function detail(
         : undefined,
     impacts: impacts.map((f) => ({ ...f, url: residentPaneHref(area, f.url) })),
     conditions: evidence.conditions,
+    conditionsSource:evidence.conditionsSource?residentPaneHref(area,evidence.conditionsSource):undefined,
     participationClosed: closed,
     expiredDeadlineMessage,
     commentUrl: closed ? undefined : expiredDeadlineMessage ? residentPaneHref(area, next?.sourceUrl) ?? area.residentAccess?.commentUrl ?? area.commentInstructionsUrl : area.residentAccess?.commentUrl ?? area.commentInstructionsUrl,

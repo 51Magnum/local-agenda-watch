@@ -34,6 +34,7 @@ export type PaneData = {
   next?: ProjectHearing & { role: string };
   impacts: { label: string; value: string; url?: string }[];
   conditions: string[];
+  conditionsSource?:string;
   commentUrl?: string;
   commentLinkLabel?: string;
   commentInstructions?: string;
@@ -106,6 +107,7 @@ export function questionEvidence(
         .map((s) => s.replace(/^[-•]\s*/, ""))
         .filter(Boolean) ?? [],
     history,
+    conditionsSource:conditions?conditions.sourceUrl+(conditions.page?"#page="+conditions.page:""):undefined,
   };
 }
 

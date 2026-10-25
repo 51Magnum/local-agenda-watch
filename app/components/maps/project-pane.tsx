@@ -210,7 +210,7 @@ export default function ProjectPane({
             ))}
             {data.conditions.length > 0 && (
               <>
-                <h3>Conditions</h3>
+                <h3>Conditions</h3>{data.conditionsSource&&<a href={data.conditionsSource} target="_blank" rel="noreferrer">Source conditions</a>}
                 <ul>
                   {data.conditions.slice(0, 5).map((c, i) => (
                     <li key={i}>{c}</li>

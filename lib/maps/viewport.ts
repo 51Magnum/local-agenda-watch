@@ -72,7 +72,7 @@ export function caseInFilter(
     return Boolean(c.nextHearing && c.nextHearing.date >= today);
   if (filter === "decided")
     return (
-      c.stage === "Decided" &&
+      ["Decided","Recorded"].includes(c.stage) &&
       Boolean(
         c.decisionDate &&
         c.decisionDate <= today &&
