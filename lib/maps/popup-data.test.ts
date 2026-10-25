@@ -4,7 +4,7 @@ import {emptyEvidenceState} from "@/lib/timeline/types";
 import {AREAS} from "@/lib/areas/registry";
 import type {MapCase,JurisdictionConfig} from "./types";
 vi.mock("@/lib/timeline/public",()=>({readTimelineState:vi.fn(async()=>emptyEvidenceState())}));
-vi.mock("./image-review-store",()=>({imageReviews:vi.fn(async()=>[]),displayedImageReviews:vi.fn(()=>[])}));
+vi.mock("./image-review-store",()=>({publicImageReviews:vi.fn(async()=>[]),displayedImageReviews:vi.fn(()=>[])}));
 import {enrichMapPopups} from "./popup-data";
 it("shows Americrete's verified current request and explanation and logs missing extraction without inventing expansion",async()=>{
  const log=vi.spyOn(console,"info").mockImplementation(()=>{});

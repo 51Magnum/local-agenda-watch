@@ -1,4 +1,4 @@
-import { imageReviews, displayedImageReviews } from "./image-review-store";
+import { publicImageReviews, displayedImageReviews } from "./image-review-store";
 import { caseCatalog } from "@/lib/case-catalog";
 import { getProjectForCase } from "@/lib/projects";
 import { publicFields } from "@/lib/timeline/types";
@@ -13,7 +13,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
   const [state, feed, reviews] = await Promise.all([
     readTimelineState([...new Set(cases.flatMap(c => getProjectForCase(c.id, config.id)?.caseIds ?? [c.id]))], config.id),
     config.loadCases?.().catch(() => undefined),
-    imageReviews(config.id,cases.map(c=>c.id)).catch(()=>[]),
+    publicImageReviews(config.id,cases.map(c=>c.id)).catch(()=>[]),
   ]);
   const catalog = new Map(caseCatalog(feed).map(h => [h.appId, h]));
   return cases.map(item => {

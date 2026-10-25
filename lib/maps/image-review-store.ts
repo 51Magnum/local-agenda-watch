@@ -19,7 +19,18 @@ export async function imageReviews(areaId?:string,caseIds?:string[]):Promise<Ima
 export async function hideImage(id:string){if(process.env.DATABASE_URL){await(await database()).query(`UPDATE law_image_reviews SET data=jsonb_set(data,'{hidden}','true') WHERE id=$1`,[id]);return;}await mutate(s=>{if(s.reviews[id])s.reviews[id].hidden=true;});}
 export function displayedImageReviews(rows:ImageReview[]){return rows.filter(r=>!r.hidden&&r.outcome==="accepted"&&approvedImageCheck(r.visual?.approval)&&!rows.some(h=>h.hidden&&h.areaId===r.areaId&&h.sourceUrl===r.sourceUrl&&h.caseIds.some(id=>r.caseIds.includes(id)))).sort((a,b)=>Number(Boolean(b.manual&&b.selected))-Number(Boolean(a.manual&&a.selected)) || Number(a.visual?.approval?.generated==="gis-boundary-v1")-Number(b.visual?.approval?.generated==="gis-boundary-v1") || (b.documentDate??b.visual?.approval?.sourceDate??"").localeCompare(a.documentDate??a.visual?.approval?.sourceDate??"") || imageRank(a.visual?.approval?.type??"")-imageRank(b.visual?.approval?.type??"") || b.checkedAt.localeCompare(a.checkedAt));}
 export async function approvedCaseImages(areaId:string,caseIds:string[]):Promise<MapVisual[]>{const rows=displayedImageReviews(await imageReviews(areaId,caseIds));return [...new Map(caseIds.flatMap(id=>{const v=rows.find(r=>r.caseIds.includes(id))?.visual;return v?[[v.src,v] as const]:[] })).values()];}
-export async function imageAssetIsActive(areaId:string,src:string){return displayedImageReviews(await imageReviews(areaId)).some(r=>r.visual?.src===src);}
+/** Public callers receive accepted, non-hidden rows only. A withdrawn source veto is enforced in SQL. */
+export async function publicImageReviews(areaId:string,caseIds:string[]):Promise<ImageReview[]>{
+ if(!process.env.DATABASE_URL)return displayedImageReviews(await imageReviews(areaId,caseIds));
+ const rows=(await(await database()).query("SELECT r.data FROM law_image_reviews r WHERE r.area_id=$1 AND r.case_ids && $2 AND r.data->>'outcome'='accepted' AND r.data->>'hidden' IS DISTINCT FROM 'true' AND NOT EXISTS(SELECT 1 FROM law_image_reviews h WHERE h.area_id=r.area_id AND h.case_ids && r.case_ids AND h.data->>'hidden'='true' AND h.data->>'sourceUrl'=r.data->>'sourceUrl')",[areaId,caseIds])).rows.map(r=>r.data as ImageReview);
+ return displayedImageReviews(rows);
+}
+export async function imageAssetIsActive(areaId:string,src:string){
+ if(!process.env.DATABASE_URL)return displayedImageReviews(await imageReviews(areaId)).some(r=>r.visual?.src===src);
+ const rows=(await(await database()).query("SELECT r.data FROM law_image_reviews r WHERE r.area_id=$1 AND r.data->'visual'->>'src'=$2 AND r.data->>'outcome'='accepted' AND r.data->>'hidden' IS DISTINCT FROM 'true' AND NOT EXISTS(SELECT 1 FROM law_image_reviews h WHERE h.area_id=r.area_id AND h.case_ids && r.case_ids AND h.data->>'hidden'='true' AND h.data->>'sourceUrl'=r.data->>'sourceUrl')",[areaId,src])).rows.map(r=>r.data as ImageReview);return displayedImageReviews(rows).some(r=>r.visual?.src===src);
+}
+export async function readImageReview(id:string):Promise<ImageReview|undefined>{if(process.env.DATABASE_URL)return(await(await database()).query("SELECT data FROM law_image_reviews WHERE id=$1",[id])).rows[0]?.data;return(await local()).reviews[id];}
+
 export async function reserveImageCheck(id:string,data:ImageCheck):Promise<boolean>{
  if(process.env.DATABASE_URL)return Boolean((await(await database()).query("INSERT INTO law_image_checks VALUES($1,$2::jsonb) ON CONFLICT(id) DO UPDATE SET data=excluded.data WHERE law_image_checks.data->>'type' IN ('unchecked','classification unavailable') AND (law_image_checks.data->>'checkedAt')::timestamptz <= now()-interval '24 hours' RETURNING id",[id,JSON.stringify(data)])).rowCount);
  let claimed=false;await mutate(s=>{if(!s.checks[id]||imageCheckExpired(s.checks[id])){s.checks[id]=data;claimed=true;}});return claimed;
@@ -34,13 +45,13 @@ export async function publishCaseImage(areaId:string,caseIds:string[],visual:Map
 
 export function imageRank(type:string){return ["site plan","concept plan","preliminary plat","landscape plan","building elevation","rendering","vicinity/aerial exhibit","project area map"].indexOf(type)<0?99:["site plan","concept plan","preliminary plat","landscape plan","building elevation","rendering","vicinity/aerial exhibit","project area map"].indexOf(type);}
 export async function selectImage(id:string){
- const rows=await imageReviews();const row=rows.find(r=>r.id===id);if(!row||!approvedImageCheck(row.visual?.approval))throw new Error("Only privacy-approved images may be selected");
+ const row=await readImageReview(id);if(!row||!approvedImageCheck(row.visual?.approval))throw new Error("Only privacy-approved images may be selected");
  if(process.env.DATABASE_URL){const db=await database();await db.query("UPDATE law_image_reviews SET data=CASE WHEN id=$1 THEN data||'{\"manual\":true,\"selected\":true,\"hidden\":false}'::jsonb ELSE data||'{\"selected\":false}'::jsonb END WHERE area_id=$2 AND case_ids && $3",[id,row.areaId,row.caseIds]);}
 
  else await mutate(s=>{for(const r of Object.values(s.reviews))if(r.areaId===row.areaId&&r.caseIds.some(c=>row.caseIds.includes(c)))r.selected=false;Object.assign(s.reviews[id],{manual:true,selected:true,hidden:false});});
 }
 export async function unhideImage(id:string){
- const row=(await imageReviews()).find(r=>r.id===id);if(!row||!approvedImageCheck(row.visual?.approval))throw new Error("Only privacy-approved images may be unhidden");
+ const row=await readImageReview(id);if(!row||!approvedImageCheck(row.visual?.approval))throw new Error("Only privacy-approved images may be unhidden");
  if(process.env.DATABASE_URL)await(await database()).query("UPDATE law_image_reviews SET data=data||'{\"hidden\":false}'::jsonb WHERE area_id=$1 AND case_ids && $2 AND data->>'sourceUrl'=$3",[row.areaId,row.caseIds,row.sourceUrl]);
  else await mutate(s=>{for(const r of Object.values(s.reviews))if(r.areaId===row.areaId&&r.sourceUrl===row.sourceUrl&&r.caseIds.some(c=>row.caseIds.includes(c)))r.hidden=false;});
 }

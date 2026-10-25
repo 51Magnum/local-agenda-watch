@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import {createHash} from "node:crypto";
 import {JURISDICTIONS} from "./jurisdictions";
 import {mapImageCases,readMapSnapshot,markCaseVisualScan} from "./store";
@@ -34,7 +35,7 @@ export async function processImageQueue(options:{budgetMs?:number;target?:{areaI
    const bytes=doc.attachmentId&&config.recordClient?.downloadPublicAttachment?await config.recordClient.downloadPublicAttachment(doc.attachmentId):await downloadDocument(doc.url,job.areaId,{maxBytes:128000000,timeoutMs:Math.min(120000,Math.max(1000,deadline-Date.now()-10000))});job.checked++;
    const documentDeadline=Math.min(deadline-1500,Date.now()+85000);
    const candidate=async(result:ScanResult)=>{const id=createHash("sha256").update(IMAGE_CHECK_VERSION+job.areaId+doc.url+result.approval.pageHash+String(result.page??0)).digest("hex"),src="/api/maps/"+job.areaId+"/visual/"+id;
-    const allowed=approvedImageCheck(result.approval);await saveVisualAsset(job.areaId,id,{image:result.image.toString("base64"),page:result.page,approval:result.approval,...(allowed?{preview:await visualPreview(result.image,result.approval.pageHash)}:{})});
+    const allowed=approvedImageCheck(result.approval);await saveVisualAsset(job.areaId,id,{image:(allowed?result.image:await sharp(result.image).resize({width:480,height:640,fit:"inside",withoutEnlargement:true}).webp({quality:60}).toBuffer()).toString("base64"),page:result.page,approval:result.approval,...(allowed?{preview:await visualPreview(result.image,result.approval.pageHash)}:{})});
     const visual:MapVisual={src,fullSizeUrl:src,sourceUrl:doc.url+(result.page&&!doc.url.includes("#/plan/")?"#page="+result.page:""),documentTitle:doc.title,label:imageCaption(result.approval),alt:imageCaption(result.approval),kind:result.approval.type==="vicinity/aerial exhibit"?"context":"proposal",approval:result.approval};
     const reviewId=createHash("sha256").update(job.areaId+[job.caseId].join(",")+src).digest("hex");await saveImageReview({id:reviewId,areaId:job.areaId,caseIds:[job.caseId],title:doc.title,sourceUrl:visual.sourceUrl,originalSrc:src,visual,documentDate:doc.date??sourceImageDate(doc.title),outcome:allowed?"accepted":"rejected",reason:allowed?"Full page passed privacy and type checks":result.approval.type,checkedAt:new Date().toISOString()});if(allowed){accepted++;await publishCaseImage(job.areaId,[job.caseId],visual);}
    };
