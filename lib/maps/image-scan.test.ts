@@ -10,11 +10,11 @@ beforeEach(()=>vi.clearAllMocks());
 it("uses captions anywhere without rejecting an entire page for a narrative reference to notices",()=>{
  expect(pageCaption(["Plan notes", "Notice to contractor: dimensions", "PROPOSED SITE PLAN"])).toBe("PROPOSED SITE PLAN");
  expect(pageCaption(["Neighborhood Meeting Sign-in Sheet","Site plan exhibit"])).toMatch(/Sign-in/);
- expect(graphicsScore("",{fnArray:[1,1,1],argsArray:[]},{paintImageXObject:1})).toBe(70);
+ expect(graphicsScore("",{fnArray:[1,2],argsArray:[[612,0,0,792,0,0],[]]},{transform:1,paintImageXObject:2})).toBe(380);
 });
 it("scans beyond page 40 and finds a graphics-only exhibit without text, sending at most 8 pages to vision",async()=>{
  const {OPS}=await import("pdfjs-dist/legacy/build/pdf.mjs");
- vi.mocked(getDocumentProxy).mockResolvedValue({numPages:160,getPage:async(n:number)=>({getTextContent:async()=>({items:n===154?[{str:"Site plan exhibit follows"}]:[]}),getOperatorList:async()=>({fnArray:n>=155?[OPS.paintImageXObject]:[],argsArray:[]}),cleanup:()=>{}}),destroy:async()=>{}} as never);
+ vi.mocked(getDocumentProxy).mockResolvedValue({numPages:160,getPage:async(n:number)=>({getTextContent:async()=>({items:n===154?[{str:"Site plan exhibit follows"}]:[]}),getOperatorList:async()=>({fnArray:n>=155?[OPS.transform,OPS.paintImageXObject]:[],argsArray:n>=155?[[612,0,0,792,0,0],["image",2200,3300]]:[]}),cleanup:()=>{}}),destroy:async()=>{}} as never);
  const png=await sharp({create:{width:200,height:180,channels:3,background:"white"}}).png().toBuffer();vi.mocked(renderPageAsImage).mockResolvedValue(new Uint8Array(png).buffer as never);
  vi.mocked(classifyImagePage).mockResolvedValue({version:IMAGE_CHECK_VERSION,type:"site plan",contains_personal_info:false,confidence:.95,pageHash:"a".repeat(64),checkedAt:"2026-10-24"});
  const candidates:number[]=[];const result=await scanDocumentVisuals(new TextEncoder().encode("%PDF-1.7"),"Staff report",{deadline:Date.now()+60000,candidate:async c=>{candidates.push(c.page!);}});
