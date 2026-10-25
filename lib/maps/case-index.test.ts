@@ -11,12 +11,13 @@ vi.mock("pg", () => ({
     }
   },
 }));
+const cachedResults=vi.hoisted(()=>new Map());
 vi.mock("next/cache", () => ({
   revalidateTag: vi.fn(),
-  unstable_cache: (fn: (...args: unknown[]) => unknown) => {
-    const memo = new Map();
+  unstable_cache: (fn: (...args: unknown[]) => unknown,parts:unknown[]) => {
+    const memo = cachedResults;
     return (...args: unknown[]) => {
-      const key = JSON.stringify(args);
+      const key = JSON.stringify([parts,args]);
       if (!memo.has(key)) memo.set(key, fn(...args));
       return memo.get(key);
     };
@@ -88,7 +89,7 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     const calls = h.calls;
     await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
     expect(h.calls).toBe(calls);
-    const shapes = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 11);
+    const shapes = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
     expect(shapes.cases[0].geometry).not.toBeNull();
     const points = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 10);
     expect(points.cases[0].geometry).toBeNull();

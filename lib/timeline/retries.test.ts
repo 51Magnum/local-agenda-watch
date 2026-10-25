@@ -1,3 +1,4 @@
+vi.mock("../ai-budget",()=>({aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
 import {afterEach,expect,it,vi} from "vitest";
 import {ingestDocuments,documentId,officialDocumentUrl} from "./ingest";
 import {emptyEvidenceState,EXTRACTED_KEYS,publicFields,type SourceDocument} from "./types";
@@ -71,3 +72,5 @@ it("persists OCR text before extraction fails so the next run does not pay for O
  expect((await s.read()).documents[documentId(doc)].pages[0].method).toBe("ocr");expect(fetch).toHaveBeenCalledTimes(1);
  vi.setSystemTime(new Date("2026-10-24T12:00:00Z"));d.extract.mockResolvedValue(empty());await ingestDocuments(s,[doc],d);expect(fetch).toHaveBeenCalledTimes(1);
 });
+
+it("retains failure limits when an official document moves URL without changing its bytes",async()=>{vi.spyOn(console,"error").mockImplementation(()=>{});const s=store(),d=deps();await ingestDocuments(s,[doc],d);const moved={...doc,url:doc.url+"-new"};await ingestDocuments(s,[moved],d);expect(d.extract).toHaveBeenCalledTimes(1);expect((await s.read()).documents[documentId(doc)].failCount).toBe(1);d.download.mockResolvedValue(new Uint8Array([2]));d.extract.mockResolvedValue(empty());await ingestDocuments(s,[moved],d);expect(d.extract).toHaveBeenCalledTimes(2);});

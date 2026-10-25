@@ -16,3 +16,6 @@ export function unpackViewport(data: PackedViewport): ViewportData {
     type: "", typeLabel: "", summary: "", href: "", source: geometry ? "polygon" : "none", citywide: false, flumCategories: [],
   })) };
 }
+
+/** Six decimals are sub-meter precision; apply to all numeric transport values. */
+export function roundMapPayload<T>(data:T):T {return JSON.parse(JSON.stringify(data,(_key,value)=>typeof value==="number"?Number(value.toFixed(6)):value));}

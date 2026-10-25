@@ -32,7 +32,9 @@ export const projectDirectory = unstable_cache(async () => {
   return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?blockAddress(row.title):row.title, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
 }, ["project-search-directory-v1"], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
 let pool: Pool, ready: Promise<void> | undefined;
-const schema = `CREATE TABLE IF NOT EXISTS law_map_cases(area_id text NOT NULL,case_id text NOT NULL,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,lng double precision,lat double precision,data jsonb NOT NULL,PRIMARY KEY(area_id,case_id));
+const schema = `CREATE TABLE IF NOT EXISTS law_map_sites(site_id text PRIMARY KEY,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,data jsonb NOT NULL);
+CREATE INDEX IF NOT EXISTS law_map_sites_bbox ON law_map_sites(min_lng,max_lng,min_lat,max_lat);
+CREATE TABLE IF NOT EXISTS law_map_cases(area_id text NOT NULL,case_id text NOT NULL,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,lng double precision,lat double precision,data jsonb NOT NULL,PRIMARY KEY(area_id,case_id));
 CREATE INDEX IF NOT EXISTS law_map_cases_centroid ON law_map_cases(lng,lat);
 CREATE INDEX IF NOT EXISTS law_map_cases_bbox ON law_map_cases(min_lng,max_lng,min_lat,max_lat);
 CREATE TABLE IF NOT EXISTS law_map_index_meta(id text PRIMARY KEY,updated_at timestamptz NOT NULL);
@@ -105,6 +107,16 @@ async function database() {
   await ready;
   return { query: indexQuery };
 }
+let sitesReady:Promise<void>|undefined;
+let siteRebuild:Promise<void>|undefined,sitesDirty=false;
+function rebuildSites(){sitesDirty=true;return siteRebuild??=(async()=>{try{while(sitesDirty){sitesDirty=false;await rebuildSitesOnce();}}finally{siteRebuild=undefined;}})();}
+async function rebuildSitesOnce(){
+ const rows=(await indexQuery("SELECT area_id,data-'visual' AS data FROM law_map_cases WHERE area_id=ANY($1::text[])",[Object.values(AREAS).filter(a=>a.status==="live").map(a=>a.id)])).rows;
+ const sites=combineRadiusCases(Object.values(AREAS).filter(a=>a.status==="live").map(area=>({area,cases:rows.filter(r=>r.area_id===area.id).map(r=>r.data)})),[0,0],25000);
+ const payload=sites.map(data=>({data,b:data.geometry?bbox(data.geometry):data.bounds??[...data.centroid!,...data.centroid!]}));
+ await indexQuery(`WITH rows AS(SELECT x->'data' AS data,x->'b' AS b FROM jsonb_array_elements($1::jsonb)x), written AS(INSERT INTO law_map_sites SELECT data->>'id',(b->>0)::float,(b->>1)::float,(b->>2)::float,(b->>3)::float,data FROM rows ON CONFLICT(site_id) DO UPDATE SET min_lng=excluded.min_lng,min_lat=excluded.min_lat,max_lng=excluded.max_lng,max_lat=excluded.max_lat,data=excluded.data RETURNING site_id) DELETE FROM law_map_sites WHERE site_id NOT IN(SELECT data->>'id' FROM rows)`,[JSON.stringify(payload)]);
+}
+async function ensureSites(){await database();sitesReady??=(async()=>{if(!(await indexQuery("SELECT 1 FROM law_map_sites LIMIT 1")).rows.length)await rebuildSites();})().catch(e=>{sitesReady=undefined;throw e;});await sitesReady;}
 export async function syncCaseIndex(snapshot: MapSnapshot) {
   if (!process.env.DATABASE_URL) return;
   const db = await database();
@@ -130,8 +142,9 @@ export async function syncCaseIndex(snapshot: MapSnapshot) {
     "INSERT INTO law_map_index_meta VALUES($1,now()) ON CONFLICT(id) DO UPDATE SET updated_at=excluded.updated_at",
     [snapshot.jurisdiction],
   );
+  await rebuildSites();
   if (process.env.NEXT_RUNTIME && process.env.NODE_ENV !== "test")
-    revalidateTag(MAP_INDEX_TAG, { expire: 0 });
+    {revalidateTag(MAP_INDEX_TAG, { expire: 0 });revalidateTag("map-area:"+snapshot.jurisdiction,{expire:0});}
 }
 function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
   let geometry = c.geometry;
@@ -185,11 +198,11 @@ async function loadViewport(
     b = bufferedBounds(bounds);
   let rows: { area_id: string; data: MapCase }[] = [];
   if (process.env.DATABASE_URL) {
-    const db = await database();
+    await ensureSites();const db = await database();
     if (zoom >= 9)
       rows = (
         await db.query(
-          `SELECT area_id,data-'visual'-'popup' AS data FROM law_map_cases WHERE area_id=ANY($6::text[]) AND min_lng<=$3 AND max_lng>=$1 AND min_lat<=$4 AND max_lat>=$2 AND $5::int>=9 AND NOT coalesce((data->>'citywide')::boolean,false) ORDER BY area_id,case_id LIMIT 1001`,
+          `SELECT data->>'areaId' AS area_id,CASE WHEN $5::int<14 THEN data-'visual'-'geometry' ELSE data-'visual' END AS data FROM law_map_sites WHERE data->>'areaId'=ANY($6::text[]) AND min_lng<=$3 AND max_lng>=$1 AND min_lat<=$4 AND max_lat>=$2 AND $5::int>=9 AND NOT coalesce((data->>'citywide')::boolean,false) ORDER BY site_id LIMIT 1001`,
           [...b, zoom, areas.map((a) => a.id)],
         )
       ).rows;
@@ -213,14 +226,7 @@ async function loadViewport(
         )
       : [];
   const overrides = await privacyOverrides();
-  const grouped = combineRadiusCases(
-    areas.map((area) => ({
-      area,
-      cases: rows.filter((r) => r.area_id === area.id).map((r) => r.data),
-    })),
-    [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2],
-    25000,
-  );
+  const grouped = process.env.DATABASE_URL?rows.map(r=>r.data):combineRadiusCases(areas.map(area=>({area,cases:rows.filter(r=>r.area_id===area.id).map(r=>r.data)})),[(b[0]+b[2])/2,(b[1]+b[3])/2],25000);
   // Lightweight public extraction metadata is cached with the viewport; no images, source feeds or page text are loaded here.
   const [
     { readTimelineState },
@@ -265,18 +271,14 @@ async function loadViewport(
       }),
     );
   return {
-    cases: grouped.slice(0, 1000).map((c) => protectMapCase(c.areaId!, { ...publicFeature(c, c.areaId!, zoom), residentialPrivacy:residentialCase(c.areaId!,c.id.split(":").at(-1)!,c,overrides) }, overrides)),
+    cases: grouped.slice(0, 1000).map((c) => {const safe=protectMapCase(c.areaId!, { ...publicFeature(c, c.areaId!, zoom), residentialPrivacy:residentialCase(c.areaId!,c.id.split(":").at(-1)!,c,overrides) }, overrides);return zoom<CASE_OUTLINE_ZOOM?{...safe,geometry:null}:safe;}),
     summaries,
     truncated: rows.length > 1000,
     updatedAt: new Date().toISOString(),
     bounds: b,
   };
 }
-export const cachedViewport = unstable_cache(
-  loadViewport,
-  ["viewport-cases-v3"],
-  { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] },
-);
+export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v4-sites"],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";
@@ -397,38 +399,8 @@ export async function exportMapFeatures(cursor = "") {
 }
 
 /** Resolve linked site references on the server so shared links do not depend on map features arriving first. */
-export async function siteMembers(item: MapCase, areaId: string) {
-  if (!item.geometry || item.citywide) return;
-  const b = (item.bounds ?? bbox(item.geometry)).slice(0, 4) as Bounds,
-    areas = Object.values(AREAS).filter((a) => a.status === "live");
-  let rows: { area_id: string; data: MapCase }[] = [];
-  if (process.env.DATABASE_URL) {
-    const db = await database();
-    rows = (
-      await db.query(
-        "SELECT area_id,data-'visual'-'popup' AS data FROM law_map_cases WHERE area_id=ANY($1::text[]) AND min_lng<=$4 AND max_lng>=$2 AND min_lat<=$5 AND max_lat>=$3 ORDER BY area_id,case_id LIMIT 1000",
-        [areas.map((a) => a.id), ...b],
-      )
-    ).rows;
-  } else
-    for (const area of areas) {
-      const snapshot = await readMapSnapshot(area.id, {
-        bounds: b,
-        includeFlum: false,
-      });
-      rows.push(
-        ...(snapshot?.cases ?? []).map((data) => ({ area_id: area.id, data })),
-      );
-    }
-  const groups = combineRadiusCases(
-    areas.map((area) => ({
-      area,
-      cases: rows.filter((r) => r.area_id === area.id).map((r) => r.data),
-    })),
-    item.centroid ?? [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2],
-    25000,
-  );
-  return groups.find((g) =>
-    g.members?.some((m) => m.areaId === areaId && m.caseId === item.id),
-  )?.members;
+export async function siteMembers(item:MapCase,areaId:string){
+ if(!item.geometry||item.citywide)return;
+ if(process.env.DATABASE_URL){await ensureSites();const rows=await indexQuery("SELECT data->'members' AS members FROM law_map_sites WHERE data->'members' @> $1::jsonb LIMIT 1",[JSON.stringify([{areaId,caseId:item.id}])]);return rows.rows[0]?.members as MapCase["members"];}
+ return item.members;
 }

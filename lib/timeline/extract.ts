@@ -1,4 +1,5 @@
 import { recordUsage } from "./telemetry";
+import {aiBudget,reserveCost} from '../ai-budget';
 import { isWorkflowRecommendation, EXTRACTED_KEYS, type ExtractedKey, type PageText, type SourceDocument, type Speaker } from "./types";
 export type ExtractedValue = { value: string | null; page: number | null; quote: string | null; confidence: number; speakers?: Speaker[]; complete?: boolean; secondPass?: boolean };
 export type Extraction = Record<ExtractedKey, ExtractedValue>;
@@ -11,11 +12,13 @@ export const EXTRACTION_SCHEMA = {
 };
 export async function structuredResponse(name: string, schema: object, content: object[], instructions: string, options:{timeoutMs?:number;maxOutputTokens?:number}={}): Promise<unknown> {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
+  const model=process.env.OPENAI_EXTRACTION_MODEL??'gpt-4.1-mini',maxOutput=options.maxOutputTokens??(name==='case_evidence'?10000:name==='pdf_transcription'?12000:6000);
+  const reservation=await aiBudget.reserve(name,model,reserveCost(model,content,instructions,schema,maxOutput));
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST", headers: { Authorization: "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(options.timeoutMs??45000),
-    body: JSON.stringify({ model: process.env.OPENAI_EXTRACTION_MODEL ?? "gpt-4.1-mini", store: false,
-      instructions, input: [{ role: "user", content }], text: { format: { type: "json_schema", name, strict: true, schema } }, max_output_tokens: options.maxOutputTokens??16000 }),
+    body: JSON.stringify({ model, store: false,
+      instructions, input: [{ role: "user", content }], text: { format: { type: "json_schema", name, strict: true, schema } }, max_output_tokens: maxOutput }),
   });
   if (!response.ok) {
     const details = await response.json().catch(() => null);
@@ -24,7 +27,9 @@ export async function structuredResponse(name: string, schema: object, content: 
     throw new Error("Extraction API HTTP " + response.status + safeCode);
   }
   const result = await response.json();
-  await recordUsage(name, result.usage);
+  const cost=await aiBudget.settle(reservation,model,result.usage??{});
+  await recordUsage(name, result.usage,cost);
+  console.info('[ai:cost]',JSON.stringify({operation:name,model,cost,inputTokens:result.usage?.input_tokens,outputTokens:result.usage?.output_tokens}));
   if (result.status !== "completed") throw new Error("Extraction did not complete");
   const text = (result.output ?? []).flatMap((item: { content?: { type: string; text?: string }[] }) => item.content ?? []).filter((item: { type: string }) => item.type === "output_text").map((item: { text: string }) => item.text).join("");
   if (!text) throw new Error("Extraction returned no structured text");

@@ -2,7 +2,7 @@ import { approvedImageCheck } from "@/lib/maps/image-policy";
 import type { MapCase, MapVisual } from "@/lib/maps/types";
 import { getArea } from "@/lib/areas/registry";
 import { buildPopupModel, popupProjectName } from "@/lib/maps/popup-model";
-import { isWatching, setWatching, subscribeWatches, watchesFromMapCase } from "@/lib/watches";
+
 export const popupDisposers = new WeakMap<HTMLElement, () => void>();
 // Use text nodes, rather than HTML strings, for all city-supplied content.
 export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jurisdiction: string, catalog: MapCase[]): HTMLElement {
@@ -12,15 +12,8 @@ export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => vo
   const text = document.createElement("div"); text.className="law-popup-copy";
   const title = document.createElement("a"); title.href = item.href; title.className = "law-popup-title"; title.textContent = model.headline; text.append(title);
   if (model.explanation) { const explanation = document.createElement("p"); explanation.className = "law-popup-explanation"; explanation.textContent = model.explanation; text.append(explanation); }
-  const watchedProjects = watchesFromMapCase(item.areaId??jurisdiction,item,catalog);
-  const allWatched=()=>watchedProjects.every(isWatching);
-  const watchLabel = document.createElement("label"); watchLabel.className = "law-watch-toggle";
-  const watch = document.createElement("input"); watch.type = "checkbox"; watch.checked = allWatched(); watch.setAttribute("aria-label", "Watch " + item.title);
-  const watchText = document.createElement("span"); watchText.textContent = "Watch"; watchLabel.append(watch, watchText);
-  watchLabel.addEventListener("click", (event) => event.stopPropagation());
-  const watchError = document.createElement("p"); watchError.setAttribute("role", "status"); watchError.hidden = true;
-  watch.addEventListener("change", () => { try { const checked=watch.checked;for(const project of watchedProjects)setWatching(project,checked); watchError.hidden = true; } catch (error) { watch.checked = allWatched(); watchError.textContent = error instanceof Error ? error.message : "Could not save your watch."; watchError.hidden = false; } });
-  popupDisposers.set(card, subscribeWatches(() => { watch.checked = allWatched(); }));
+  const watchLabel=document.createElement("a");watchLabel.className="law-watch-toggle";watchLabel.textContent="Watch this project";watchLabel.href="/?project="+(item.areaId??jurisdiction)+"/"+item.id.split(":").at(-1)+"&watchProject=1";
+  const watchError=document.createElement("p");watchError.hidden=true;
   if (item.visual && approvedImageCheck(item.visual.approval)) {
     const exhibit = item.visual;
     const figure = document.createElement("figure"); figure.className = "law-popup-visual"; card.classList.add("law-popup-with-image");

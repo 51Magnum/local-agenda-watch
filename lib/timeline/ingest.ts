@@ -53,16 +53,19 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
     const id = documentId(document); run.checked++;
     const areaId = document.areaId ?? "nampa";
     let replaced = false;
+    const priorState=await store.read();
+    const previous=priorState.documents[id]??Object.values(priorState.documents).find(d=>(d.areaId??"nampa")===areaId&&d.title===document.title&&d.kind===document.kind&&d.caseIds.some(c=>document.caseIds.includes(c)));
     await withDocument(areaId,id,async()=>{
     try {
-      const stored=(await store.read()).documents[id];
+      const stored=previous;
       if(stored&&!stored.hash&&stored.state!=="failed-permanent"&&!retryDue(stored)){run.skipped++;return;}
       if (!officialDocumentUrl(document.url,areaId)) throw new Error("Invalid official source URL");
       if(document.content===undefined&&stored?.structured&&store.pages){const cached=await store.pages(id);document.content=cached[0]?.text;}
       const bytes = document.content === undefined ? await (dependencies.download ?? downloadDocument)(document.url,areaId) : new TextEncoder().encode(document.content);
       const hash = digest(bytes);
       dependencies.onChecked?.(document);
-      const before = (await store.read()).documents[id];
+      const currentState=await store.read();
+      const before = currentState.documents[id]??Object.values(currentState.documents).find(d=>(d.areaId??"nampa")===areaId&&d.hash===hash&&d.kind===document.kind&&d.caseIds.some(c=>document.caseIds.includes(c)))??previous;
       const same = before?.hash === hash && before.extractionVersion === extractionVersion;
       if(before?.hash===hash&&!retryDue(before)){run.skipped++;return;}
       const failCount=before?.hash===hash?before.failCount??0:0;
@@ -113,7 +116,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
           const decisionKeys = Object.keys(extracted).filter(k=>DECISION_KEYS.has(k as EvidenceField["key"]) && extracted[k as keyof Extraction].value!==null) as (keyof Extraction)[];
           let second:Partial<Extraction>={};
           if(decisionKeys.length && (dependencies.secondPass || (!dependencies.extract && process.env.OPENAI_API_KEY)) && deadline-Date.now()>45000){
-            try{second=await (dependencies.secondPass??verifySecondPass)(document,caseId,pages,decisionKeys);}catch{warnings.push("Independent pass unavailable; manual review required");}
+            try{second=await (dependencies.secondPass??verifySecondPass)(document,caseId,pages,decisionKeys);}catch(error){if(error instanceof Error&&/AI work deferred/.test(error.message))throw error;warnings.push("Independent pass unavailable; manual review required");}
           }
           for (const [key, value] of Object.entries(extracted)) {
             if (value.value === null || value.page === null || !value.quote) continue;
@@ -160,7 +163,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         const current=state.documents[id];
         if(deferred){if(current)current.error=message;return;}
         // Failed downloads never invalidate a previously published document version.
-        if(!current)state.documents[id]={...document,id,hash:"",pages:[],checkedAt:new Date().toISOString(),state:"error"};
+        if(!current)state.documents[id]={...document,id,hash:"",pages:[],checkedAt:new Date().toISOString(),state:"error",failCount:previous?.failCount??0,lastAttemptAt:previous?.lastAttemptAt};
         const doc=state.documents[id];
         doc.failCount=Math.min(3,(doc.failCount??0)+1);doc.lastAttemptAt=new Date().toISOString();doc.error=message;
         if(doc.failCount>=3)doc.state="failed-permanent";else if(replaced||doc.state!=="complete")doc.state="error";

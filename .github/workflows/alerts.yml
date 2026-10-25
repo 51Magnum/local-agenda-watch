@@ -1,0 +1,13 @@
+name: Daily project alerts
+on:
+  schedule:
+    - cron: '30 16 * * *'
+  workflow_dispatch:
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deliver confirmed project digests
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: curl --fail-with-body --max-time 300 -H "Authorization:Bearer $CRON_SECRET" https://www.localagendawatch.com/api/cron/alerts

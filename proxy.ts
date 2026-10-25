@@ -16,6 +16,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next({ headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" } });
   }
   const path=request.nextUrl.pathname;
+  if(["/nampa/toll-brothers-amity-happy-valley","/us/id/nampa/toll-brothers-amity-happy-valley"].includes(path)){const target=request.nextUrl.clone();target.pathname="/us/id/nampa/braeburn-creek";return NextResponse.redirect(target,308);}
   if(path.startsWith("/api/")||path.startsWith("/maplibre/"))return;
   const host=(request.headers.get("host")??"").toLowerCase().split(":")[0];
   for(const area of Object.values(AREAS)){

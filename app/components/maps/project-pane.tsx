@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PaneData } from "@/lib/maps/project-questions";
 import type { MapVisual } from "@/lib/maps/types";
 import { RESIDENT_QUESTIONS } from "@/lib/maps/project-questions";
-import { isWatching, setWatching, watchesFromMapCase } from "@/lib/watches";
+import AlertForm from "../alert-form";
 export default function ProjectPane({
   data,
   onClose,
@@ -21,20 +21,10 @@ export default function ProjectPane({
   savedPlace?: { distance: number };
   onWatch: () => void;
 }) {
-  const targets = data.item.members?.length
-    ? watchesFromMapCase(data.area.id, data.item, [data.item])
-    : [
-        {
-          jurisdiction: data.area.id,
-          href: data.item.href,
-          title: data.item.popup?.projectName ?? data.item.title,
-          caseIds: data.caseIds,
-        },
-      ];
   const ref = useRef<HTMLElement>(null),
     start = useRef<number | null>(null);
   const [size, setSize] = useState<"peek" | "half" | "full">("half"),
-    [watch, setWatch] = useState(() => targets.every(isWatching)),
+    [watchForm, setWatchForm] = useState(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("watchProject")==="1"),
     [copied, setCopied] = useState(false),
     [error, setError] = useState("");
   const item = data.item;
@@ -251,7 +241,7 @@ export default function ProjectPane({
               {!data.participationClosed && data.calendarHref && (
                 <a href={data.calendarHref}>Add to calendar</a>
               )}
-              <button onClick={onWatch}>Watch this place</button>
+              <button onClick={onWatch}>Watch an address</button>
             </div>
             <small>
               Dates can change. Confirm with the official notice. Alerts are
@@ -287,23 +277,9 @@ export default function ProjectPane({
               >
                 {copied ? "Link copied" : "Share"}
               </button>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={watch}
-                  onChange={(e) => {
-                    try {
-                      for (const target of targets)
-                        setWatching(target, e.target.checked);
-                      setWatch(e.target.checked);
-                    } catch (e) {
-                      setError((e as Error).message);
-                    }
-                  }}
-                />{" "}
-                Watch project
-              </label>
+              <button onClick={()=>setWatchForm(v=>!v)}>Watch this project</button>
             </div>
+            {watchForm&&<section aria-label="Watch this project"><AlertForm target={{kind:"project",areaId:data.area.id,caseId:item.id.split(":").at(-1)!}}/></section>}
             <p>
               Updated automatically from official records · last checked{" "}
               {date(data.updatedAt)}

@@ -31,6 +31,7 @@ import type { PaneData } from "@/lib/maps/project-questions";
 import { unpackViewport } from "@/lib/maps/viewport-wire";
 import ThemeSelector from "../theme-selector";
 import ProjectFinder from "./project-finder";
+const AlertForm = dynamic(()=>import("../alert-form"));
 const InterestForm = dynamic(() => import("../locations/interest-form"));
 const ProjectPane = dynamic(() => import("./project-pane"));
 import MapImageViewer from "./map-image-viewer";
@@ -766,10 +767,10 @@ export default function MapHome() {
         cells = gridCells(bounds, z);
       setZoom(z);
       setLoading(true);
-      const boundaryKey = snapBounds(bounds, z).join(",");
+      const boundaryKey = "static-v1";
       let boundaryRequest = boundaryCache.current.get(boundaryKey);
       if (!boundaryRequest) {
-        boundaryRequest = fetch("/api/map/boundaries?" + new URLSearchParams({ bbox: boundaryKey }))
+        boundaryRequest = fetch("/map-data/boundaries.json")
           .then((r) => { if (!r.ok) throw Error("Boundaries unavailable"); return r.json(); });
         boundaryCache.current.set(boundaryKey, boundaryRequest);
         if (boundaryCache.current.size > 24) boundaryCache.current.delete(boundaryCache.current.keys().next().value!);
@@ -785,7 +786,7 @@ export default function MapHome() {
       try {
         const responses = await Promise.all(
           cells.map(async (cell) => {
-            const key = cell.join(",") + "@" + z + "@" + revision.current;
+            const key = cell.join(",") + "@" + z;
             if (cache.current.has(key)) return cache.current.get(key)!;
             let promise = inflight.current.get(key);
             if (!promise) {
@@ -794,7 +795,6 @@ export default function MapHome() {
                   new URLSearchParams({
                     bbox: cell.join(","),
                     zoom: String(z),
-                    v: revision.current,
                     compact: "1",
                   }),
               )
@@ -1326,7 +1326,7 @@ export default function MapHome() {
               {watchPlace?.label ??
                 "Tell us which area you would like us to track."}
             </p>
-            <InterestForm
+            {dialog==="watch"&&watchPlace?<AlertForm target={{kind:"place",label:watchPlace.label,coordinates:watchPlace.coordinates,radiusMiles:watchPlace.radius??1}} onSaved={()=>{try{localStorage.setItem(PLACE_KEY,JSON.stringify(watchPlace));setSavedPlace(watchPlace);}catch{}}}/>:<InterestForm
               key={dialog + (watchPlace?.label ?? "")}
               kind={dialog === "watch" ? "follow" : "coverage"}
               areaName={
@@ -1347,7 +1347,7 @@ export default function MapHome() {
                   }
                 }
               }}
-            />
+            />}
           </section>
         </div>
       )}

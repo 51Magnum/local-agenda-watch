@@ -2,7 +2,7 @@ import { cachedViewport } from "@/lib/maps/case-index";
 import { parseMapBounds } from "@/lib/maps/radius";
 import { snapBounds, zoomTier } from "@/lib/maps/viewport";
 import { withDbTransfer, currentDbTransfer } from "@/lib/db-transfer";
-import { packViewport } from "@/lib/maps/viewport-wire";
+import { roundMapPayload, packViewport } from "@/lib/maps/viewport-wire";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 export async function GET(request: Request) {
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         readBytes: metrics?.readBytes ?? 0,
       }),
     );
-    return Response.json(url.searchParams.get("compact") === "1" ? packViewport(data) : data, {
+    return Response.json(roundMapPayload(url.searchParams.get("compact") === "1" ? packViewport(data) : data), {
       headers: {
         "Cache-Control":
           "public, max-age=60, s-maxage=3600, stale-while-revalidate=86400",

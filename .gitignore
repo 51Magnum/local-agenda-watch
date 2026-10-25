@@ -50,3 +50,5 @@ next-env.d.ts
 
 # Offline FLUM preparation test bytecode
 /scripts/__pycache__/
+
+/public/map-data/

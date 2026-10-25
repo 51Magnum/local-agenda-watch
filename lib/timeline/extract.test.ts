@@ -1,3 +1,4 @@
+vi.mock("../ai-budget",()=>({aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
 import { afterEach, expect, it, vi } from "vitest";
 import { ocrMissingPages } from "./extract";
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
