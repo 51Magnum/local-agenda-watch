@@ -1,3 +1,4 @@
+import {hearingDateTime} from "@/lib/areas/format";
 import {cleanResidentTitle,cleanResidentProse} from "@/lib/resident-copy";
 import type { AreaDefinition } from "@/lib/areas/registry";
 import type { Hearing, ScheduledMeeting } from "@/lib/localities/types";
@@ -15,7 +16,7 @@ function shortDate(value: string, area: AreaDefinition, weekday = false) {
 function meetingLabel(meeting: ScheduledMeeting, area: AreaDefinition) {
   const body = meeting.body === area.bodies.planning.id ? (area.type === "county" ? area.bodies.planning.label.replace(/ Commission$/, "") : area.bodies.planning.shortLabel) : meeting.body === area.bodies.decision.id ? area.bodies.decision.label : meeting.bodyLabel || meeting.body;
   const time = meeting.time?.match(/^(\d{1,2}):(\d{2})$/);
-  return body + ", " + shortDate(meeting.date, area, true) + (time ? " · " + (+time[1] % 12 || 12) + (time[2] === "00" ? "" : ":" + time[2]) + (+time[1] >= 12 ? " PM" : " AM") : "");
+  return body + " · " + hearingDateTime(meeting.date, area.timezone) + (time ? " · " + (+time[1] % 12 || 12) + (time[2] === "00" ? "" : ":" + time[2]) + (+time[1] >= 12 ? " PM" : " AM") + (area.timezone==="America/Denver"?" Mountain Time":" "+area.timezone) : "");
 }
 /** Reuse previously extracted prose without another model call or mixing document revisions. */
 export function popupApplicationCopy(fields: EvidenceField[]) {
@@ -62,7 +63,7 @@ export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: H
   } else {
     const upcoming = meetings.find(m => m.date >= today && !m.continuedNote);
     if (upcoming) progress.push({ label: meetingLabel(upcoming, area), state: "current" });
-    else if (item.nextHearing) progress.push({ label: item.nextHearing.body + ", " + shortDate(item.nextHearing.date, area, true), state: "current" });
+    else if (item.nextHearing) progress.push({ label: item.nextHearing.body + " · " + hearingDateTime(item.nextHearing.date, area.timezone), state: "current" });
     else progress.push({ label: "Under review, no hearing set yet", state: "current" });
     progress.push({ label: "Decision", state: "future" });
   }

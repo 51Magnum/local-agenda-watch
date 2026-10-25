@@ -38,13 +38,13 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
     // A verified authored project uses its latest application figures, never the older neighborhood notice.
     if (project) {
       popup.projectName = project.name ?? popup.projectName;
-      const latest = project.summary.match(/application proposes ([\d,]+) (?:detached )?homes on (?:about )?([\d.]+) acres/i);
+      const latest = project.summary.match(/application[^;]*?proposes ([\d,]+) (?:detached )?homes on (?:about )?([\d.]+) acres/i);
       const extractedCopy = popupApplicationCopy(fields);
       const knownSources = project.sourceDocuments?.map(d => d.url.split("#")[0]) ?? [];
       const differentApplication = fields.some(f => f.sourceKind === "staff-report" && ["requestSummary", "units", "acres", "popupHeadline"].includes(f.key) && !knownSources.includes(f.sourceUrl.split("#")[0]));
       if (latest && !differentApplication) {
         if (!extractedCopy.headline) popup.headline = latest[1] + " new homes on " + latest[2] + " acres";
-        const applicant = project.summary.match(/([A-Z][\w]+(?: [A-Z][\w]+)*)[’']s? [A-Z][a-z]+ application/);
+        const applicant = project.summary.match(/([A-Z][\w]+(?: [A-Z][\w]+)*)[’']s? (?:[A-Z][a-z]+ )?application/);
         if (applicant && !extractedCopy.explanation) { popup.explanation = applicant[1] + " wants to add this land to " + config.area!.name + " and build a neighborhood of single-family homes."; popup.aiGenerated = false; }
       }
     }

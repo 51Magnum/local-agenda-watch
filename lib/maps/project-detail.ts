@@ -232,6 +232,6 @@ async function detail(
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v7"],
+  ["map-project-questions-v8"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );

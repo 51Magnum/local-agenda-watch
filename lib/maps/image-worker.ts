@@ -1,3 +1,5 @@
+import {privacyOverrides} from "@/lib/residential-privacy-store";
+import {residentialCase} from "@/lib/residential-privacy";
 import sharp from "sharp";
 import {createHash} from "node:crypto";
 import {JURISDICTIONS} from "./jurisdictions";
@@ -16,10 +18,11 @@ import type {Hearing} from "@/lib/localities/types";
 import type {MapVisual} from "./types";
 export async function seedImageQueue(){let total=0;for(const a of Object.values(JURISDICTIONS).filter(a=>a.area?.status==="live")){const cases=await mapImageCases(a.id);await enqueueImages(cases.map(c=>({areaId:a.id,caseId:c.id})));total+=cases.length;}return total;}
 export async function imageCoverage(){
+ const overrides=await privacyOverrides();
  const rows=await imageReviews(),active=displayedImageReviews(rows),result=[];
  for(const area of Object.values(JURISDICTIONS).filter(a=>a.area?.status==="live")){
  const cases=await mapImageCases(area.id);let plans=0,aerial=0,fallback=0;
- for(const c of cases){const v=active.find(r=>r.areaId===area.id&&r.caseIds.includes(c.id))?.visual;if(v?.approval?.generated)fallback++;else if(v?.approval?.type==="vicinity/aerial exhibit")aerial++;else if(v)plans++;}
+ for(const c of cases){const v=residentialCase(area.id,c.id,{},overrides)?undefined:active.find(r=>r.areaId===area.id&&r.caseIds.includes(c.id))?.visual;if(v?.approval?.generated)fallback++;else if(v?.approval?.type==="vicinity/aerial exhibit")aerial++;else if(v)plans++;}
  result.push({area:area.id,cases:cases.length,geometry:cases.filter(c=>c.hasGeometry&&!c.citywide).length,plans,aerial,real:plans+aerial,fallback,empty:cases.length-plans-aerial-fallback});
  }return result;
 }

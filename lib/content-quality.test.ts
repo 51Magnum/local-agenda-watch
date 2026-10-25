@@ -12,3 +12,5 @@ it("formats hearing dates identically in summer, winter and date-only records",(
  expect(hearingDateTime("2026-12-16T01:00:00Z")).toBe("Tue, Dec 15, 2026 · 6 PM Mountain Time");
  expect(hearingDateTime("2026-11-19")).toBe("Thu, Nov 19, 2026");
 });
+
+it("preserves official mixed-case names and zoning codes",()=>{expect(cleanResidentTitle("WinCo Wells final plat")).toBe("WinCo Wells Final Plat");expect(cleanResidentTitle("MU-RG")).toBe("MU-RG");});
