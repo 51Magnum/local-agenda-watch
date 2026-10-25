@@ -1,6 +1,6 @@
 import {caseReportPages} from "./timeline/report-pages";
 import {downloadDocument,digest} from "./timeline/ingest";
-import {extractNativePdfPages,ocrMissingPages} from "./timeline/extract";
+import {extractNativePdfChunk,ocrMissingPages} from "./timeline/extract";
 import {cacheContentPages} from "./project-content-store";
 import {backfillDecisionDates} from "./maps/decision-backfill";
 import {createHash} from "node:crypto";
@@ -28,14 +28,19 @@ export async function enrichProjectContent({budgetMs=240000,areaId,caseId}:{budg
    const state=store.readCase?await store.readCase(config.id,[h.appId]):await store.read();
    const docs=Object.values(state.documents).filter(d=>(d.areaId??"nampa")===config.id&&d.caseIds.includes(h.appId)&&["staff-report","case-record"].includes(d.kind)).sort((a,b)=>Number(a.kind!=="staff-report")-Number(b.kind!=="staff-report")||(sourceImageDate(b.title)??"").localeCompare(sourceImageDate(a.title)??"")||b.checkedAt.localeCompare(a.checkedAt));
    const fingerprint=createHash("sha256").update("resident-content-v1"+JSON.stringify([h.displayTitle,h.appScope,h.description,docs.map(d=>[d.id,d.hash])])).digest("hex");
-   if(old[h.appId]?.fingerprint===fingerprint&&old[h.appId].status!=="deferred"){counts.cached++;continue;}
+   if(old[h.appId]?.fingerprint===fingerprint&&(old[h.appId].status!=="deferred"||Date.parse(old[h.appId].retryAt??"")>Date.now())&&!docs.some(d=>d.contentNextPage!=null&&d.contentNextPage<=(d.contentTotalPages??0))){counts.cached++;continue;}
    counts.checked++;const copy=popupApplicationCopy(publicFields(state,[h.appId],config.id));
    const value:ProjectContent={fingerprint,headline:copy.headline??cleanResidentTitle(h.displayTitle??h.appScope??h.appTypeLabel,h.appTypeLabel),explanation:copy.explanation,aiGenerated:Boolean(copy.explanation),status:copy.explanation?"ready":"fallback",checkedAt:new Date().toISOString(),impacts:[]};
    const doc=docs[0];
-   if(doc&&!copy.explanation){
+   if(doc&&(doc.kind==="staff-report"||!copy.explanation)){
     let pages=store.pages?await store.pages(doc.id):doc.pages;
-    if(!pages?.length&&doc.kind==="staff-report"&&Date.now()<deadline-60000)try{
-      const bytes=await downloadDocument(doc.url,config.id,{timeoutMs:25000});pages=await extractNativePdfPages(bytes);if(pages.every(p=>p.text.trim().length<30))pages=await ocrMissingPages(bytes,pages);doc.hash=digest(bytes);await cacheContentPages(doc.id,doc.hash,pages);value.fingerprint=createHash("sha256").update("resident-content-v1"+JSON.stringify([h.displayTitle,h.appScope,h.description,docs.map(d=>[d.id,d.hash])])).digest("hex");
+    if((!pages?.length||doc.contentNextPage!=null&&doc.contentNextPage<=(doc.contentTotalPages??0))&&doc.kind==="staff-report"&&Date.now()<deadline-60000)try{
+      const bytes=await downloadDocument(doc.url,config.id,{timeoutMs:25000,maxBytes:128000000}),hash=digest(bytes);
+      const chunk=await extractNativePdfChunk(bytes,{startPage:hash===doc.hash?doc.contentNextPage??1:1,deadline:Math.min(deadline-35000,Date.now()+50000)});
+      if(chunk.nextPage>chunk.totalPages&&chunk.pages.length&&chunk.pages.every(p=>p.text.trim().length<30))chunk.pages=await ocrMissingPages(bytes,chunk.pages);
+      pages=hash===doc.hash?[...new Map([...(pages??[]),...chunk.pages].map(p=>[p.page,p])).values()].sort((a,b)=>a.page-b.page):chunk.pages;
+      doc.hash=hash;doc.contentNextPage=chunk.nextPage;doc.contentTotalPages=chunk.totalPages;await cacheContentPages(doc.id,hash,chunk.pages,chunk);value.fingerprint=createHash("sha256").update("resident-content-v1"+JSON.stringify([h.displayTitle,h.appScope,h.description,docs.map(d=>[d.id,d.hash])])).digest("hex");
+
     }catch(e){errors.push(config.id+"/"+h.appId+" report: "+(e instanceof Error?e.message:"unavailable"));}
 
     pages=caseReportPages(pages??[],h.appId,/packet/i.test(doc.title)||doc.caseIds.length>5);
@@ -49,6 +54,8 @@ export async function enrichProjectContent({budgetMs=240000,areaId,caseId}:{budg
      for(const [key,label]of Object.entries(labels)){const f=valid(key);if(f)value.impacts.push({label,value:cleanResidentProse(f.value!),url:doc.url+"#page="+f.page});}
     }catch(e){value.status="deferred";counts.deferred++;errors.push(config.id+"/"+h.appId+": "+(e instanceof Error?e.message:"AI unavailable"));}
    }
+   if(doc?.contentNextPage!=null&&doc.contentNextPage<=(doc.contentTotalPages??0)){value.status="deferred";value.retryAt=new Date(Date.now()+300000).toISOString();}
+   else if(value.status==="deferred")value.retryAt=new Date(Date.now()+86400000).toISOString();
    if(value.status==="fallback")counts.fallback++;
    await saveProjectContent(config.id,h.appId,value);
   }

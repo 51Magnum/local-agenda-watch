@@ -1,3 +1,4 @@
+import {caseReportPages} from "./timeline/report-pages";
 import {expect,it,vi,afterEach} from "vitest";
 import {cleanResidentTitle,readableLocation,cleanResidentProse} from "./resident-copy";
 import {hearingDateTime} from "./areas/format";
@@ -14,3 +15,8 @@ it("formats hearing dates identically in summer, winter and date-only records",(
 });
 
 it("preserves official mixed-case names and zoning codes",()=>{expect(cleanResidentTitle("WinCo Wells final plat")).toBe("WinCo Wells Final Plat");expect(cleanResidentTitle("MU-RG")).toBe("MU-RG");});
+
+it("isolates a case's physical packet pages and ignores a multi-case table of contents",()=>{
+ const pages=[{page:1,text:"H-2026-0001 H-2026-0002 H-2026-0003 H-2026-0004",method:"native" as const},{page:2,text:"H-2026-0002 staff report",method:"native" as const},{page:3,text:"Proposed site layout",method:"native" as const},{page:4,text:"H-2026-0003 other case",method:"native" as const}];
+ expect(caseReportPages(pages,"H-2026-0002",true).map(p=>p.page)).toEqual([2,3]);
+});

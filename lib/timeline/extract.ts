@@ -67,15 +67,14 @@ export async function extractFields(document: SourceDocument, caseId: string, pa
   // The ingestion boundary validates each candidate independently and records omissions.
   return value as Extraction;
 }
-export async function extractNativePdfPages(bytes: Uint8Array): Promise<PageText[]> {
-  const { getDocumentProxy } = await import("unpdf");
-  const pdf = await getDocumentProxy(new Uint8Array(bytes)),pages:PageText[]=[];
-  try {
-    // Sequential extraction bounds decoded-image/font memory in large meeting packets.
-    for(let n=1;n<=pdf.numPages;n++){const page=await pdf.getPage(n),content=await page.getTextContent();pages.push({page:n,text:content.items.map(item=>"str" in item?item.str:"").join(" "),method:"native"});page.cleanup();await pdf.cleanup();}
-    return pages;
-  } finally { await pdf.loadingTask.destroy(); }
+export async function extractNativePdfChunk(bytes:Uint8Array,{startPage=1,deadline=Date.now()+120000,allowLarge=true}:{startPage?:number;deadline?:number;allowLarge?:boolean}={}){
+ const {getDocumentProxy}=await import("unpdf"),pdf=await getDocumentProxy(new Uint8Array(bytes)),pages:PageText[]=[];let nextPage=startPage;
+ try{if(!allowLarge&&pdf.numPages>200)throw new Error("PDF exceeds 200-page processing limit; split for review");
+  for(let n=startPage;n<=pdf.numPages;n++){if(Date.now()>deadline-1000||process.memoryUsage().rss>700*1024*1024)break;const page=await pdf.getPage(n),content=await page.getTextContent();pages.push({page:n,text:content.items.map(item=>"str" in item?item.str:"").join(" ").replace(/\u0000/g,""),method:"native"});page.cleanup();await pdf.cleanup();nextPage=n+1;}
+  return {pages,nextPage,totalPages:pdf.numPages};
+ }finally{await pdf.loadingTask.destroy();}
 }
+export async function extractNativePdfPages(bytes:Uint8Array):Promise<PageText[]>{return(await extractNativePdfChunk(bytes,{allowLarge:false})).pages;}
 export async function ocrMissingPages(bytes: Uint8Array, pages: PageText[]): Promise<PageText[]> {
   const scanned = pages.filter((p) => p.method === "native" && p.text.trim().length < 30);
   if (!scanned.length) return pages;
