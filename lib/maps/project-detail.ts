@@ -156,6 +156,7 @@ async function detail(
     ],
   );
   const sensitive=residentialCase(areaId,caseId,{hearing,record,item},await privacyOverrides());
+  const continuances=continuanceHistory(record?.events ?? (hearing?.meetings??[]).map(m=>({...m,note:m.continuedNote??undefined})),next?.startsAt.slice(0,10));
   const result:PaneData = {
     item,
     officialRecords,
@@ -176,11 +177,11 @@ async function detail(
       ? "Citywide change — " + area.name
       : (project?.location ?? record?.address),
     history: [
-      ...continuanceHistory(record?.events ?? (hearing?.meetings??[]).map(m=>({...m,note:m.continuedNote??undefined})),next?.startsAt.slice(0,10)).map(row=>({...row,source:residentPaneHref(area,row.source)})),
+      ...continuances.map(row=>({...row,source:residentPaneHref(area,row.source)})),
       ...progress
-        .filter((p) => p.state === "done" || p.state === "past")
+        .filter((p) => (p.state === "done" || p.state === "past") && (!continuances.length || !/continued|continuance/i.test(p.label)))
         .map((p) => ({ label: p.label })),
-      ...evidence.history.map((row) => ({
+      ...evidence.history.filter(row=>!continuances.length || !/continued|continuance/i.test(row.label)).map((row) => ({
         ...row,
         source: residentPaneHref(area, row.source),
       })),
@@ -219,6 +220,6 @@ async function detail(
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v5"],
+  ["map-project-questions-v6"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );
