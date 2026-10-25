@@ -1,0 +1,77 @@
+name: Extract project images
+on:
+  schedule:
+    # 05:15 Denver, after the daily sweep; skip the inactive DST partner.
+    - cron: '15 11,12 * * *'
+  workflow_dispatch:
+    inputs:
+      test_cases:
+        description: "Optional comma-separated area:case pairs to verify instead of the full backfill"
+        type: string
+        default: ""
+      cases:
+        description: 'Maximum cases in this backfill batch (one per API invocation)'
+        type: number
+        default: 40
+permissions: {}
+concurrency:
+  group: case-image-backfill
+  cancel-in-progress: false
+jobs:
+  images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Run resumable image queue
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          CASES: ${{ inputs.cases || 40 }}
+          TEST_CASES: ${{ inputs.test_cases || '' }}
+        shell: bash
+        run: |
+          if [ -z "$CRON_SECRET" ]; then echo '::notice::Configure CRON_SECRET to run image extraction.'; exit 0; fi
+          HOUR=$(TZ=America/Denver date +%H)
+          if [ "$MANUAL" != 'true' ] && [ "$HOUR" != '05' ]; then exit 0; fi
+          COUNT=$CASES
+          if ! [[ "$COUNT" =~ ^[0-9]+$ ]]; then COUNT=40; fi
+          if [ "$COUNT" -gt 40 ]; then COUNT=40; fi
+          BASE=https://www.localagendawatch.com/api/cron/case-images
+          curl --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" "$BASE?coverage=1" > before.json
+          if [ -n "$TEST_CASES" ]; then
+            IFS=',' read -ra TARGETS <<< "$TEST_CASES"
+            for TARGET in "${TARGETS[@]}"; do
+              IFS=':' read -r AREA CASE <<< "$TARGET"
+              if ! [[ "$AREA" =~ ^[a-z-]+$ && "$CASE" =~ ^[A-Z0-9-]+$ ]]; then exit 1; fi
+              curl --get --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" --data-urlencode "area=$AREA" --data-urlencode "case=$CASE" "$BASE" > result.json || exit 1
+              cat result.json; echo
+            done
+            curl --fail-with-body --silent --show-error --max-time 90 -H "Authorization: Bearer $CRON_SECRET" "$BASE?coverage=1" > after.json
+            echo 'Before:'; cat before.json; echo
+            echo 'After:'; cat after.json; echo
+            exit 0
+          fi
+          # Seed once, then independent one-case requests share the durable queue.
+          curl --fail-with-body --silent --show-error --max-time 90 -H "Authorization: Bearer $CRON_SECRET" "$BASE?fallback=1&seed=1" > seed.json || exit 1
+          cat seed.json; echo
+          for ((i=0; i<125; i++)); do
+            PIDS=()
+            for ((worker=0; worker<8; worker++)); do
+              curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 90 -H "Authorization: Bearer $CRON_SECRET" "$BASE?fallback=1" > "fallback-$worker.json" &
+              PIDS+=("$!")
+            done
+            for PID in "${PIDS[@]}"; do wait "$PID" || exit 1; done
+            cat fallback-*.json; echo
+            if grep -q '"status":"idle"' fallback-*.json; then break; fi
+          done
+          for ((i=0; i<COUNT; i++)); do
+            QUERY=''
+            if [ "$i" -eq 0 ]; then QUERY='?seed=1'; fi
+            curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 290 -H "Authorization: Bearer $CRON_SECRET" "$BASE$QUERY" > result.json || exit 1
+            cat result.json
+            echo
+            if grep -q '"status":"idle"' result.json; then break; fi
+          done
+          curl --fail-with-body --silent --show-error --max-time 290 -H "Authorization: Bearer $CRON_SECRET" "$BASE?coverage=1" > after.json
+          echo 'Before:'; cat before.json; echo
+          echo 'After:'; cat after.json; echo

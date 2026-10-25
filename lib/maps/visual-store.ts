@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-export type VisualAsset = { preview?:import("./preview-crop").VisualPreview; image: string; page?: number; approval?: import("./image-policy").ImageCheck };
+export type VisualAsset = { generated?:{geometryHash:string;imageryUrl:string;attribution:string}; preview?:import("./preview-crop").VisualPreview; image: string; page?: number; approval?: import("./image-policy").ImageCheck };
 let pool: Pool | undefined, initialized: Promise<unknown> | undefined;
 async function database() {
   pool ??= new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:10000});

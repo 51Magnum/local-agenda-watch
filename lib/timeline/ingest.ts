@@ -9,15 +9,16 @@ import type { EvidenceStore } from "./store";
 import { extractFields, extractNativePdfPages, ocrMissingPages, validateExtraction, EXTRACTION_VERSION, verifySecondPass, type Extraction } from "./extract";
 export const digest = (value: string | Uint8Array) => createHash("sha256").update(value).digest("hex");
 export const officialDocumentUrl = allowedSource;
-export async function downloadDocument(url: string, areaId = "nampa"): Promise<Uint8Array> {
+export async function downloadDocument(url: string, areaId = "nampa",options:{maxBytes?:number;timeoutMs?:number}={}): Promise<Uint8Array> {
+  const maxBytes=options.maxBytes??45000000;
   if (!officialDocumentUrl(url, areaId)) throw new Error("Document is outside the official source allowlist");
   const energov = parseEnerGovDocumentReference(url);
   if (energov) {try{const bytes=await downloadEnerGovReference(energov);recordHost(areaId,url,"worked");return bytes;}catch(error){recordHost(areaId,url,isBlockedSource(error)?"blocked":"unavailable");throw error;}}
-  const response = await sourceRequest(url,areaId,"application/pdf",15000);
-  if (Number(response.headers.get("content-length")) > 45000000) throw new Error("Document exceeds 45 MB limit");
+  const response = await sourceRequest(url,areaId,"application/pdf",options.timeoutMs??15000);
+  if (Number(response.headers.get("content-length")) > maxBytes) throw new Error("Document exceeds configured download limit");
   const reader=response.body?.getReader();if(!reader)throw new Error("Empty document response");
   const chunks:Uint8Array[]=[];let length=0;
-  for(;;){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>45000000){await reader.cancel();throw new Error("Document exceeds 45 MB limit");}chunks.push(value);}
+  for(;;){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>maxBytes){await reader.cancel();throw new Error("Document exceeds configured download limit");}chunks.push(value);}
   const bytes=new Uint8Array(Buffer.concat(chunks));
   if(!Buffer.from(bytes.subarray(0,1024)).includes(Buffer.from("%PDF-")))throw new Error("Expected PDF; received HTML or unsupported file");
   return bytes;

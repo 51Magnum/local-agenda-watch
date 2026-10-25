@@ -1,6 +1,4 @@
-import { publishCaseImage } from "./image-review-store";
 import { canonicalAreaHref } from "@/lib/areas/registry";
-import { refreshCaseVisual } from "./visuals";
 import { bbox, feature, simplify } from "@turf/turf";
 import type { Feature } from "geojson";
 import type { Hearing } from "@/lib/localities/types";
@@ -43,11 +41,10 @@ function hearingFromFeature(config: JurisdictionConfig, item: Feature): Hearing 
 export async function buildMapSnapshot(config: JurisdictionConfig, previous?: MapSnapshot, options: { deadline?: number } = {}): Promise<MapSnapshot> {
   const deadline = options.deadline ?? Date.now() + 70000, now = new Date(), warnings: string[] = [];
   const oldCases = new Map(previous?.cases.map((c) => [c.id, c]));
-  const [layers, feed, flum, reports] = await Promise.all([
+  const [layers, feed, flum] = await Promise.all([
     Promise.all(config.caseGeometry.layers.map(async (url) => { try { return { url, data: await geoQuery(url, config.caseGeometry.where ? { where: config.caseGeometry.where } : {}) }; } catch { warnings.push("A case boundary layer is unavailable; existing cached outlines are retained."); return { url, data: undefined }; } })),
     config.loadCases?.().catch(() => { warnings.push("The case schedule is unavailable; source layer records are shown."); return undefined; }),
     previous?.flum && Date.now() - Date.parse(previous.flum.updatedAt) < WEEK ? Promise.resolve(previous.flum) : config.flum.layerUrl ? fetchFlum(config).catch(() => { warnings.push("Future land use is temporarily unavailable or out of date."); return previous?.flum; }) : Promise.resolve(undefined),
-    config.loadCaseReports?.(Math.min(deadline-16000,Date.now()+16000)).catch(()=>[]) ?? Promise.resolve([]),
   ]);
   const hearings = new Map(caseCatalog(feed).map((h) => [h.appId, h]));
   const retained = new Set<string>();
@@ -91,13 +88,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
       if (!geometry && old?.geometry && old.source === "parcel match") { geometry = old.geometry; source = old.source; confidence = old.confidence; sourceUrl = old.sourceUrl; geometryUpdatedAt = old.geometryUpdatedAt; }
       if (!geometry && old?.geometry && layers.some((l) => !l.data)) { geometry = old.geometry; source = old.source; confidence = old.confidence; sourceUrl = old.sourceUrl; geometryUpdatedAt = old.geometryUpdatedAt; }
     }
-    let visual = old?.visual, visualCheckedAt = old?.visualCheckedAt;
-    if (!config.caseVisuals?.[hearing.appId] && Date.now() < deadline - 16000 && config.recordClient?.downloadPublicAttachment) {
-      try { visual = await refreshCaseVisual(config, hearing, deadline, reports.filter(r=>r.caseIds.includes(hearing.appId))) ?? visual; }
-      catch { console.error("[map-visual] City files unavailable", hearing.appId); }
-      if(visual?.approval)await publishCaseImage(config.id,[hearing.appId],visual);
-      visualCheckedAt = now.toISOString();
-    }
+    const visual = old?.visual, visualCheckedAt = old?.visualCheckedAt;
     let stage = normalizeMapStage(config, hearing);
     const meeting = hearing.meetings.filter((m) => !m.continuedNote && m.date >= today && (stage !== "Council/Board" || /council|board/i.test(m.body))).sort((a, b) => a.date.localeCompare(b.date))[0];
     const presentation = config.presentation?.(hearing, plan);

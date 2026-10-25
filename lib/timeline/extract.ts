@@ -9,13 +9,13 @@ export const EXTRACTION_SCHEMA = {
   properties: Object.fromEntries(EXTRACTED_KEYS.map((key) => [key, { type: "object", additionalProperties: false,
     required: ["value", "page", "quote", "confidence", "speakers", "complete"], properties: { value: nullableString, page: { type: ["integer", "null"] }, quote: nullableString, confidence: { type: "number" }, complete: {type:"boolean"}, speakers: {type:"array",items:{type:"object",additionalProperties:false,required:["name","position","quote","page"],properties:{name:{type:"string"},position:{type:"string",enum:["support","oppose","neutral"]},quote:{type:"string"},page:{type:"integer"}}}} } }])),
 };
-export async function structuredResponse(name: string, schema: object, content: object[], instructions: string): Promise<unknown> {
+export async function structuredResponse(name: string, schema: object, content: object[], instructions: string, options:{timeoutMs?:number;maxOutputTokens?:number}={}): Promise<unknown> {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST", headers: { Authorization: "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
-    signal: AbortSignal.timeout(45000),
+    signal: AbortSignal.timeout(options.timeoutMs??45000),
     body: JSON.stringify({ model: process.env.OPENAI_EXTRACTION_MODEL ?? "gpt-4.1-mini", store: false,
-      instructions, input: [{ role: "user", content }], text: { format: { type: "json_schema", name, strict: true, schema } }, max_output_tokens: 16000 }),
+      instructions, input: [{ role: "user", content }], text: { format: { type: "json_schema", name, strict: true, schema } }, max_output_tokens: options.maxOutputTokens??16000 }),
   });
   if (!response.ok) {
     const details = await response.json().catch(() => null);

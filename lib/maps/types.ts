@@ -18,6 +18,7 @@ export type JurisdictionConfig = {
   caseTypes: Record<string, string>; citywideTypes: string[];
   caseVisuals?: Record<string, MapVisual>;
   reviewedApplications?:Record<string,{headline:string;explanation:string;reportUrl:string;page:number;sourceDate:string}>;
+  loadCaseDocuments?: (caseId:string,context:import("./image-documents").ImageDocumentContext)=>Promise<{documents:import("./image-job-store").ImageDocument[];complete:boolean}>;
   loadCaseReports?: (deadline:number) => Promise<{caseIds:string[];label:string;url:string}[]>;
   isCitywide?: (hearing: Hearing) => boolean;
   parcelNumbersForCase?: (hearing: Hearing) => string[];

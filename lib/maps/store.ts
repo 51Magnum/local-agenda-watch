@@ -64,3 +64,13 @@ export async function readFlumSnapshot(id:string,options?:{bounds:readonly numbe
  }
  return process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test"?cachedFlum(id):loadFlum(id);
 }
+
+/** Image workers read only queue metadata, never the FLUM or all case geometries. */
+export async function mapImageCases(id:string):Promise<{id:string;hasGeometry:boolean;citywide:boolean}[]>{
+ if(process.env.DATABASE_URL){const db=database();await initialized;return(await db.query("SELECT c->>'id' AS id,(c->'geometry' IS NOT NULL AND c->'geometry'<>'null'::jsonb) AS geometry,coalesce((c->>'citywide')::boolean,false) AS citywide FROM law_map_cache,jsonb_array_elements(snapshot->'cases') c WHERE jurisdiction=$1",[id])).rows.map(r=>({id:r.id,hasGeometry:r.geometry,citywide:r.citywide}));}
+ return (await readMapSnapshot(id,{includeFlum:false}))?.cases.map(c=>({id:c.id,hasGeometry:Boolean(c.geometry),citywide:c.citywide}))??[];
+}
+export async function markCaseVisualScan(id:string,caseId:string,finishedAt:string){
+ if(process.env.DATABASE_URL){const db=database();await initialized;await db.query("UPDATE law_map_cache SET snapshot=jsonb_set(snapshot,'{cases}',(SELECT jsonb_agg(CASE WHEN c->>'id'=$2 THEN c||jsonb_build_object('visualCheckedAt',$3::text) ELSE c END) FROM jsonb_array_elements(snapshot->'cases') c)) WHERE jurisdiction=$1",[id,caseId,finishedAt]);return;}
+ const snapshot=await readMapSnapshot(id);if(snapshot){const c=snapshot.cases.find(c=>c.id===caseId);if(c)c.visualCheckedAt=finishedAt;await saveMapSnapshot(snapshot);}
+}

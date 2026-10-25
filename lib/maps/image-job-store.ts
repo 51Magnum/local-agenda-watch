@@ -1,0 +1,27 @@
+import {Pool} from "pg";
+import {randomUUID} from "node:crypto";
+import {mkdir,readFile,writeFile,rename} from "node:fs/promises";
+import path from "node:path";
+import type {DocumentScan} from "./image-scan";
+export type ImageDocument={url:string;title:string;date?:string;packet?:boolean;attachmentId?:string;planId?:string};
+export type ImageJob={areaId:string;caseId:string;attempts:number;failedAt?:string;finishedAt?:string;dueAt:string;status:"pending"|"deferred"|"blocked"|"complete";documents:ImageDocument[];scans:Record<string,DocumentScan>;folders:Record<string,string[]>;discoveryCursor?:number;discoveryComplete?:boolean;errors:string[];lease?:string;leaseUntil?:number;checked:number;fallbackReady?:boolean};
+let pool:Pool|undefined,ready:Promise<unknown>|undefined;
+async function db(){pool??=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:10000});ready??=pool.query("CREATE TABLE IF NOT EXISTS law_image_jobs(area_id text NOT NULL,case_id text NOT NULL,data jsonb NOT NULL,lease text,lease_until timestamptz,PRIMARY KEY(area_id,case_id))");await ready;return pool;}
+const file=()=>path.join(process.cwd(),".data","image-jobs.json");let pending=Promise.resolve();
+async function readLocal():Promise<ImageJob[]>{try{return JSON.parse(await readFile(file(),"utf8"));}catch(e){if((e as NodeJS.ErrnoException).code!=="ENOENT")throw e;return [];}}
+async function change<T>(work:(jobs:ImageJob[])=>T):Promise<T>{const task=pending.then(async()=>{const rows=await readLocal(),result=work(rows);await mkdir(path.dirname(file()),{recursive:true});const tmp=file()+"."+randomUUID()+".tmp";await writeFile(tmp,JSON.stringify(rows));await rename(tmp,file());return result;});pending=task.then(()=>{},()=>{});return task;}
+export function newImageJob(areaId:string,caseId:string):ImageJob{return{areaId,caseId,attempts:0,dueAt:new Date(0).toISOString(),status:"pending",documents:[],scans:{},folders:{},errors:[],checked:0};}
+export async function enqueueImages(cases:{areaId:string;caseId:string}[]){
+ if(process.env.DATABASE_URL){if(!cases.length)return;await(await db()).query("INSERT INTO law_image_jobs SELECT x->>'areaId',x->>'caseId',x FROM jsonb_array_elements($1::jsonb) x ON CONFLICT DO NOTHING",[JSON.stringify(cases.map((c,i)=>({...newImageJob(c.areaId,c.caseId),dueAt:new Date(i*1000).toISOString()})))]);return;}
+ await change(rows=>{for(const [i,c] of cases.entries())if(!rows.some(j=>j.areaId===c.areaId&&j.caseId===c.caseId))rows.push({...newImageJob(c.areaId,c.caseId),dueAt:new Date(i*1000).toISOString()});});
+}
+export async function claimImageJob(target?:{areaId:string;caseId:string},fallbackOnly=false):Promise<ImageJob|undefined>{const token=randomUUID();
+ if(process.env.DATABASE_URL){const result=await(await db()).query(`UPDATE law_image_jobs SET lease=$1,lease_until=now()+interval '300 seconds' WHERE (area_id,case_id)=(SELECT area_id,case_id FROM law_image_jobs WHERE (lease_until IS NULL OR lease_until<now()) AND (data->>'dueAt')::timestamptz<=now() AND ($2::text IS NULL OR (area_id=$2 AND case_id=$3)) AND (NOT $4::boolean OR coalesce((data->>'fallbackReady')::boolean,false)=false) ORDER BY data->>'dueAt',area_id,case_id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING data`,[token,target?.areaId??null,target?.caseId??null,fallbackOnly]);return result.rows[0]?{...result.rows[0].data,lease:token}:undefined;}
+ return change(rows=>{const j=rows.filter(j=>(!fallbackOnly||!j.fallbackReady)&&(!target||(j.areaId===target.areaId&&j.caseId===target.caseId))&&(j.leaseUntil??0)<Date.now()&&Date.parse(j.dueAt)<=Date.now()).sort((a,b)=>a.dueAt.localeCompare(b.dueAt)||a.areaId.localeCompare(b.areaId)||a.caseId.localeCompare(b.caseId))[0];if(!j)return;Object.assign(j,{lease:token,leaseUntil:Date.now()+300000});return structuredClone(j);});
+}
+export async function saveImageJob(job:ImageJob,release=false){
+ if(process.env.DATABASE_URL){await(await db()).query("UPDATE law_image_jobs SET data=$3::jsonb,lease=CASE WHEN $5 THEN NULL ELSE lease END,lease_until=CASE WHEN $5 THEN NULL ELSE lease_until END WHERE area_id=$1 AND case_id=$2 AND lease=$4",[job.areaId,job.caseId,JSON.stringify({...job,lease:undefined,leaseUntil:undefined}),job.lease,release]);return;}
+ await change(rows=>{const i=rows.findIndex(j=>j.areaId===job.areaId&&j.caseId===job.caseId&&j.lease===job.lease);if(i>=0)rows[i]={...job,...(release?{lease:undefined,leaseUntil:undefined}:{})};});
+}
+export async function imageJobs(){if(process.env.DATABASE_URL)return(await(await db()).query("SELECT data FROM law_image_jobs")).rows.map(r=>r.data as ImageJob);return readLocal();}
+export async function rescanCase(areaId:string,caseId:string){await enqueueImages([{areaId,caseId}]);if(process.env.DATABASE_URL){await(await db()).query("UPDATE law_image_jobs SET data=jsonb_set(jsonb_set(jsonb_set(data,'{discoveryComplete}','false'::jsonb),'{dueAt}',to_jsonb('1970-01-01T00:00:00Z'::text)),'{status}','\"pending\"'::jsonb)-'finishedAt' WHERE area_id=$1 AND case_id=$2",[areaId,caseId]);return;}await change(rows=>{const row=rows.find(r=>r.areaId===areaId&&r.caseId===caseId)!;row.dueAt=new Date(0).toISOString();row.status="pending";delete row.finishedAt;row.discoveryComplete=false;});}

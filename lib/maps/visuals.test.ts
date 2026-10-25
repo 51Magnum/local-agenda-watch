@@ -19,7 +19,7 @@ it("allowlists plan titles and never accepts arbitrary photos, staff text, forms
  for(const title of ["Site plan.pdf","Concept plan.png","Building elevation.pdf","Landscape plan.pdf","Aerial exhibit.pdf"])expect(previewCandidate(title)).toBe(true);
 });
 it("classifies the full source page and skips a rejected staff text page before a real exhibit",async()=>{
- const destroy=vi.fn();vi.mocked(getDocumentProxy).mockResolvedValue({numPages:2,getPage:async(n:number)=>({getTextContent:async()=>({items:[{str:n===1?"Site plan narrative review text":"Aerial exhibit"}]})}),destroy} as never);
+ const destroy=vi.fn();vi.mocked(getDocumentProxy).mockResolvedValue({numPages:2,getPage:async(n:number)=>({getTextContent:async()=>({items:[{str:n===1?"Site plan narrative review text":"Aerial exhibit"}]}),getOperatorList:async()=>({fnArray:[],argsArray:[]}),cleanup:()=>{}}),destroy} as never);
  const png=await sharp({create:{width:500,height:400,channels:3,background:"white"}}).png().toBuffer();vi.mocked(renderPageAsImage).mockResolvedValue(new Uint8Array(png).buffer as never);
  vi.mocked(classifyImagePage).mockResolvedValueOnce({...check,type:"rejected",confidence:1}).mockResolvedValueOnce({...check,type:"vicinity/aerial exhibit"});
  const result=await extractDocumentVisual(new TextEncoder().encode("%PDF-1.7"),"Staff report.pdf");expect(result?.page).toBe(2);expect(classifyImagePage).toHaveBeenCalledTimes(2);expect(destroy).toHaveBeenCalled();
