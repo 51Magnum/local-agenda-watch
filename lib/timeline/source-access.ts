@@ -8,10 +8,10 @@ export function allowedSource(value:string,areaId="nampa"){
 export async function sourceRequest(url:string,areaId:string,accept="text/html,application/json,application/pdf",timeout=12000){
  if(!allowedSource(url,areaId))throw new Error("Source is outside the jurisdiction allowlist");
  if(hostWasBlocked(areaId,url))throw new BlockedSourceError(new URL(url).hostname);
- let target=url;
+ let target=url;const deadline=Date.now()+timeout;
  try{
  for(let i=0;i<5;i++){
-  const r=await fetch(target,{redirect:"manual",cache:"no-store",signal:AbortSignal.timeout(timeout),headers:{Accept:accept,"User-Agent":"Mozilla/5.0 (compatible; LocalAgendaWatch public records reader)"}});
+  const r=await fetch(target,{redirect:"manual",cache:"no-store",signal:AbortSignal.timeout(Math.max(1,deadline-Date.now())),headers:{Accept:accept,"User-Agent":"Mozilla/5.0 (compatible; LocalAgendaWatch public records reader)"}});
   if([301,302,303,307,308].includes(r.status)){
    const location=r.headers.get("location");if(!location)throw new Error("Source redirect missing location");
    const next=new URL(location,target);

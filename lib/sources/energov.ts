@@ -99,7 +99,7 @@ export type EnerGovClient = {
   ): Promise<EnerGovAttachment[]>;
   getAttachmentMetadata?(attachmentId: string): Promise<Record<string, unknown> | null>;
   downloadAttachment?(attachmentId: string): Promise<Uint8Array>;
-  downloadPublicAttachment?(attachmentId: string): Promise<Uint8Array>;
+  downloadPublicAttachment?(attachmentId: string, options?: {timeoutMs?:number}): Promise<Uint8Array>;
   getPlanWorkflowActivities?(planId: string): Promise<Record<string, unknown>[]>;
   /** Public URL for the plan detail page in the citizen portal. */
   planPortalUrl(planId: string, tab?: string): string;
@@ -148,7 +148,7 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
     },
     getAttachmentMetadata: metadata,
     async downloadAttachment(attachmentId) { return download(attachmentId, true); },
-    async downloadPublicAttachment(attachmentId) { return download(attachmentId, false); },
+    async downloadPublicAttachment(attachmentId, options) { return download(attachmentId, false, options?.timeoutMs); },
     async getPlanAttachments(planId, opts = {}) {
       const env = await call<{ Attachments: EnerGovAttachment[] }>(`/energov/entity/attachments/search/entityattachments/${planId}/${EnerGovModule.Plan}/true`, opts);
       return env?.Success && env.Result ? env.Result.Attachments ?? [] : [];
@@ -158,7 +158,8 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
       return `${baseUrl}/Apps/SelfService#/plan/${planId}${suffix}`;
     },
   };
-  async function download(attachmentId: string, pdfOnly: boolean) {
+  async function download(attachmentId: string, pdfOnly: boolean, timeoutMs=120000) {
+      const deadline=Date.now()+timeoutMs;
       // Contract verified in the city's public FileDownloadService. IsOnline
       // indicates how a file was uploaded, not whether it is publicly visible.
       const info = await metadata(attachmentId);
@@ -167,9 +168,11 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
       const chunks: Uint8Array[] = [];
       const chunkSize = 1000000;
       for (let start = 0; start < size; start += chunkSize) {
+        const remaining=deadline-Date.now();
+        if(remaining<=0)throw new Error("Public document download budget reached");
         const end = Math.min(size - 1, start + chunkSize - 1);
         const response = await fetch(baseUrl + "/apps/selfservice/api/energov/attachments/rangedownload/", {
-          cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15000),
+          cache: "no-store", redirect: "error", signal: AbortSignal.timeout(Math.min(15000,remaining)),
           headers: { ...attachmentHeaders(attachmentId), FileToken: token, range: "bytes=" + start + "-" + end,
             tenantId: String(config.tenantId), "Tyler-TenantUrl": config.tenantName, "Tyler-Tenant-Culture": culture },
         });

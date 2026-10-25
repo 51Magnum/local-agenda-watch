@@ -31,3 +31,9 @@ describe("verified EnerGov public downloads", () => {
     await expect(createEnerGovClient({ baseUrl: "https://nampaid-energovpub.tylerhost.net", tenantId: 1, tenantName: "NampaIDProd" }).downloadAttachment!(attachment)).rejects.toThrow("range mismatch");
   });
 });
+
+it("bounds the entire ranged download instead of granting every chunk a fresh budget",async()=>{
+ const clock=vi.spyOn(Date,"now");let now=0;clock.mockImplementation(()=>now);
+ const fetcher=vi.fn().mockResolvedValueOnce(Response.json({Success:true,Result:{FileName:"Site plan.pdf",FileSize:2000000,FileToken:"test-token"}})).mockImplementationOnce(async()=>{now=90001;return new Response(new Uint8Array(1000000),{status:206,headers:{"Content-Range":"bytes 0-999999/2000000"}});});vi.stubGlobal("fetch",fetcher);
+ try{await expect(createEnerGovClient({baseUrl:"https://example.test",tenantId:1,tenantName:"Test"}).downloadPublicAttachment!(attachment,{timeoutMs:90000})).rejects.toThrow("download budget reached");expect(fetcher).toHaveBeenCalledTimes(2);}finally{clock.mockRestore();}
+});
