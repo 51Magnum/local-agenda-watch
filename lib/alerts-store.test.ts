@@ -37,7 +37,7 @@ it("requires confirmation, hashes confirmation tokens, supports unsubscribe, and
       token = message.match(/confirm\?token=([\w-]+)/)![1],
       unsub = message.match(/unsubscribe\?token=([\w-]+)/)![1];
     const before = (
-      await state.db.query(
+      await state.db.query<{confirm_hash:string;confirmed_at:string|null}>(
         "SELECT confirm_hash,confirmed_at FROM law_alert_subscriptions",
       )
     ).rows[0];
