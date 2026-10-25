@@ -31,6 +31,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
       }] };
     }
     if (hearing && project?.pastHearings) hearing = { ...hearing, meetings: [...hearing.meetings, ...project.pastHearings.filter(p => !hearing!.meetings.some(m => m.date === p.date && /planning|P&Z/i.test(m.body))).map(p => ({ date: p.date, dateLabel: p.date, body: config.area!.bodies.planning.id, bodyLabel: config.area!.bodies.planning.label, sourceUrl: p.sourceUrl, continuedNote: null }))] };
+    if(hearing && (hearing.decisionRecorded || /^(approved|denied|withdrawn)\b/i.test(hearing.appStatus))) item={...item,stage:item.stage==="Recorded"?"Recorded":"Decided",recordStatus:hearing.appStatus,nextHearing:undefined};
     const popup = buildPopupModel(item, config.area!, hearing, fields);
     // A verified authored project uses its latest application figures, never the older neighborhood notice.
     if (project) {

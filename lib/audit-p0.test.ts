@@ -1,3 +1,4 @@
+import {continuanceHistory} from "./continuances";
 import {expect,it} from "vitest";
 import {residentialCase,blockAddress,protectMapCase,privateResidentialDocument} from "./residential-privacy";
 import {expiredCommentDeadline,participationClosed} from "./participation";
@@ -40,4 +41,9 @@ it("flags stale sweeps and unresolved hearings while preserving last-success dat
  const plan=planSchedule(state,{nampa:AREAS.nampa},now,{force:true})!;
  const failed=finishSchedule(state,plan,{nampa:{active:[],completed:[],dataUnavailable:true}},emptyEvidenceState(),{nampa:AREAS.nampa},now);
  expect(failed.sweeps.nampa.lastSuccessAt).toBe(state.sweeps.nampa.lastSuccessAt);
+});
+
+it("turns a continued-from note on a future County hearing into a sourced timeline row",()=>{
+ const rows=continuanceHistory([{date:"2026-12-15",note:"Continued from October 8, 2026",sourceUrl:"https://county.example/hearing"}],"2026-12-15");
+ expect(rows).toEqual([{label:"Continued from Oct 8 to Dec 15",source:"https://county.example/hearing"}]);
 });

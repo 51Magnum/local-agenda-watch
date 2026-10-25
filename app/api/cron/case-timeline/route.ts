@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
   if (!secretMatches(authorization, process.env.CRON_SECRET ? "Bearer " + process.env.CRON_SECRET : undefined)) return new Response("Unauthorized", { status: 401 });
-  const now=new Date(),url=new URL(request.url),manual=url.searchParams.get("manual")==="1",force=manual&&url.searchParams.get("force")==="1";
+  const now=new Date(),url=new URL(request.url),manual=url.searchParams.get("manual")==="1",force=manual&&url.searchParams.get("force")==="1",discoverOnly=manual&&url.searchParams.get("discoveryOnly")==="1";
   const skipped=(reason:string,alreadyCompleted=false)=>{console.info("[timeline:scheduler]",JSON.stringify({modes:["skipped"],reason,checked:0}));return Response.json({status:"skipped",reason,modes:[],checked:0,alreadyCompleted},{status:alreadyCompleted?200:409});};
   const window=schedulerWindow(now,manual);
   if(!force&&!window)return skipped("Outside 05:00–09:59 / 14:00–18:59 America/Denver windows");
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   }catch(error){console.error("[timeline:scheduler] Schedule storage unavailable",error instanceof Error?error.message:"Unknown error");return Response.json({error:"Schedule storage unavailable"},{status:503});}
   let plan=planSchedule(snapshot,AREAS,now,{manual,force});
   if(!plan)return skipped("Nothing due or this local-time slot already completed",Boolean(window&&snapshot.slots[`${window.date}:${window.period}`]));
-  if (!process.env.OPENAI_API_KEY) return Response.json({ error: "OPENAI_API_KEY is not configured" }, { status: 503 });
+  if (!process.env.OPENAI_API_KEY && !discoverOnly) return Response.json({ error: "OPENAI_API_KEY is not configured" }, { status: 503 });
   const scheduleLease=await claimSchedule();
   if(!scheduleLease)return Response.json({status:"already running"},{status:409});
   let nextSchedule;
@@ -30,6 +30,7 @@ export async function GET(request: Request) {
   // Re-read under the scheduler lease so simultaneous invocations cannot both claim the same slot.
   snapshot=await readSchedule();plan=planSchedule(snapshot,AREAS,now,{manual,force});
   if(!plan)return skipped("This slot completed while waiting for the scheduler lease",true);
+  if(discoverOnly)plan.modes.push("source-discovery-only");
   console.info("[timeline:scheduler]",JSON.stringify({modes:plan.modes,meetings:plan.meetingIds.length,fullSweep:plan.fullSweep}));
   let store;
   let lease;
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
   try {
     const meetingDatesByArea:Record<string,string[]>={};
     if(!plan.fullSweep)for(const m of snapshot.meetings)if(plan.meetingIds.includes(m.id))(meetingDatesByArea[m.areaId]??=[]).push(m.date);
-    const {run,maps,feeds,checkedCases}=await refreshTimelines(store,{plan,includeMaps:plan.fullSweep,meetingDatesByArea:plan.fullSweep?undefined:meetingDatesByArea});
+    const {run,maps,feeds,checkedCases}=await refreshTimelines(store,{plan,discoverOnly,includeMaps:plan.fullSweep,meetingDatesByArea:plan.fullSweep?undefined:meetingDatesByArea});
     nextSchedule=finishSchedule(snapshot,plan,feeds,await store.read(),AREAS,new Date(),checkedCases);
     revalidateTag("case-timeline-v2",{expire:0});
     console.warn("[timeline:health]",JSON.stringify((await import("@/lib/timeline/health")).timelineHealth(nextSchedule,AREAS)));

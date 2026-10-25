@@ -121,6 +121,7 @@ export async function discoverNampaDocuments(options: { caseIds?: string[]; budg
           else if(previous?.hash===hash&&previous.state==="complete"&&previous.pages.length)pages=previous.pages;
           else {
             if(previous?.hash===hash&&!retryDue(previous))return;
+            if(!process.env.OPENAI_API_KEY){warnings.push("Agenda "+meeting.id+" OCR deferred: AI extraction is not configured.");documents.push({areaId:"nampa",url:meeting.agendaUrl,title:meeting.title+" agenda",kind:"agenda",caseIds:[],fields:[]});return;}
             if(!options.store)pages=await withDocument("nampa",digest(meeting.agendaUrl),async()=>ocrMissingPages(bytes,await extractNativePdfPages(bytes)));
             else {
               await ingestDocuments(options.store,[{areaId:"nampa",url:meeting.agendaUrl,title:meeting.title+" agenda — "+meeting.date,kind:"agenda",caseIds:[],fields:[],meeting:{body:meeting.body,date:meeting.date,isHearing:false,minutesUrl:meeting.minutesUrl}}],{run:currentRun(),budgetMs:Math.max(0,deadline-Date.now()),download:async()=>bytes});

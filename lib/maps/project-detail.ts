@@ -28,6 +28,7 @@ import {
 } from "./project-questions";
 import { MAP_INDEX_TAG, siteMembers } from "./case-index";
 import { participationClosed, expiredCommentDeadline } from "@/lib/participation";
+import {continuanceHistory} from "@/lib/continuances";
 
 async function detail(
   areaId: string,
@@ -158,10 +159,10 @@ async function detail(
   const result:PaneData = {
     item,
     officialRecords,
-    relatedCases: item.members?.map((m) => ({
-      ...m,
-      status: (m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId)?.appStatus:undefined)??m.status,
-      label: AREAS[m.areaId]?.name ?? m.areaId,
+    relatedCases: await Promise.all((item.members??[]).map(async m=>{
+      const h=m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId):undefined;
+      const relatedRecord=h?await config.recordForCase?.(h):undefined;
+      return {...m,status:h?.appStatus??m.status,date:m.date??relatedRecord?.decisionDate,label:AREAS[m.areaId]?.name??m.areaId};
     })),
     area: {
       id: area.id,
@@ -175,11 +176,7 @@ async function detail(
       ? "Citywide change — " + area.name
       : (project?.location ?? record?.address),
     history: [
-      ...(hearing?.meetings ?? []).filter(m => m.continuedNote || /continued/i.test(m.result ?? "")).map(m => {
-        const fmt = (d:string) => new Intl.DateTimeFormat("en-US", {month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(d+"T12:00:00Z"));
-        const to = next?.startsAt.slice(0,10);
-        return { label: to && to > m.date ? `Continued from ${fmt(m.date)} to ${fmt(to)}` : `${fmt(m.date)} · ${m.continuedNote ?? m.result}`, source: residentPaneHref(area,m.sourceUrl) };
-      }),
+      ...continuanceHistory(record?.events ?? (hearing?.meetings??[]).map(m=>({...m,note:m.continuedNote??undefined})),next?.startsAt.slice(0,10)).map(row=>({...row,source:residentPaneHref(area,row.source)})),
       ...progress
         .filter((p) => p.state === "done" || p.state === "past")
         .map((p) => ({ label: p.label })),
@@ -208,7 +205,7 @@ async function detail(
       : "How to comment",
     commentInstructions: closed || expiredDeadlineMessage ? undefined : area.meetingRules.commentInstructions,
     calendarHref:
-      next && next.startsAt.length > 10
+      !closed && next && next.startsAt.length > 10
         ? item.href + "/hearing.ics"
         : undefined,
     updatedAt:
@@ -222,6 +219,6 @@ async function detail(
 }
 export const projectDetail = unstable_cache(
   detail,
-  ["map-project-questions-v4"],
+  ["map-project-questions-v5"],
   { revalidate: 300, tags: [MAP_INDEX_TAG, TIMELINE_CACHE_TAG] },
 );
