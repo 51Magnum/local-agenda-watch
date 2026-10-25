@@ -1,4 +1,5 @@
 "use client";
+import { PROJECT_FILL_OPACITY, PROJECT_POLYGON_LAYERS } from "@/lib/maps/project-style";
 import FLUM_TILES from "@/public/flum/manifest.json";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -60,18 +61,6 @@ function projectFromUrl() {
   const q = new URLSearchParams(window.location.search).get("project");
   return q && /^[a-z-]+\/[A-Z0-9-]+$/.test(q) ? q : undefined;
 }
-
-const PROJECT_FILL_OPACITY = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  11,
-  0.58,
-  13,
-  0.32,
-  15,
-  0.14,
-] as import("maplibre-gl").ExpressionSpecification;
 
 export default function MapHome() {
   const container = useRef<HTMLDivElement>(null),
@@ -419,64 +408,7 @@ export default function MapHome() {
             },
           });
           m.addSource("law-polygons", { type: "geojson", data: empty });
-          m.addLayer({
-            id: "law-fill",
-            minzoom: CASE_OUTLINE_ZOOM,
-            type: "fill",
-            source: "law-polygons",
-            paint: {
-              "fill-color": ["get", "color"],
-              "fill-opacity": PROJECT_FILL_OPACITY,
-            },
-          });
-          m.addLayer({
-            id: "law-halo",
-            minzoom: CASE_OUTLINE_ZOOM,
-            type: "line",
-            source: "law-polygons",
-            paint: {
-              "line-color": "#ffffff",
-              "line-width": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                CASE_OUTLINE_ZOOM,
-                3.5,
-                14,
-                6,
-              ],
-            },
-          });
-          m.addLayer({
-            id: "law-outline",
-            minzoom: CASE_OUTLINE_ZOOM,
-            type: "line",
-            source: "law-polygons",
-            paint: {
-              "line-color": ["get", "color"],
-              "line-width": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                CASE_OUTLINE_ZOOM,
-                1.5,
-                14,
-                3,
-              ],
-            },
-          });
-          m.addLayer({
-            id: "law-approximate",
-            minzoom: CASE_OUTLINE_ZOOM,
-            type: "line",
-            source: "law-polygons",
-            filter: ["==", ["get", "approximate"], true],
-            paint: {
-              "line-color": "#ffffff",
-              "line-width": 2,
-              "line-dasharray": [3, 2],
-            },
-          });
+          for (const layer of PROJECT_POLYGON_LAYERS) m.addLayer(layer);
           m.addSource("law-points", {
             type: "geojson",
             data: empty,
