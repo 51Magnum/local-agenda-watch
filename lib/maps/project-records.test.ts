@@ -64,3 +64,18 @@ it("labels a broad Meridian fallback as an archive instead of pretending it is a
   expect(link.url).toContain("meetings.municode.com/");
   expect(link.label).toContain("archive — search case");
 });
+
+it("distinguishes a jurisdiction project map and an agenda PDF from a direct project record", () => {
+  expect(
+    officialProjectRecords(AREAS.eagle, [
+      hearing("https://experience.arcgis.com/experience/example"),
+    ])[0].label,
+  ).toContain("project map — search case");
+  expect(
+    officialProjectRecords(AREAS.star, [
+      hearing(
+        "https://meetings.municode.com/d/f?u=https://example.test/agenda.pdf",
+      ),
+    ])[0].label,
+  ).toContain("hearing record");
+});

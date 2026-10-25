@@ -38,19 +38,25 @@ export function officialProjectRecords(
     const url =
       specific ?? residentPaneHref(area, area.residentAccess?.archiveUrl);
     if (!url || !residentHref(url)) continue;
+    const target = new URL(url, "https://local.invalid");
+    const kind =
+      direct && target.hostname === "experience.arcgis.com"
+        ? " project map — search case"
+        : direct && /\/public-hearing-notices\/?$/i.test(target.pathname)
+          ? " hearing notices — search case"
+          : direct && target.hostname === "meetings.municode.com"
+            ? " hearing record"
+            : direct
+              ? " project record"
+              : specific
+                ? " hearing record"
+                : " meeting archive — search case";
     const existing = links.get(url);
     links.set(url, {
       url,
       label: existing
         ? existing.label + " · " + hearing.appId
-        : area.name +
-          (direct
-            ? " project record"
-            : specific
-              ? " hearing record"
-              : " meeting archive — search case") +
-          " · " +
-          hearing.appId,
+        : area.name + kind + " · " + hearing.appId,
     });
   }
   return [...links.values()];
