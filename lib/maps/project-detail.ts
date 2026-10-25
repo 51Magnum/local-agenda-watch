@@ -20,7 +20,7 @@ import { landUseFact } from "@/lib/areas/land-use";
 import { canonicalAreaHref } from "@/lib/areas/registry";
 import { questionEvidence, type PaneData } from "./project-questions";
 import { MAP_INDEX_TAG } from "./case-index";
-import type { PublicCaseRecord } from "@/lib/localities/record-types";
+
 async function detail(
   areaId: string,
   caseId: string,
@@ -43,8 +43,10 @@ async function detail(
     ]),
     item = items[0],
     hearing = caseCatalog(feed).find((h) => h.appId === caseId),
-    record = (hearing as typeof hearing & { record?: PublicCaseRecord })
-      ?.record,
+    record =
+      hearing && !item.citywide && !project?.location
+        ? await config.recordForCase?.(hearing)
+        : undefined,
     fields = publicFields(state, ids, areaId);
   item.areaId = areaId;
   item.href = canonicalAreaHref(areaId, item.href);
@@ -125,7 +127,9 @@ async function detail(
       decisionBody: area.bodies.decision.label,
     },
     caseIds: ids,
-    where: project?.location ?? record?.address,
+    where: item.citywide
+      ? "Citywide change — " + area.name
+      : (project?.location ?? record?.address),
     history: [
       ...progress
         .filter((p) => p.state === "done" || p.state === "past")

@@ -1,10 +1,11 @@
+import{meridianPublicRecord}from"@/lib/sources/meridian-record";
 import {MUNICIPAL_IDS,MUNICIPAL_SOURCES} from "@/lib/sources/municipal-config";
 import {MUNICIPAL_FEEDS} from "@/lib/localities/municipal";
-import {municipalCaseIds,municipalFromFeature,municipalStage,municipalTitle,municipalSummary,MUNICIPAL_TYPES,type MunicipalCase} from "@/lib/sources/municipal";
+import {municipalRecord,municipalCaseIds,municipalFromFeature,municipalStage,municipalTitle,municipalSummary,MUNICIPAL_TYPES,type MunicipalCase} from "@/lib/sources/municipal";
 import {getMeridianHearings}from "@/lib/localities/meridian";
 import {MERIDIAN_WHERE,MERIDIAN_TYPES,meridianFromFeature,meridianStage,meridianTitle,meridianSummary}from "@/lib/sources/meridian";
 import { getCanyonCountyHearings } from "@/lib/localities/canyon-county";
-import { countyFromFeature, countyCaseWhere, countyStage, countyTitle, countySummary, COUNTY_TYPES } from "@/lib/sources/canyon-county";
+import { type CountyCase, countyFromFeature, countyCaseWhere, countyStage, countyTitle, countySummary, COUNTY_TYPES } from "@/lib/sources/canyon-county";
 import { AREAS, areaPath } from "@/lib/areas/registry";
 import { getNampaVisualReports } from "@/lib/sources/primegov";
 import { getNampaHearings, nampa } from "@/lib/localities/nampa";
@@ -19,7 +20,7 @@ export const JURISDICTIONS: Record<string, JurisdictionConfig> = {
  area:AREAS[id],id,name:s.name,mapOnHub:true,center:[...s.center],zoom:12,bounds:[...s.bounds],state:{abbreviation:"ID",fips:"16",name:"Idaho"},
  caseGeometry:{layers:s.cases?[s.cases]:[],...(id==="kuna"?{where:"Active_Application = 'Y' OR Case_No LIKE '%"+String(new Date().getFullYear()).slice(2)+"-%' OR Case_No LIKE '%"+String(new Date().getFullYear()-1).slice(2)+"-%'"}:{}),caseIdField:s.caseField,fields:{type:s.caseField,phase:s.statusField,status:s.statusField,title:s.nameField},parcelFallback:{layerUrl:id==="star"?"https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/Ada_County_Parcels/FeatureServer/142":"",matchField:"PARCEL",recordField:"",ignored:[]}},
  flum:{layerUrl:s.flum,categoryField:s.flumField,colorSource:"renderer",planName:s.flumLabel,label:s.flumLabel,adoptedDate:null,adoptionSource:s.flumSource,dataNote:"City GIS designation; plan amendments may be newer. No zoning compatibility is inferred.",simplifyTolerance:.00002},
- addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:s.name+", ID"},stages:{phase:{},status:{},recorded:{phases:[],statuses:[]}},caseTypes:MUNICIPAL_TYPES,citywideTypes:["OA","ORD"],isCitywide:h=>h.citywide===true,loadCases:MUNICIPAL_FEEDS[id],loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments(id,caseId,context)),
+ addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:s.name+", ID"},stages:{phase:{},status:{},recorded:{phases:[],statuses:[]}},caseTypes:MUNICIPAL_TYPES,citywideTypes:["OA","ORD"],isCitywide:h=>h.citywide===true,recordForCase:municipalRecord,loadCases:MUNICIPAL_FEEDS[id],loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments(id,caseId,context)),
  parcelNumbersForCase:id==="star"?h=>(h as MunicipalCase).municipal.parcelIds??[]:undefined,parseFeatures:f=>municipalCaseIds(id,String(f.properties?.[s.caseField]??"")).map(caseId=>municipalFromFeature(id,f,caseId)),stageForCase:municipalStage,presentation:h=>({title:municipalTitle(h),summary:municipalSummary(h),href:areaPath(AREAS[id])+"/plan/"+encodeURIComponent(h.appId)})
  } satisfies JurisdictionConfig];})),
   nampa: {
@@ -43,12 +44,13 @@ export const JURISDICTIONS: Record<string, JurisdictionConfig> = {
       })),
     },
     loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments("nampa",caseId,context)), loadCases: getNampaHearings, loadCaseReports: getNampaVisualReports, recordClient: nampa.energov,
+    recordForCase:async h=>{if(!h.energovPlanId)return;const p=await nampa.energov!.getPlan(h.energovPlanId,{timeoutMs:1500}).catch(()=>null);if(!p||JURISDICTIONS.nampa.caseGeometry.parcelFallback.ignored.includes(p.MainParcelNumber??""))return;return{address:p.MainAddress??"",sourceStatus:p.PlanStatus,approvalStatus:"",events:[]};},
     presentation: (hearing, plan) => ({ title: caseDisplayTitle(hearing, plan), summary: caseSummary(hearing, plan), href: areaPath(AREAS.nampa) + projectPathForCase(hearing.appId), hearing: getProjectForCase(hearing.appId)?.nextHearing }),
   },
   meridian:{area:AREAS.meridian,id:"meridian",name:"Meridian",mapOnHub:true,center:AREAS.meridian.center,zoom:11,bounds:[-116.58,43.46,-116.23,43.8],state:{abbreviation:"ID",fips:"16",name:"Idaho"},
     caseGeometry:{layers:AREAS.meridian.sources.geometry!,where:MERIDIAN_WHERE,caseIdField:"App_ID",fields:{type:"App_ID",phase:"Hearing_Type",status:"Action",title:"Name",link:"Weblink"},parcelFallback:{layerUrl:AREAS.meridian.sources.parcelFallback!,matchField:"PARCEL",recordField:"parcel",ignored:[]}},
     flum:{layerUrl:AREAS.meridian.sources.flum!,categoryField:"class2",colorSource:"renderer",planName:"Meridian Comprehensive Plan",label:"Meridian Comprehensive Plan, Future Land Use",adoptedDate:null,adoptionSource:"https://meridiancity.org/community-development/planning/comprehensive-plan/",dataNote:"Plan designation only. Listed zoning examples are not exhaustive; compatibility is not inferred from an unlisted district.",simplifyTolerance:0.00002},
-    addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:"Meridian, ID"},stages:{phase:{Review:"In review","City Council":"Council/Board","PZ Commission":"P&Z",Decided:"Decided"},status:{},recorded:{phases:[],statuses:[]}},caseTypes:MERIDIAN_TYPES,citywideTypes:[],isCitywide:h=>h.citywide===true,loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments("meridian",caseId,context)),loadCases:getMeridianHearings,parseFeature:meridianFromFeature,stageForCase:h=>meridianStage(h) as import("./types").MapStage,presentation:h=>({title:meridianTitle(h),summary:meridianSummary(h),href:areaPath(AREAS.meridian)+"/plan/"+encodeURIComponent(h.appId)}),
+    addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:"Meridian, ID"},stages:{phase:{Review:"In review","City Council":"Council/Board","PZ Commission":"P&Z",Decided:"Decided"},status:{},recorded:{phases:[],statuses:[]}},caseTypes:MERIDIAN_TYPES,citywideTypes:[],isCitywide:h=>h.citywide===true,loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments("meridian",caseId,context)),recordForCase:meridianPublicRecord,loadCases:getMeridianHearings,parseFeature:meridianFromFeature,stageForCase:h=>meridianStage(h) as import("./types").MapStage,presentation:h=>({title:meridianTitle(h),summary:meridianSummary(h),href:areaPath(AREAS.meridian)+"/plan/"+encodeURIComponent(h.appId)}),
   },
   "canyon-county": {
     area: AREAS["canyon-county"], id:"canyon-county", name:"Canyon County", mapOnHub:true, center:AREAS["canyon-county"].center, zoom:10, bounds:[-117.2,43.15,-116.3,44.0], state:{abbreviation:"ID",fips:"16",name:"Idaho"},
@@ -56,7 +58,7 @@ export const JURISDICTIONS: Record<string, JurisdictionConfig> = {
     flum:{layerUrl:AREAS["canyon-county"].sources.flum!,categoryField:"FLU_ZONE_C",colorSource:"renderer",planName:"Canyon County 2030 Comprehensive Plan",label:"Canyon County 2030 adopted Future Land Use",adoptedDate:null,adoptionSource:"https://www.canyoncounty.id.gov/elected-officials/commissioners/development-services/dsd-gis/",dataNote:"Adopted Future Land Use layer. City plans and rural-residential overlays are separate; this designation alone does not establish zoning compatibility.",simplifyTolerance:0.00002},
     addressPoints:{layerUrl:"",addressField:"",where:"1=1",suffix:"ID"},
     stages:{phase:{Review:"In review",Board:"Council/Board","Hearing Examiner":"P&Z","PZ Commission":"P&Z",Decided:"Decided"},status:{Approved:"Decided",Denied:"Decided","In Progress":"In review"},recorded:{phases:[],statuses:[]}},
-    caseTypes:COUNTY_TYPES,citywideTypes:[],isCitywide:h=>h.citywide===true,loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments("canyon-county",caseId,context)),loadCases:getCanyonCountyHearings,parseFeature:countyFromFeature,
+    caseTypes:COUNTY_TYPES,citywideTypes:[],isCitywide:h=>h.citywide===true,loadCaseDocuments:(caseId,context)=>import("./image-documents").then(m=>m.loadCaseDocuments("canyon-county",caseId,context)),recordForCase:h=>(h as CountyCase).county,loadCases:getCanyonCountyHearings,parseFeature:countyFromFeature,
     stageForCase:hearing=>{const stage=countyStage(hearing);return stage==="Hearing Examiner"?"P&Z":stage as import("./types").MapStage;},
     presentation:hearing=>({title:countyTitle(hearing),summary:countySummary(hearing),href:areaPath(AREAS["canyon-county"])+"/plan/"+encodeURIComponent(hearing.appId)}),
   },

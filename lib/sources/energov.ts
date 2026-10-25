@@ -85,6 +85,8 @@ export const EnerGovModule = {
 export type EnerGovModuleId = (typeof EnerGovModule)[keyof typeof EnerGovModule];
 
 type FetchOpts = {
+  /** Optional short budget for map-pane enrichment; full pages retain the normal timeout. */
+  timeoutMs?:number;
   /** Seconds before the Next.js data cache revalidates. Default 1 hour. */
   revalidate?: number;
   /** Optional cache tag to allow targeted revalidation later. */
@@ -111,7 +113,7 @@ export function createEnerGovClient(config: EnerGovConfig): EnerGovClient {
 
   async function call<T>(path: string, opts: FetchOpts, extraHeaders: Record<string, string> = {}): Promise<EnerGovEnvelope<T> | null> {
     const res = await fetch(`${baseUrl}/apps/selfservice/api${path}`, {
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(opts.timeoutMs??15000),
       headers: {
         Accept: "application/json, text/plain, */*",
         tenantId: String(config.tenantId),

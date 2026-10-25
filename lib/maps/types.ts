@@ -25,6 +25,7 @@ export type JurisdictionConfig = {
   parseFeatures?: (feature: import("geojson").Feature) => Hearing[];
   parseFeature?: (feature: import("geojson").Feature) => Hearing;
   stageForCase?: (hearing: Hearing) => MapStage;
+  recordForCase?:(hearing:Hearing)=>import("@/lib/localities/record-types").PublicCaseRecord|undefined|Promise<import("@/lib/localities/record-types").PublicCaseRecord|undefined>;
   loadCases?: () => Promise<HearingFeed>; recordClient?: EnerGovClient;
   presentation?: (hearing: Hearing, plan: Parameters<typeof caseSummary>[1]) => { title: string; summary: string; href: string; hearing?: { startsAt: string; body: string } };
 };
