@@ -1,18 +1,10 @@
-import { JURISDICTIONS } from "../lib/maps/jurisdictions";
-import { readMapSnapshot,saveMapSnapshot } from "../lib/maps/store";
-import { refreshCaseVisual } from "../lib/maps/visuals";
-import { caseCatalog } from "../lib/case-catalog";
+import {seedImageQueue,processImageQueue} from "../lib/maps/image-worker";
+import {rescanCase} from "../lib/maps/image-job-store";
+import {getJurisdiction} from "../lib/maps/jurisdictions";
+/** CLI uses the same one-case queue as cron; it never rewrites a full map snapshot. */
 async function main(){
-  const config=JURISDICTIONS.nampa,snapshot=await readMapSnapshot(config.id);if(!snapshot)throw new Error("Refresh map data first");
-  const deadline=Date.now()+100000;
-  const [feed,reports]=await Promise.all([config.loadCases!(),config.loadCaseReports?.(Date.now()+18000)??[]]);
-  const filter=new Set(process.argv.slice(2));const hearings=caseCatalog(feed).filter(h=>!filter.size||filter.has(h.appId));
-  let images=0;
-  for(const hearing of hearings){
-    if(Date.now()>deadline-16000)break;
-    const item=snapshot.cases.find(c=>c.id===hearing.appId);if(!item||config.caseVisuals?.[item.id])continue;
-    try{const visual=await refreshCaseVisual(config,hearing,deadline,reports.filter(r=>r.caseIds.includes(hearing.appId)));if(visual){item.visual=visual;images++;console.log("Image cached:",hearing.appId);}item.visualCheckedAt=new Date().toISOString();}catch{console.log("No preview available:",hearing.appId);}
-  }
-  await saveMapSnapshot(snapshot);console.log(JSON.stringify({images,sourceReports:reports.length}));
+ const argument=process.argv[2];let target:{areaId:string;caseId:string}|undefined;
+ if(argument){const [areaId,caseId]=argument.includes(":")?argument.split(":"):["nampa",argument];if(!getJurisdiction(areaId)||!caseId)throw new Error("Use area:caseId");target={areaId,caseId};await rescanCase(areaId,caseId,true);}else await seedImageQueue();
+ console.log(JSON.stringify(await processImageQueue({target,budgetMs:250000})));
 }
 main().catch(e=>{console.error(e.message);process.exitCode=1;});
