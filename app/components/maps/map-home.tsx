@@ -110,7 +110,11 @@ export default function MapHome() {
     else {
       const u = new URL(window.location.href);
       u.searchParams.delete("project");
-      window.history.replaceState(null, "", u);
+      window.history.replaceState(
+        { ...window.history.state, lawPane: false },
+        "",
+        u,
+      );
       setSelected(undefined);
       setPane(undefined);
     }
@@ -227,8 +231,16 @@ export default function MapHome() {
       const shared = new URL(window.location.href),
         base = new URL(shared);
       base.searchParams.delete("project");
-      window.history.replaceState({ lawMapBase: true }, "", base);
-      window.history.pushState({ lawPane: true }, "", shared);
+      window.history.replaceState(
+        { ...window.history.state, lawMapBase: true },
+        "",
+        base,
+      );
+      window.history.pushState(
+        { ...window.history.state, lawPane: true },
+        "",
+        shared,
+      );
     }
     const restore = () => setSelected(projectFromUrl());
     restore();
@@ -640,7 +652,11 @@ export default function MapHome() {
       if (key === selectedRef.current) return;
       const u = new URL(window.location.href);
       u.searchParams.set("project", key);
-      window.history.pushState({ lawPane: true }, "", u);
+      window.history.pushState(
+        { ...window.history.state, lawPane: true },
+        "",
+        u,
+      );
       setSelected(key);
     };
     loadRef.current = async () => {
