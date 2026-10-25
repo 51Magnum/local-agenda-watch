@@ -11,6 +11,7 @@ export const RESIDENT_QUESTIONS = [
   "How can I act",
 ] as const;
 export type PaneData = {
+  summarySource?:string;
   documents?: {label:string;url:string}[];
   parcels?: string[];
   officialRecords?: { label: string; url: string }[];

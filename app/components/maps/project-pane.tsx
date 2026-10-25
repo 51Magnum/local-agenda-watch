@@ -116,6 +116,7 @@ export default function ProjectPane({
           </p>
           <div className="law-pane-expanded">
             {item.popup?.explanation && <p>{item.popup.explanation}</p>}
+            {data.summarySource && <a href={data.summarySource} target="_blank" rel="noreferrer">Summary source</a>}
             {page && item.popup?.aiGenerated && <p className="text-xs text-zinc-500">AI-generated summary; check the linked official records.</p>}
             {item.visual && (
               <figure>

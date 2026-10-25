@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- approved source exhibits use the cached visual endpoint. */
 import {useState} from "react";
 import type {PaneData} from "@/lib/maps/project-questions";
 import ProjectPane from "./project-pane";

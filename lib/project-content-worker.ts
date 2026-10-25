@@ -5,7 +5,7 @@ import {backfillDecisionDates} from "./maps/decision-backfill";
 import {createHash} from "node:crypto";
 import {JURISDICTIONS} from "./maps/jurisdictions";
 import {caseCatalog} from "./case-catalog";
-import {getEvidenceStore} from "./timeline/store";
+import {getEvidenceStore,acquireLease,releaseLease} from "./timeline/store";
 import {structuredResponse,normalizeQuote} from "./timeline/extract";
 import {readProjectContent,saveProjectContent,type ProjectContent} from "./project-content-store";
 import {cleanResidentTitle,cleanResidentProse} from "./resident-copy";
@@ -18,6 +18,8 @@ const schema={type:"object",additionalProperties:false,required:["headline","exp
 export async function enrichProjectContent({budgetMs=240000,areaId,caseId}:{budgetMs?:number;areaId?:string;caseId?:string}={}){
  const deadline=Date.now()+budgetMs,store=getEvidenceStore(),report:{area:string;active:number;checked:number;generated:number;cached:number;fallback:number;deferred:number}[]=[],errors:string[]=[];
  for(const config of Object.values(JURISDICTIONS).filter(c=>c.area?.status==="live"&&(!areaId||c.id===areaId))){
+  const lease=await acquireLease(store,"resident-content:"+config.id,300000);if(!lease)continue;
+  try{
   const feed=await config.loadCases?.(),cases=caseCatalog(feed).filter(h=>(caseId?h.appId===caseId:!h.decisionRecorded&&!/^(?:withdrawn|denied|approved|expired)/i.test(h.appStatus))).sort((a,b)=>(a.meetings.find(m=>m.date>=new Date().toISOString().slice(0,10))?.date??"9999").localeCompare(b.meetings.find(m=>m.date>=new Date().toISOString().slice(0,10))?.date??"9999"));
   await backfillDecisionDates(config.id,feed);
   const counts={area:config.id,active:cases.length,checked:0,generated:0,cached:0,fallback:0,deferred:0};report.push(counts);const old=await readProjectContent(config.id,cases.map(h=>h.appId));
@@ -32,7 +34,7 @@ export async function enrichProjectContent({budgetMs=240000,areaId,caseId}:{budg
    if(doc&&!copy.explanation){
     let pages=store.pages?await store.pages(doc.id):doc.pages;
     if(!pages?.length&&doc.kind==="staff-report"&&Date.now()<deadline-60000)try{
-      const bytes=await downloadDocument(doc.url,config.id,{timeoutMs:25000});pages=await extractNativePdfPages(bytes);pages=await ocrMissingPages(bytes,pages);await cacheContentPages(doc.id,digest(bytes),pages);
+      const bytes=await downloadDocument(doc.url,config.id,{timeoutMs:25000});pages=await extractNativePdfPages(bytes);pages=await ocrMissingPages(bytes,pages);doc.hash=digest(bytes);await cacheContentPages(doc.id,doc.hash,pages);value.fingerprint=createHash("sha256").update("resident-content-v1"+JSON.stringify([h.displayTitle,h.appScope,h.description,docs.map(d=>[d.id,d.hash])])).digest("hex");
     }catch(e){errors.push(config.id+"/"+h.appId+" report: "+(e instanceof Error?e.message:"unavailable"));}
 
     if(!process.env.OPENAI_API_KEY||Date.now()>deadline-35000||!pages?.length){value.status="deferred";counts.deferred++;}
@@ -48,6 +50,7 @@ export async function enrichProjectContent({budgetMs=240000,areaId,caseId}:{budg
    if(value.status==="fallback")counts.fallback++;
    await saveProjectContent(config.id,h.appId,value);
   }
+  }finally{await releaseLease(store,"resident-content:"+config.id,lease);}
  }
  return {areas:report,errors,complete:Date.now()<deadline-5000};
 }

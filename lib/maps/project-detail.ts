@@ -169,6 +169,7 @@ async function detail(
   const result:PaneData = {
     item,
     officialRecords,
+    summarySource:content?.source?residentPaneHref(area,content.source.url+"#page="+content.source.page):undefined,
     documents:[...new Map([...(record?.documents??[]),...(project?.sourceDocuments??[])].filter(d=>(!sensitive||!privateResidentialDocument(d.label))&&residentPaneHref(area,d.url)).map(d=>[d.url,{label:d.label,url:residentPaneHref(area,d.url)!}])).values()],
     parcels:sensitive?undefined:item.parcelIds,
     relatedCases: await Promise.all((item.members??[]).map(async m=>{

@@ -35,3 +35,8 @@ it("a case-specific stronger-check hold blocks old checks but keeps generated ma
  expect(displayedImageReviews([{...base,visual:{...base.visual!,approval:{...check,reviewerVersion:"vision-high-v2"}}},hold])).toHaveLength(1);
  expect(displayedImageReviews([{...base,visual:{...base.visual!,approval:{...check,type:"project area map",generated:"gis-boundary-v1"}}},hold])).toHaveLength(1);
 });
+
+it("labels a classified context map by its true type rather than a legacy concept caption",()=>{
+ const row={id:"context",areaId:"nampa",caseIds:["DAMO-00068-2026"],sourceUrl:"https://city.test/report.pdf",outcome:"accepted",visual:{label:"Concept plan",approval:{...check,is_context_map:true}}} as ImageReview;
+ const image=displayedImageReviews([row])[0].visual!;expect(image.approval!.type).toBe("vicinity/aerial exhibit");expect(image.label).toBe("Vicinity/aerial exhibit · Sep 2026");
+});
