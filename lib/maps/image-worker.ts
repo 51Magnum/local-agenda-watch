@@ -1,3 +1,4 @@
+import {claimDocumentWork} from "@/lib/timeline/document-work-lease";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import {residentialCase} from "@/lib/residential-privacy";
 import sharp from "sharp";
@@ -26,7 +27,7 @@ export async function imageCoverage(){
  result.push({area:area.id,cases:cases.length,geometry:cases.filter(c=>c.hasGeometry&&!c.citywide).length,plans,aerial,real:plans+aerial,fallback,empty:cases.length-plans-aerial-fallback});
  }return result;
 }
-export async function processImageQueue(options:{budgetMs?:number;target?:{areaId:string;caseId:string};fallbackOnly?:boolean}={}){
+async function processImageJob(options:{budgetMs?:number;target?:{areaId:string;caseId:string};fallbackOnly?:boolean}={}){
  const started=Date.now(),deadline=started+(options.budgetMs??250000);const job=await claimImageJob(options.target,options.fallbackOnly);if(!job)return {status:"idle",checked:0};
  const config=JURISDICTIONS[job.areaId],resuming=job.status==="deferred"||job.status==="blocked";job.attempts++;job.errors=[];job.checked=0;
  const checkpoint=()=>saveImageJob(job);let accepted=0,blocked=false,fallbackFailed=false;
@@ -57,4 +58,9 @@ export async function processImageQueue(options:{budgetMs?:number;target?:{areaI
   return {status:job.status,area:job.areaId,caseId:job.caseId,checked:job.checked,accepted,documents:job.documents.length,errors:job.errors,elapsedMs:Date.now()-started};
  }catch(e){job.status="deferred";job.failedAt=new Date().toISOString();job.dueAt=new Date(Date.now()+86400000).toISOString();job.errors.push(e instanceof Error?e.message:"Image scan unavailable");return {status:job.status,area:job.areaId,caseId:job.caseId,checked:job.checked,errors:job.errors};}
  finally{job.errors=job.errors.slice(-25);await saveImageJob(job,true);console.info("[images:case]",JSON.stringify({area:job.areaId,caseId:job.caseId,status:job.status,checked:job.checked,attempts:job.attempts,elapsedMs:Date.now()-started}));}
+}
+
+export async function processImageQueue(options:Parameters<typeof processImageJob>[0]={}){
+ const release=await claimDocumentWork();if(!release)return {status:"busy",checked:0,reason:"Another document worker is running"};
+ try{return await processImageJob(options);}finally{await release();}
 }
