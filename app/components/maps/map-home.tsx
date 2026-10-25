@@ -1087,10 +1087,10 @@ export default function MapHome() {
           ))}
         </nav>
         <div className="law-explorer-controls">
-          <button aria-expanded={legend} onClick={() => setLegend(!legend)}>
+          <button aria-expanded={legend} aria-controls="map-progress-legend" onClick={() => { setLegend(!legend); setLayers(false); }}>
             Legend
           </button>
-          <button aria-expanded={layers} onClick={() => setLayers(!layers)}>
+          <button aria-expanded={layers} aria-controls="map-layer-options" onClick={() => { setLayers(!layers); setLegend(false); }}>
             Layers
           </button>
           <button aria-label="Use my location" onClick={locate}>
@@ -1098,7 +1098,7 @@ export default function MapHome() {
           </button>
         </div>
         {legend && (
-          <section className="law-map-legend" aria-label="Map legend">
+          <section id="map-progress-legend" className="law-map-legend" aria-label="Map legend">
             <strong>Project progress</strong>
             {MAP_STAGES.map((stage) => (
               <p key={stage}>
@@ -1120,7 +1120,7 @@ export default function MapHome() {
           </section>
         )}
         {layers && (
-          <section className="law-layer-panel" aria-label="Map layers">
+          <section id="map-layer-options" className="law-layer-panel" aria-label="Map layers">
             <label>
               <input
                 type="checkbox"

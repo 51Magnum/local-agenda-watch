@@ -19,3 +19,15 @@ body:has(.law-map-home)>header,body:has(.law-map-home)>footer{display:none}
 /* The six resident questions share one strong, recognizable heading style. */
 .law-resident-pane .law-question-heading{font-family:inherit;font-size:18px;font-weight:750;line-height:1.35;letter-spacing:0;text-transform:none;color:#115e59;background:#eef8f5;border-left:4px solid #0f766e;border-radius:0 7px 7px 0;padding:9px 12px;margin:0 0 14px}
 .dark .law-resident-pane .law-question-heading{color:#99f6e4;background:#123b39;border-left-color:#5eead4}
+/* The explorer legend is a vertical panel, independent of legacy map legends. */
+.law-explorer-stage>.law-map-legend{display:block}
+.law-explorer-controls button[aria-expanded=true]{border-color:#0f766e;box-shadow:0 0 0 1px #0f766e}
+@media(max-width:699px){
+  .law-filter-chips{right:10px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;pointer-events:auto}
+  .law-filter-chips button{flex:none;white-space:nowrap;min-height:38px;font-size:11px}
+  .law-explorer-controls{top:60px;left:10px;right:auto;gap:8px}
+  .law-explorer-controls button{min-height:44px;min-width:44px;padding:9px 13px;font-size:13px}
+  .law-explorer-stage .maplibregl-ctrl-top-right{top:50px}
+  .law-explorer-stage>.law-map-legend,.law-layer-panel{top:112px;left:10px;right:auto;width:min(290px,calc(100% - 64px));min-width:0;max-height:calc(100% - 160px);overflow:auto;overscroll-behavior:contain}
+  .law-layer-panel label{align-items:center;min-height:36px}
+}
