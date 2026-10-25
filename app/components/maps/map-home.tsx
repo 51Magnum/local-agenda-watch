@@ -16,6 +16,7 @@ import {
 } from "@/lib/maps/types";
 import {
   gridCells,
+  snapBounds,
   zoomTier,
   CASE_OUTLINE_ZOOM,
   caseInFilter,
@@ -56,6 +57,18 @@ function projectFromUrl() {
   return q && /^[a-z-]+\/[A-Z0-9-]+$/.test(q) ? q : undefined;
 }
 
+const PROJECT_FILL_OPACITY = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  11,
+  0.58,
+  13,
+  0.32,
+  15,
+  0.14,
+] as import("maplibre-gl").ExpressionSpecification;
+
 export default function MapHome() {
   const container = useRef<HTMLDivElement>(null),
     map = useRef<LibreMap | null>(null),
@@ -68,6 +81,7 @@ export default function MapHome() {
     cache = useRef(new Map<string, ViewportData>()),
     inflight = useRef(new Map<string, Promise<ViewportData>>()),
     flumCache = useRef(new Map<string, FlumCache>()),
+    flumInflight = useRef(new Map<string, Promise<FlumCache>>()),
     revision = useRef("initial"),
     destroyed = useRef(false),
     lastTooltip = useRef("");
@@ -80,6 +94,7 @@ export default function MapHome() {
     [pane, setPane] = useState<PaneData>(),
     [paneError, setPaneError] = useState(""),
     [loading, setLoading] = useState(false),
+    [flumLoading, setFlumLoading] = useState(false),
     [message, setMessage] = useState(""),
     [flumOn, setFlumOn] = useState(false),
     [boundariesOn, setBoundariesOn] = useState(true),
@@ -378,7 +393,10 @@ export default function MapHome() {
           minzoom: CASE_OUTLINE_ZOOM,
           type: "fill",
           source: "law-polygons",
-          paint: { "fill-color": ["get", "color"], "fill-opacity": 0.16 },
+          paint: {
+            "fill-color": ["get", "color"],
+            "fill-opacity": PROJECT_FILL_OPACITY,
+          },
         });
         m.addLayer({
           id: "law-halo",
@@ -716,6 +734,7 @@ export default function MapHome() {
         cells = gridCells(bounds, z);
       setZoom(z);
       setLoading(true);
+      setFlumLoading(false);
       fetch(
         "/api/map/boundaries?" +
           new URLSearchParams({ bbox: bounds.join(",") }),
@@ -827,26 +846,39 @@ export default function MapHome() {
               : [],
         });
         if (flumRef.current && z >= 9) {
-          const key = cells.map((c) => c.join(",")).join("|"),
-            planBounds = [
-              Math.min(...cells.map((c) => c[0])),
-              Math.min(...cells.map((c) => c[1])),
-              Math.max(...cells.map((c) => c[2])),
-              Math.max(...cells.map((c) => c[3])),
-            ];
+          setFlumLoading(true);
+          // Case grid cells are deliberately broad. Land-use clipping needs a
+          // much tighter viewport so it does not process whole neighboring cities.
+          const planBounds = snapBounds(bounds, Math.min(18, z + 3)),
+            key = planBounds.join(",") + "@" + revision.current;
           let layer = flumCache.current.get(key);
           if (!layer) {
-            const r = await fetch(
-              "/api/maps/nearby?" +
-                new URLSearchParams({
-                  bbox: planBounds.join(","),
-                  layer: "flum",
-                }),
-            );
-            if (r.ok) {
-              layer = await r.json();
-              if (layer) flumCache.current.set(key, layer);
+            let pending = flumInflight.current.get(key);
+            if (!pending) {
+              pending = fetch(
+                "/api/maps/nearby?" +
+                  new URLSearchParams({
+                    bbox: planBounds.join(","),
+                    layer: "flum",
+                  }),
+              )
+                .then(async (r) => {
+                  if (!r.ok)
+                    throw Error(
+                      "Future land use is temporarily unavailable. Try again.",
+                    );
+                  const result = (await r.json()) as FlumCache;
+                  flumCache.current.set(key, result);
+                  if (flumCache.current.size > 24)
+                    flumCache.current.delete(
+                      flumCache.current.keys().next().value!,
+                    );
+                  return result;
+                })
+                .finally(() => flumInflight.current.delete(key));
+              flumInflight.current.set(key, pending);
             }
+            layer = await pending;
           }
           if (layer && current === generation.current) {
             setFlum(layer);
@@ -867,7 +899,10 @@ export default function MapHome() {
       } catch (e) {
         if (current === generation.current) setMessage((e as Error).message);
       } finally {
-        if (current === generation.current) setLoading(false);
+        if (current === generation.current) {
+          setLoading(false);
+          setFlumLoading(false);
+        }
       }
     };
   }, []);
@@ -879,7 +914,11 @@ export default function MapHome() {
       "visibility",
       flumOn && zoom >= 9 ? "visible" : "none",
     );
-    m.setPaintProperty("law-fill", "fill-opacity", flumOn ? 0 : 0.16);
+    m.setPaintProperty(
+      "law-fill",
+      "fill-opacity",
+      flumOn ? 0 : PROJECT_FILL_OPACITY,
+    );
     for (const id of ["law-boundaries", "law-area-labels"])
       m.setLayoutProperty(id, "visibility", boundariesOn ? "visible" : "none");
   }, [ready, flumOn, boundariesOn, zoom]);
@@ -1244,7 +1283,7 @@ export default function MapHome() {
         )}
         {loading && (
           <p className="law-map-loading" role="status">
-            Loading projects…
+            {flumLoading ? "Loading future land use…" : "Loading projects…"}
           </p>
         )}
         {limited && (

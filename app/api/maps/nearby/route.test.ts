@@ -1,3 +1,4 @@
+vi.mock("next/cache",()=>({unstable_cache:(f:unknown)=>f}));
 vi.mock("@/lib/maps/popup-data",()=>({enrichMapPopups:async (_config:unknown,cases:unknown)=>cases}));
 import {afterEach,expect,it,vi} from "vitest";
 import {readFlumSnapshot,readMapSnapshot} from "@/lib/maps/store";

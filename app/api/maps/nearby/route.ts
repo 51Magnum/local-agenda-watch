@@ -1,10 +1,11 @@
+import {combinedFlumViewport} from "@/lib/maps/flum-viewport";
 import { enrichMapPopups } from "@/lib/maps/popup-data";
 import {bbox,featureCollection,feature,distance} from "@turf/turf";
 import {AREAS} from "@/lib/areas/registry";
 import {getJurisdiction} from "@/lib/maps/jurisdictions";
-import {readFlumSnapshot,readMapSnapshot} from "@/lib/maps/store";
+import {readMapSnapshot} from "@/lib/maps/store";
 import {publicMapData} from "@/lib/maps/refresh";
-import {clipCombinedFlum,combineRadiusCases,liveAreasInRadius,liveAreasInBounds,parseMapBounds,radiusBounds} from "@/lib/maps/radius";
+import {combineRadiusCases,liveAreasInRadius,liveAreasInBounds,parseMapBounds,radiusBounds} from "@/lib/maps/radius";
 import {isLonLat,type PublicMapData} from "@/lib/maps/types";
 export const runtime="nodejs";
 export const maxDuration=120;
@@ -20,10 +21,8 @@ export async function GET(request:Request){
  if(overview||viewBounds)coordinates=[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2];
  const warnings:string[]=[],flum=q.get("layer")==="flum";
  if(flum){
-  const planAreas=Object.values(AREAS).filter(a=>a.status==="live"&&getJurisdiction(a.id)?.flum.layerUrl);
-  const layers=await Promise.all(planAreas.map(async area=>{const config=getJurisdiction(area.id);if(!config?.flum.layerUrl)return;try{const data=await readFlumSnapshot(area.id,{bounds});if(data)return {area,flum:data,categoryField:config.flum.categoryField};}catch{}warnings.push(area.name+" future land use unavailable.");}));
-  const data=clipCombinedFlum(layers.filter(l=>l!==undefined),Object.values(AREAS).filter(a=>a.type==="city"),coordinates,r,bounds);
-  return Response.json({...data,warnings},{headers:{"Cache-Control":"public, max-age=300, s-maxage=300"}});
+  const data=await combinedFlumViewport(bounds);
+  return Response.json(data,{headers:{"Cache-Control":"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400"}});
  }
  const snapshots=await Promise.all(areas.map(async area=>{
   const config=getJurisdiction(area.id);if(!config)return;
