@@ -35,3 +35,22 @@ it("does not re-associate a reference withheld by the source adapter", () => {
   const feed={active:[{appId:"DA-26-03",meetings:[{...meeting,date:"2026-11-03"}]} as Hearing],completed:[],agendaMeetings:[{...meeting,id:"1",title:"Council",items:[{title:"Another site's related DA-26-03",caseIds:["DA-26-03"],agendaUrl:meeting.sourceUrl,staffReports:[]}]}]};
   expect(agendaCaseCopy(feed,"DA-26-03",undefined,now)).toBeUndefined();
 });
+it("keeps mixed-case case numbers and staff names out of Kuna's resident copy",()=>{
+ const id="26-03-ZC",h={appId:id,displayTitle:"Perry's Place",meetings:[meeting]} as Hearing;
+ const title="Case No. 26-03-ZC & 26-01-CPA, Perry’s Place – Marina Lundy – Associate Planner. A zone change from R-6 to C-2 at Kay Ave and E 4th St.";
+ const copy=agendaCaseCopy({active:[h],completed:[],agendaMeetings:[{...meeting,id:"1",title:"Council",items:[{title,caseIds:[id],agendaUrl:meeting.sourceUrl,staffReports:[]}]}]},id,undefined,now)!;
+ expect(copy.name).toBe("Perry's Place");expect(copy.headline).toContain("change zoning from R-6 to C-2");expect(JSON.stringify(copy)).not.toMatch(/Marina|Lundy|Case No|26-03/);
+});
+it("summarizes the current Nampa request without copying legal descriptions or an old concept",()=>{
+ const id="ANN-00361-2026",h={appId:id,displayTitle:"Annexation and zoning",meetings:[meeting]} as Hearing;
+ const title="Annexation & zoning with a development agreement and Master Planned Community for Whitewater, on 3 parcels, for an applicant (ann-00361-2026). Original Concept: 900 residential lots.";
+ const copy=agendaCaseCopy({active:[h],completed:[],agendaMeetings:[{...meeting,id:"1",title:"Council",items:[{title,caseIds:[id],agendaUrl:meeting.sourceUrl,staffReports:[]}]}]},id,undefined,now)!;
+ expect(copy.name).toBe("Whitewater");expect(copy.headline).toBe("Whitewater: annexation and zoning for a master-planned community");expect(JSON.stringify(copy)).not.toMatch(/parcels|applicant|900|ann-00361/);
+});
+it("keeps the same Ridgeside name for each jointly heard case number",()=>{
+ const items=parseMunicipalAgenda(readFileSync("lib/sources/fixtures/eagle-agenda.txt","utf8"),"eagle",meeting.sourceUrl);
+ for(const id of ["RZDA-2026-03","PP-2026-03","CUP-2026-08","PPUD-2026-03"]){
+  const copy=agendaCaseCopy({active:[{appId:id,displayTitle:"Ridgeside Subdivision",meetings:[meeting]} as Hearing],completed:[],agendaMeetings:[{...meeting,id:"1",title:"Council",items}]},id,undefined,now)!;
+  expect(copy.name).toBe("Ridgeside Subdivision");expect(copy.headline).toContain("20 residential lots in a 28-lot subdivision");
+ }
+});
