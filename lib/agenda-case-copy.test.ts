@@ -54,3 +54,8 @@ it("keeps the same Ridgeside name for each jointly heard case number",()=>{
   expect(copy.name).toBe("Ridgeside Subdivision");expect(copy.headline).toContain("20 residential lots in a 28-lot subdivision");
  }
 });
+it("ends an agenda heading's address before the following Request section",()=>{
+ const id="H-2026-0053",h={appId:id,displayTitle:"Thruston Choi Farms Subdivision",meetings:[meeting]} as Hearing;
+ const title="Public Hearing for Thruston Choi Farms Subdivision (H-2026-0053), located at 5201 and 5035 W. Franklin Rd. A. Request: Preliminary Plat to subdivide two (2) existing parcels into six (6) buildable lots in the I-L zoning district on 22.26 acres of land";
+ expect(agendaCaseCopy({active:[h],completed:[],agendaMeetings:[{...meeting,id:"1",title:"Council",items:[{title,caseIds:[id],agendaUrl:meeting.sourceUrl,staffReports:[]}]}]},id,undefined,now)?.where).toBe("5201 and 5035 W. Franklin Rd");
+});

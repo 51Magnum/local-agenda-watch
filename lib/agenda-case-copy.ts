@@ -73,6 +73,6 @@ export function agendaCaseCopy(feed: HearingFeed | undefined, caseId: string, ti
     : `${headline}. The published agenda describes the request being considered.`;
   const location = text.match(/\b(?:is\s+)?(?:generally\s+)?located\s+((?:on|at|approximately|generally|near)\b.+?)(?=\s+This item\b|\s+Applicant:|$)/i)?.[1];
   // Street initials ("W. Franklin Rd.") are not sentence boundaries.
-  const where = location ? readableLocation(location.replace(/\.\s+(?:This|The|Applicant|Staff)\b.*$/i, "").replace(/^\s*(?:on|at)\s+/i, "").replace(/\s*\([A-Z]{2,5}\)\s*$/, "").replace(/[.\s]+$/, "")) : undefined;
+  const where = location ? readableLocation(location.replace(/\s+[A-Z]\.\s*(?:Request|Applicant|Application|Staff)\b.*$/i, "").replace(/\.\s+(?:This|The|Applicant|Staff)\b.*$/i, "").replace(/^\s*(?:on|at)\s+/i, "").replace(/\s*\([A-Z]{2,5}\)\s*$/, "").replace(/[.\s]+$/, "")) : undefined;
   return { name, headline, explanation, sourceUrl: source.url, date: source.date, where };
 }
