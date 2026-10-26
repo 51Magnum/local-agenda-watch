@@ -40,7 +40,7 @@ export function outlineThumbnail(geometry: CaseGeometry | null) {
   return (
     "data:image/svg+xml;base64," +
     Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="630"><rect width="420" height="630" fill="#e2e8f0"/><path d="${path}" fill="#99f6e4" stroke="#0f766e" stroke-width="4" fill-rule="evenodd"/><text x="25" y="600" fill="#334155" font-size="18" font-family="sans-serif">Project outline · not a site plan</text></svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="630"><rect width="420" height="630" fill="#e2e8f0"/><path d="${path}" fill="#99f6e4" stroke="#0f766e" stroke-width="4" fill-rule="evenodd"/></svg>`,
     ).toString("base64")
   );
 }

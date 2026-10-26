@@ -7,6 +7,8 @@ it("cleans official boilerplate without inventing facts or exposing parcel-only 
  expect(cleanResidentTitle("ACTION ITEM: WINCO WELLS final plat H-2026-0047 Checklist")).toBe("Winco Wells Final Plat");
  expect(readableLocation("0,0,0")).toBeUndefined();expect(readableLocation("Parcel R3066500000")).toBeUndefined();expect(readableLocation("0 SOUTHSIDE BLVD Nampa ID")).toBe("SOUTHSIDE BLVD Nampa ID");
  expect(cleanResidentProse("Canyon County .")).toBe("Canyon County.");
+ expect(cleanResidentTitle("An Conditional Use Permit")).toBe("Conditional Use Permit");
+ expect(readableLocation("S0510449410 and S0510449210")).toBeUndefined();
 });
 it("formats hearing dates identically in summer, winter and date-only records",()=>{
  expect(hearingDateTime("2026-10-28T00:00:00Z")).toBe("Tue, Oct 27, 2026 · 6 PM Mountain Time");

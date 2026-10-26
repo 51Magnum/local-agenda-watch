@@ -328,7 +328,10 @@ describe("case parity, hub cleanup and SEO", () => {
     setup();
     vi.mocked(nampa.getHearings!).mockResolvedValue({ active: [record], completed: [{ ...record, appId: "CUP-00411-2026" }], upcomingOnly: [{ ...record, appId: "SPP-12345-2026" }] });
     const urls = (await sitemap()).map((e) => e.url);
-    for (const path of ["/", "/us/id/nampa", "/us/id/nampa/braeburn-creek", "/us/id/nampa/plan/ANN-00369-2026", "/us/id/nampa/plan/CUP-00411-2026", "/us/id/nampa/plan/SPP-12345-2026", "/us/id/nampa/plan/ANN-00371-2026", "/us/id/nampa/plan/SPP-00184-2026"]) expect(urls).toContain("https://www.localagendawatch.com" + path);
+    for (const path of ["/", "/us/id/nampa", "/us/id/nampa/braeburn-creek", "/us/id/nampa/plan/ANN-00369-2026", "/us/id/nampa/plan/CUP-00411-2026", "/us/id/nampa/plan/SPP-12345-2026"]) expect(urls).toContain("https://www.localagendawatch.com" + path);
+    expect(urls).not.toContain("https://www.localagendawatch.com/us/id/nampa/plan/ANN-00371-2026");
+    expect(urls).not.toContain("https://www.localagendawatch.com/us/id/nampa/plan/SPP-00184-2026");
+    expect((await sitemap()).every(e=>!e.lastModified)).toBe(true);
     expect(new Set(urls).size).toBe(urls.length);
     expect(robots().sitemap).toBe("https://www.localagendawatch.com/sitemap.xml");
   });

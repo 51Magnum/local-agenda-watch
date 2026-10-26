@@ -1,4 +1,3 @@
-import { hearingDateTime } from "./areas/format";
 import {getProjectForCase} from "./projects";
 import { Pool } from "pg";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
@@ -7,6 +6,9 @@ import { nearbyCases } from "./maps/spatial";
 import type { MapCase } from "./maps/types";
 import { projectDetail } from "./maps/project-detail";
 import { SITE_ORIGIN } from "./site-config";
+import { alertEmailDocument } from "./alert-email";
+import { confirmationTemplate } from "./email/templates";
+import { emailProject, type WatchState } from "./email/project";
 export type WatchTarget =
   | { kind: "project"; areaId: string; caseId: string }
   | {
@@ -15,12 +17,12 @@ export type WatchTarget =
       coordinates: [number, number];
       radiusMiles: number;
     };
-type StoredWatchTarget = WatchTarget | { kind: "pending"; label: string };
-type Subscription = {
+export type StoredWatchTarget = WatchTarget | { kind: "pending"; label: string };
+export type Subscription = {
   id: string;
   email: string;
   target: StoredWatchTarget;
-  state: Record<string, string> | null;
+  state: WatchState | Record<string, string> | null;
   unsubscribe_token: string;
 };
 let pool: Pool, ready: Promise<unknown> | undefined;
@@ -30,7 +32,11 @@ export async function alertsDb() {
   pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
   ready ??= pool
     .query(
-      `CREATE TABLE IF NOT EXISTS law_alert_subscriptions(id uuid PRIMARY KEY,scope text NOT NULL,email text NOT NULL,target jsonb NOT NULL,confirm_hash text NOT NULL,confirm_expires timestamptz NOT NULL,unsubscribe_token text NOT NULL,confirmed_at timestamptz,unsubscribed_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),state jsonb,last_sent date,UNIQUE(scope,email,target));CREATE INDEX IF NOT EXISTS law_alert_confirm ON law_alert_subscriptions(confirm_hash);CREATE TABLE IF NOT EXISTS law_alert_limits(key text NOT NULL,window_start timestamptz NOT NULL,hits int NOT NULL,PRIMARY KEY(key,window_start));CREATE TABLE IF NOT EXISTS law_alert_waitlist(id uuid PRIMARY KEY,sent_at timestamptz);`,
+      `CREATE TABLE IF NOT EXISTS law_alert_subscriptions(id uuid PRIMARY KEY,scope text NOT NULL,email text NOT NULL,target jsonb NOT NULL,confirm_hash text NOT NULL,confirm_expires timestamptz NOT NULL,unsubscribe_token text NOT NULL,confirmed_at timestamptz,unsubscribed_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),state jsonb,last_sent date,UNIQUE(scope,email,target));CREATE INDEX IF NOT EXISTS law_alert_confirm ON law_alert_subscriptions(confirm_hash);CREATE TABLE IF NOT EXISTS law_alert_limits(key text NOT NULL,window_start timestamptz NOT NULL,hits int NOT NULL,PRIMARY KEY(key,window_start));CREATE TABLE IF NOT EXISTS law_alert_waitlist(id uuid PRIMARY KEY,sent_at timestamptz);
+ALTER TABLE law_alert_subscriptions ADD COLUMN IF NOT EXISTS coverage_announcements boolean NOT NULL DEFAULT false;
+CREATE TABLE IF NOT EXISTS law_alert_deliveries(id text PRIMARY KEY,scope text NOT NULL,email text NOT NULL,kind text NOT NULL,payload jsonb NOT NULL,states jsonb,status text NOT NULL DEFAULT 'pending',sent_parts int NOT NULL DEFAULT 0,attempts int NOT NULL DEFAULT 0,last_error text,next_attempt timestamptz NOT NULL DEFAULT now(),created_at timestamptz NOT NULL DEFAULT now(),sent_at timestamptz);
+CREATE INDEX IF NOT EXISTS law_alert_delivery_due ON law_alert_deliveries(scope,status,next_attempt);
+CREATE TABLE IF NOT EXISTS law_alert_recipient_checks(scope text NOT NULL,email text NOT NULL,last_checked timestamptz NOT NULL,PRIMARY KEY(scope,email));`,
     )
     .catch((e) => {
       ready = undefined;
@@ -83,27 +89,41 @@ export function parseWatchTarget(value: unknown): WatchTarget {
   throw Error("Choose a valid project or a place with a 0.25–10 mile radius");
 }
 export function alertReadiness() {
+  const deliveryEnabled=process.env.ALERTS_DELIVERY_ENABLED === "true" && process.env.VERCEL_ENV === "production";
   return {
-    ready: !!(process.env.RESEND_API_KEY && process.env.ALERTS_MAILING_ADDRESS),
+    ready: !!(process.env.RESEND_API_KEY?.trim() && process.env.ALERTS_MAILING_ADDRESS?.trim()),
+    deliveryEnabled,
     waitlistEnabled:
-      process.env.ALERTS_WAITLIST_CONFIRMATIONS_ENABLED === "true",
+      deliveryEnabled && process.env.ALERTS_WAITLIST_CONFIRMATIONS_ENABLED === "true",
   };
 }
 export async function sendAlertMail({
   to,
   subject,
   text,
+  html,
   key,
   unsubscribe,
+  mode = "live",
 }: {
   to: string;
   subject: string;
   text: string;
+  html?: string;
   key: string;
   unsubscribe: string;
+  mode?: "live" | "test" | "internal";
 }) {
+  if(mode!=="test"&&!alertReadiness().deliveryEnabled)throw Error("Live email delivery is paused pending owner approval");
+  if(mode==="internal"&&to!=="corrections@localagendawatch.com")throw Error("Internal corrections mail has a fixed recipient");
+  if(to.length>254||!/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(to))throw Error("Enter one valid recipient address");
   if (!alertReadiness().ready)
     throw Error("Alerts need a verified Resend sender and mailing address");
+  const complete=!!html?.startsWith("<!doctype html>");
+  const htmlPart=complete?html:html?alertEmailDocument(html,process.env.ALERTS_MAILING_ADDRESS!,unsubscribe):undefined;
+  const textPart=complete?text:text+"\n\nUpdated automatically from public records. Official records control.\nLocal Agenda Watch\n"+process.env.ALERTS_MAILING_ADDRESS+"\nUnsubscribe from all alerts: "+unsubscribe;
+  if(!htmlPart)throw Error("Every email requires an HTML and plain-text part");
+  if(Buffer.byteLength(htmlPart)+Buffer.byteLength(textPart)>=68000)throw Error("Email exceeds the 100 KB size limit");
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -112,18 +132,12 @@ export async function sendAlertMail({
       "Idempotency-Key": key,
     },
     body: JSON.stringify({
-      from:
-        process.env.ALERTS_FROM ??
-        "Local Agenda Watch <alerts@localagendawatch.com>",
-      reply_to: process.env.ALERTS_REPLY_TO ?? "hello@localagendawatch.com",
+      from: "Local Agenda Watch <alerts@localagendawatch.com>",
+      reply_to: "hello@localagendawatch.com",
       to: [to],
-      subject,
-      text:
-        text +
-        "\n\nLocal Agenda Watch · Independent summaries; official records control.\n" +
-        process.env.ALERTS_MAILING_ADDRESS +
-        "\nUnsubscribe from all alerts: " +
-        unsubscribe,
+      subject: (mode==="test"?"[TEST] ":"")+subject,
+      html:htmlPart,
+      text:textPart,
       headers: {
         "List-Unsubscribe": "<" + unsubscribe + ">",
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
@@ -139,9 +153,12 @@ export async function subscribeAlert(
   target: StoredWatchTarget,
   ip: string,
   origin = SITE_ORIGIN,
+  options:{reconsent?:boolean}={},
 ) {
-  if (!alertReadiness().ready)
+  if (!alertReadiness().ready || !alertReadiness().deliveryEnabled)
     throw Error("Email alerts are not configured yet");
+  const detail=target.kind==="project"?await projectDetail(target.areaId,target.caseId):undefined;
+  if(target.kind==="project"&&!detail)throw Error("Project data could not be verified");
   const db = await alertsDb(),
     now = new Date();
   email = email.trim().toLowerCase();
@@ -175,19 +192,7 @@ export async function subscribeAlert(
   try {
     await sendAlertMail({
       to: email,
-      subject: "Confirm your Local Agenda Watch alerts",
-      text:
-        "Confirm that you want a daily email when " +
-        (target.kind === "project"
-          ? "this project changes: " + target.caseId
-          : target.kind === "place"
-            ? target.label + " changes within " + target.radiusMiles + " miles"
-            : "your interest in " +
-              target.label +
-              ". After confirmation, choose a project or address on the map before alerts can start") +
-        ".\n\n" +
-        url +
-        "\n\nThis link expires in 48 hours. No alerts start until you confirm.",
+      ...confirmationTemplate(target,url,{mailingAddress:process.env.ALERTS_MAILING_ADDRESS!,unsubscribe:remove,manage:origin+"/api/alerts/manage?token="+unsubscribe},detail?emailProject(detail):undefined,options.reconsent),
       key: "confirm/" + id + "/" + hash(token),
       unsubscribe: remove,
     });
@@ -242,103 +247,5 @@ export const watchFingerprint = (c: MapCase) =>
     ]),
   );
 export async function sendDigests() {
-  if (!alertReadiness().ready)
-    return { sent: 0, skipped: "Email alerts are not configured" };
-  const db = await alertsDb(),
-    subs = (
-      await db.query(
-        `SELECT id,email,target,state,unsubscribe_token FROM law_alert_subscriptions WHERE scope=$1 AND confirmed_at IS NOT NULL AND target->>'kind'<>'pending' AND unsubscribed_at IS NULL AND (last_sent IS NULL OR last_sent<CURRENT_DATE) ORDER BY email,id LIMIT 250`,
-        [alertScope()],
-      )
-    ).rows as Subscription[];
-  if (!subs.length) return { sent: 0, checked: 0 };
-  const rows = (
-    await db.query(
-      `SELECT area_id AS "areaId",data-'visual'-'popup' AS data FROM law_map_cases WHERE area_id=ANY($1::text[])`,
-      [
-        Object.values(AREAS)
-          .filter((a) => a.status === "live")
-          .map((a) => a.id),
-      ],
-    )
-  ).rows.map((r) => ({ ...r.data, areaId: r.areaId })) as MapCase[];
-  const grouped = new Map<string, Subscription[]>();
-  for (const s of subs)
-    grouped.set(s.email, [...(grouped.get(s.email) ?? []), s]);
-  let sent = 0;
-  for (const [email, watches] of grouped) {
-    const states = new Map<string, Record<string, string>>(),
-      changed = new Map<string, MapCase>();
-    for (const sub of watches) {
-      const matches = watchMatches(sub.target, rows),
-        state = Object.fromEntries(
-          matches.map((c) => [c.areaId + ":" + c.id, watchFingerprint(c)]),
-        );
-      states.set(sub.id, state);
-      if (sub.state)
-        for (const c of matches) {
-          const key = c.areaId + ":" + c.id;
-          if (state[key] !== sub.state[key]) changed.set(key, c);
-        }
-    }
-    if (changed.size) {
-      const text: string[] = [];
-      for (const c of [...changed.values()].slice(0, 20)) {
-        const d = await projectDetail(c.areaId!, c.id);
-        if (!d) continue;
-        const link = SITE_ORIGIN + "/?project=" + c.areaId + "/" + c.id;
-        text.push(
-          "What is it: " +
-            (d.item.popup?.headline ?? d.item.title) +
-            "\nWhat's next: " +
-            (d.next
-              ? d.next.body +
-                " · " +
-                hearingDateTime(d.next.startsAt, d.area.timezone)
-              : (d.item.recordStatus ??
-                d.history.at(-1)?.label ??
-                d.item.stage)) +
-            "\nHow can I act: " +
-            (d.participationClosed
-              ? "Read the official decision and project history"
-              : (d.expiredDeadlineMessage ??
-                "Check the official notice for comment options and deadlines")) +
-            "\n" +
-            link +
-            (d.commentUrl
-              ? "\nOfficial comment information: " +
-                new URL(d.commentUrl, SITE_ORIGIN).href
-              : ""),
-        );
-      }
-      if (text.length) {
-        await sendAlertMail({
-          to: email,
-          subject: `${changed.size} project update${changed.size === 1 ? "" : "s"} near your watched places`,
-          text: text.join("\n\n"),
-          key:
-            "digest/" +
-            hash(email) +
-            ":" +
-            alertScope() +
-            ":" +
-            new Date().toISOString().slice(0, 10),
-          unsubscribe:
-            SITE_ORIGIN +
-            "/api/alerts/unsubscribe?token=" +
-            watches[0].unsubscribe_token,
-        });
-        sent++;
-      }
-    }
-    await db.query(
-      `UPDATE law_alert_subscriptions s SET state=x->'state',last_sent=CURRENT_DATE FROM jsonb_array_elements($1::jsonb)x WHERE s.id=(x->>'id')::uuid AND s.unsubscribed_at IS NULL`,
-      [
-        JSON.stringify(
-          watches.map((s) => ({ id: s.id, state: states.get(s.id) })),
-        ),
-      ],
-    );
-  }
-  return { sent, checked: subs.length };
+  return (await import("./email/jobs")).sendScheduledAlerts();
 }

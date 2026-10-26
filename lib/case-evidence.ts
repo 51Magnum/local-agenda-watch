@@ -10,6 +10,14 @@ export type CaseVisual = {
 
 /** Verified public document metadata remains available when EnerGov is down. */
 export const CASE_EVIDENCE: Record<string, { documentNames: string[]; address?: string; sourceUrl: string; reportUrl?: string; applicationCopy?: {headline:string;explanation:string;page:number;sourceDate:string}; visuals?: CaseVisual[] }> = {
+  // Official August 17 Council staff report, physical pages 1–2.
+  "DAMO-00068-2026": {
+    documentNames: ["Spring Shores Commons · Council staff report · Aug 17, 2026"],
+    address: "Northwest of Cherry Lane and 11th Avenue North, Nampa",
+    sourceUrl: "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=692e24e4-3deb-43d0-8609-530cf87e180c",
+    reportUrl: "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=692e24e4-3deb-43d0-8609-530cf87e180c",
+    applicationCopy: {headline:"Spring Shores Commons development agreement changes",explanation:"A request to change the development agreement for Spring Shores Commons, alongside a rezone and preliminary subdivision plat. The report describes an original concept of five detached homes, 63 attached homes, one commercial lot, and seven common lots.",page:1,sourceDate:"2026-08-17"},
+  },
   "SPP-00176-2026": {
     documentNames: ["Lake Lowell Estates · Council staff report, preliminary plat and landscape exhibits · Aug 3, 2026"],
     sourceUrl: "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=9826",

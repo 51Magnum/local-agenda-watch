@@ -10,6 +10,7 @@ vi.mock("./case-index", () => ({
   siteMembers: async () => undefined,
 }));
 vi.mock("./jurisdictions", () => ({ getJurisdiction: () => h.config }));
+vi.mock("@/lib/timeline/schedule-store", () => ({readSchedule:async()=>({sweeps:{"canyon-county":{lastSuccessAt:"2026-10-24T14:00:00Z"}}})}));
 vi.mock("./store", () => ({
   readMapSnapshot: async () => ({
     updatedAt: "2026-10-25",
@@ -79,6 +80,7 @@ it("uses the same jurisdiction record adapter as full project pages for the Wher
   config();
   const p = await projectDetail("canyon-county", "CR2025-0009");
   expect(p?.where).toBe("Ruth Lane and Happy Valley Road");
+  expect(p?.lastCheckedAt).toBe("2026-10-24T14:00:00Z");
   expect(h.record).toHaveBeenCalledTimes(1);
 });
 it("labels citywide changes without fetching or guessing a physical address", async () => {

@@ -25,7 +25,7 @@ export function projectJsonLd(data: PaneData) {
               },
               organizer: {
                 "@type": "GovernmentOrganization",
-                name: data.next.body,
+                name: data.area.name.replace(/^City of /, "") + " " + data.next.body,
               },
               url: data.next.sourceUrl ?? url,
               description: data.item.popup?.explanation ?? data.item.title,

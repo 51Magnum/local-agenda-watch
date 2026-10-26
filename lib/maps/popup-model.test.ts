@@ -29,8 +29,8 @@ it("County uses the actual Hearing Examiner and Board names, stopping at a final
 });
 it("Meridian uses P&Z and City Council and has no invented outcome",()=>{
  const model=buildPopupModel({...item,title:"Hyperbaric Oxygen Clinic of Idaho"},AREAS.meridian,{meetings:[meeting("2026-10-15","P&Z"),meeting("2026-11-03","City Council")]} as Hearing,[],now);
- expect(model.headline).toBe("Hyperbaric Oxygen Clinic of Idaho");expect(model.explanation).toBeUndefined();
- expect(model.progress[1].label).toBe("P&Z met; result pending (Oct 15)");expect(model.progress[2].label).toBe("City Council · Tue, Nov 3, 2026 · 6 PM Mountain Time");
+ expect(model.headline).toBe("Hyperbaric Oxygen Clinic of Idaho");expect(model.explanation).toContain("official record");expect(model.aiGenerated).toBe(false);
+ expect(model.progress[1].label).toBe("Forwarded to City Council after P&Z (Oct 15); earlier outcome not posted");expect(model.progress[2].label).toBe("City Council · Tue, Nov 3, 2026 · 6 PM Mountain Time");
 });
 it("a newer application without published short copy never borrows older numbers",()=>{
  const model=buildPopupModel(item,AREAS.nampa,undefined,[field("popupHeadline","500 new homes on 137 acres",{documentId:"old",createdAt:"2026-03-01"}),field("requestSummary","Updated application",{documentId:"new",createdAt:"2026-09-01"})],now);
@@ -38,7 +38,7 @@ it("a newer application without published short copy never borrows older numbers
 });
 it("removes case codes from fallback names and rejects oversized explanation",()=>{
  expect(popupProjectName("Gas station (CUP-00411-2026)")).toBe("Gas station");
- const model=buildPopupModel(item,AREAS.nampa,undefined,[field("popupExplanation",Array(26).fill("word").join(" "))],now);expect(model.explanation).toBeUndefined();
+ const model=buildPopupModel(item,AREAS.nampa,undefined,[field("popupExplanation",Array(26).fill("word").join(" "))],now);expect(model.explanation).not.toContain("word word");expect(model.aiGenerated).toBe(false);
 });
 
 it("shows an explicit official approval even when no Council meeting result is linked",()=>{

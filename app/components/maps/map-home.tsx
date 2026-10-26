@@ -4,7 +4,6 @@ import FLUM_TILES from "@/public/flum/manifest.json";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Map as LibreMap, GeoJSONSource } from "maplibre-gl";
-import * as maplibre from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import { bbox, circle, distance } from "@turf/turf";
 import dynamic from "next/dynamic";
@@ -18,7 +17,6 @@ import {
 } from "@/lib/maps/types";
 import {
   gridCells,
-  snapBounds,
   zoomTier,
   CASE_OUTLINE_ZOOM,
   caseInFilter,
@@ -44,6 +42,14 @@ const VIEW_KEY = "law:map-view:v1",
   PLACE_KEY = "law:saved-place:v1";
 
 type Place = { label: string; coordinates: [number, number]; radius: number };
+function updatePlaceUrl(p: Place) {
+  const u = new URL(window.location.href);
+  u.searchParams.set("lng", String(p.coordinates[0]));
+  u.searchParams.set("lat", String(p.coordinates[1]));
+  u.searchParams.set("q", p.label);
+  u.searchParams.set("r", String(p.radius));
+  window.history.replaceState(window.history.state, "", u);
+}
 function readPlace(): Place | undefined {
   try {
     const p = JSON.parse(localStorage.getItem(PLACE_KEY) ?? "null");
@@ -71,6 +77,8 @@ export default function MapHome() {
     features = useRef(new Map<string, MapCase>()),
     selectedRef = useRef<string | undefined>(undefined),
     openRef = useRef<(c: MapCase) => void>(() => {}),
+    choosePlaceRef = useRef<(p: Place) => void>(() => {}),
+    dropPinRef = useRef(false),
     boundaryCache = useRef(new Map<string, Promise<{
       polygons: FeatureCollection; labels: FeatureCollection; uncovered: FeatureCollection;
     }>>()),
@@ -101,6 +109,7 @@ export default function MapHome() {
     [results, setResults] = useState<AddressResult[]>([]),
     [place, setPlace] = useState<Place>(),
     [savedPlace, setSavedPlace] = useState<Place>(),
+    [droppingPin, setDroppingPin] = useState(false),
     [limited, setLimited] = useState(false),
     [zoom, setZoom] = useState(10),
     [layers, setLayers] = useState(false),
@@ -273,9 +282,11 @@ export default function MapHome() {
       return r.json();
     });
     void metadata.catch(() => {});
-    Promise.resolve(maplibre).then(
+    // Yield two frames so the search/header paint before renderer initialization.
+    new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+      .then(() => disposed ? undefined : import("maplibre-gl")).then(
       (lib) => {
-        if (disposed || !container.current) return;
+        if (disposed || !lib || !container.current) return;
         lib.setWorkerUrl("/maplibre/worker.mjs");
         if (window.innerWidth < 700) lib.setWorkerCount(1);
         let center: [number, number] = [-116.5, 43.6],
@@ -498,9 +509,10 @@ export default function MapHome() {
         });
         const hideTip = () => {
           if (tooltip.current) tooltip.current.hidden = true;
-          m.getCanvas().style.cursor = "";
+          m.getCanvas().style.cursor = dropPinRef.current ? "crosshair" : "";
         };
         m.on("mousemove", (e) => {
+          if (dropPinRef.current) { hideTip(); return; }
           if (!m.getSource("law-polygons") || e.originalEvent.buttons) {
             hideTip();
             return;
@@ -548,6 +560,13 @@ export default function MapHome() {
         m.getCanvas().addEventListener("mouseleave", hideTip);
         m.on("movestart", hideTip);
         m.on("click", async (e) => {
+          if (dropPinRef.current) {
+            dropPinRef.current = false;
+            setDroppingPin(false);
+            closePane();
+            choosePlaceRef.current({label:"Selected map location",coordinates:[e.lngLat.lng,e.lngLat.lat],radius:1});
+            return;
+          }
           if (!m.getLayer("law-dots")) return;
           hideTip();
           const hit = m.queryRenderedFeatures(e.point, {
@@ -834,6 +853,8 @@ export default function MapHome() {
     } else if (m.getLayer("law-flum")) {
       m.setLayoutProperty("law-flum", "visibility", showFlum ? "visible" : "none");
     }
+    // Map source visibility is external state; reset its loading indicator when hidden.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!showFlum) setFlumLoading(false);
     m.setPaintProperty(
       "law-fill",
@@ -851,9 +872,14 @@ export default function MapHome() {
       cancelled = false;
     import("maplibre-gl").then((lib) => {
       if (destroyed.current || cancelled) return;
-      marker = new lib.Marker({ color: "#0f766e" })
+      marker = new lib.Marker({ color: "#0f766e", draggable: true })
         .setLngLat(place.coordinates)
         .addTo(m);
+      marker.on("dragend", () => {
+        const point = marker!.getLngLat();
+        choosePlaceRef.current({label:"Selected map location",coordinates:[point.lng,point.lat],radius:place.radius});
+      });
+      marker.getElement().setAttribute("aria-label", "Selected area pin. Drag to move. Not a subscription status.");
     });
     (m.getSource("law-ring") as GeoJSONSource).setData({
       type: "FeatureCollection",
@@ -866,17 +892,15 @@ export default function MapHome() {
         (m.getSource("law-ring") as GeoJSONSource).setData(empty);
     };
   }, [place, ready]);
+  useEffect(() => {
+    if (map.current) map.current.getCanvas().style.cursor = droppingPin ? "crosshair" : "";
+  }, [droppingPin, ready]);
   function choosePlace(p: Place) {
     setPlace(p);
     setAddress(p.label);
     setResults([]);
     setMessage("");
-    const u = new URL(window.location.href);
-    u.searchParams.set("lng", String(p.coordinates[0]));
-    u.searchParams.set("lat", String(p.coordinates[1]));
-    u.searchParams.set("q", p.label);
-    u.searchParams.set("r", String(p.radius));
-    window.history.replaceState(window.history.state, "", u);
+    updatePlaceUrl(p);
     map.current?.fitBounds(
       bbox(circle(p.coordinates, p.radius, { units: "miles" })) as Bounds,
       { padding: 70, maxZoom: 14 },
@@ -892,6 +916,24 @@ export default function MapHome() {
         if (!d.areas?.length) setDialog("coverage");
       })
       .catch(() => {});
+  }
+  function clearPlace() {
+    setPlace(undefined);
+    setSavedPlace(undefined);
+    setAddress("");
+    setCoverage([]);
+    dropPinRef.current = false;
+    setDroppingPin(false);
+    const u = new URL(window.location.href);
+    for (const key of ["lat", "lng", "q", "r"]) u.searchParams.delete(key);
+    window.history.replaceState(window.history.state, "", u);
+    try {
+      localStorage.removeItem(PLACE_KEY);
+      setMessage("Pin and circle cleared. Your email watches are unchanged.");
+    } catch {
+      setMessage("Pin and circle cleared for this visit. This browser could not remove its saved place. Your email watches are unchanged.");
+    }
+    map.current?.getCanvas().focus();
   }
   async function search() {
     if (address.trim().length < 2) return;
@@ -941,6 +983,7 @@ export default function MapHome() {
       { timeout: 10000, maximumAge: 300000 },
     );
   }
+  useEffect(() => { choosePlaceRef.current = choosePlace; });
   const nearby = place
     ? cases
         .filter((c) => c.centroid)
@@ -1036,6 +1079,11 @@ export default function MapHome() {
         </nav>
         {filter==="decided"&&<p className="law-undated-decisions" role="status">{undatedDecisions} decided projects in this map view excluded because no decision date is verified.</p>}
         <div className="law-explorer-controls">
+          <button aria-pressed={droppingPin} onClick={() => {
+            dropPinRef.current = !droppingPin;
+            setDroppingPin(!droppingPin);
+            setMessage(droppingPin ? "" : "Click or tap the map to place a pin, then choose a radius and watch this area.");
+          }}>{droppingPin ? "Cancel pin" : "Drop a pin"}</button>
           <button aria-expanded={legend} aria-controls="map-progress-legend" onClick={() => { setLegend(!legend); setLayers(false); }}>
             Legend
           </button>
@@ -1046,6 +1094,7 @@ export default function MapHome() {
             ◎
           </button>
         </div>
+        {place && <button className="law-clear-place" onClick={clearPlace}>Clear pin &amp; circle</button>}
         {legend && (
           <section id="map-progress-legend" className="law-map-legend" aria-label="Map legend">
             <strong>Project progress</strong>
@@ -1145,35 +1194,46 @@ export default function MapHome() {
                   }
                 : undefined
             }
-            onWatch={() => setDialog("watch")}
+            onWatch={() => {
+              if (!visiblePane.item.centroid) {
+                setMessage("This project has no verified map location. Search an address or drop a pin to choose an area.");
+                return;
+              }
+              const p = {label:visiblePane.item.popup?.projectName ?? visiblePane.item.title,coordinates:visiblePane.item.centroid,radius:1};
+              setPlace(p);
+              setAddress(p.label);
+              setDialog("watch");
+            }}
           />
         )}
         {!selected && (
           <div className="law-map-help">
             {zoom < 9
               ? "Choose an area to explore projects"
-              : "Hover to preview · Click or tap for project details"}
+              : <><span className="law-pointer-hint">Hover to preview · Click for project details</span><span className="law-touch-hint">Tap to preview project details</span></>}
           </div>
         )}
         {place && !selected && (
           <details className="law-nearby-projects">
             <summary>
-              {nearby.length} projects within {place.radius} mile
-              {place.radius === 1 ? "" : "s"}{" "}
+              Selected area: {place.label} · {place.radius} mi{" "}
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  setPlace(undefined);
-                  setAddress("");
-                  const u = new URL(window.location.href);
-                  for (const k of ["lat", "lng", "q", "r"])
-                    u.searchParams.delete(k);
-                  window.history.replaceState(window.history.state, "", u);
+                  clearPlace();
                 }}
               >
-                Clear address
+                Clear pin &amp; circle
               </button>
             </summary>
+            <p>The pin and circle show your selected area, not email subscription status. Only the latest place is remembered in this browser. The unsubscribe link in your email stops all alerts for that email address.</p>
+            <label>Radius
+              <select value={place.radius} onChange={e => choosePlace({...place,radius:Number(e.target.value)})}>
+                {[...new Set([0.25,0.5,1,2,3,5,10,place.radius])].sort((a,b)=>a-b).map(r=><option key={r} value={r}>{r} {r===1?"mile":"miles"}</option>)}
+              </select>
+            </label>
+            <button onClick={()=>setDialog("watch")}>Watch this area</button>
+            <p>{nearby.length} projects in this map view within this radius.</p>
             {nearby.map((c) => (
               <button key={c.id} onClick={() => openRef.current(c)}>
                 {c.title}
@@ -1258,7 +1318,21 @@ export default function MapHome() {
               {watchPlace?.label ??
                 "Tell us which area you would like us to track."}
             </p>
-            {dialog==="watch"&&watchPlace?<AlertForm target={{kind:"place",label:watchPlace.label,coordinates:watchPlace.coordinates,radiusMiles:watchPlace.radius??1}} onSaved={()=>{try{localStorage.setItem(PLACE_KEY,JSON.stringify(watchPlace));setSavedPlace(watchPlace);}catch{}}}/>:<InterestForm
+            {dialog==="watch"&&watchPlace&&<label className="law-watch-radius">Watch radius
+              <select value={watchPlace.radius} onChange={e=>setPlace({...watchPlace,radius:Number(e.target.value)})}>
+                {[...new Set([0.25,0.5,1,2,3,5,10,watchPlace.radius])].sort((a,b)=>a-b).map(r=><option key={r} value={r}>{r} {r===1?"mile":"miles"}</option>)}
+              </select>
+              <small>Choose the area before requesting a confirmation. Changing this selection does not edit an existing email watch.</small>
+            </label>}
+            {dialog==="watch"&&watchPlace?<AlertForm target={{kind:"place",label:watchPlace.label,coordinates:watchPlace.coordinates,radiusMiles:watchPlace.radius??1}} onSaved={()=>{
+              setSavedPlace(watchPlace);
+              setPlace(watchPlace);
+              updatePlaceUrl(watchPlace);
+              try{localStorage.setItem(PLACE_KEY,JSON.stringify(watchPlace));}catch{}
+              setDialog(undefined);
+              setMessage("Check your email to confirm. Alerts start only after confirmation.");
+              map.current?.getCanvas().focus();
+            }}/>:<InterestForm
               key={dialog + (watchPlace?.label ?? "")}
               kind={dialog === "watch" ? "follow" : "coverage"}
               areaName={

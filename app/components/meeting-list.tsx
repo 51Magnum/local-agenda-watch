@@ -1,45 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import type { meetingsList } from "@/lib/meetings-list";
 import { hearingDateTime } from "@/lib/areas/format";
 export default function MeetingList({
   initial,
   area,
   year,
+  filters = {},
 }: {
   initial: Awaited<ReturnType<typeof meetingsList>>;
   area: { id: string; name: string; timezone: string };
   year: number;
+  filters?: { year?: number; caseId?: string; body?: string };
 }) {
-  const query = useSearchParams(),
-    selectedYear = Number(query.get("year") ?? year),
-    caseId = query.get("case")?.toUpperCase(),
-    body = query.get("body"),
-    [loaded, setData] = useState(initial),
-    [error, setError] = useState("");
-  useEffect(() => {
-    if (selectedYear === year) return;
-    const controller = new AbortController();
-    fetch(
-      "/api/meetings?" +
-        new URLSearchParams({ area: area.id, year: String(selectedYear) }),
-      { signal: controller.signal },
-    )
-      .then(async (r) => {
-        if (!r.ok) throw Error("Archive unavailable");
-        setData(await r.json());
-        setError("");
-      })
-      .catch((e) => {
-        if (e.name !== "AbortError")
-          setError(
-            "The archive could not be loaded. Try the official meeting portal.",
-          );
-      });
-    return () => controller.abort();
-  }, [selectedYear, year, area.id, initial]);
-  const data = selectedYear === year ? initial : loaded;
+  const selectedYear = filters.year ?? year,
+    caseId = filters.caseId,
+    body = filters.body;
+  const data = initial;
   const rows = data.rows.filter(
     (m) =>
       (!caseId || m.caseIds.includes(caseId)) &&
@@ -49,7 +25,7 @@ export default function MeetingList({
   );
   return (
     <section className="space-y-5">
-      <form className="flex gap-4">
+      <form className="flex flex-wrap items-end gap-4 [&_input]:min-h-11 [&_select]:min-h-11 [&_button]:min-h-11">
         <label>
           Year{" "}
           <select name="year" defaultValue={String(selectedYear)}>
@@ -80,7 +56,6 @@ export default function MeetingList({
         </label>
         <button className="rounded border px-3">Filter</button>
       </form>
-      {error && <p role="status">{error}</p>}
       {data.unavailable && (
         <p>Some records could not be verified. Check the official portal.</p>
       )}
@@ -95,8 +70,9 @@ export default function MeetingList({
           <article key={m.id} className="space-y-3 rounded-xl border p-5">
             <p>{hearingDateTime(m.startsAt, area.timezone)}</p>
             <h2 className="font-semibold">{m.title}</h2>
-            <p>{m.body}</p>
-            <p>{m.caseIds.join(" · ")}</p>
+            {!m.title.toLowerCase().includes(m.body.toLowerCase()) && <p>{m.body}</p>}
+            {!!m.projects?.length && <ul className="space-y-3">{m.projects.map(p => <li key={p.caseId}><a href={p.href} className="font-semibold underline">{p.headline}</a><p className="text-sm">{p.caseId}{p.outcome ? " · " + p.outcome + " · " + hearingDateTime(m.date, area.timezone) : ""}</p></li>)}</ul>}
+            {!m.projects?.length && <p>{m.caseIds.join(" · ")}</p>}
             <ul>
               {m.links.map((l) => (
                 <li key={l.url}>

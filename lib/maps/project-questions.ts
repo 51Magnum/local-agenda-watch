@@ -12,7 +12,7 @@ export const RESIDENT_QUESTIONS = [
 ] as const;
 export type PaneData = {
   summarySource?:string;
-  documents?: {label:string;url:string}[];
+  documents?: {label:string;url:string;hash?:string}[];
   parcels?: string[];
   officialRecords?: { label: string; url: string }[];
   relatedCases?: {
@@ -42,6 +42,7 @@ export type PaneData = {
   expiredDeadlineMessage?: string;
   calendarHref?: string;
   updatedAt: string;
+  lastCheckedAt?: string;
   caseIds: string[];
 };
 /** Receives public evidence only; votes/testimony additionally require an explicit human approval. */

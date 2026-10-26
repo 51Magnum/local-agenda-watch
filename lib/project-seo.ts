@@ -17,8 +17,11 @@ export function projectCanonical(data: PaneData) {
   );
 }
 export function projectMetadata(data: PaneData): Metadata {
+  const headline = data.item.popup?.headline ?? data.item.title;
+  const specific = headline.toLowerCase().replace(/[^a-z]/g, "") === data.item.typeLabel?.toLowerCase().replace(/[^a-z]/g, "") && data.where
+    ? headline + " near " + data.where : headline;
   const title =
-    (data.item.popup?.headline ?? data.item.title) +
+    specific +
     " · " +
     data.area.name +
     " | Local Agenda Watch";

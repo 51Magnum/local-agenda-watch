@@ -53,14 +53,19 @@ it("keeps waitlist delivery disabled and includes reply-to, mailing address, ide
     to: "test@example.test",
     subject: "Test",
     text: "Confirmation",
+    html: "<h1>Confirm my alerts</h1>",
     key: "test/1",
     unsubscribe: "https://example.test/api/alerts/unsubscribe?token=abc",
+    mode: "test",
   });
   const options = send.mock.calls[0][1],
     body = JSON.parse(options.body);
   expect(options.headers["Idempotency-Key"]).toBe("test/1");
   expect(body.reply_to).toBe("hello@localagendawatch.com");
   expect(body.text).toContain("123 Example St");
+  expect(body.html).toContain("<h1>Confirm my alerts</h1>");
+  expect(body.html).toContain("123 Example St");
+  expect(body.html).toContain("Unsubscribe from all alerts</a>");
   expect(body.headers["List-Unsubscribe-Post"]).toBe(
     "List-Unsubscribe=One-Click",
   );

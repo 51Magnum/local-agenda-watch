@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- approved private-source images use our existing cached visual endpoint. */
 import {hearingDateTime} from "@/lib/areas/format";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { PaneData } from "@/lib/maps/project-questions";
 import type { MapVisual } from "@/lib/maps/types";
 import { RESIDENT_QUESTIONS } from "@/lib/maps/project-questions";
@@ -24,13 +24,15 @@ export default function ProjectPane({
   const ref = useRef<HTMLElement>(null),
     start = useRef<number | null>(null);
   const [size, setSize] = useState<"peek" | "half" | "full">("half"),
-    [watchForm, setWatchForm] = useState(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("watchProject")==="1"),
+    [watchStep, setWatchStep] = useState<"closed" | "choose" | "project">(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("watchProject")==="1" ? "project" : "closed"),
     [copied, setCopied] = useState(false),
     [error, setError] = useState("");
   const item = data.item;
+  const Container = page ? "article" : "aside";
+  const watchOptionsId = useId();
   useEffect(() => {
-    ref.current?.focus({ preventScroll: true });
-  }, [item.id, item.href, data.area.id]);
+    if (!page) ref.current?.focus({ preventScroll: true });
+  }, [item.id, item.href, data.area.id, page]);
   const date = (v: string) =>
     new Intl.DateTimeFormat("en-US", {
       month: "short",
@@ -48,10 +50,10 @@ export default function ProjectPane({
       ? " Mountain Time"
       : " " + data.area.timezone);
   return (
-    <aside
+    <Container
       ref={ref}
       tabIndex={-1}
-      className={"law-resident-pane " + (page?"law-project-page ":"") + size}
+      className={"law-resident-pane " + (page ? "law-project-page" : size)}
       aria-label="Project details"
       data-size={size}
     >
@@ -69,7 +71,7 @@ export default function ProjectPane({
         }}
       >
         <button
-          aria-label={"Expand project details, currently " + size}
+          aria-label={size === "full" ? "Collapse project details" : "Expand project details, currently " + size}
           onClick={() =>
             setSize(
               size === "peek" ? "half" : size === "half" ? "full" : "peek",
@@ -241,11 +243,44 @@ export default function ProjectPane({
               {!data.participationClosed && data.calendarHref && (
                 <a href={data.calendarHref}>Add to calendar</a>
               )}
-              <button onClick={onWatch}>Watch an address</button>
+              <button
+                type="button"
+                className="law-email-updates-button"
+                aria-expanded={watchStep !== "closed"}
+                aria-controls={watchOptionsId}
+                onClick={() => setWatchStep(step => step === "closed" ? "choose" : "closed")}
+              >
+                Get email updates
+              </button>
             </div>
+            {watchStep !== "closed" && (
+              <section id={watchOptionsId} aria-label="Email update options" className="mt-4 space-y-4 rounded-xl border border-teal-700/30 p-4">
+                <h3 className="font-semibold">What would you like to follow?</h3>
+                <div className="grid gap-3">
+                  <button
+                    type="button"
+                    aria-pressed={watchStep === "project"}
+                    onClick={() => setWatchStep("project")}
+                    className={"cursor-pointer rounded-xl border border-teal-700 p-4 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 " + (watchStep === "project" ? "bg-teal-700 text-white hover:bg-teal-800" : "bg-white text-slate-900 hover:bg-teal-50")}
+                  >
+                    <span className="block font-semibold">Only this project</span>
+                    <span className="mt-1 block text-sm">Updates about this development and its related cases.</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onWatch}
+                    className="cursor-pointer rounded-xl border border-teal-700 bg-white p-4 text-left text-slate-900 hover:bg-teal-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                  >
+                    <span className="block font-semibold">Projects near a place</span>
+                    <span className="mt-1 block text-sm">Updates about all tracked projects within a radius, including new projects. Review the place and radius before signing up.</span>
+                  </button>
+                </div>
+                {watchStep === "project" && <AlertForm key={data.area.id + ":" + item.id} target={{kind:"project",areaId:data.area.id,caseId:item.id.split(":").at(-1)!}}/>}
+              </section>
+            )}
             <small>
-              Dates can change. Confirm with the official notice. Alerts are
-              coming soon.
+              Dates can change. Confirm with the official notice. Email updates
+              start only after you confirm your email.
             </small>
           </section>
           <footer>
@@ -277,12 +312,9 @@ export default function ProjectPane({
               >
                 {copied ? "Link copied" : "Share"}
               </button>
-              <button onClick={()=>setWatchForm(v=>!v)}>Watch this project</button>
             </div>
-            {watchForm&&<section aria-label="Watch this project"><AlertForm target={{kind:"project",areaId:data.area.id,caseId:item.id.split(":").at(-1)!}}/></section>}
             <p>
-              Updated automatically from official records · last checked{" "}
-              {date(data.updatedAt)}
+              {data.lastCheckedAt ? "Last checked " + hearingDateTime(data.lastCheckedAt,data.area.timezone) : "A successful source sweep has not completed yet."}
             </p>
             <a
               href={
@@ -313,6 +345,6 @@ export default function ProjectPane({
           </footer>
         </div>
       </div>
-    </aside>
+    </Container>
   );
 }
