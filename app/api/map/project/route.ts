@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   return withDbTransfer(async()=>{const data = await projectDetail(area, id);const metrics=currentDbTransfer();
   return data
     ? Response.json(data, {
-        headers: { "Cache-Control": "public, max-age=60, s-maxage=86400", "X-LAW-Origin-Queries":String(metrics?.readQueries??0) },
+        headers: { "Cache-Control": "public, max-age=30, s-maxage=60", "X-LAW-Origin-Queries":String(metrics?.readQueries??0) },
       })
     : Response.json({ error: "Project not found" }, { status: 404 });});
 }

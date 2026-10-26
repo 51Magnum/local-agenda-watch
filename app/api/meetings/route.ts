@@ -12,6 +12,6 @@ export async function GET(request: Request) {
   )
     return new Response("Invalid archive", { status: 400 });
   return Response.json(await meetingsList(area, year), {
-    headers: { "Cache-Control": "public, max-age=300, s-maxage=86400" },
+    headers: { "Cache-Control": "public, max-age=30, s-maxage=60" },
   });
 }
