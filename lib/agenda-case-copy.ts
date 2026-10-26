@@ -40,6 +40,7 @@ export function agendaCaseCopy(feed: HearingFeed | undefined, caseId: string, ti
     : count ? `${/\bplat\b/i.test(text) ? "A preliminary plat would divide the property into" : "The proposal includes"} ${number(count[1])} ${count[2].toLowerCase()} lots${acres ? " on about "+acres+" acres" : ""}${lightIndustrial ? " in the I-L light industrial zone" : ""}.`
     : sentence((request ? "The proposal requests "+request : clean).split(/\bApplicant:/i)[0]).replace(/^For\s+(?:a|an)\s+/i,"A ")+".";
   const location = text.match(/\b(?:is\s+)?(?:generally\s+)?located\s+((?:on|at|approximately|generally|near)\b.+?)(?=\s+This item\b|\s+Applicant:|$)/i)?.[1];
-  const where = location ? readableLocation(sentence(location).replace(/^on\s+/i, "").replace(/[.\s]+$/, "")) : undefined;
+  // Street initials ("W. Franklin Rd.") are not sentence boundaries.
+  const where = location ? readableLocation(location.replace(/\.\s+(?:This|The|Applicant|Staff)\b.*$/i, "").replace(/^\s*(?:on|at)\s+/i, "").replace(/\s*\([A-Z]{2,5}\)\s*$/, "").replace(/[.\s]+$/, "")) : undefined;
   return { name, headline, explanation, sourceUrl: source.url, date: source.date, where };
 }

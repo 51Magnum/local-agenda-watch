@@ -23,6 +23,7 @@ it("uses the current Thruston Choi notice's lots, acreage and industrial zone", 
   expect(copy.name).toBe("Thruston Choi Farms Subdivision");
   expect(copy.headline).toBe("6 buildable lots on 22.26 acres in the I-L light industrial zone");
   expect(copy.explanation).not.toContain("Applicant");
+  expect(copy.where).toBe("5201 and 5035 W. Franklin Rd");
 });
 it("does not use another case's agenda text or a past agenda", () => {
   const item={title:"RZDA-2020-05-MOD1 Quarry Village",caseIds:["RZDA-2020-05-MOD1"],agendaUrl:meeting.sourceUrl,staffReports:[]};

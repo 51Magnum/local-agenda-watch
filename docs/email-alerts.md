@@ -1,6 +1,6 @@
 # Email alerts: approval, preview, and delivery
 
-The email rebuild is deployed to a Vercel **preview only**. No live delivery is enabled by the implementation or deployment commands.
+The email rebuild is available for review with live delivery disabled. All deployments must be sourced from GitHub through a reviewed PR; local file uploads to Vercel are prohibited. Publishing the application does not authorize subscriber delivery.
 
 ## Approval controls
 
@@ -9,9 +9,9 @@ The email rebuild is deployed to a Vercel **preview only**. No live delivery is 
 - Waitlist re-consent also requires `ALERTS_WAITLIST_CONFIRMATIONS_ENABLED=true`.
 - Coverage announcements also require `ALERTS_ANNOUNCEMENTS_ENABLED=true`, a same-origin authenticated admin trigger, and the recipient's separate coverage-announcement opt-in. They do not run on the cron.
 - The proposed Actions schedule is every 30 minutes for retries and hearing reminders, but the workflow job is gated by repository variable `ALERTS_DELIVERY_APPROVED=true`. Do not enable that variable or production delivery until the owner approves this rebuild.
-- The authenticated `/admin/emails/test` endpoint is the only preview delivery exception. It accepts exactly one explicit admin-entered address, builds the selected template on the server, adds `[TEST]`, and uses inactive subscription links. It never reads a subscriber list. No test email was sent during implementation.
+- The authenticated `/admin/emails/test` endpoint accepts exactly one explicit admin-entered address, builds the selected template on the server, adds `[TEST]`, and uses inactive subscription links. It never reads a subscriber list. Owner-requested individual test sends do not enable automatic delivery.
 
-Production has not been promoted as part of this work. Its existing deployed version is separate from these preview-only controls.
+Production and preview use the same approval controls. Keep the three delivery flags false in Vercel's project environment so a Git-triggered build also remains paused. New emails omit the extra watch-management link; their unsubscribe link explicitly stops all alerts for the email address. Test emails label unsubscribe as inactive without a clickable dead link. The management route remains for links in older emails.
 
 ## Templates and preview data
 
