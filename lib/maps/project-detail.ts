@@ -53,7 +53,9 @@ async function detail(
   const agenda = agendaCaseCopy(feed,caseId,area.timezone);
   const members = await siteMembers(raw, areaId);
   const lead = members?.[0];
-  if (followLead && !agenda && lead && (lead.areaId !== areaId || lead.caseId !== caseId)) return detail(lead.areaId, lead.caseId, false);
+  const leadAgenda = lead?.areaId === areaId ? agendaCaseCopy(feed,lead.caseId,area.timezone) : undefined;
+  const sameAgendaRequest = agenda && leadAgenda && agenda.sourceUrl === leadAgenda.sourceUrl && agenda.name === leadAgenda.name;
+  if (followLead && (!agenda || sameAgendaRequest) && lead && (lead.areaId !== areaId || lead.caseId !== caseId)) return detail(lead.areaId, lead.caseId, false);
   const project = getProjectForCase(caseId, areaId),
     ids = project?.caseIds ?? [caseId];
   const [items, state] = await Promise.all([
