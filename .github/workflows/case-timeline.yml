@@ -9,6 +9,10 @@ on:
         description: 'Bypass the time window and force a full source sweep'
         type: boolean
         default: false
+      discovery_only:
+        description: 'Refresh sources and native case records without AI document extraction'
+        type: boolean
+        default: false
       site_url:
         description: "Production or this repository's Vercel preview URL"
         type: string
@@ -28,6 +32,7 @@ jobs:
           SITE_URL: ${{ inputs.site_url || 'https://www.localagendawatch.com' }}
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
           FORCE_FULL_SWEEP: ${{ inputs.force || false }}
+          DISCOVERY_ONLY: ${{ inputs.discovery_only || false }}
         shell: bash
         run: |
           if [ -z "$CRON_SECRET" ]; then
@@ -42,6 +47,7 @@ jobs:
           if [ "$MANUAL" = "true" ]; then
             QUERY="?manual=1"
             if [ "$FORCE_FULL_SWEEP" = "true" ]; then QUERY="$QUERY&force=1"; fi
+            if [ "$DISCOVERY_ONLY" = "true" ]; then QUERY="$QUERY&discoveryOnly=1"; fi
           fi
           curl --output response.json --fail-with-body --silent --show-error --connect-timeout 15 --max-time 330 \
             --header "Authorization: Bearer $CRON_SECRET" \
