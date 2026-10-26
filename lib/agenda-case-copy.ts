@@ -34,7 +34,7 @@ export function agendaCaseCopy(feed: HearingFeed | undefined, caseId: string, ti
   const known=[hearing?.displayTitle,hearing?.appScope].find(n=>shortName(n??undefined)&&normalized(text).includes(normalized(n!)));
   const named=text.match(/\b(?:approval|community|plat) for\s+([^,;:]+?)(?:\s+in\b|,|\s+on\b|$)/i)?.[1];
   const policy=/SH[ -]?16 Specific Area Plan/i.test(text)?"SH-16 Specific Area Plan":/transmission line/i.test(text)?"Transmission line regulations":undefined;
-  const name = cleanResidentTitle(agreementName ?? known ?? policy ?? (shortName(prefix)?prefix:shortName(named)?named!:shortName(heading)?heading:hearing?.appTypeLabel??"Planning proposal"));
+  const name = cleanResidentTitle(agreementName ?? known ?? policy ?? (shortName(prefix)?prefix:shortName(named)?named!:shortName(heading)?heading:hearing?.appTypeLabel??"Planning proposal")).replace(/^\(?Continued from .+?\)?\s+for\s+/i, "");
   const count = text.match(/\b([a-z]+\s*\([\d,]+\)|[\d,]+)\s+(buildable|building|residential)\s+lots?\b/i);
   const acres = text.match(/\b(?:on\s+(?:about\s+|approximately\s+)?|(?:the\s+)?)([\d,.]+)[ -]acres?\b/i)?.[1];
   const lightIndustrial = /\bI-L\b/.test(text);
@@ -57,7 +57,7 @@ export function agendaCaseCopy(feed: HearingFeed | undefined, caseId: string, ti
     : /comprehensive plan.*map|comprehensive plan map/i.test(text) ? "Change comprehensive plan land-use designations"
     : /comprehensive plan text/i.test(text) ? "Amend the comprehensive plan text"
     : /easement vacation/i.test(text) ? "Vacate an easement"
-    : /annexation|annex /i.test(text) ? `Annex${acres?" "+acres+" acres of":""} land into the city`
+    : /annexation|annex /i.test(text) ? `Annex${acres?" "+acres+(Number(acres)===1?" acre of":" acres of"):""} land into the city`
     : /preliminary plat|final plat/i.test(text) ? "Approve a subdivision plat"
     : /conditional use permit/i.test(text) ? "Consider a conditional use permit"
     : /code|ordinance|UDC/i.test(text) ? "Amend development code rules" : "Review the proposed planning application";

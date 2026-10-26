@@ -119,7 +119,7 @@ export async function meetingsList(areaId: string, year: number) {
         unavailable: !!feed.dataUnavailable || archive.unavailable,
       };
     },
-    ["resident-meetings-v4-agenda", areaId, String(year)],
+    ["resident-meetings-v5-agenda", areaId, String(year)],
     { revalidate: 86400, tags: ["map-area:" + areaId, areaId + ":archive"] },
   )();
 }
