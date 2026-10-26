@@ -5,6 +5,7 @@ import { getCaseStage, getCaseStatus } from "@/lib/localities/stages";
 import type { Hearing, HearingFeed } from "@/lib/localities/types";
 import type { EnerGovAttachment, EnerGovPlan } from "@/lib/sources/energov";
 import { getProjectForCase, getProjectNextHearing, type ProjectHearing } from "@/lib/projects";
+import { residentialCase, residentialPublicTitle } from "./residential-privacy";
 
 export const PENDING_AGENDA_MESSAGE = "Agenda usually posted the Thursday before the meeting";
 export const NAMPA_HEARING_LOCATION = "Nampa City Hall, Council Chambers, 411 3rd St S, Nampa, ID";
@@ -80,6 +81,7 @@ export function projectNameFromFiles(caseId: string, filenames: string[]): strin
 
 /** Names come only from a record's ProjectName or a matching document filename. */
 export function caseSummary(hearing: Hearing, plan: EnerGovPlan | null, attachments: EnerGovAttachment[] = []): string {
+  if (residentialCase("nampa",hearing.appId,{hearing,plan})) return residentialPublicTitle({hearing,plan}) + ". Check the official record for the activity and any conditions.";
   const curated = getProjectForCase(hearing.appId);
   if (curated) return curated.summary;
   const evidence = CASE_EVIDENCE[hearing.appId];
@@ -126,6 +128,7 @@ export function staffReportLinks(hearing: Hearing, attachments: EnerGovAttachmen
 
 /** City-published names/topics, retained when a portal request is unavailable. */
 const CITY_CASE_NAMES: Record<string, string> = {
+  "DAMO-00068-2026": "Spring Shores Commons", // August 17, 2026 Council staff report, page 1.
   "ANN-00358-2026": "Lonestar", "MPC-00006-2026": "Lonestar",
   "ANN-00367-2026": "Emberwood", "SPP-00182-2026": "Emberwood",
   "ANN-00339-2025": "District Sixteen", "ANN-00370-2026": "Resting Rock",
@@ -150,6 +153,7 @@ export function caseProjectName(hearing: Hearing, plan: EnerGovPlan | null = nul
   return getProjectForCase(hearing.appId)?.name ?? CITY_CASE_NAMES[hearing.appId] ?? safeName(plan?.ProjectName) ?? safeName(projectNameFromFiles(hearing.appId, filenames));
 }
 export function caseDisplayTitle(hearing: Hearing, plan: EnerGovPlan | null = null, attachments: EnerGovAttachment[] = []): string {
+  if (residentialCase("nampa",hearing.appId,{hearing,plan})) return residentialPublicTitle({hearing,plan});
   const name = caseProjectName(hearing, plan, uniqueAttachments(attachments).map((a) => a.FileName)) ?? nameFromCityRecord(hearing);
   const type = ["ANN-00358-2026", "MPC-00006-2026"].includes(hearing.appId) ? "annexation and master plan" : SHORT_TYPES[hearing.appType] ?? cleanCaseType(hearing.appTypeLabel).toLowerCase();
   return name ? name + " " + type : displayTitle(type || "Planning case").replace(/^./, (c) => c.toUpperCase()) + " (" + hearing.appId + ")";

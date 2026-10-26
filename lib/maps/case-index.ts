@@ -1,7 +1,7 @@
 import {readProjectContent} from "@/lib/project-content-store";
 import {getProjectForCase} from "@/lib/projects";
 import {cleanResidentTitle} from "@/lib/resident-copy";
-import {residentialCase,protectMapCase,blockAddress,PRIVACY_TAG} from "@/lib/residential-privacy";
+import {residentialCase,protectMapCase,residentialPublicTitle,PRIVACY_TAG} from "@/lib/residential-privacy";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { Pool } from "pg";
 import { bbox, simplify, feature } from "@turf/turf";
@@ -29,8 +29,8 @@ export const projectDirectory = unstable_cache(async () => {
     [areas.map((a) => a.id)],
   );
   const overrides=await privacyOverrides();
-  return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?blockAddress(row.title):row.title, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
-}, ["project-search-directory-v1"], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
+  return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?residentialPublicTitle({...row,summary:internalSummary}):row.title, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
+}, ["project-search-directory-v2-private-names"], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
 let pool: Pool, ready: Promise<void> | undefined;
 const schema = `CREATE TABLE IF NOT EXISTS law_map_sites(site_id text PRIMARY KEY,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,data jsonb NOT NULL);
 CREATE INDEX IF NOT EXISTS law_map_sites_bbox ON law_map_sites(min_lng,max_lng,min_lat,max_lat);
@@ -238,7 +238,7 @@ async function loadViewport(
     bounds: b,
   };
 }
-export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v7-outlines11"],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
+export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v8-private-names"],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";

@@ -52,3 +52,6 @@ next-env.d.ts
 /scripts/__pycache__/
 
 /public/map-data/
+
+# Local review screenshots, exports, temporary scripts, and audit artifacts
+/output/

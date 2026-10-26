@@ -5,6 +5,18 @@ import {emptySchedule,finishSchedule,mergeMeetingIndex,planSchedule,resolvedMeet
 const watch=(date="2026-10-19"):MeetingWatch=>({id:"meeting",areaId:"nampa",body:"City Council",date,caseIds:["ANN-ONE"],resolvedCaseIds:[]});
 const state=(m=watch())=>({...emptySchedule(),meetings:[m]});
 const plan=(date:string,m=watch())=>planSchedule(state(m),AREAS,new Date(date));
+it("records completion time for each successful area sweep and retains it when a later sweep fails",()=>{
+ const now=new Date("2026-10-26T12:00:00Z");
+ const areas=Object.values(AREAS).filter(a=>a.status==="live"&&a.timeline);
+ const feeds=Object.fromEntries(areas.map(a=>[a.id,{active:[],completed:[],refreshedAt:"2026-01-01T00:00:00Z"}]));
+ const forced=planSchedule(emptySchedule(),AREAS,now,{manual:true,force:true})!;
+ const completed=finishSchedule(emptySchedule(),forced,feeds,emptyEvidenceState(),AREAS,now);
+ for(const area of areas)expect(completed.sweeps?.[area.id]?.lastSuccessAt).toBe(now.toISOString());
+ const failed=finishSchedule(completed,forced,{...feeds,meridian:{...feeds.meridian,scheduleUnavailable:true}},emptyEvidenceState(),AREAS,new Date("2026-10-27T12:00:00Z"));
+ expect(failed.sweeps?.meridian.lastSuccessAt).toBe(now.toISOString());
+ expect(failed.sweeps?.meridian.lastAttemptAt).toBe("2026-10-27T12:00:00.000Z");
+ expect(failed.sweeps?.meridian.warning).toContain("incomplete");
+});
 describe("Denver scheduler",()=>{
  it("accepts delayed runs across DST inside the AM and PM windows",()=>{
   expect(schedulerWindow(new Date("2026-10-24T11:00:00Z"))?.period).toBe("am");

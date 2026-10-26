@@ -1,5 +1,6 @@
 import {hearingDateTime} from "@/lib/areas/format";
 import {cleanResidentTitle,cleanResidentProse} from "@/lib/resident-copy";
+import { caseProjectName } from "@/lib/case-details";
 import type { AreaDefinition } from "@/lib/areas/registry";
 import type { Hearing, ScheduledMeeting } from "@/lib/localities/types";
 import type { EvidenceField } from "@/lib/timeline/types";
@@ -37,9 +38,18 @@ export function popupApplicationCopy(fields: EvidenceField[]) {
 /** Only public evidence is passed in; pending AI decisions never enter the model. */
 export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: Hearing, fields: EvidenceField[] = [], now = new Date()): NonNullable<MapCase["popup"]> {
   const newest = (key: string) => fields.filter(f => f.key === key).sort((a,b) => (b.reviewedAt ?? b.createdAt).localeCompare(a.reviewedAt ?? a.createdAt))[0];
-  const projectName = cleanResidentTitle(popupProjectName(hearing?.displayTitle??item.title),item.typeLabel);
+  const officialTitle = hearing?.displayTitle ?? item.title;
+  const noticeTitle = hearing?.description?.includes(hearing.appId) ? hearing.description.split(hearing.appId)[0].replace(/[\s(:–—-]+$/g, "") : undefined;
+  const projectName = cleanResidentTitle((area.id === "nampa" && hearing?.appId ? caseProjectName(hearing) : undefined) ?? popupProjectName(/…|\.{3}/.test(officialTitle) && noticeTitle && noticeTitle.length < 180 ? noticeTitle : officialTitle),item.typeLabel);
   const copy = popupApplicationCopy(fields);
-  const headline = copy.headline ?? projectName, explanation = copy.explanation ? cleanResidentProse(copy.explanation) : undefined;
+  const fallbackExplanation = /annex/i.test(item.typeLabel) ? `A request to bring this land into ${area.name}. Check the official proposal for the requested zoning and development.`
+    : /rezone|zoning map/i.test(item.typeLabel) ? "A request to change the zoning rules for this property. The official proposal identifies the uses and development allowed."
+    : /plat|subdivision/i.test(item.typeLabel) ? "A proposal to divide land into lots. The official plat shows the proposed lots, streets, and other improvements."
+    : /development agreement/i.test(item.typeLabel) ? "A request to change an agreement governing this development. Check the official proposal for the terms being changed."
+    : /conditional use/i.test(item.typeLabel) ? "A request for a use that needs specific approval under the zoning rules. Check the official record for the activity and proposed conditions."
+    : /variance/i.test(item.typeLabel) ? "A request for an exception to a zoning requirement. Check the official proposal for the rule and requested exception."
+    : `A ${item.typeLabel?.toLowerCase() || "planning"} request is being considered. The official record describes the proposal.`;
+  const headline = copy.headline ?? projectName, explanation = copy.explanation ? cleanResidentProse(copy.explanation) : fallbackExplanation;
   const progress: NonNullable<MapCase["popup"]>["progress"] = [];
   const meetings = [...(hearing?.meetings ?? [])].sort((a,b) => a.date.localeCompare(b.date));
   const latestDecisionMeeting = [...meetings].reverse().find(m => (m.body === area.bodies.decision.id || /council|commissioners/i.test(m.body)) && m.result);
@@ -53,7 +63,8 @@ export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: H
   const pzDate = newest("pzHearingDate")?.value ?? planning?.date;
   const planningBody = planning && planning.body !== area.bodies.planning.id ? planning.bodyLabel : area.type === "county" ? area.bodies.planning.label.replace(/ Commission$/, "") : area.bodies.planning.shortLabel;
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: area.timezone }).format(now);
-  if (pzDate && pzDate <= today) progress.push({ label: planningBody + (pzResult ? " " + pzResult.replace(/^recommend /i, "recommended ").replace(/^approved$/i, "recommended approval").replace(/^denied$/i, "recommended denial") : " met; result pending") + " (" + shortDate(pzDate, area) + ")", state: pzResult ? "done" : "past" });
+  const laterDecisionHearing = pzDate ? meetings.find(m => m.date > pzDate && (m.body === area.bodies.decision.id || /council|commissioners/i.test(m.body))) : undefined;
+  if (pzDate && pzDate <= today) progress.push({ label: pzResult ? planningBody + " " + pzResult.replace(/^recommend /i, "recommended ").replace(/^approved$/i, "recommended approval").replace(/^denied$/i, "recommended denial") + " (" + shortDate(pzDate, area) + ")" : laterDecisionHearing ? "Forwarded to " + area.bodies.decision.label + " after " + planningBody + " (" + shortDate(pzDate, area) + "); earlier outcome not posted" : "Result not yet posted by " + planningBody + " for " + shortDate(pzDate, area), state: pzResult || laterDecisionHearing ? "done" : "past" });
   if (outcome && /^(approved|denied|withdrawn)\b/i.test(outcome)) {
     progress.push({ label: outcome.charAt(0).toUpperCase() + outcome.slice(1).toLowerCase() + " by " + area.bodies.decision.shortLabel + (finalDate ? ", " + shortDate(finalDate, area) : ""), state: "current" });
   } else if (item.stage === "Decided" || item.stage === "Recorded") {
@@ -67,5 +78,5 @@ export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: H
     else progress.push({ label: "Under review, no hearing set yet", state: "current" });
     progress.push({ label: "Decision", state: "future" });
   }
-  return { headline, ...(explanation && words(explanation) <= 60 ? { explanation, aiGenerated: true } : {}), projectName, progress };
+  return { headline, ...(explanation && words(explanation) <= 60 ? { explanation, aiGenerated: Boolean(copy.explanation) } : {}), projectName, progress };
 }

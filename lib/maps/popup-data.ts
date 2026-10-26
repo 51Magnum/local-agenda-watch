@@ -1,4 +1,6 @@
 import {readProjectContent} from "@/lib/project-content-store";
+import { agendaCaseCopy } from "@/lib/agenda-case-copy";
+import { cleanResidentTitle } from "@/lib/resident-copy";
 import {protectMapCase,residentialCase} from "@/lib/residential-privacy";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { publicImageReviews, displayedImageReviews } from "./image-review-store";
@@ -48,7 +50,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
         if (applicant && !extractedCopy.explanation) { popup.explanation = applicant[1] + " wants to add this land to " + config.area!.name + " and build a neighborhood of single-family homes."; popup.aiGenerated = false; }
       }
     }
-    const enriched=content[item.id];if(enriched&&(enriched.status==="ready"||!project&&!popup.explanation)){popup.headline=enriched.headline;popup.explanation=enriched.explanation??popup.explanation;popup.aiGenerated=enriched.aiGenerated;}
+    const enriched=content[item.id];if(enriched&&(enriched.status==="ready"||!project&&!popup.aiGenerated)){popup.headline=cleanResidentTitle(enriched.headline,item.typeLabel);popup.explanation=enriched.explanation??popup.explanation;popup.aiGenerated=enriched.aiGenerated;}
     const copy=popupApplicationCopy(fields),reviewed=config.reviewedApplications?.[item.id];
     const newer=fields.some(f=>f.sourceKind==="staff-report"&&f.sourceUrl.split("#")[0]!==reviewed?.reportUrl&&f.createdAt.slice(0,10)>(reviewed?.sourceDate??""));
     if(reviewed&&!newer){
@@ -61,7 +63,14 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
       if(fallbackLogs.size>2000)fallbackLogs.clear();
     }
     let visual=displayedImageReviews(reviews).find(r=>r.caseIds.some(id=>ids.includes(id)))?.visual;
+    // Physical page 6 was verified against the official report on Oct 25, 2026.
+    if(config.id==="nampa"&&item.id==="DAMO-00068-2026"&&visual?.sourceUrl.includes("692e24e4-3deb-43d0-8609-530cf87e180c")&&visual.sourceUrl.endsWith("#page=6")&&visual.approval?.pageHash==="00093c24e7c1eba3e02473ac2a23b8b5b026fe565f854d93eb11d3ec45723a89")visual={...visual,label:"Zoning and future land-use maps",alt:"Zoning and future land-use context maps; not a proposed layout",kind:"context"};
     if(visual&&reviewed&&visual.sourceUrl.split("#")[0]===reviewed.reportUrl&&!visual.approval?.sourceDate)visual={...visual,label:visual.label+" · "+new Intl.DateTimeFormat("en-US",{month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(reviewed.sourceDate+"T12:00:00Z"))};
+    const agenda = agendaCaseCopy(feed,item.id,config.area!.timezone);
+    if (agenda) {
+      popup.projectName=agenda.name;popup.headline=agenda.headline;popup.explanation=agenda.explanation;popup.aiGenerated=false;
+      item={...item,title:agenda.name,summary:agenda.explanation};
+    }
     return protectMapCase(config.id,{...item,popup,visual,residentialPrivacy:residentialCase(config.id,item.id,{item,hearing},overrides)},overrides);
   });
 }

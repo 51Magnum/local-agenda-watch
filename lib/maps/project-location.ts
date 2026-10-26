@@ -11,8 +11,8 @@ export const nearestIntersection=unstable_cache(async(lng:number,lat:number)=>{
  }catch{return null;}
 },["project-intersection-v1"],{revalidate:30*86400});
 export async function projectLocation(item:MapCase,areaName:string,official?:string){
- const known=readableLocation(official);if(known)return known;
- const center=item.centroid??(item.geometry?geometryCentroid(item.geometry):null);if(!center)return undefined;
+ const known=readableLocation(official);if(known&&!/^0\s/.test(official??""))return known;
+ const center=item.centroid??(item.geometry?geometryCentroid(item.geometry):null);if(!center)return known;
  const cross=await nearestIntersection(Number(center[0].toFixed(5)),Number(center[1].toFixed(5)));
- return cross?"Near "+cross+", "+areaName:"Mapped project area in "+areaName+" ("+center[1].toFixed(3)+", "+center[0].toFixed(3)+")";
+ return cross?"Near "+cross+", "+areaName:known??"Mapped project area in "+areaName+" ("+center[1].toFixed(3)+", "+center[0].toFixed(3)+")";
 }

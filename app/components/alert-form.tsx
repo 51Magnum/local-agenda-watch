@@ -40,7 +40,7 @@ export default function AlertForm({
           ? "Get a daily email when this project changes."
           : "Watch all tracked jurisdictions within " +
             target.radiusMiles +
-            " miles of " +
+            (target.radiusMiles === 1 ? " mile of " : " miles of ") +
             target.label +
             "."}
       </p>
@@ -65,7 +65,12 @@ export default function AlertForm({
           onChange={(e) => setWebsite(e.target.value)}
         />
       </label>
-      <button className="rounded border px-4 py-2" disabled={busy}>
+      <button
+        type="submit"
+        className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-xl border border-teal-700 bg-teal-700 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:border-teal-800 hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700 active:bg-teal-900 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+        disabled={busy}
+        aria-busy={busy}
+      >
         {busy ? "Sending…" : "Email me a confirmation"}
       </button>
       <p className="text-sm">

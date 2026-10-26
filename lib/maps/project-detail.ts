@@ -28,9 +28,12 @@ import {
   progressOutcome,
   type PaneData,
 } from "./project-questions";
-import { MAP_INDEX_TAG, siteMembers } from "./case-index";
+import { siteMembers } from "./case-index";
 import { participationClosed, expiredCommentDeadline } from "@/lib/participation";
 import {continuanceHistory} from "@/lib/continuances";
+import { readSchedule } from "@/lib/timeline/schedule-store";
+import { CASE_EVIDENCE } from "@/lib/case-evidence";
+import { agendaCaseCopy } from "@/lib/agenda-case-copy";
 
 async function detail(
   areaId: string,
@@ -46,14 +49,17 @@ async function detail(
     }),
     raw = snapshot?.cases[0];
   if (!raw) return null;
+  const feed = await config.loadCases?.();
+  const agenda = agendaCaseCopy(feed,caseId,area.timezone);
   const members = await siteMembers(raw, areaId);
   const lead = members?.[0];
-  if (followLead && lead && (lead.areaId !== areaId || lead.caseId !== caseId)) return detail(lead.areaId, lead.caseId, false);
+  const leadAgenda = lead?.areaId === areaId ? agendaCaseCopy(feed,lead.caseId,area.timezone) : undefined;
+  const sameAgendaRequest = agenda && leadAgenda && agenda.sourceUrl === leadAgenda.sourceUrl && agenda.name === leadAgenda.name;
+  if (followLead && (!agenda || sameAgendaRequest) && lead && (lead.areaId !== areaId || lead.caseId !== caseId)) return detail(lead.areaId, lead.caseId, false);
   const project = getProjectForCase(caseId, areaId),
     ids = project?.caseIds ?? [caseId];
-  const [items, feed, state] = await Promise.all([
+  const [items, state] = await Promise.all([
       enrichMapPopups(config, [raw]),
-      config.loadCases?.(),
       readTimelineState(ids, areaId),
     ]),
     item = items[0],
@@ -169,8 +175,8 @@ async function detail(
   const result:PaneData = {
     item,
     officialRecords,
-    summarySource:content?.source?residentPaneHref(area,content.source.url+"#page="+content.source.page):undefined,
-    documents:[...new Map([...(record?.documents??[]),...(project?.sourceDocuments??[])].filter(d=>(!sensitive||!privateResidentialDocument(d.label))&&residentPaneHref(area,d.url)).map(d=>[d.url,{label:d.label,url:residentPaneHref(area,d.url)!}])).values()],
+    summarySource:agenda?residentPaneHref(area,agenda.sourceUrl):content?.source?residentPaneHref(area,content.source.url+"#page="+content.source.page):undefined,
+    documents:[...new Map([...(record?.documents??[]),...(record?.events??[]).flatMap(e=>e.documents),...(hearing?.meetings??[]).flatMap(m=>m.staffReports??[]),...(project?.sourceDocuments??[]),...(areaId==="nampa"&&CASE_EVIDENCE[caseId]?.reportUrl?[{label:CASE_EVIDENCE[caseId].documentNames[0],url:CASE_EVIDENCE[caseId].reportUrl!}]:[])].filter(d=>(!sensitive||!privateResidentialDocument(d.label))&&residentPaneHref(area,d.url)).map(d=>[d.url,{label:d.label,url:residentPaneHref(area,d.url)!}])).values()],
     parcels:sensitive?undefined:item.parcelIds,
     relatedCases: await Promise.all((item.members??[]).map(async m=>{
       const h=m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId):undefined;
@@ -187,11 +193,11 @@ async function detail(
     caseIds: ids,
     where: item.citywide
       ? "Citywide change — " + area.name
-      : await projectLocation(item,area.name,project?.location ?? record?.address),
+      : agenda?.where ?? await projectLocation(item,area.name,project?.location ?? (areaId==="nampa"?CASE_EVIDENCE[caseId]?.address:undefined) ?? record?.address),
     history: [
       ...continuances.map(row=>({...row,source:residentPaneHref(area,row.source)})),
       ...progress
-        .filter((p) => (p.state === "done" || p.state === "past") && (!continuances.length || !/continued|continuance/i.test(p.label)))
+        .filter((p) => (p.state === "done" || p.state === "past" || p.state === "current" && ["Decided","Recorded"].includes(item.stage)) && (!continuances.length || !/continued|continuance/i.test(p.label)))
         .map((p) => ({ label: p.label })),
       ...evidence.history.filter(row=>!continuances.length || !/continued|continuance/i.test(row.label)).map((row) => ({
         ...row,
@@ -227,8 +233,11 @@ async function detail(
         .map((d) => d.checkedAt)
         .sort()
         .at(-1) ?? snapshot!.updatedAt,
+    lastCheckedAt: (await readSchedule()).sweeps?.[areaId]?.lastSuccessAt,
   };
-  if(sensitive){result.item=protectMapCase(areaId,{...result.item,residentialPrivacy:true},await privacyOverrides());result.where=result.where?redactResidence(result.where)+" · Approximate area shown to protect a residential location.":"Approximate residential area; exact address withheld.";return redactResidence(result);}
+  result.documents=result.documents?.map(d=>({...d,hash:Object.values(state.documents).find(doc=>doc.url?.split("#")[0]===d.url.split("#")[0])?.hash}));
+  if(areaId==="nampa"&&caseId==="DAMO-00068-2026")result.history=result.history.map(h=>/Result not yet posted by P&Z for Jul 14/.test(h.label)?{label:"P&Z recommended approval — July 2026",source:CASE_EVIDENCE[caseId].reportUrl+"#page=1"}:h);
+  if(sensitive){result.item=protectMapCase(areaId,{...result.item,residentialPrivacy:true},await privacyOverrides());result.relatedCases=result.relatedCases?.map(c=>({...c,title:result.item.title}));result.where=result.where?redactResidence(result.where)+" · Approximate area shown to protect a residential location.":"Approximate residential area; exact address withheld.";return redactResidence(result);}
   return result;
 }
-export function projectDetail(areaId:string,caseId:string){return unstable_cache(detail,["map-project-questions-v10"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}
+export function projectDetail(areaId:string,caseId:string){return unstable_cache(detail,["map-project-questions-v15-agenda"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}

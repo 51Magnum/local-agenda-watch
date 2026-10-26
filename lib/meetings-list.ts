@@ -5,6 +5,11 @@ import { AREAS } from "./areas/registry";
 import { residentPaneHref } from "./maps/project-records";
 import { denverInstant } from "./case-details";
 import { getNampaMeetingArchive } from "./sources/primegov";
+import { getProjectForCase } from "./projects";
+import { cleanResidentTitle } from "./resident-copy";
+import { residentialCase, residentialPublicTitle } from "./residential-privacy";
+import { areaPath } from "./areas/registry";
+import { agendaCaseCopy } from "./agenda-case-copy";
 export type MeetingRow = {
   id: string;
   date: string;
@@ -13,6 +18,7 @@ export type MeetingRow = {
   title: string;
   caseIds: string[];
   links: { label: string; url: string }[];
+  projects?: { caseId: string; headline: string; href: string; outcome?: string }[];
 };
 export async function meetingsList(areaId: string, year: number) {
   return unstable_cache(
@@ -96,13 +102,24 @@ export async function meetingsList(areaId: string, year: number) {
             links,
           });
       }
+      const catalog = caseCatalog(feed);
+      for (const row of rows) {
+       row.title = [...new Set(row.title.split(/\s+[\/|]\s+/))].join(" · ");
+       row.projects = [...new Set(row.caseIds)].map(caseId => {
+        const hearing = catalog.find(h => h.appId === caseId), project = getProjectForCase(caseId, areaId);
+        const meeting = hearing?.meetings.find(m => m.date === row.date && (m.bodyLabel === row.body || m.body === row.id.split(":")[0]));
+        const agenda = agendaCaseCopy(feed,caseId,area.timezone,new Date(),{date:row.date,body:row.id.split(":")[0]});
+        const title = agenda?.headline ?? project?.name ?? hearing?.displayTitle ?? hearing?.appScope ?? hearing?.appTypeLabel ?? caseId;
+        return {caseId, headline: residentialCase(areaId,caseId,hearing) ? residentialPublicTitle(hearing) : cleanResidentTitle(title), href: areaPath(area)+"/"+(project?.slug??"plan/"+encodeURIComponent(caseId)), outcome: meeting?.result ?? (meeting?.continuedNote ? "Continued" : undefined)};
+       });
+      }
       return {
         rows: rows.sort((a, b) => b.date.localeCompare(a.date)),
         updatedAt: feed.refreshedAt ?? null,
         unavailable: !!feed.dataUnavailable || archive.unavailable,
       };
     },
-    ["resident-meetings-v1", areaId, String(year)],
+    ["resident-meetings-v5-agenda", areaId, String(year)],
     { revalidate: 86400, tags: ["map-area:" + areaId, areaId + ":archive"] },
   )();
 }

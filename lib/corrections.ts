@@ -1,5 +1,6 @@
 import {Pool} from "pg";
 import {createHash,randomUUID} from "node:crypto";
+import { queueCorrectionReceived } from "./email/jobs";
 let pool:Pool,ready:Promise<unknown>|undefined;
 async function db(){
  if(!process.env.DATABASE_URL)throw Error("Corrections storage not configured");
@@ -14,7 +15,8 @@ export async function saveCorrection(input:{project:string;message:string;email:
  if(!rate.rows.length)return {limited:true};
  const id=randomUUID();await database.query("INSERT INTO law_corrections(id,project,message,email,created_at) VALUES($1,$2,$3,$4,$5)",[id,input.project,input.message,input.email,now.toISOString()]);
  await database.query("DELETE FROM law_correction_limits WHERE window_start<now()-interval '2 hours'");
- console.info("[corrections:received]",JSON.stringify({id,project:input.project,mail:"No mail helper configured; review /admin/corrections"}));return {limited:false,id};
+ try{await queueCorrectionReceived({id,...input});}catch{console.warn("[corrections] Saved report; notification queue unavailable. Review /admin/corrections.");}
+ console.info("[corrections:received]",JSON.stringify({id,project:input.project}));return {limited:false,id};
 }
 export async function readCorrections(){return(await(await db()).query("SELECT id,project,message,email,created_at,status FROM law_corrections ORDER BY created_at DESC LIMIT 100")).rows;}
 export async function updateCorrection(id:string,status:string){await(await db()).query("UPDATE law_corrections SET status=$2 WHERE id=$1",[id,status]);}
