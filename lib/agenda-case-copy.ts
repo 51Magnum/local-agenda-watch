@@ -1,6 +1,7 @@
 import type { HearingFeed } from "./localities/types";
 import { caseCatalog } from "./case-catalog";
 import { cleanResidentTitle, cleanResidentProse, readableLocation } from "./resident-copy";
+import type { MeridianCase } from "./sources/meridian";
 
 export type AgendaCaseCopy = { name: string; headline: string; explanation: string; sourceUrl: string; date: string; where?: string };
 const caseNumbers = /\b(?:[A-Z]{1,6}-\d{4}-\d{1,6}(?:-(?:MOD|APL)\d*)?|\d{2}-\d{2,3}-[A-Z]+)\b/g;
@@ -18,7 +19,9 @@ export function agendaCaseCopy(feed: HearingFeed | undefined, caseId: string, ti
   let source = scheduled.flatMap(m => m.items.filter(i => i.caseIds.includes(caseId)).map(i => ({ text: i.title, date: m.date, url: i.agendaUrl || m.sourceUrl })))[0];
   // Some portals expose the complete request in the notice but only a name in the agenda.
   const appearance = hearing?.meetings.filter(m => m.date >= today && !m.continuedNote && (!meeting || m.date === meeting.date && m.body === meeting.body)).sort((a,b) => a.date.localeCompare(b.date))[0];
-  if ((!source || source.text.length < 100) && appearance && hearing?.description?.includes(caseId)) source = { text: hearing.description, date: appearance.date, url: appearance.sourceUrl };
+  const notice = appearance ? (hearing as MeridianCase | undefined)?.meridian?.notices.find(n => n.date === appearance.date && n.body === appearance.body && n.caseIds.includes(caseId)) : undefined;
+  const description = notice?.description ?? (!(hearing as MeridianCase | undefined)?.meridian ? hearing?.description : undefined);
+  if ((!source || source.text.length < 100) && appearance && description?.includes(caseId)) source = { text: description, date: appearance.date, url: notice?.sourceUrl ?? appearance.sourceUrl };
   if (!source || !source.text.trim()) return;
   const text = cleanResidentProse(source.text).replace(/^\s*(?:\d+[.)]\s*)?PUBLIC HEARING\s*(?:FOR|ON)?\s*[:–—-]?\s*/i, "");
   const clean = text.replace(caseNumbers, "").replace(/\(\s*\)|^[\s/,:–—-]+/g, "").trim();
