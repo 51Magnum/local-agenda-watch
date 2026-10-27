@@ -34,6 +34,7 @@ import {continuanceHistory} from "@/lib/continuances";
 import { readSchedule } from "@/lib/timeline/schedule-store";
 import { CASE_EVIDENCE } from "@/lib/case-evidence";
 import { agendaCaseCopy } from "@/lib/agenda-case-copy";
+import { resolveHearingMeeting } from "@/lib/hearings/resolver";
 
 async function detail(
   areaId: string,
@@ -80,11 +81,12 @@ async function detail(
   item.members = members;
   item.areaId = areaId;
   item.href = canonicalAreaHref(areaId, item.href);
-  const next =
+  const scheduledNext =
     (project ? getProjectNextHearing(project, feed) : undefined) ??
     (hearing
       ? getCaseNextHearing(hearing, feed, new Date(), areaId)
       : undefined);
+  const next=scheduledNext?await resolveHearingMeeting(areaId,caseId,scheduledNext):undefined;
   const timeline = buildTimeline(state, {
     areaId,
     caseIds: ids,
@@ -240,4 +242,4 @@ async function detail(
   if(sensitive){result.item=protectMapCase(areaId,{...result.item,residentialPrivacy:true},await privacyOverrides());result.relatedCases=result.relatedCases?.map(c=>({...c,title:result.item.title}));result.where=result.where?redactResidence(result.where)+" · Approximate area shown to protect a residential location.":"Approximate residential area; exact address withheld.";return redactResidence(result);}
   return result;
 }
-export function projectDetail(areaId:string,caseId:string){return unstable_cache(detail,["map-project-questions-v15-agenda"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}
+export function projectDetail(areaId:string,caseId:string){return unstable_cache(detail,["map-project-questions-v16-hearing-links"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}

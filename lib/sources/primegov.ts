@@ -44,7 +44,11 @@ export function parsePrimeGovMeetings(payload: unknown): AgendaMeeting[] {
         typeof row.dateTime !== "string" || !/^\d{4}-\d{2}-\d{2}T/.test(row.dateTime)) {
       throw new Error("Invalid PrimeGov meeting fields");
     }
-    const docs: PrimeGovDocument[] = Array.isArray(row.documentList) ? row.documentList : [];
+    const rawDocs: PrimeGovDocument[] = Array.isArray(row.documentList) ? row.documentList : Array.isArray(row.templateList) ? row.templateList : [];
+    const docs=rawDocs.filter(d=>!("publishStatus" in d)||d.publishStatus===1).map(d=>({...d,
+      id:Number(d.id??d.templateId),templateId:Number(d.templateId??d.id),
+      compileOutputType:Number(d.compileOutputType??1),
+    })).filter(d=>Number.isInteger(d.id)&&Number.isInteger(d.templateId)&&[1,3].includes(d.compileOutputType));
     const html = docs.find((d) => d.compileOutputType === 3 && /agenda/i.test(d.templateName));
     const agenda = html ?? docs.find((d) => /agenda/i.test(d.templateName));
     const minutes = docs.find((d) => /minutes/i.test(d.templateName) && d.compileOutputType === 1) ?? docs.find((d) => /minutes/i.test(d.templateName));
@@ -60,6 +64,9 @@ export function parsePrimeGovMeetings(payload: unknown): AgendaMeeting[] {
       timeLabel: typeof row.time === "string" ? row.time : undefined,
       location: typeof row.location === "string" ? row.location : undefined,
       sourceUrl: NAMPA_PRIMEGOV_ORIGIN + "/public/portal",
+      meetingUrl: html && documentUrl(html),
+      compiledAgendaUrl: agenda && agenda.templateId>0 ? NAMPA_PRIMEGOV_ORIGIN+"/Public/CompiledDocument?meetingTemplateId="+agenda.templateId+"&compileOutputType=1" : undefined,
+      subjectToChange: /subject to change/i.test(row.title+" "+(row.time??"")) || row.timeSubjectToChange===true ? true : undefined,
       agendaUrl: agenda && documentUrl(agenda),
       htmlAgendaUrl: html && documentUrl(html),
       packetUrl: packet && documentUrl(packet),
@@ -97,7 +104,10 @@ export function parsePrimeGovAgenda(html: string, agendaUrl: string): AgendaItem
       if (url && !staffReports.some((r) => r.url === url)) staffReports.push({ label, url });
     });
     const anchor = item.attr("id");
-    items.push({ title, caseIds, agendaUrl: anchor ? agendaUrl + "#" + encodeURIComponent(anchor) : agendaUrl, staffReports });
+    const numberCell=item.prevAll("td").first().text().replace(/\s+/g,"").trim();
+    const visibleNumber=title.match(/^((?:\d{1,2}\.)?[A-Z]\.|\d{1,2}\.)\s+/)?.[1];
+    const itemNumber=/^(?:\d{1,2}\.)?(?:[A-Z]\.?|\d{1,2}\.)$/.test(numberCell)?numberCell:visibleNumber;
+    items.push({ title, caseIds, itemNumber, agendaUrl: anchor ? agendaUrl + "#" + encodeURIComponent(anchor) : agendaUrl, staffReports });
   });
   return items;
 }
