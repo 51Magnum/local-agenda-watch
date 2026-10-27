@@ -16,10 +16,14 @@ export default function PreviewMap({boundaries,cases}:{boundaries:FeatureCollect
   let active=true;
   void import("maplibre-gl").then(lib=>{
    if(!active||!container.current)return;
+   // Turbopack does not emit MapLibre's default relative worker URL.
+   // Use the same build-prepared worker as the public maps.
+   lib.setWorkerUrl("/maplibre/worker.mjs");
+   if(window.innerWidth<700)lib.setWorkerCount(1);
    const m=new lib.Map({container:container.current,style:"https://tiles.openfreemap.org/styles/liberty",center:[-116.24,43.55],zoom:10});
    map.current=m;m.addControl(new lib.NavigationControl({showCompass:false}),"bottom-right");
-   m.on("error",()=>{if(active)setError("Some map data could not load. Project records are available in the list below.");});
-   m.on("load",()=>{
+   m.on("error",event=>{if(active)setError("Map renderer: "+(event.error?.message??"A map resource could not load").slice(0,180)+". Project records are available in the list below.");});
+   m.once("style.load",()=>{
     if(!active)return;
     try{
      m.addSource("qa-boundaries",{type:"geojson",data:boundaries});
