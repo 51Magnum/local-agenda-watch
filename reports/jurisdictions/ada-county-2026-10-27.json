@@ -1,0 +1,871 @@
+{
+  "id": "e2e17957de2759777f63cf7a2e65a39dea29b71674c242cb1c923fc38cb46317",
+  "areaId": "ada-county",
+  "createdAt": "2026-10-27T17:18:09.104Z",
+  "passed": false,
+  "snapshotHash": "417d55ac90315f42b2788269e61423adbaea9ad37ddcc6aeef50f9b4c762de19",
+  "checks": [
+    {
+      "name": "hard-fact sources",
+      "passed": true,
+      "detail": "Actual endpoint checks recorded; failures retained."
+    },
+    {
+      "name": "collection complete",
+      "passed": true,
+      "detail": "Bounded collection completed"
+    },
+    {
+      "name": "boundary",
+      "passed": true,
+      "detail": "County coverage must exclude all incorporated cities"
+    },
+    {
+      "name": "case matching",
+      "passed": false,
+      "detail": "5 of 92 hearing items match the application inventory"
+    },
+    {
+      "name": "AI sample",
+      "passed": true,
+      "detail": "At least one source-backed AI sample is required; sensitive fields stay under review"
+    },
+    {
+      "name": "runtime download check",
+      "passed": true,
+      "detail": "A Git-sourced Vercel-runtime document check is required separately"
+    }
+  ],
+  "data": {
+    "health": [
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 7017000,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:01.388Z",
+        "latencyMs": 1156
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=1000",
+        "bytes": 4066147,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:02.795Z",
+        "latencyMs": 1123
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=2000",
+        "bytes": 2631672,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:04.168Z",
+        "latencyMs": 853
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=3000",
+        "bytes": 2846762,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:05.272Z",
+        "latencyMs": 1131
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=4000",
+        "bytes": 656870,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:06.653Z",
+        "latencyMs": 1058
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/?papp=DS_Agendas",
+        "bytes": 2748828,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:07.768Z",
+        "latencyMs": 2838
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+        "bytes": 213276,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:10.856Z",
+        "latencyMs": 186
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+        "bytes": 240125,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:11.497Z",
+        "latencyMs": 373
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+        "bytes": 209862,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:12.122Z",
+        "latencyMs": 319
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+        "bytes": 228057,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:12.690Z",
+        "latencyMs": 326
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+        "bytes": 45254,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:13.266Z",
+        "latencyMs": 207
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+        "bytes": 258193,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:13.724Z",
+        "latencyMs": 330
+      },
+      {
+        "url": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/",
+        "bytes": 107454,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:14.139Z",
+        "latencyMs": 326
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 684259,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:14.477Z",
+        "latencyMs": 770
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 1041371,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:11:15.498Z",
+        "latencyMs": 327
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 211142,
+        "state": "ok",
+        "status": 304,
+        "checkedAt": "2026-10-27T17:11:17.215Z",
+        "latencyMs": 221
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9?f=json",
+        "bytes": 4250,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:49.643Z",
+        "latencyMs": 317
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3?f=json",
+        "bytes": 8804,
+        "state": "ok",
+        "status": 304,
+        "checkedAt": "2026-10-27T17:17:50.210Z",
+        "latencyMs": 117
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20?f=json",
+        "bytes": 8335,
+        "state": "ok",
+        "status": 304,
+        "checkedAt": "2026-10-27T17:17:50.577Z",
+        "latencyMs": 101
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/1?f=json",
+        "bytes": 10499,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:50.928Z",
+        "latencyMs": 114
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/13?f=json",
+        "bytes": 4363,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:51.293Z",
+        "latencyMs": 111
+      },
+      {
+        "url": "https://services2.arcgis.com/dgGjZc6xAH5m5JyP/arcgis/rest/services/Parcels/FeatureServer/5?f=json",
+        "bytes": 16690,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:51.405Z",
+        "latencyMs": 114
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 684259,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:51.655Z",
+        "latencyMs": 380
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14?f=json",
+        "bytes": 8036,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:52.286Z",
+        "latencyMs": 110
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?f=json&where=AppDivision%3D%27PZ%27&returnCountOnly=true",
+        "bytes": 14,
+        "state": "ok",
+        "status": 200,
+        "records": 4275,
+        "checkedAt": "2026-10-27T17:17:52.647Z",
+        "latencyMs": 248
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/?papp=DS_Agendas",
+        "bytes": 2748828,
+        "state": "ok",
+        "status": 200,
+        "records": 0,
+        "checkedAt": "2026-10-27T17:17:52.895Z",
+        "latencyMs": 2348
+      },
+      {
+        "url": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/",
+        "bytes": 123442,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:55.359Z",
+        "latencyMs": 736
+      }
+    ],
+    "runtime": {
+      "checks": [
+        {
+          "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C7-PZC-201601258-DA-DM-D-STAFF_REPORT.pdf&papp=DS_Agendas",
+          "bytes": 22729066,
+          "state": "ok",
+          "status": 200,
+          "checkedAt": "2026-10-27T17:18:01.970Z",
+          "latencyMs": 1965
+        }
+      ],
+      "gitCommit": "b5fae7aec0fc24a0abb9d6053c410ff5b221f417",
+      "environment": "preview"
+    },
+    "meetings": 6,
+    "items": 92,
+    "applications": 110,
+    "applicationWindow": "Recent applications plus older active records linked to collected hearings; undated active records retained",
+    "caseMatchRate": 0.05434782608695652,
+    "geometryMatchRate": 1,
+    "itemsWithNoLocation": 0,
+    "skipped": [
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C04-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 528390644,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C04-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 528390644,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C02-PZC-202600819-ZC-DA-S-PR-PZC-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 45067157,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C03-PZC-202600881-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 84954992,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C02-PZC-202600819-ZC-DA-S-PR-PZC-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 45067157,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C03-PZC-202600881-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 84954992,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 164090791,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 164090791,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C02-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 135666231,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C07-BOCC-202502461-A-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 53968832,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C02-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 135666231,
+        "reason": "Attachment exceeds byte cap"
+      },
+      {
+        "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C07-BOCC-202502461-A-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "bytes": 53968832,
+        "reason": "Attachment exceeds byte cap"
+      }
+    ],
+    "aiSamples": [
+      {
+        "hash": "c95008f5dd0abb81945b329435a87bac5954d9338c1384905c07985900875812",
+        "caseId": "202601398-CU-MSP",
+        "fields": [
+          {
+            "key": "acres",
+            "page": 1,
+            "value": "10.77 acres",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "staffRecommendation",
+            "page": 6,
+            "value": "Staff recommends approval of the renewal of the contractor's yard Conditional Use and Master Site Plan as it complies with Ada County Code.",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "applicantCompany",
+            "page": 1,
+            "value": "Gary A. Lee",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "pzHearingDate",
+            "page": 1,
+            "value": "2026-10-15",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          }
+        ],
+        "tokens": 9783,
+        "costUsd": 0.0059496,
+        "pageCount": 9,
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      },
+      {
+        "hash": "e9ac05fc684e1a92365fade392a2615f3e826d6e742d26dd2b901155115905a3",
+        "caseId": "202601317-CU-MSP",
+        "fields": [
+          {
+            "key": "popupHeadline",
+            "page": 1,
+            "value": "Conditional Use and Master Site Plan for 40-acre gravel pit operation",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "densityContext",
+            "page": 3,
+            "value": "The proposed gravel pit meets the purpose of the Rural Preservation District with minimal impact on prime farmland and no extension of public services required.",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "constructionTiming",
+            "page": 2,
+            "value": "Extraction period proposed for twenty (20) years.",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "applicantCompany",
+            "page": 1,
+            "value": "Quality Sand & Gravel Inc",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "pzHearingDate",
+            "page": 1,
+            "value": "2026-10-15",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+          }
+        ],
+        "tokens": 8229,
+        "costUsd": 0.005212800000000001,
+        "pageCount": 11,
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      },
+      {
+        "hash": "6d9dc7c1d9f268e191d44d180579e59b08f92070ae1f631b3944ea02393607fe",
+        "caseId": "202601395-CU-MSP-ALT",
+        "fields": [
+          {
+            "key": "popupHeadline",
+            "page": 1,
+            "value": "Renewal of contractor's yard and shop operation on 9.271 acres in Rural Urban Transition zone",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "acres",
+            "page": 1,
+            "value": "9.271 acres",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "staffRecommendation",
+            "page": 5,
+            "value": "Recommend approval as set out in the Findings of Fact and Conclusions of Law attached hereto",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "trafficSummary",
+            "page": 5,
+            "value": "Ada County Highway District has no comments or required improvements for this application.",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "densityContext",
+            "page": 4,
+            "value": "The property is in a transitional district with the contractor’s yard use allowed for up to five years or until annexation. The use is consistent with the Rural Urban Transition district's purpose as a transitional use.",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "applicantCompany",
+            "page": 1,
+            "value": "Risa Roe",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "pzHearingDate",
+            "page": 1,
+            "value": "2026-10-15",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+          }
+        ],
+        "tokens": 8112,
+        "costUsd": 0.0053484000000000005,
+        "pageCount": 8,
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+      },
+      {
+        "hash": "d04f9552b41063c38746980c839b16991eabfa70e273e32de89a2b1c887473ee",
+        "caseId": "202600638-ZC-DA-S-V",
+        "fields": [
+          {
+            "key": "popupHeadline",
+            "page": 1,
+            "value": "Subdivision into two lots with zoning change and variance for undersized lot",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "acres",
+            "page": 1,
+            "value": "9.36 acres",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "units",
+            "page": 2,
+            "value": "2 lots",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "zoningRequested",
+            "page": 1,
+            "value": "Rural-Urban Transition (RUT) District",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "staffRecommendation",
+            "page": 4,
+            "value": "recommend approval",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "applicantCompany",
+            "page": 1,
+            "value": "Ackerman-Estvold",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "councilHearingDate",
+            "page": 1,
+            "value": "2026-10-14",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+          }
+        ],
+        "tokens": 8659,
+        "costUsd": 0.005588800000000001,
+        "pageCount": 6,
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+      },
+      {
+        "hash": "0c2994364533289719b74516bea1937add5dfaa4adcc9ef87dc76ad0cb950cd6",
+        "caseId": "202601258-DA-DM",
+        "fields": [
+          {
+            "key": "popupHeadline",
+            "page": 1,
+            "value": "Dry Creek Ranch Planned Community periodic evaluation and development update",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas"
+          },
+          {
+            "key": "acres",
+            "page": 2,
+            "value": "1,414 acres",
+            "status": "auto_published",
+            "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas"
+          }
+        ],
+        "tokens": 10297,
+        "costUsd": 0.0061876000000000006,
+        "pageCount": 11,
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    ],
+    "tokens": 45080,
+    "spentUsd": 0.028287200000000002,
+    "budgetSpend": [
+      {
+        "bucket": "backfill",
+        "spent": 0.028287200000000002,
+        "reserved": 0
+      },
+      {
+        "bucket": "month:2026-10",
+        "spent": 0.028287200000000002,
+        "reserved": 0
+      },
+      {
+        "bucket": "sample:9ffa6001-b025-4b51-8c6c-b89be1e315c5",
+        "spent": 0.028287200000000002,
+        "reserved": 0
+      }
+    ],
+    "extractionOnlySpendUsd": 0.028287200000000005,
+    "projectedMonthlyUsd": {
+      "low": 0,
+      "high": 2,
+      "basis": "Planning estimate from onboarding brief, not measured spend; validate after one month"
+    },
+    "nextHearings": [
+      {
+        "date": "2026-11-18",
+        "body": "bocc",
+        "meetingUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/",
+        "tentative": true,
+        "deadlines": [
+          {
+            "kind": "written",
+            "date": "2026-11-12",
+            "label": "Close of business (clock time not verified)",
+            "sourceUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/"
+          },
+          {
+            "kind": "remote",
+            "date": "2026-11-16",
+            "label": "Registration date; confirm the cutoff time",
+            "sourceUrl": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/"
+          }
+        ]
+      },
+      {
+        "date": "2026-11-19",
+        "body": "pzc",
+        "meetingUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/",
+        "tentative": true,
+        "deadlines": [
+          {
+            "kind": "written",
+            "date": "2026-11-12",
+            "label": "Close of business (clock time not verified)",
+            "sourceUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/"
+          },
+          {
+            "kind": "remote",
+            "date": "2026-11-16",
+            "label": "Registration date; confirm the cutoff time",
+            "sourceUrl": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/"
+          }
+        ]
+      }
+    ],
+    "mapChecklist": [
+      "Official boundary verified",
+      "County clipped below city layers",
+      "Distinct jurisdiction color",
+      "No location invented for unmapped applications",
+      "No public map, sitemap, search or email exposure"
+    ],
+    "notes": [
+      "Listings, GIS, participation endpoints and per-item documents checked from local ingestion and a Git-sourced Vercel preview on 2026-10-27. Production runtime is not verified.",
+      "Filter AppDivision=PZ; do not backfill all historic building/zoning-certificate records.",
+      "Close of business has no verified clock time; retain a date and qualified label, never invent 17:00.",
+      "Use DS_Agendas only, never the general BOCCAgendas archive.",
+      "Tentative hearing schedule is context; an actual agenda confirms a hearing.",
+      "Application metadata has no address field. Do not manufacture an address from a parcel number.",
+      "Historical hearing cases may be absent from the active application feed. Missing matches remain explicit; no location or case relationship is inferred. Older hearing-linked active records are retained. A targeted historical-record lookup is not implemented."
+    ],
+    "localIngestionValidation": {
+      "areaId": "ada-county",
+      "checkedAt": "2026-10-27T16:26:42.797Z",
+      "health": [
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 149,
+          "bytes": 4250,
+          "checkedAt": "2026-10-27T16:26:37.474Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 60,
+          "bytes": 8804,
+          "checkedAt": "2026-10-27T16:26:37.886Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 62,
+          "bytes": 8335,
+          "checkedAt": "2026-10-27T16:26:38.205Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/1?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 61,
+          "bytes": 10499,
+          "checkedAt": "2026-10-27T16:26:38.524Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/13?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 77,
+          "bytes": 4363,
+          "checkedAt": "2026-10-27T16:26:38.842Z"
+        },
+        {
+          "url": "https://services2.arcgis.com/dgGjZc6xAH5m5JyP/arcgis/rest/services/Parcels/FeatureServer/5?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 189,
+          "bytes": 16690,
+          "checkedAt": "2026-10-27T16:26:38.919Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+          "state": "ok",
+          "status": 304,
+          "latencyMs": 147,
+          "bytes": 684259,
+          "checkedAt": "2026-10-27T16:26:39.175Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 65,
+          "bytes": 8036,
+          "checkedAt": "2026-10-27T16:26:39.574Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?f=json&where=AppDivision%3D%27PZ%27&returnCountOnly=true",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 293,
+          "bytes": 14,
+          "checkedAt": "2026-10-27T16:26:39.892Z",
+          "records": 4273
+        },
+        {
+          "url": "https://apps.adacounty.id.gov/AdaFileBrowse/?papp=DS_Agendas",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 2172,
+          "bytes": 2748828,
+          "checkedAt": "2026-10-27T16:26:40.185Z",
+          "records": 0
+        },
+        {
+          "url": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 401,
+          "bytes": 123442,
+          "checkedAt": "2026-10-27T16:26:42.380Z"
+        }
+      ],
+      "passed": true
+    },
+    "pageChecks": {
+      "origin": "https://local-agenda-watch-38011rsxl-shane-s-projects-e4093d06.vercel.app",
+      "gitCommit": "b5fae7aec0fc24a0abb9d6053c410ff5b221f417",
+      "checks": [
+        {
+          "path": "/admin/jurisdictions",
+          "status": 200,
+          "privateBadge": true,
+          "bothAreas": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB26-00047",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 4,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/CPA26-00002",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 11,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB26-00024",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 4,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB25-00033",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 9,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB25-00033",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 9,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/us/id/boise",
+          "status": 404,
+          "hidden": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601398-CU-MSP",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 6,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601317-CU-MSP",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 8,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601395-CU-MSP-ALT",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 8,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202600638-ZC-DA-S-V",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 9,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601258-DA-DM",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 5,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/us/id/ada-county",
+          "status": 404,
+          "hidden": true
+        },
+        {
+          "path": "/sitemap.xml",
+          "status": 200,
+          "privateAreasExcluded": true
+        }
+      ]
+    },
+    "adminPreviewUrl": "https://local-agenda-watch-38011rsxl-shane-s-projects-e4093d06.vercel.app/admin/jurisdictions",
+    "pendingMeetings": [],
+    "visualsFound": 0
+  }
+}

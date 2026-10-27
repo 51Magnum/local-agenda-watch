@@ -15,7 +15,7 @@ import {parseEscribeCalendar,parseEscribeMeeting} from "./adapters/escribe";
 import {parseIqm2Calendar,parseIqm2Meeting} from "./adapters/iqm2";
 import {parseAdaFiles,adaMeetings} from "./adapters/ada-file-browse";
 import {caseNumbers} from "./adapters/common";
-import {arcgisAdapter} from "./adapters/arcgis";
+import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
 import {createJurisdictionBudget,withJurisdictionAi} from "./ai-budget";
 import {structuredResponse} from "../timeline/extract";
 import {JURISDICTIONS} from "../maps/jurisdictions";
@@ -90,6 +90,18 @@ it("enforces monthly, backfill and sample dollar caps in one durable transaction
   const rows=(await db.query<{bucket:string;reserved:number}>("SELECT bucket,reserved FROM law_jurisdiction_ai_budgets")).rows;expect(rows).toHaveLength(3);expect(rows.every(r=>Number(r.reserved)===.6)).toBe(true);
   await ledger.settle(id,"gpt-4.1-mini",{input_tokens:100,output_tokens:20});await ledger.settle(id,"gpt-4.1-mini",{input_tokens:100,output_tokens:20});await expect(ledger.reserve(work,.5)).resolves.toBeTruthy();await expect(ledger.reserve({...work,sample:undefined},5.1)).rejects.toThrow("dollar cap");
  }finally{await db.close();}
+});
+it("normalizes recorded Boise table and Ada polygon features without inventing dates or addresses",async()=>{
+ const cache=await mkdtemp(path.join(tmpdir(),"law-feature-contract-"));
+ try{
+  const table=new SourceHttp({cacheDir:cache,delayMs:0,fetch:vi.fn().mockResolvedValue(Response.json(JSON.parse(fixture("arcgis-boise.json"))))});
+  const [boise]=await applicationAdapter(jurisdiction("boise"),table).listApplications();
+  expect(boise.recordId).toBe("PLN23-00040");expect(boise.relatedCaseNumbers).toContain("CVA24-00026");expect(boise.geometry).toBeUndefined();expect(boise.received).toBeUndefined();
+  const features=JSON.parse(fixture("arcgis-ada-county.json"));
+  const gis=new SourceHttp({cacheDir:cache,delayMs:0,fetch:vi.fn().mockResolvedValue(Response.json(features))});
+  const [ada]=await applicationAdapter(jurisdiction("ada-county"),gis).listApplications();
+  expect(ada.recordId).toBe(features.features[0].properties.APPFILE);expect(ada.geometry?.type).toBe("Polygon");expect(ada.address).toBe("");expect(ada.received).toMatch(/^20\d{2}-\d{2}-\d{2}$/);
+ }finally{await rm(cache,{recursive:true,force:true});}
 });
 it("stops an oversized new-jurisdiction AI request before budget storage or the provider is contacted",async()=>{
  vi.stubEnv("OPENAI_API_KEY","fixture");const fetcher=vi.fn();vi.stubGlobal("fetch",fetcher);

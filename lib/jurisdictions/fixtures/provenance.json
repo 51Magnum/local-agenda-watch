@@ -28,5 +28,19 @@
     "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5490",
     "recordedAt": "2026-10-27T14:29:09.850Z",
     "hash": "09c6ddfd10df78c6a47c5c2a7c337dac01db24aabb8c5ea47a7f9708a93e55a4"
+  },
+  {
+    "file": "arcgis-boise.json",
+    "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0",
+    "recordedAt": "2026-10-27T15:46:20.477Z",
+    "hash": "5de00a4bacc750a84a8be3a7ecdcf3210035737b88c07bdc56cb016425d23a98",
+    "note": "Recorded feature subset. Personal/application prose fields omitted; retained values and geometry are unchanged."
+  },
+  {
+    "file": "arcgis-ada-county.json",
+    "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14",
+    "recordedAt": "2026-10-27T15:43:39.985Z",
+    "hash": "b6a094c5d41ebceb7de531ea883c67ff6594c561c4275149e05e557cb22c4806",
+    "note": "Recorded feature subset. Personal/application prose fields omitted; retained values and geometry are unchanged."
   }
 ]

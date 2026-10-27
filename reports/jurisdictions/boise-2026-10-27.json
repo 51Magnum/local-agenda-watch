@@ -1,0 +1,1392 @@
+{
+  "id": "ca009b7b88160d720b37bfb3ce49a767233928062095b05c6dd9431b720b8b1b",
+  "areaId": "boise",
+  "createdAt": "2026-10-27T17:18:06.505Z",
+  "passed": false,
+  "snapshotHash": "eae990414a16594731a812b3ecc8c7993ef498278847c74500e16439110e3dcc",
+  "checks": [
+    {
+      "name": "hard-fact sources",
+      "passed": true,
+      "detail": "Actual endpoint checks recorded; failures retained."
+    },
+    {
+      "name": "collection complete",
+      "passed": false,
+      "detail": "Some collection work is deferred or unavailable"
+    },
+    {
+      "name": "boundary",
+      "passed": true,
+      "detail": "Official city boundary"
+    },
+    {
+      "name": "case matching",
+      "passed": false,
+      "detail": "65 of 103 hearing items match the application inventory"
+    },
+    {
+      "name": "AI sample",
+      "passed": true,
+      "detail": "At least one source-backed AI sample is required; sensitive fields stay under review"
+    },
+    {
+      "name": "runtime download check",
+      "passed": false,
+      "detail": "A Git-sourced Vercel-runtime document check is required separately"
+    }
+  ],
+  "data": {
+    "health": [
+      {
+        "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0/query?where=StatusCategory+%3D+%27Application+in+Review%27&outFields=*&returnGeometry=false&outSR=4326&f=json&resultRecordCount=1000&resultOffset=0",
+        "bytes": 196759,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:22.365Z",
+        "latencyMs": 311
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/MeetingsCalendarView.aspx/GetCalendarMeetings",
+        "bytes": 99553,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:22.695Z",
+        "latencyMs": 431
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=f07cbb52-39b9-4bd8-b93d-b89802bf8983&Agenda=Agenda&lang=English",
+        "bytes": 77318,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:23.377Z",
+        "latencyMs": 365
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=675285c7-1782-4f72-a001-338c4cf63c3e&Agenda=Agenda&lang=English",
+        "bytes": 77317,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:23.992Z",
+        "latencyMs": 81
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=2094a45f-950a-4128-8845-84941cc82216&Agenda=Agenda&lang=English",
+        "bytes": 77319,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:24.324Z",
+        "latencyMs": 74
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=154e240a-7b31-4156-9d3e-5fcb33aa4b5c&Agenda=Agenda&lang=English",
+        "bytes": 77318,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:24.648Z",
+        "latencyMs": 82
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=6c4bc17c-6739-4e92-88dd-6823fc268832&Agenda=Agenda&lang=English",
+        "bytes": 77319,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:24.979Z",
+        "latencyMs": 71
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=933341e5-8b2d-4d76-8af7-3a9d94360e5a&Agenda=Agenda&lang=English",
+        "bytes": 77318,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:25.300Z",
+        "latencyMs": 91
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English",
+        "bytes": 910045,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:25.641Z",
+        "latencyMs": 245
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a27f8cfd-d0fb-439c-9e4c-30af7e555027&Agenda=Agenda&lang=English",
+        "bytes": 905239,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:26.417Z",
+        "latencyMs": 244
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=e0dc31a2-15b6-4ab5-ab77-826847b13b3e&Agenda=Agenda&lang=English",
+        "bytes": 895585,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:27.018Z",
+        "latencyMs": 287
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=846ee965-11f1-480e-8a74-00a0ef39830b&Agenda=Agenda&lang=English",
+        "bytes": 909643,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:27.656Z",
+        "latencyMs": 258
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=69ad9ea7-8117-4702-b635-d7f42285002a&Agenda=Agenda&lang=English",
+        "bytes": 907685,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:28.214Z",
+        "latencyMs": 248
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=1b53f856-8806-4f82-8d90-1f33877f49c5&Agenda=Agenda&lang=English",
+        "bytes": 902848,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:28.775Z",
+        "latencyMs": 252
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=482d2f7e-dcde-425b-813e-b1c87bc213ea&Agenda=Agenda&lang=English",
+        "bytes": 917402,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:29.325Z",
+        "latencyMs": 263
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=cf763bc6-8bd1-4c83-b9dc-e6b0d51ebd2a&Agenda=Agenda&lang=English",
+        "bytes": 912001,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:29.904Z",
+        "latencyMs": 302
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Calendar.aspx",
+        "bytes": 568352,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:30.534Z",
+        "latencyMs": 26802
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5484",
+        "bytes": 22442,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:58.056Z",
+        "latencyMs": 163
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5482",
+        "bytes": 22442,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:58.469Z",
+        "latencyMs": 495
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5480",
+        "bytes": 22444,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:07:59.214Z",
+        "latencyMs": 878
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5478",
+        "bytes": 22443,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:00.341Z",
+        "latencyMs": 682
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5476",
+        "bytes": 22443,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:01.273Z",
+        "latencyMs": 434
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5474",
+        "bytes": 22443,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:01.957Z",
+        "latencyMs": 283
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5471",
+        "bytes": 22450,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:02.491Z",
+        "latencyMs": 568
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5472",
+        "bytes": 43381,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:03.310Z",
+        "latencyMs": 410
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5470",
+        "bytes": 50662,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:03.971Z",
+        "latencyMs": 691
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5470&MediaPosition=&ID=26555&CssClass=",
+        "bytes": 24162,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:04.913Z",
+        "latencyMs": 1747
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5470&MediaPosition=&ID=26556&CssClass=",
+        "bytes": 24284,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:06.910Z",
+        "latencyMs": 9275
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5470&MediaPosition=&ID=26535&CssClass=",
+        "bytes": 24300,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:16.435Z",
+        "latencyMs": 1346
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5470&MediaPosition=&ID=26557&CssClass=",
+        "bytes": 24403,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:18.031Z",
+        "latencyMs": 9599
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5470&MediaPosition=&ID=26552&CssClass=",
+        "bytes": 25081,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:27.880Z",
+        "latencyMs": 1341
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5468",
+        "bytes": 46242,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:29.472Z",
+        "latencyMs": 5595
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5468&MediaPosition=&ID=26527&CssClass=",
+        "bytes": 24543,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:35.315Z",
+        "latencyMs": 9281
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5468&MediaPosition=&ID=26099&CssClass=",
+        "bytes": 25677,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:44.846Z",
+        "latencyMs": 3143
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5468&MediaPosition=&ID=26526&CssClass=",
+        "bytes": 25144,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:08:48.240Z",
+        "latencyMs": 19512
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5466",
+        "bytes": 41406,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:08.003Z",
+        "latencyMs": 734
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5466&MediaPosition=&ID=26507&CssClass=",
+        "bytes": 24702,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:08.988Z",
+        "latencyMs": 2186
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5464",
+        "bytes": 90158,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:11.424Z",
+        "latencyMs": 8700
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5464&MediaPosition=&ID=26375&CssClass=",
+        "bytes": 24226,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:20.375Z",
+        "latencyMs": 9674
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5464&MediaPosition=&ID=26398&CssClass=",
+        "bytes": 31988,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:30.298Z",
+        "latencyMs": 3205
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5464&MediaPosition=&ID=26377&CssClass=",
+        "bytes": 27306,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:33.753Z",
+        "latencyMs": 10686
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5509",
+        "bytes": 23313,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:44.689Z",
+        "latencyMs": 383
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5461",
+        "bytes": 22449,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:45.322Z",
+        "latencyMs": 3119
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5462",
+        "bytes": 69336,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:48.691Z",
+        "latencyMs": 8727
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5462&MediaPosition=&ID=26442&CssClass=",
+        "bytes": 24211,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:09:57.668Z",
+        "latencyMs": 9459
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5462&MediaPosition=&ID=26398&CssClass=",
+        "bytes": 31988,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:07.377Z",
+        "latencyMs": 3590
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5462&MediaPosition=&ID=26451&CssClass=",
+        "bytes": 47514,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:11.216Z",
+        "latencyMs": 4485
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5460",
+        "bytes": 88089,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:15.951Z",
+        "latencyMs": 745
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5460&MediaPosition=&ID=26387&CssClass=",
+        "bytes": 24404,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:16.946Z",
+        "latencyMs": 1209
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5460&MediaPosition=&ID=26380&CssClass=",
+        "bytes": 24548,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:18.406Z",
+        "latencyMs": 9278
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5460&MediaPosition=&ID=26267&CssClass=",
+        "bytes": 24570,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:27.934Z",
+        "latencyMs": 1798
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5460&MediaPosition=&ID=26398&CssClass=",
+        "bytes": 31988,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:29.982Z",
+        "latencyMs": 12661
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5460&MediaPosition=&ID=26097&CssClass=",
+        "bytes": 25356,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:42.894Z",
+        "latencyMs": 2111
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_LegiFile.aspx?Frame=&MeetingID=5460&MediaPosition=&ID=26099&CssClass=",
+        "bytes": 25677,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:45.255Z",
+        "latencyMs": 11356
+      },
+      {
+        "url": "https://www.cityofboise.org/umbraco/api/events/fullcalendar?demo=all&category=4439&startDate=2026-07-29&endDate=2026-12-11&department=&playlist=&page=0&size=100",
+        "bytes": 61276,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:56.614Z",
+        "latencyMs": 781
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3/query?where=CITY%3D%27BOISE%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 226635,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:57.399Z",
+        "latencyMs": 469
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 211142,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:10:58.119Z",
+        "latencyMs": 190
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3?f=json",
+        "bytes": 8804,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:27.502Z",
+        "latencyMs": 450
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20?f=json",
+        "bytes": 8335,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:28.202Z",
+        "latencyMs": 114
+      },
+      {
+        "url": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/18?f=json",
+        "bytes": 19252,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:28.316Z",
+        "latencyMs": 383
+      },
+      {
+        "url": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/14?f=json",
+        "bytes": 17832,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:28.949Z",
+        "latencyMs": 82
+      },
+      {
+        "url": "https://gismap.cityofboise.org/arcgis/rest/services/Layers/Parcels/MapServer/18?f=json",
+        "bytes": 10358,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:29.282Z",
+        "latencyMs": 80
+      },
+      {
+        "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3/query?where=CITY%3D%27BOISE%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+        "bytes": 226635,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:29.363Z",
+        "latencyMs": 270
+      },
+      {
+        "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0?f=json",
+        "bytes": 10708,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:29.635Z",
+        "latencyMs": 96
+      },
+      {
+        "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0/query?f=json&where=StatusCategory+%3D+%27Application+in+Review%27&returnCountOnly=true",
+        "bytes": 13,
+        "state": "ok",
+        "status": 200,
+        "records": 267,
+        "checkedAt": "2026-10-27T17:17:29.982Z",
+        "latencyMs": 117
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/MeetingsCalendarView.aspx/GetCalendarMeetings",
+        "bytes": 28257,
+        "state": "ok",
+        "status": 200,
+        "records": 8,
+        "checkedAt": "2026-10-27T17:17:30.099Z",
+        "latencyMs": 255
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English",
+        "bytes": 910044,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:30.604Z",
+        "latencyMs": 378
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=921",
+        "bytes": 0,
+        "state": "blocked",
+        "reason": "Access challenge; no automated bypass or retry",
+        "status": 403,
+        "checkedAt": "2026-10-27T17:17:31.719Z",
+        "latencyMs": 26
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Calendar.aspx",
+        "bytes": 568352,
+        "state": "ok",
+        "status": 200,
+        "records": 8,
+        "checkedAt": "2026-10-27T17:17:31.746Z",
+        "latencyMs": 13283
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5471",
+        "bytes": 22450,
+        "state": "ok",
+        "status": 200,
+        "checkedAt": "2026-10-27T17:17:45.635Z",
+        "latencyMs": 1292
+      }
+    ],
+    "runtime": {
+      "checks": [
+        {
+          "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=716",
+          "bytes": 307937,
+          "state": "blocked",
+          "reason": "Access challenge; no automated bypass or retry",
+          "status": 403,
+          "checkedAt": "2026-10-27T17:17:58.550Z",
+          "latencyMs": 83
+        },
+        {
+          "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=41923",
+          "bytes": 9536833,
+          "state": "ok",
+          "status": 200,
+          "checkedAt": "2026-10-27T17:17:58.633Z",
+          "latencyMs": 978
+        }
+      ],
+      "gitCommit": "b5fae7aec0fc24a0abb9d6053c410ff5b221f417",
+      "environment": "preview"
+    },
+    "meetings": 45,
+    "items": 103,
+    "applications": 267,
+    "applicationWindow": "Recent applications plus older active records linked to collected hearings; undated active records retained",
+    "caseMatchRate": 0.6310679611650486,
+    "geometryMatchRate": 0,
+    "itemsWithNoLocation": 0,
+    "skipped": [
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=929",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=917",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=865",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=780",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=760",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=690",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=682",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=721",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6050&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6048&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4198&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42532&MeetingID=5470",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42532",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6046&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4196&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6044&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4193&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6040&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4190&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42410&MeetingID=5464",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42410",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6037&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4188&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6026&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4187&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6023&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4184&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6016&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4185&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42298",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42299",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42300",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6017&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4182&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6019&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4181&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42169&MeetingID=5456",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42169",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6011&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4178&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6014&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4176&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6007&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4174&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42060&MeetingID=5452",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42059&MeetingID=5452",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42060",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42059",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=5998&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4172&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42036",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=6005&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4169&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42029&MeetingID=5450",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42060",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42029",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=5995&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4167&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42300",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42014",
+        "reason": "Private attendance material excluded"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=1&ID=5994&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      },
+      {
+        "url": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=12&ID=4165&Inline=True",
+        "reason": "Compiled meeting packet excluded from AI"
+      }
+    ],
+    "aiSamples": [
+      {
+        "hash": "1334c30a2d03d6398d9e5d09004d0812d6019f4a125eb9a798722b2a8ac7528d",
+        "caseId": "SUB26-00047",
+        "fields": [
+          {
+            "key": "popupHeadline",
+            "page": 1,
+            "value": "Final plat approval for Eastport Industrial No. 1 subdivision with four industrial lots",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42487"
+          },
+          {
+            "key": "acres",
+            "page": 1,
+            "value": "43.6 acres",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42487"
+          },
+          {
+            "key": "units",
+            "page": 1,
+            "value": "4 buildable lots",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42487"
+          },
+          {
+            "key": "applicantCompany",
+            "page": 1,
+            "value": "The Lincoln Property Company",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42487"
+          }
+        ],
+        "tokens": 9861,
+        "costUsd": 0.0057983999999999996,
+        "pageCount": 8,
+        "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42487"
+      },
+      {
+        "hash": "79054c7a4f1436a389d394f2e3bcb0db92b6152a56d4e19cd36e649ab74bec53",
+        "caseId": "CPA26-00002",
+        "fields": [
+          {
+            "key": "popupHeadline",
+            "page": 1,
+            "value": "Adopt 2025 Boise State 10-Year Campus Master Plan into Comprehensive Plan",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42418"
+          },
+          {
+            "key": "popupExplanation",
+            "page": 8,
+            "value": "Boise State University requests to amend the city's Comprehensive Plan to include their updated 10-Year Campus Master Plan covering campus and adjacent areas.",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42418"
+          },
+          {
+            "key": "staffRecommendation",
+            "page": 8,
+            "value": "approval",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42418"
+          },
+          {
+            "key": "councilHearingDate",
+            "page": 1,
+            "value": "2026-10-06",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42418"
+          }
+        ],
+        "tokens": 13417,
+        "costUsd": 0.0071608,
+        "pageCount": 9,
+        "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42418"
+      },
+      {
+        "hash": "dac3aa07a1854b0a367334ca331b6d5265e9bf56c3e1b5a54fb9e56f51641c90",
+        "caseId": "SUB26-00024",
+        "fields": [
+          {
+            "key": "acres",
+            "page": 2,
+            "value": "0.32 acres",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42371"
+          },
+          {
+            "key": "units",
+            "page": 2,
+            "value": "2 lots with two fourplex buildings",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42371"
+          },
+          {
+            "key": "zoningRequested",
+            "page": 1,
+            "value": "MX-2/AI-O (Mixed Use: General and Airport Influence Area Overlay)",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42371"
+          },
+          {
+            "key": "staffRecommendation",
+            "page": 3,
+            "value": "approval of the Ziggy Subdivision final plat, subject to the recommended conditions of approval",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42371"
+          }
+        ],
+        "tokens": 10031,
+        "costUsd": 0.006158,
+        "pageCount": 8,
+        "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42371"
+      },
+      {
+        "hash": "2703bc98a2105df1edfe56288c33d1227765c03623b0cbf844b2aae50f8abdc8",
+        "caseId": "SUB25-00033",
+        "fields": [
+          {
+            "key": "staffRecommendation",
+            "page": 2,
+            "value": "Recommend approval of the preliminary plat",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=41977"
+          },
+          {
+            "key": "nearbySchools",
+            "page": 2,
+            "value": "Future public school site west across Hayloft Avenue",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=41977"
+          }
+        ],
+        "tokens": 15719,
+        "costUsd": 0.0076544000000000004,
+        "pageCount": 9,
+        "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=41977"
+      },
+      {
+        "hash": "eade47693ea0cd79c366d0e75ca0d1335ffd26b6b78cdd3d9a593515b8f9a82d",
+        "caseId": "SUB25-00033",
+        "fields": [
+          {
+            "key": "nearbySchools",
+            "page": 3,
+            "value": "A future public school site is located to the west across Hayloft Avenue.",
+            "status": "auto_published",
+            "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42216"
+          }
+        ],
+        "tokens": 15373,
+        "costUsd": 0.008452000000000001,
+        "pageCount": 9,
+        "sourceUrl": "https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42216"
+      }
+    ],
+    "tokens": 64401,
+    "spentUsd": 0.04941720000000001,
+    "budgetSpend": [
+      {
+        "bucket": "backfill",
+        "spent": 0.0494172,
+        "reserved": 0.0055752
+      },
+      {
+        "bucket": "month:2026-10",
+        "spent": 0.0494172,
+        "reserved": 0.0055752
+      },
+      {
+        "bucket": "sample:124dd514-ae56-4716-971c-0b58f5eb8ea0",
+        "spent": 0.010773600000000001,
+        "reserved": 0
+      },
+      {
+        "bucket": "sample:ce2332d4-f0c4-4b28-ac46-9a07bcc55bb0",
+        "spent": 0.0012472,
+        "reserved": 0.0055752
+      },
+      {
+        "bucket": "sample:e1ed33ab-318e-4990-a367-3426f5278cf2",
+        "spent": 0.0373964,
+        "reserved": 0
+      }
+    ],
+    "extractionOnlySpendUsd": 0.0352236,
+    "projectedMonthlyUsd": {
+      "low": 3,
+      "high": 10,
+      "basis": "Planning estimate from onboarding brief, not measured spend; validate after one month"
+    },
+    "nextHearings": [
+      {
+        "date": "2026-10-27",
+        "body": "council",
+        "meetingUrl": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5471",
+        "tentative": false,
+        "deadlines": [
+          {
+            "kind": "written",
+            "date": "2026-10-22",
+            "startsAt": "2026-10-22T23:00:00.000Z",
+            "label": "17:00",
+            "sourceUrl": "https://www.cityofboise.org/public-meetings"
+          },
+          {
+            "kind": "signup",
+            "date": "2026-10-27",
+            "startsAt": "2026-10-27T18:00:00.000Z",
+            "label": "12:00",
+            "sourceUrl": "https://www.cityofboise.org/public-meetings"
+          }
+        ]
+      },
+      {
+        "date": "2026-10-27",
+        "body": "council",
+        "meetingUrl": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5472",
+        "tentative": false,
+        "deadlines": [
+          {
+            "kind": "written",
+            "date": "2026-10-22",
+            "startsAt": "2026-10-22T23:00:00.000Z",
+            "label": "17:00",
+            "sourceUrl": "https://www.cityofboise.org/public-meetings"
+          },
+          {
+            "kind": "signup",
+            "date": "2026-10-27",
+            "startsAt": "2026-10-27T18:00:00.000Z",
+            "label": "12:00",
+            "sourceUrl": "https://www.cityofboise.org/public-meetings"
+          }
+        ]
+      }
+    ],
+    "mapChecklist": [
+      "Official boundary verified",
+      "County clipped below city layers",
+      "Distinct jurisdiction color",
+      "No location invented for unmapped applications",
+      "No public map, sitemap, search or email exposure"
+    ],
+    "notes": [
+      "Listings, GIS, participation endpoints and per-item documents checked from local ingestion and a Git-sourced Vercel preview on 2026-10-27. Production runtime is not verified.",
+      "eSCRIBE FileStream may return a Cloudflare challenge; no bypass.",
+      "Council transitions 2027-01-12; per-body migration dates require verification.",
+      "An item's actual decision/recommendation role must come from its source, never the body default.",
+      "The active application inventory has no received-date field; CRCompleteDate must not be presented as a filing date. The GIS layer is a table; parcel geometry requires a verified join. HPC transition date is not established; collect both sources and deduplicate.",
+      "eSCRIBE per-item PDFs returned Cloudflare HTTP 403 in the Git-built Vercel preview and local ingestion runtime. iQM2 PDFs downloaded successfully. Keep blocked documents queued; do not bypass challenges. Active-only inventory cannot match every historical hearing case.",
+      "Historical hearing cases may be absent from the active application feed. Missing matches remain explicit; no location or case relationship is inferred. Older hearing-linked active records are retained. A targeted historical-record lookup is not implemented."
+    ],
+    "localIngestionValidation": {
+      "areaId": "boise",
+      "checkedAt": "2026-10-27T16:26:36.325Z",
+      "health": [
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 166,
+          "bytes": 8804,
+          "checkedAt": "2026-10-27T16:26:23.544Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 56,
+          "bytes": 8333,
+          "checkedAt": "2026-10-27T16:26:23.970Z"
+        },
+        {
+          "url": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/18?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 300,
+          "bytes": 19252,
+          "checkedAt": "2026-10-27T16:26:24.026Z"
+        },
+        {
+          "url": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/14?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 60,
+          "bytes": 17832,
+          "checkedAt": "2026-10-27T16:26:24.588Z"
+        },
+        {
+          "url": "https://gismap.cityofboise.org/arcgis/rest/services/Layers/Parcels/MapServer/18?f=json",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 56,
+          "bytes": 10358,
+          "checkedAt": "2026-10-27T16:26:24.907Z"
+        },
+        {
+          "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3/query?where=CITY%3D%27BOISE%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+          "state": "ok",
+          "status": 304,
+          "latencyMs": 106,
+          "bytes": 226635,
+          "checkedAt": "2026-10-27T16:26:24.963Z"
+        },
+        {
+          "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0?f=json",
+          "state": "ok",
+          "status": 304,
+          "latencyMs": 333,
+          "bytes": 10708,
+          "checkedAt": "2026-10-27T16:26:25.073Z"
+        },
+        {
+          "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0/query?f=json&where=StatusCategory+%3D+%27Application+in+Review%27&returnCountOnly=true",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 307,
+          "bytes": 15,
+          "checkedAt": "2026-10-27T16:26:25.668Z",
+          "records": 267
+        },
+        {
+          "url": "https://pub-cityofboise.escribemeetings.com/MeetingsCalendarView.aspx/GetCalendarMeetings",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 690,
+          "bytes": 28257,
+          "checkedAt": "2026-10-27T16:26:25.975Z",
+          "records": 8
+        },
+        {
+          "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 979,
+          "bytes": 910045,
+          "checkedAt": "2026-10-27T16:26:26.927Z"
+        },
+        {
+          "url": "https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=921",
+          "state": "blocked",
+          "status": 403,
+          "latencyMs": 49,
+          "bytes": 0,
+          "reason": "Access challenge; no automated bypass or retry",
+          "checkedAt": "2026-10-27T16:26:28.188Z"
+        },
+        {
+          "url": "https://boisecityid.iqm2.com/Citizens/Calendar.aspx",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 7361,
+          "bytes": 568352,
+          "checkedAt": "2026-10-27T16:26:28.237Z",
+          "records": 8
+        },
+        {
+          "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5471",
+          "state": "ok",
+          "status": 200,
+          "latencyMs": 436,
+          "bytes": 22450,
+          "checkedAt": "2026-10-27T16:26:35.861Z"
+        }
+      ],
+      "passed": false
+    },
+    "pageChecks": {
+      "origin": "https://local-agenda-watch-38011rsxl-shane-s-projects-e4093d06.vercel.app",
+      "gitCommit": "b5fae7aec0fc24a0abb9d6053c410ff5b221f417",
+      "checks": [
+        {
+          "path": "/admin/jurisdictions",
+          "status": 200,
+          "privateBadge": true,
+          "bothAreas": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB26-00047",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 4,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/CPA26-00002",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 11,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB26-00024",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 4,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB25-00033",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 9,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/boise/project/SUB25-00033",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 9,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/us/id/boise",
+          "status": 404,
+          "hidden": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601398-CU-MSP",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 6,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601317-CU-MSP",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 8,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601395-CU-MSP-ALT",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 8,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202600638-ZC-DA-S-V",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 9,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/admin/jurisdictions/ada-county/project/202601258-DA-DM",
+          "status": 200,
+          "questions": true,
+          "asOf": true,
+          "correction": true,
+          "officialLinks": 5,
+          "sourceImageOrContext": true
+        },
+        {
+          "path": "/us/id/ada-county",
+          "status": 404,
+          "hidden": true
+        },
+        {
+          "path": "/sitemap.xml",
+          "status": 200,
+          "privateAreasExcluded": true
+        }
+      ]
+    },
+    "adminPreviewUrl": "https://local-agenda-watch-38011rsxl-shane-s-projects-e4093d06.vercel.app/admin/jurisdictions",
+    "pendingMeetings": [
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5604",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5573",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5533",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5458",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5456",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5507",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5454",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5453",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5452",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5531",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5450",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5571",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5448",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5603",
+      "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5569"
+    ],
+    "visualsFound": 0
+  }
+}

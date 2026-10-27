@@ -21,12 +21,15 @@ For a second eSCRIBE jurisdiction, copy `boise.json` to `example-city.json`, rep
 
 The build, dev server, tests and CLI automatically regenerate `lib/jurisdictions/generated.ts` from the registry directory. Commit the generated manifest with the new config for reviewers; `npm run jurisdictions:generate` regenerates it manually.
 
+The collection window retains recent applications plus older active records linked to collected hearings. Missing historical cases remain an explicit QA gap. Exact case/child-record IDs take precedence; parcel and full-address fallbacks must identify a unique application. A sample reads at most 12 native pages and can OCR at most two physical page images. It never uploads the complete PDF for OCR. Skipped pages and appendices remain deferred.
+
 Legacy source families retain compatibility bridges. Before claiming that a new source matches one of those families, run its recorded-fixture contract and validation. A vendor name alone does not establish identical page semantics. Unsupported variants fail closed and must acquire a reusable platform implementation and contract fixtures before onboarding.
 
 ## Boise
 
 - eSCRIBE and iQM2 are configured per body and date. Council remains on iQM2 until 2027-01-12; P&Z/Examiner start on eSCRIBE 2026-10-05 and Design Review on 2026-10-14. The brief did not establish HPC's exact cutover; retain both archives and deduplicate rather than inventing a date.
 - The zoning-activities layer is a **table**. Use `StatusCategory = 'Application in Review'`, not a comparison against `Status`. It has no parcel geometry or received-date field. Do not use `CRCompleteDate` as a filing date. Child records join PLN inventory to CAR/SUB/CUP/DRH agenda references.
+- Recorded child data also contains `CVA` cases, now included in the configured pattern. Do not infer a parcel join from the address alone.
 - Never download full eSCRIBE packages or iQM2 Type=1 packets for AI. Test per-item reports separately from meeting pages. If eSCRIBE files are blocked, retain the agenda facts and document links, record the block, and leave extraction pending.
 - Written testimony and sign-up are separate rules; use the linked city event page for the actual meeting sign-up. Examiner sign-up time differs from the other bodies.
 

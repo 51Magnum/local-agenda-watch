@@ -1,0 +1,12 @@
+{
+  "features": [
+    {
+      "attributes": {
+        "RecordID": "PLN23-00040",
+        "Status": "Planning Application Review",
+        "StatusCategory": "Application in Review",
+        "ChildRecords": "CVA24-00026, SUB24-00009, SUB25-00039"
+      }
+    }
+  ]
+}

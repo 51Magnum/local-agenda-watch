@@ -147,7 +147,7 @@
     }
   ],
   "caseNumberPatterns": [
-    "\\b(?:PLN|CAR|SUB|CUP|CPA|ZOA|DRH|DRC|CFH|VAR|PUD|HPC)\\d{2}-\\d{5}\\b"
+    "\\b(?:PLN|CVA|CAR|SUB|CUP|CPA|ZOA|DRH|DRC|CFH|VAR|PUD|HPC)\\d{2}-\\d{5}\\b"
   ],
   "participation": {
     "signupUrlRule": "umbracoEvents",
