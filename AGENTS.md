@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Commit and push code to GitHub first. Open a pull request into `main`, verify the Git-sourced preview and required checks, then merge only when authorized.
 - Production must be built from the merged Git commit through the Vercel Git integration (or an explicit Vercel `gitSource` deployment). Verify the deployment's Git commit SHA matches `origin/main` and report it.
 - Do not substitute local deployment metadata for evidence that Vercel built the commit from Git. Never promote a deployment sourced from local files.
-- Keep email delivery paused unless the owner separately approves enabling it.
+- The owner approved regular production email delivery on October 27, 2026: new-watch confirmations, confirmed project/place digests, hearing reminders, and internal correction notices. Keep preview subscriber delivery disabled. Existing waitlist re-consent and coverage-announcement campaigns require separate owner approval.
 
 
 # Project document and image discovery

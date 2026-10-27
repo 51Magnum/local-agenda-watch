@@ -14,7 +14,10 @@ export async function GET(request: Request) {
     )
   )
     return new Response("Unauthorized", { status: 401 });
-  if(!alertReadiness().deliveryEnabled)return Response.json({sent:0,skipped:"Live email delivery is paused pending owner approval"},{headers:{"Cache-Control":"no-store"}});
+  const readiness = alertReadiness();
+  if (new URL(request.url).searchParams.get("status") === "1")
+    return Response.json(readiness, { headers: { "Cache-Control": "no-store" } });
+  if(!readiness.deliveryEnabled)return Response.json({sent:0,skipped:"Live email delivery is paused pending owner approval"},{headers:{"Cache-Control":"no-store"}});
   const store = getEvidenceStore(),
     lease = await acquireLease(store, "alert-digest", 300000);
   if (!lease)

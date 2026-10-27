@@ -11,4 +11,14 @@ jobs:
       - name: Deliver confirmed project digests
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: curl --fail-with-body --max-time 300 -H "Authorization:Bearer $CRON_SECRET" https://www.localagendawatch.com/api/cron/alerts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CRON_SECRET" || { echo '::error::CRON_SECRET is missing'; exit 1; }
+          BASE=https://www.localagendawatch.com/api/cron/alerts
+          curl --fail-with-body --silent --show-error --max-time 30 -H "Authorization:Bearer $CRON_SECRET" "$BASE?status=1" > readiness.json
+          cat readiness.json
+          jq -e '.ready == true and .deliveryEnabled == true' readiness.json > /dev/null || { echo '::error::Production email is disabled or missing mail configuration'; exit 1; }
+          curl --fail-with-body --silent --show-error --max-time 300 -H "Authorization:Bearer $CRON_SECRET" "$BASE" > delivery.json
+          cat delivery.json
+          jq -e 'has("sent") and has("checked") and .failures == 0 and (has("skipped") | not)' delivery.json > /dev/null || { echo '::error::Email delivery was skipped or a recipient failed; inspect queued retries'; exit 1; }
