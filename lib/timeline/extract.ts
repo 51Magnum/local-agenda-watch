@@ -1,5 +1,7 @@
-import { recordUsage } from "./telemetry";
+import { recordUsage,currentDocument } from "./telemetry";
 import {aiBudget,reserveCost} from '../ai-budget';
+import {currentJurisdictionAi,jurisdictionAiBudget} from "../jurisdictions/ai-budget";
+import {jurisdiction} from "../jurisdictions/registry";
 import { isWorkflowRecommendation, EXTRACTED_KEYS, type ExtractedKey, type PageText, type SourceDocument, type Speaker } from "./types";
 export type ExtractedValue = { value: string | null; page: number | null; quote: string | null; confidence: number; speakers?: Speaker[]; complete?: boolean; secondPass?: boolean };
 export type Extraction = Record<ExtractedKey, ExtractedValue>;
@@ -10,10 +12,20 @@ export const EXTRACTION_SCHEMA = {
   properties: Object.fromEntries(EXTRACTED_KEYS.map((key) => [key, { type: "object", additionalProperties: false,
     required: ["value", "page", "quote", "confidence", "speakers", "complete"], properties: { value: nullableString, page: { type: ["integer", "null"] }, quote: nullableString, confidence: { type: "number" }, complete: {type:"boolean"}, speakers: {type:"array",items:{type:"object",additionalProperties:false,required:["name","position","quote","page"],properties:{name:{type:"string"},position:{type:"string",enum:["support","oppose","neutral"]},quote:{type:"string"},page:{type:"integer"}}}} } }])),
 };
-export async function structuredResponse(name: string, schema: object, content: object[], instructions: string, options:{timeoutMs?:number;maxOutputTokens?:number}={}): Promise<unknown> {
+export async function structuredResponse(name: string, schema: object, content: object[], instructions: string, options:{timeoutMs?:number;maxOutputTokens?:number;areaId?:string}={}): Promise<unknown> {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
   const model=process.env.OPENAI_EXTRACTION_MODEL??'gpt-4.1-mini',maxOutput=options.maxOutputTokens??(name==='case_evidence'?10000:name==='pdf_transcription'?12000:6000);
-  const reservation=await aiBudget.reserve(name,model,reserveCost(model,content,instructions,schema,maxOutput));
+  const areaId=options.areaId??currentDocument()?.areaId,work=currentJurisdictionAi()??(areaId?{areaId,mode:"monthly" as const}:undefined);
+  const amount=reserveCost(model,content,instructions,schema,maxOutput);
+  if(work){
+    const config=jurisdiction(work.areaId);if(!config)throw Error("AI work deferred: jurisdiction is not registered");
+    const boundedContent=content.map(c=>Object.fromEntries(Object.entries(c).filter(([key])=>!["image_url","file_data"].includes(key))));
+    const tokenBound=content.some(c=>"file_data" in c)?1047576:Buffer.byteLength(JSON.stringify([instructions,schema,boundedContent]))+1024+content.filter(c=>"image_url" in c).length*8192;
+    if(tokenBound+maxOutput>config.costCaps.perDocMaxTokens)throw Error("AI work deferred: per-document token cap; use a smaller per-item report or bounded native pages");
+  }
+  const jurisdictionReservation=work?await jurisdictionAiBudget.reserve(work,amount):undefined;
+  let reservation:string;
+  try{reservation=await aiBudget.reserve(name,model,amount);}catch(error){if(jurisdictionReservation)await jurisdictionAiBudget.settle(jurisdictionReservation,model,{});throw error;}
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST", headers: { Authorization: "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(options.timeoutMs??45000),
@@ -28,6 +40,7 @@ export async function structuredResponse(name: string, schema: object, content: 
   }
   const result = await response.json();
   const cost=await aiBudget.settle(reservation,model,result.usage??{});
+  if(jurisdictionReservation)await jurisdictionAiBudget.settle(jurisdictionReservation,model,result.usage??{});
   await recordUsage(name, result.usage,cost);
   console.info('[ai:cost]',JSON.stringify({operation:name,model,cost,inputTokens:result.usage?.input_tokens,outputTokens:result.usage?.output_tokens}));
   if (result.status !== "completed") throw new Error("Extraction did not complete");

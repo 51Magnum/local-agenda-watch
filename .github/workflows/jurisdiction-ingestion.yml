@@ -1,0 +1,27 @@
+name: Refresh configured jurisdictions
+on:
+  schedule:
+    - cron: '45 * * * *'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: configured-jurisdiction-ingestion
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Refresh registry-enabled source adapters without AI or publication
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=https://www.localagendawatch.com/api/cron/jurisdictions
+          AREAS=$(curl --fail-with-body --silent --show-error --max-time 30 --header "Authorization: Bearer $CRON_SECRET" "$BASE?scope=configured" | jq -r '.areas[]')
+          for area in $AREAS; do
+            curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 290 --retry 3 --retry-delay 60 --retry-all-errors \
+              --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=backfill&area=$area&days=90" > result.json
+            jq '{areaId,complete,applications:(.applications|length),meetings:(.meetings|length),blocked:[.health[]|select(.state=="blocked")],skipped:(.skipped|length)}' result.json
+          done

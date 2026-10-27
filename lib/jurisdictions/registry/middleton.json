@@ -1,0 +1,254 @@
+{
+  "id": "middleton",
+  "name": "Middleton",
+  "type": "city",
+  "state": "id",
+  "timezone": "America/Boise",
+  "color": "#7c3aed",
+  "mapOrder": 100,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0",
+    "where": "1=1",
+    "outSR": 4326
+  },
+  "agenda": [
+    {
+      "adapter": "sanityNotices",
+      "params": {
+        "baseUrl": "https://middleton.id.gov/public-hearing-notices"
+      },
+      "bodies": [
+        "P&Z",
+        "City Council"
+      ]
+    }
+  ],
+  "applications": {
+    "adapter": "none",
+    "params": {}
+  },
+  "gis": {},
+  "hearingBodies": [
+    {
+      "key": "P&Z",
+      "name": "Planning & Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "Planning & Zoning Commission"
+    },
+    {
+      "key": "City Council",
+      "name": "City Council",
+      "role": "deciding",
+      "agendaBodyMatch": "City Council"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\b(?:[A-Z]{1,6}-)?\\d{2}-\\d{2,4}(?:-[A-Z]{1,5})?\\b"
+  ],
+  "participation": {
+    "deadlineRules": []
+  },
+  "costCaps": {
+    "backfillUsd": 15,
+    "monthlyUsd": 15,
+    "perDocMaxTokens": 1100000
+  },
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "enabled": true,
+  "launchStatus": "public",
+  "legacyPublic": true,
+  "sourcesVerifiedAt": "2026-10-23",
+  "notes": [
+    "Existing published adapter; retain its source-specific interpretation and completeness."
+  ],
+  "cachedBoundaryFile": "../areas/boundaries/middleton.json",
+  "area": {
+    "timeline": {
+      "adapter": "municipal",
+      "hosts": [
+        "middleton.id.gov",
+        "middleton.id.gov",
+        "middleton.id.gov",
+        "www.middleton.id.gov"
+      ],
+      "storage": [
+        {
+          "host": "cdn.sanity.io",
+          "pathPrefix": "/files/4vjerzrk/production/"
+        }
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff[\\s_-]*report|agency.*comment|ACHD.*(?:FINAL|REPORT)"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        },
+        {
+          "kind": "pz-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:PZ|P&Z|planning.*zoning)"
+        },
+        {
+          "kind": "council-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:council|board|BOCC)"
+        },
+        {
+          "kind": "findings",
+          "pattern": "reasoned|findings|FCO|decision|determination|action[\\s_-]*letter"
+        }
+      ]
+    },
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.6201,
+      43.7068
+    ],
+    "boundaryLabel": "Official city limits",
+    "boundarySources": [
+      "https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0"
+    ],
+    "coverageNote": "Initial coverage from published land-use hearings. Projects without a verified site boundary appear in All cases; this is not a complete application inventory.",
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning & Zoning Commission",
+        "shortLabel": "P&Z",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "City Council",
+        "label": "City Council",
+        "shortLabel": "Council",
+        "stageLabel": "Council hearing"
+      }
+    },
+    "meetingRules": {
+      "agendaNotice": "Agenda not posted yet; check the official meeting calendar",
+      "location": "Council Chambers, 1103 W Main Street, Middleton, ID",
+      "commentInstructions": "Use the city's published hearing notice for written comments and speaking instructions. Include the application number. Confirm deadlines with the published agenda."
+    },
+    "commentInstructionsUrl": "https://middleton.id.gov/public-hearing-notices",
+    "sources": {
+      "cases": "https://middleton.id.gov/public-hearing-notices",
+      "hearingsSchedule": "https://middleton.id.gov/public-hearing-notices",
+      "geometry": [],
+      "agendas": "https://middleton.id.gov/public-hearing-notices"
+    }
+  },
+  "legacyMunicipal": {
+    "name": "Middleton",
+    "center": [
+      -116.6201,
+      43.7068
+    ],
+    "bounds": [
+      -116.75,
+      43.64,
+      -116.5,
+      43.83
+    ],
+    "cases": "",
+    "caseField": "",
+    "nameField": "",
+    "statusField": "",
+    "tracker": "https://middleton.id.gov/public-hearing-notices",
+    "agendas": "https://middleton.id.gov/public-hearing-notices",
+    "comments": "https://middleton.id.gov/public-hearing-notices",
+    "location": "Council Chambers, 1103 W Main Street, Middleton, ID",
+    "boundary": "https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0",
+    "flum": "",
+    "flumField": "",
+    "flumLabel": "",
+    "flumSource": "https://middleton.id.gov/departments/planning-zoning"
+  },
+  "catalogOrder": 5,
+  "legacyRuntime": {
+    "mapOnHub": true,
+    "zoom": 12,
+    "bounds": [
+      -116.75,
+      43.64,
+      -116.5,
+      43.83
+    ],
+    "caseGeometry": {
+      "layers": [],
+      "caseIdField": "",
+      "fields": {
+        "type": "",
+        "phase": "",
+        "status": "",
+        "title": ""
+      },
+      "parcelFallback": {
+        "layerUrl": "",
+        "matchField": "PARCEL",
+        "recordField": "",
+        "ignored": []
+      }
+    },
+    "flum": {
+      "layerUrl": "",
+      "categoryField": "",
+      "colorSource": "renderer",
+      "planName": "",
+      "label": "",
+      "adoptedDate": null,
+      "adoptionSource": "https://middleton.id.gov/departments/planning-zoning",
+      "dataNote": "City GIS designation; plan amendments may be newer. No zoning compatibility is inferred.",
+      "simplifyTolerance": 0.00002
+    },
+    "addressPoints": {
+      "layerUrl": "",
+      "addressField": "",
+      "where": "1=1",
+      "suffix": "Middleton, ID"
+    },
+    "stages": {
+      "phase": {},
+      "status": {},
+      "recorded": {
+        "phases": [],
+        "statuses": []
+      }
+    },
+    "caseTypes": {
+      "AN": "Annexation",
+      "A": "Annexation",
+      "AZ": "Annexation and zoning",
+      "ZC": "Rezone",
+      "RZ": "Rezone",
+      "RZDA": "Rezone and development agreement",
+      "S": "Subdivision",
+      "PP": "Preliminary plat",
+      "FP": "Final plat",
+      "PPFP": "Preliminary and final plat",
+      "PPUD": "Preliminary development plan",
+      "PUD": "Planned unit development",
+      "CUP": "Conditional use permit",
+      "CU": "Conditional use permit",
+      "SUP": "Special use permit",
+      "DR": "Design review",
+      "DA": "Development agreement",
+      "CPF": "Combined preliminary and final plat",
+      "CPA": "Comprehensive plan amendment",
+      "OA": "Code amendment",
+      "ORD": "Code amendment",
+      "PLAN": "Planning application"
+    },
+    "citywideTypes": [
+      "OA",
+      "ORD"
+    ]
+  }
+}

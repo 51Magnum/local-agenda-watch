@@ -1,0 +1,32 @@
+[
+  {
+    "file": "escribe-calendar.json",
+    "url": "https://pub-cityofboise.escribemeetings.com/MeetingsCalendarView.aspx/GetCalendarMeetings",
+    "recordedAt": "2026-10-27T14:29:06.850Z",
+    "hash": "75a33c8a1db67decd9fa2fca3408921b1b9eb36ea0e2d7f9feae638e609b9911"
+  },
+  {
+    "file": "iqm2-calendar.html",
+    "url": "https://boisecityid.iqm2.com/Citizens/Calendar.aspx",
+    "recordedAt": "2026-10-27T14:29:06.897Z",
+    "hash": "3f12627cb33c559e2cec3bd744b1570cf35815d220c13c399bda227e2ec3e39d"
+  },
+  {
+    "file": "ada-file-tree.html",
+    "url": "https://apps.adacounty.id.gov/AdaFileBrowse/?papp=DS_Agendas",
+    "recordedAt": "2026-10-27T14:29:06.914Z",
+    "hash": "5829508b4191c4a20f21bc787437ff19a15d88700463b813792d134251ae14b4"
+  },
+  {
+    "file": "escribe-meeting.html",
+    "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English",
+    "recordedAt": "2026-10-27T14:29:08.918Z",
+    "hash": "a465625828534812d96f43c5aa87852c8d0a9ee3c157fa064e3ca6d6c39f8e42"
+  },
+  {
+    "file": "iqm2-meeting.html",
+    "url": "https://boisecityid.iqm2.com/Citizens/Detail_Meeting.aspx?ID=5490",
+    "recordedAt": "2026-10-27T14:29:09.850Z",
+    "hash": "09c6ddfd10df78c6a47c5c2a7c337dac01db24aabb8c5ea47a7f9708a93e55a4"
+  }
+]

@@ -1,0 +1,269 @@
+{
+  "state": "id",
+  "timezone": "America/Boise",
+  "enabled": true,
+  "launchStatus": "admin_only",
+  "sourcesVerifiedAt": null,
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "id": "boise",
+  "name": "Boise",
+  "type": "city",
+  "color": "#9a3412",
+  "mapOrder": 110,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3",
+    "where": "CITY='BOISE'",
+    "outSR": 4326
+  },
+  "impactArea": {
+    "source": "arcgis",
+    "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20",
+    "where": "City='BOISE'",
+    "outSR": 4326
+  },
+  "agenda": [
+    {
+      "adapter": "escribe",
+      "params": {
+        "baseUrl": "https://pub-cityofboise.escribemeetings.com"
+      },
+      "bodies": [
+        "pz",
+        "he",
+        "drc",
+        "hpc",
+        "council"
+      ],
+      "bodyWindows": {
+        "pz": {
+          "activeFrom": "2026-10-05"
+        },
+        "he": {
+          "activeFrom": "2026-10-05"
+        },
+        "drc": {
+          "activeFrom": "2026-10-14"
+        },
+        "council": {
+          "activeFrom": "2027-01-12"
+        }
+      }
+    },
+    {
+      "adapter": "iqm2",
+      "params": {
+        "baseUrl": "https://boisecityid.iqm2.com/Citizens/",
+        "boardIds": {
+          "council": 1000,
+          "pz": 1032,
+          "drc": 1031,
+          "he": 1053,
+          "hpc": 1033
+        }
+      },
+      "bodies": [
+        "pz",
+        "he",
+        "drc",
+        "hpc",
+        "council"
+      ],
+      "bodyWindows": {
+        "pz": {
+          "activeUntil": "2026-10-04"
+        },
+        "he": {
+          "activeUntil": "2026-10-04"
+        },
+        "drc": {
+          "activeUntil": "2026-10-13"
+        },
+        "council": {
+          "activeUntil": "2027-01-11"
+        }
+      }
+    }
+  ],
+  "applications": {
+    "adapter": "arcgisFeatureLayer",
+    "params": {
+      "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0",
+      "where": "StatusCategory = 'Application in Review'",
+      "fields": {
+        "id": "RecordID",
+        "name": "RecordName",
+        "status": "Status",
+        "type": "ProjectType",
+        "description": "Description",
+        "address": "FullAddress",
+        "related": "ChildRecords"
+      },
+      "attributeOnly": true
+    },
+    "recordUrlTemplate": "https://permits.cityofboise.org/CitizenAccess/Cap/GlobalSearchResults.aspx?QueryText={recordId}"
+  },
+  "gis": {
+    "cityLimits": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3",
+    "impactAreas": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20",
+    "zoning": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/18",
+    "futureLandUse": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/14",
+    "parcels": "https://gismap.cityofboise.org/arcgis/rest/services/Layers/Parcels/MapServer/18"
+  },
+  "hearingBodies": [
+    {
+      "key": "pz",
+      "name": "Planning and Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "Planning and Zoning Commission"
+    },
+    {
+      "key": "he",
+      "name": "Hearing Examiner",
+      "role": "quasi-judicial",
+      "agendaBodyMatch": "Hearing Examiner"
+    },
+    {
+      "key": "drc",
+      "name": "Design Review Commission",
+      "role": "design",
+      "agendaBodyMatch": "Design Review Commission"
+    },
+    {
+      "key": "hpc",
+      "name": "Historic Preservation Commission",
+      "role": "design",
+      "agendaBodyMatch": "Historic Preservation Commission"
+    },
+    {
+      "key": "council",
+      "name": "City Council",
+      "role": "deciding",
+      "agendaBodyMatch": "City Council"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\b(?:PLN|CAR|SUB|CUP|CPA|ZOA|DRH|DRC|CFH|VAR|PUD|HPC)\\d{2}-\\d{5}\\b"
+  ],
+  "participation": {
+    "signupUrlRule": "umbracoEvents",
+    "writtenCommentEmails": {
+      "council": [
+        "citycouncil@cityofboise.org"
+      ],
+      "pz": [
+        "zoninginfo@cityofboise.org"
+      ],
+      "drc": [
+        "zoninginfo@cityofboise.org"
+      ],
+      "hpc": [
+        "zoninginfo@cityofboise.org"
+      ]
+    },
+    "deadlineRules": [
+      {
+        "kind": "written",
+        "rule": "THU_BEFORE 17:00",
+        "sourceUrl": "https://www.cityofboise.org/public-meetings",
+        "timeVerified": true
+      },
+      {
+        "kind": "signup",
+        "rule": "SAME_DAY 12:00",
+        "bodyKeys": [
+          "pz",
+          "drc",
+          "hpc",
+          "council"
+        ],
+        "sourceUrl": "https://www.cityofboise.org/public-meetings",
+        "timeVerified": true
+      },
+      {
+        "kind": "signup",
+        "rule": "SAME_DAY 10:00",
+        "bodyKeys": [
+          "he"
+        ],
+        "sourceUrl": "https://www.cityofboise.org/public-meetings",
+        "timeVerified": true
+      }
+    ],
+    "signupEventsUrl": "https://www.cityofboise.org/umbraco/api/events/fullcalendar?demo=all&category=4439&startDate={start}&endDate={end}&department=&playlist=&page=0&size=100"
+  },
+  "costCaps": {
+    "backfillUsd": 15,
+    "monthlyUsd": 15,
+    "perDocMaxTokens": 60000
+  },
+  "notes": [
+    "Sources supplied in the owner brief; live and Vercel-runtime validation pending.",
+    "eSCRIBE FileStream may return a Cloudflare challenge; no bypass.",
+    "Council transitions 2027-01-12; per-body migration dates require verification.",
+    "An item's actual decision/recommendation role must come from its source, never the body default.",
+    "The active application inventory has no received-date field; CRCompleteDate must not be presented as a filing date. The GIS layer is a table; parcel geometry requires a verified join. HPC transition date is not established; collect both sources and deduplicate."
+  ],
+  "area": {
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.2023,
+      43.615
+    ],
+    "boundaryLabel": "Official city limits",
+    "boundarySources": [
+      "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3"
+    ],
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning and Zoning Commission",
+        "shortLabel": "P&Z",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "City Council",
+        "label": "City Council",
+        "shortLabel": "Council",
+        "stageLabel": "Council hearing"
+      }
+    },
+    "meetingRules": {
+      "agendaNotice": "Confirm the hearing in its official agenda.",
+      "commentInstructions": "Use the case-specific official meeting and testimony instructions. Published deadlines control."
+    },
+    "timeline": {
+      "adapter": "municipal",
+      "hosts": [
+        "pub-cityofboise.escribemeetings.com",
+        "boisecityid.iqm2.com",
+        "www.cityofboise.org",
+        "permits.cityofboise.org",
+        "services1.arcgis.com",
+        "gismap.cityofboise.org"
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff.?report|project.?report"
+        },
+        {
+          "kind": "findings",
+          "pattern": "findings"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        }
+      ]
+    },
+    "sources": {}
+  }
+}

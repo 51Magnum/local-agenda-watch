@@ -1,0 +1,357 @@
+{
+  "id": "nampa",
+  "name": "Nampa",
+  "type": "city",
+  "state": "id",
+  "timezone": "America/Boise",
+  "color": "#2563eb",
+  "mapOrder": 100,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/6",
+    "where": "1=1",
+    "outSR": 4326
+  },
+  "agenda": [
+    {
+      "adapter": "primegov",
+      "params": {
+        "baseUrl": "https://nampa.primegov.com/public/portal"
+      },
+      "bodies": [
+        "P&Z",
+        "City Council"
+      ]
+    }
+  ],
+  "applications": {
+    "adapter": "arcgisFeatureLayer",
+    "params": {
+      "url": "https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer/0",
+      "where": "1=1"
+    }
+  },
+  "gis": {
+    "parcels": "https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0",
+    "futureLandUse": "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/30"
+  },
+  "hearingBodies": [
+    {
+      "key": "P&Z",
+      "name": "Planning & Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "Planning & Zoning Commission"
+    },
+    {
+      "key": "City Council",
+      "name": "City Council",
+      "role": "deciding",
+      "agendaBodyMatch": "City Council"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\b[A-Z]{2,6}-\\d{5}-\\d{4}\\b"
+  ],
+  "participation": {
+    "deadlineRules": []
+  },
+  "costCaps": {
+    "backfillUsd": 15,
+    "monthlyUsd": 15,
+    "perDocMaxTokens": 1100000
+  },
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "enabled": true,
+  "launchStatus": "public",
+  "legacyPublic": true,
+  "sourcesVerifiedAt": "2026-10-23",
+  "notes": [
+    "Existing published adapter; retain its source-specific interpretation and completeness."
+  ],
+  "cachedBoundaryFile": "../areas/boundaries/nampa.json",
+  "cachedCoverageBoundaryFile": "../areas/boundaries/nampa-impact.json",
+  "area": {
+    "residentAccess": {
+      "excludedHosts": [
+        "www.cityofnampa.us",
+        "cityofnampa.us",
+        "nampaid-energovpub.tylerhost.net"
+      ],
+      "archiveUrl": "https://nampa.primegov.com/public/portal",
+      "commentUrl": "https://nampa.primegov.com/public/portal",
+      "caseRecords": {
+        "DAMO-00068-2026": [
+          "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=692e24e4-3deb-43d0-8609-530cf87e180c"
+        ],
+        "SPP-00176-2026": [
+          "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=9826"
+        ],
+        "ANN-00355-2026": [
+          "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=9826"
+        ],
+        "ANN-00368-2026": [
+          "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062"
+        ],
+        "ANN-00369-2026": [
+          "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10062"
+        ]
+      }
+    },
+    "timeline": {
+      "adapter": "energov-primegov",
+      "hosts": [
+        "nampa.primegov.com",
+        "www.cityofnampa.us",
+        "id-nampa2.civicplus.com",
+        "nampaid-energovpub.tylerhost.net"
+      ],
+      "storage": [
+        {
+          "host": "pgwest.blob.core.windows.net",
+          "pathPrefix": "/us/id/nampa/"
+        }
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff[\\s_-]*report|agency.*comment|ACHD.*(?:FINAL|REPORT)"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        },
+        {
+          "kind": "pz-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:PZ|P&Z|planning.*zoning)"
+        },
+        {
+          "kind": "council-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:council|board|BOCC)"
+        },
+        {
+          "kind": "findings",
+          "pattern": "reasoned|findings|FCO|decision|determination|action[\\s_-]*letter"
+        }
+      ]
+    },
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.5635,
+      43.5739
+    ],
+    "boundaryLabel": "Official city limits",
+    "boundarySources": [
+      "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/6",
+      "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/12"
+    ],
+    "addressSearch": {
+      "addressField": "SiteAddres",
+      "where": "UPPER(SiteCity) = 'NAMPA' AND SiteState = 'ID'",
+      "suffix": "Nampa, ID"
+    },
+    "flumCompatibility": {
+      "zoningCodePattern": "\\b(?:RS\\s*\\d+(?:\\.\\d+)?|RML|RMH|RD|RA|RP|BN|BC|GB[12]?|IP|IL|IH|HC|U)\\b",
+      "categories": {
+        "Medium Density Residential": {
+          "districts": [
+            "RS4",
+            "RS6",
+            "RS7",
+            "RS8.5"
+          ],
+          "sourceUrl": "https://www.cityofnampa.us/DocumentCenter/View/13801/3-Medium-Density-Residential"
+        },
+        "Industrial": {
+          "districts": [
+            "IL",
+            "IP",
+            "IH"
+          ],
+          "sourceUrl": "https://www.cityofnampa.us/DocumentCenter/View/13805/7-Industrial"
+        }
+      }
+    },
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning & Zoning Commission",
+        "shortLabel": "P&Z",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "City Council",
+        "label": "City Council",
+        "shortLabel": "Council",
+        "stageLabel": "Council hearing"
+      }
+    },
+    "meetingRules": {
+      "defaultHearingTime": "18:00",
+      "decisionCommentDeadlineHour": 12,
+      "agendaNotice": "Agenda usually posted the Thursday before the meeting",
+      "location": "Nampa City Hall, Council Chambers, 411 3rd St S, Nampa, ID",
+      "commentInstructions": "Once the agenda is posted, use the comment bubble in the meeting portal to send written comments, or the microphone button to sign up to speak. Include the relevant case number."
+    },
+    "commentInstructionsUrl": "https://www.cityofnampa.us/1616/Public-Comment",
+    "sources": {
+      "cases": "https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer",
+      "hearingsSchedule": "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings",
+      "geometry": [
+        "https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer/0",
+        "https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer/1"
+      ],
+      "flum": "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/30",
+      "agendas": "https://nampa.primegov.com/public/portal",
+      "addressPoints": "https://utility.arcgis.com/usrsvcs/servers/2cb0c34984644eb19ebeb3f8a17b7dc9/rest/services/Public/CityInformation_Public/MapServer/35",
+      "parcelFallback": "https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"
+    }
+  },
+  "catalogOrder": 0,
+  "legacyRuntime": {
+    "reviewedApplications": {
+      "DAMO-00068-2026": {
+        "headline": "Spring Shores Commons development agreement changes",
+        "explanation": "A request to change the development agreement for Spring Shores Commons, alongside a rezone and preliminary subdivision plat. The report describes an original concept of five detached homes, 63 attached homes, one commercial lot, and seven common lots.",
+        "page": 1,
+        "sourceDate": "2026-08-17",
+        "reportUrl": "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=692e24e4-3deb-43d0-8609-530cf87e180c"
+      },
+      "ANN-00368-2026": {
+        "headline": "Annex 148.52 acres for existing concrete operations",
+        "explanation": "Americrete Land Holding and Triple Crown Development want to bring an existing concrete plant and gravel pit into Nampa with light-industrial zoning.",
+        "page": 1,
+        "sourceDate": "2026-09-15",
+        "reportUrl": "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=2dfe2f93-94c2-465e-b8aa-70833bc86e88"
+      }
+    },
+    "mapOnHub": true,
+    "zoom": 11,
+    "bounds": [
+      -116.85,
+      43.3,
+      -116.3,
+      43.85
+    ],
+    "caseGeometry": {
+      "layers": [
+        "https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer/0",
+        "https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer/1"
+      ],
+      "caseIdField": "APPID",
+      "fields": {
+        "type": "APPTYPE",
+        "phase": "APPPHASE",
+        "status": "APPSTATUS",
+        "title": "APPSCOPE",
+        "acres": "APPACRES",
+        "link": "APPLINK"
+      },
+      "parcelFallback": {
+        "layerUrl": "https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0",
+        "matchField": "ACCOUNT",
+        "recordField": "MainParcelNumber",
+        "ignored": [
+          "R1542600000"
+        ]
+      }
+    },
+    "flum": {
+      "layerUrl": "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/30",
+      "categoryField": "DESIG",
+      "colorSource": "renderer",
+      "planName": "Nampa 2040 Comprehensive Plan",
+      "label": "Nampa 2040 Comprehensive Plan, Future Land Use (plan update underway in 2026)",
+      "adoptedDate": "2020-03",
+      "adoptionSource": "https://www.cityofnampa.us/1664/Long-Range-Planning-Comprehensive-Plan",
+      "dataNote": "City planning page: adopted March 2020. GIS layer metadata says its underlying data was adopted in 2019; it may lag plan amendments.",
+      "simplifyTolerance": 0.00002
+    },
+    "addressPoints": {
+      "layerUrl": "https://utility.arcgis.com/usrsvcs/servers/2cb0c34984644eb19ebeb3f8a17b7dc9/rest/services/Public/CityInformation_Public/MapServer/35",
+      "addressField": "SiteAddres",
+      "where": "UPPER(SiteCity) = 'NAMPA' AND SiteState = 'ID'",
+      "suffix": "Nampa, ID"
+    },
+    "stages": {
+      "phase": {
+        "Review": "In review",
+        "Notification": "In review",
+        "PZ Commission": "P&Z",
+        "City Council": "Council/Board",
+        "Recording": "Decided"
+      },
+      "status": {
+        "Submitted": "Filed",
+        "Pending": "In review",
+        "Approved": "Decided",
+        "Denied": "Decided",
+        "Withdrawn": "Decided",
+        "Closed": "Decided",
+        "Complete": "Decided",
+        "Completed": "Decided"
+      },
+      "recorded": {
+        "phases": [
+          "Recording"
+        ],
+        "statuses": [
+          "Complete",
+          "Recorded"
+        ]
+      }
+    },
+    "caseTypes": {
+      "ANN": "Annexation",
+      "SPP": "Preliminary plat",
+      "SPF": "Final plat",
+      "MPC": "Master plan",
+      "CUP": "Conditional use permit",
+      "ZMA": "Rezone",
+      "ZTA": "Zoning text amendment",
+      "CTA": "Comprehensive plan text amendment",
+      "CMA": "Comprehensive plan map amendment",
+      "VAR": "Variance"
+    },
+    "citywideTypes": [
+      "ZTA",
+      "CTA"
+    ],
+    "caseVisuals": {
+      "ANN-00371-2026": {
+        "src": "/us/id/nampa/braeburn-concept-preview.webp",
+        "fullSizeUrl": "/us/id/nampa/toll-brothers-concept-plan.webp",
+        "alt": "Detail of the developer concept for Braeburn Creek showing proposed lots, streets and shared spaces",
+        "label": "Developer concept · March 13, 2026",
+        "note": "Detail crop. Early concept; later submissions may differ.",
+        "sourceUrl": "/us/id/nampa/toll-brothers-concept-plan.png",
+        "kind": "proposal"
+      },
+      "SPP-00184-2026": {
+        "src": "/us/id/nampa/braeburn-concept-preview.webp",
+        "fullSizeUrl": "/us/id/nampa/toll-brothers-concept-plan.webp",
+        "alt": "Detail of the developer concept for Braeburn Creek showing proposed lots, streets and shared spaces",
+        "label": "Developer concept · March 13, 2026",
+        "note": "Detail crop. Early concept; later submissions may differ.",
+        "sourceUrl": "/us/id/nampa/toll-brothers-concept-plan.png",
+        "kind": "proposal"
+      },
+      "ANN-00369-2026": {
+        "src": "/us/id/nampa/ann-00369-2026/zoning-map.webp",
+        "fullSizeUrl": "/us/id/nampa/ann-00369-2026/zoning-map.webp",
+        "alt": "Official zoning exhibit showing the Northside Logistics Center parcel marked Project Location on Northside Boulevard",
+        "label": "Zoning map · staff report",
+        "note": "Planning context, not a proposed site layout.",
+        "sourceUrl": "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=cace2bcc-e1c6-4af8-b039-15eb63c021ab#page=15",
+        "kind": "context"
+      }
+    },
+    "recordClient": {}
+  }
+}

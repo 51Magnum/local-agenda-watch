@@ -14,7 +14,9 @@ export default function ProjectPane({
   savedPlace,
   onWatch,
   page = false,
+  preview = false,
 }: {
+  preview?: boolean;
   page?: boolean;
   data: PaneData;
   onClose: () => void;
@@ -47,7 +49,7 @@ export default function ProjectPane({
       minute: "2-digit",
       timeZone: data.area.timezone,
     }).format(new Date(v)) +
-    (data.area.timezone === "America/Denver"
+    (["America/Denver", "America/Boise"].includes(data.area.timezone)
       ? " Mountain Time"
       : " " + data.area.timezone);
   const impactRows = data.impacts.map((f, index) => (
@@ -125,7 +127,8 @@ export default function ProjectPane({
           <div className="law-pane-expanded">
             {item.popup?.explanation && <p>{item.popup.explanation}</p>}
             {data.summarySource && <a href={data.summarySource} target="_blank" rel="noreferrer">Summary source</a>}
-            {page && item.popup?.aiGenerated && <p className="text-xs text-zinc-500">AI-generated summary; check the linked official records.</p>}
+            {data.aiSummaryPending && <p className="text-xs text-zinc-500">AI summary pending. Official application facts are shown below.</p>}
+            {(page || preview) && item.popup?.aiGenerated && <p className="text-xs text-zinc-500">AI-generated summary; check the linked official records.</p>}
             {item.visual && (
               <figure>
                 <button
@@ -249,7 +252,7 @@ export default function ProjectPane({
               {!data.participationClosed && data.calendarHref && (
                 <a href={data.calendarHref}>Add to calendar</a>
               )}
-              <button
+              {!preview && <button
                 type="button"
                 className="law-email-updates-button"
                 aria-expanded={watchStep !== "closed"}
@@ -257,7 +260,7 @@ export default function ProjectPane({
                 onClick={() => setWatchStep(step => step === "closed" ? "choose" : "closed")}
               >
                 Get email updates
-              </button>
+              </button>}
             </div>
             {watchStep !== "closed" && (
               <section id={watchOptionsId} aria-label="Email update options" className="mt-4 space-y-4 rounded-xl border border-teal-700/30 p-4">

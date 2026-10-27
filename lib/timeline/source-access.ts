@@ -1,9 +1,10 @@
 import { getArea } from "@/lib/areas/registry";
+import {jurisdiction} from "../jurisdictions/registry";
 import { hostWasBlocked, recordHost } from "./telemetry";
 export class BlockedSourceError extends Error { constructor(public host:string){super("Official source blocked: "+host);this.name="BlockedSourceError";} }
 export const isBlockedSource=(error:unknown)=>error instanceof BlockedSourceError||(!/Extraction API/.test(error instanceof Error?error.message:String(error))&&/HTTP (?:401|403|429)|Cloudflare|challenge page|official source blocked/i.test(error instanceof Error?error.message:String(error)));
 export function allowedSource(value:string,areaId="nampa"){
- try{const u=new URL(value),config=getArea(areaId)?.timeline;return u.protocol==="https:"&&!u.username&&!u.password&&!u.port&&Boolean(config&&(config.hosts.includes(u.hostname)||config.storage?.some(s=>s.host===u.hostname&&u.pathname.startsWith(s.pathPrefix))));}catch{return false;}
+ try{const u=new URL(value),definition=jurisdiction(areaId),config=getArea(areaId)?.timeline??(definition?.enabled?definition.area.timeline:undefined);return u.protocol==="https:"&&!u.username&&!u.password&&!u.port&&Boolean(config&&(config.hosts.includes(u.hostname)||config.storage?.some(s=>s.host===u.hostname&&u.pathname.startsWith(s.pathPrefix))));}catch{return false;}
 }
 export async function sourceRequest(url:string,areaId:string,accept="text/html,application/json,application/pdf",timeout=12000){
  if(!allowedSource(url,areaId))throw new Error("Source is outside the jurisdiction allowlist");

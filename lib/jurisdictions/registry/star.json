@@ -1,0 +1,254 @@
+{
+  "id": "star",
+  "name": "Star",
+  "type": "city",
+  "state": "id",
+  "timezone": "America/Boise",
+  "color": "#db2777",
+  "mapOrder": 100,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/CityLimitsAndImpactAreas/FeatureServer/1",
+    "where": "1=1",
+    "outSR": 4326
+  },
+  "agenda": [
+    {
+      "adapter": "municodePublishPage",
+      "params": {
+        "baseUrl": "https://meetings.municode.com/PublishPage/index?cid=STARID&ppid=13616671-3b4b-4eb5-bc0f-320059f14bbe&p=1"
+      },
+      "bodies": [
+        "P&Z",
+        "City Council"
+      ]
+    }
+  ],
+  "applications": {
+    "adapter": "none",
+    "params": {}
+  },
+  "gis": {},
+  "hearingBodies": [
+    {
+      "key": "P&Z",
+      "name": "Planning & Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "Planning & Zoning Commission"
+    },
+    {
+      "key": "City Council",
+      "name": "City Council",
+      "role": "deciding",
+      "agendaBodyMatch": "City Council"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\b(?:[A-Z]{1,6}-)?\\d{2}-\\d{2,4}(?:-[A-Z]{1,5})?\\b"
+  ],
+  "participation": {
+    "deadlineRules": []
+  },
+  "costCaps": {
+    "backfillUsd": 15,
+    "monthlyUsd": 15,
+    "perDocMaxTokens": 1100000
+  },
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "enabled": true,
+  "launchStatus": "public",
+  "legacyPublic": true,
+  "sourcesVerifiedAt": "2026-10-23",
+  "notes": [
+    "Existing published adapter; retain its source-specific interpretation and completeness."
+  ],
+  "cachedBoundaryFile": "../areas/boundaries/star.json",
+  "area": {
+    "timeline": {
+      "adapter": "municipal",
+      "hosts": [
+        "meetings.municode.com",
+        "www.staridaho.org",
+        "www.staridaho.org"
+      ],
+      "storage": [
+        {
+          "host": "mccmeetings.blob.core.usgovcloudapi.net",
+          "pathPrefix": "/starid-pubu/"
+        }
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff[\\s_-]*report|agency.*comment|ACHD.*(?:FINAL|REPORT)"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        },
+        {
+          "kind": "pz-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:PZ|P&Z|planning.*zoning)"
+        },
+        {
+          "kind": "council-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:council|board|BOCC)"
+        },
+        {
+          "kind": "findings",
+          "pattern": "reasoned|findings|FCO|decision|determination|action[\\s_-]*letter"
+        }
+      ]
+    },
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.4937,
+      43.6921
+    ],
+    "boundaryLabel": "Official city limits",
+    "boundarySources": [
+      "https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/CityLimitsAndImpactAreas/FeatureServer/1",
+      "https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0"
+    ],
+    "coverageNote": "Initial coverage from published land-use hearings. Projects without a verified site boundary appear in All cases; this is not a complete application inventory.",
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning & Zoning Commission",
+        "shortLabel": "P&Z",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "City Council",
+        "label": "City Council",
+        "shortLabel": "Council",
+        "stageLabel": "Council hearing"
+      }
+    },
+    "meetingRules": {
+      "agendaNotice": "Agenda not posted yet; check the official meeting calendar",
+      "location": "City Hall, 10769 W State Street, Star, ID",
+      "commentInstructions": "Use the city's published hearing notice for written comments and speaking instructions. Include the application number. Confirm deadlines with the published agenda."
+    },
+    "commentInstructionsUrl": "https://www.staridaho.org/1246/Public-Hearings",
+    "sources": {
+      "cases": "https://www.staridaho.org/1305/Meetings-Agendas",
+      "hearingsSchedule": "https://meetings.municode.com/PublishPage/index?cid=STARID&ppid=13616671-3b4b-4eb5-bc0f-320059f14bbe&p=1",
+      "geometry": [],
+      "agendas": "https://meetings.municode.com/PublishPage/index?cid=STARID&ppid=13616671-3b4b-4eb5-bc0f-320059f14bbe&p=1"
+    }
+  },
+  "legacyMunicipal": {
+    "name": "Star",
+    "center": [
+      -116.4937,
+      43.6921
+    ],
+    "bounds": [
+      -116.68,
+      43.59,
+      -116.35,
+      43.85
+    ],
+    "cases": "",
+    "caseField": "",
+    "nameField": "",
+    "statusField": "",
+    "tracker": "https://www.staridaho.org/1305/Meetings-Agendas",
+    "agendas": "https://meetings.municode.com/PublishPage/index?cid=STARID&ppid=13616671-3b4b-4eb5-bc0f-320059f14bbe&p=1",
+    "comments": "https://www.staridaho.org/1246/Public-Hearings",
+    "location": "City Hall, 10769 W State Street, Star, ID",
+    "boundary": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/CityLimitsAndImpactAreas/FeatureServer/1",
+    "flum": "",
+    "flumField": "",
+    "flumLabel": "",
+    "flumSource": "https://www.staridaho.org/1239/Maps"
+  },
+  "catalogOrder": 4,
+  "legacyRuntime": {
+    "mapOnHub": true,
+    "zoom": 12,
+    "bounds": [
+      -116.68,
+      43.59,
+      -116.35,
+      43.85
+    ],
+    "caseGeometry": {
+      "layers": [],
+      "caseIdField": "",
+      "fields": {
+        "type": "",
+        "phase": "",
+        "status": "",
+        "title": ""
+      },
+      "parcelFallback": {
+        "layerUrl": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/Ada_County_Parcels/FeatureServer/142",
+        "matchField": "PARCEL",
+        "recordField": "",
+        "ignored": []
+      }
+    },
+    "flum": {
+      "layerUrl": "",
+      "categoryField": "",
+      "colorSource": "renderer",
+      "planName": "",
+      "label": "",
+      "adoptedDate": null,
+      "adoptionSource": "https://www.staridaho.org/1239/Maps",
+      "dataNote": "City GIS designation; plan amendments may be newer. No zoning compatibility is inferred.",
+      "simplifyTolerance": 0.00002
+    },
+    "addressPoints": {
+      "layerUrl": "",
+      "addressField": "",
+      "where": "1=1",
+      "suffix": "Star, ID"
+    },
+    "stages": {
+      "phase": {},
+      "status": {},
+      "recorded": {
+        "phases": [],
+        "statuses": []
+      }
+    },
+    "caseTypes": {
+      "AN": "Annexation",
+      "A": "Annexation",
+      "AZ": "Annexation and zoning",
+      "ZC": "Rezone",
+      "RZ": "Rezone",
+      "RZDA": "Rezone and development agreement",
+      "S": "Subdivision",
+      "PP": "Preliminary plat",
+      "FP": "Final plat",
+      "PPFP": "Preliminary and final plat",
+      "PPUD": "Preliminary development plan",
+      "PUD": "Planned unit development",
+      "CUP": "Conditional use permit",
+      "CU": "Conditional use permit",
+      "SUP": "Special use permit",
+      "DR": "Design review",
+      "DA": "Development agreement",
+      "CPF": "Combined preliminary and final plat",
+      "CPA": "Comprehensive plan amendment",
+      "OA": "Code amendment",
+      "ORD": "Code amendment",
+      "PLAN": "Planning application"
+    },
+    "citywideTypes": [
+      "OA",
+      "ORD"
+    ]
+  }
+}

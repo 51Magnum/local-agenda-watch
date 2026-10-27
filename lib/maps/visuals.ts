@@ -6,6 +6,7 @@ import { readVisualAsset, saveVisualAsset } from "./visual-store";
 import type { MapVisual, JurisdictionConfig } from "./types";
 import type { Hearing } from "@/lib/localities/types";
 import { downloadDocument } from "@/lib/timeline/ingest";
+import {currentJurisdictionAi,withJurisdictionAi} from "../jurisdictions/ai-budget";
 const proposal = /site[\s_-]*plan|concept|prelim(?:inary)?[\s_-]*plat|landscape[\s_-]*plan|elevation|rendering/i;
 export function previewCandidate(title:string){return allowedImageTitle(title);}
 export function sourceImageDate(title:string):string|undefined {
@@ -17,7 +18,8 @@ export function sourceImageDate(title:string):string|undefined {
 export async function extractDocumentVisual(bytes:Uint8Array,title:string,deadline=Date.now()+90000):Promise<{image:Buffer;page?:number;approval:ImageCheck}|undefined>{
  const result=await scanDocumentVisuals(bytes,title,{deadline,sourceDate:sourceImageDate(title)});return result.best;
 }
-export async function documentPreview(jurisdiction:string,bytes:Uint8Array,title:string,sourceUrl:string,deadline?:number):Promise<MapVisual|undefined>{
+export async function documentPreview(jurisdiction:string,bytes:Uint8Array,title:string,sourceUrl:string,deadline?:number):Promise<MapVisual|undefined>{return withJurisdictionAi(currentJurisdictionAi()??{areaId:jurisdiction,mode:"monthly"},()=>documentPreviewInScope(jurisdiction,bytes,title,sourceUrl,deadline));}
+async function documentPreviewInScope(jurisdiction:string,bytes:Uint8Array,title:string,sourceUrl:string,deadline?:number):Promise<MapVisual|undefined>{
  if(forbiddenImageDocument.test(title))return;
  const id=createHash("sha256").update(IMAGE_CHECK_VERSION).update(jurisdiction).update(sourceUrl).update(title).update(bytes).digest("hex");
  let asset=await readVisualAsset(jurisdiction,id);

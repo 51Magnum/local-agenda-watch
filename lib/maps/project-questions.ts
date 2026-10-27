@@ -12,6 +12,7 @@ export const RESIDENT_QUESTIONS = [
 ] as const;
 export type ProjectImpact = { label: string; value: string; url?: string; sourceTitle?: string; sourcePage?: number };
 export type PaneData = {
+  aiSummaryPending?:boolean;
   summarySource?:string;
   documents?: {label:string;url:string;hash?:string}[];
   parcels?: string[];

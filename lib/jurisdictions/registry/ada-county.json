@@ -1,0 +1,185 @@
+{
+  "state": "id",
+  "timezone": "America/Boise",
+  "enabled": true,
+  "launchStatus": "admin_only",
+  "sourcesVerifiedAt": null,
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "id": "ada-county",
+  "name": "Ada County",
+  "type": "county",
+  "color": "#3f6212",
+  "mapOrder": 2,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",
+    "where": "1=1",
+    "outSR": 4326
+  },
+  "clipRule": {
+    "operation": "subtractCityLimits",
+    "layer": {
+      "source": "arcgis",
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3",
+      "where": "1=1",
+      "outSR": 4326
+    }
+  },
+  "agenda": [
+    {
+      "adapter": "adaFileBrowse",
+      "params": {
+        "baseUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/",
+        "papp": "DS_Agendas",
+        "hearingsUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/",
+        "scheduleYear": 2026,
+        "scheduleTables": [
+          {
+            "index": 0,
+            "body": "bocc"
+          },
+          {
+            "index": 1,
+            "body": "pzc"
+          }
+        ]
+      },
+      "bodies": [
+        "pzc",
+        "bocc"
+      ]
+    }
+  ],
+  "applications": {
+    "adapter": "arcgisFeatureLayer",
+    "params": {
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14",
+      "where": "AppDivision='PZ'",
+      "fields": {
+        "id": "APPFILE",
+        "name": "AppApplicDesc",
+        "type": "AppType",
+        "status": "APPStatus",
+        "parcel": "PARCEL",
+        "description": "AppApplicDesc",
+        "received": "APPRcvdDate"
+      }
+    },
+    "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/"
+  },
+  "gis": {
+    "countyBoundary": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",
+    "cityLimits": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3",
+    "impactAreas": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20",
+    "futureLandUse": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/1",
+    "zoning": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/13",
+    "parcels": "https://services2.arcgis.com/dgGjZc6xAH5m5JyP/arcgis/rest/services/Parcels/FeatureServer/5"
+  },
+  "hearingBodies": [
+    {
+      "key": "pzc",
+      "name": "Planning and Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "PZC"
+    },
+    {
+      "key": "bocc",
+      "name": "Board of County Commissioners",
+      "role": "deciding",
+      "agendaBodyMatch": "BOCC"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\b\\d{9}(?:-[A-Z]{1,5})+\\b"
+  ],
+  "participation": {
+    "testimonySignupUrl": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/",
+    "deadlineRules": [
+      {
+        "kind": "written",
+        "rule": "THU_BEFORE COB",
+        "timeVerified": false,
+        "sourceUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/"
+      },
+      {
+        "kind": "remote",
+        "rule": "MON_BEFORE DATE_ONLY",
+        "timeVerified": false,
+        "sourceUrl": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/"
+      }
+    ]
+  },
+  "costCaps": {
+    "backfillUsd": 5,
+    "monthlyUsd": 5,
+    "perDocMaxTokens": 60000
+  },
+  "notes": [
+    "Sources supplied in the owner brief; runtime validation pending.",
+    "Filter AppDivision=PZ; do not backfill all historic building/zoning-certificate records.",
+    "Close of business has no verified clock time; retain a date and qualified label, never invent 17:00.",
+    "Use DS_Agendas only, never the general BOCCAgendas archive.",
+    "Tentative hearing schedule is context; an actual agenda confirms a hearing.",
+    "Application metadata has no address field. Do not manufacture an address from a parcel number."
+  ],
+  "area": {
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.24,
+      43.45
+    ],
+    "boundaryLabel": "Unincorporated Ada County",
+    "boundarySources": [
+      "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9"
+    ],
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning and Zoning Commission",
+        "shortLabel": "P&Z",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "Board of County Commissioners",
+        "label": "Board of County Commissioners",
+        "shortLabel": "Board",
+        "stageLabel": "Board hearing"
+      }
+    },
+    "meetingRules": {
+      "agendaNotice": "Confirm the hearing in its official agenda.",
+      "commentInstructions": "Use the case-specific official meeting and testimony instructions. Published deadlines control."
+    },
+    "timeline": {
+      "adapter": "municipal",
+      "hosts": [
+        "apps.adacounty.id.gov",
+        "adacounty.id.gov",
+        "gisprod.adacounty.id.gov",
+        "gisprodapi.adacounty.id.gov"
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff.?report|project.?report"
+        },
+        {
+          "kind": "findings",
+          "pattern": "findings"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        }
+      ]
+    },
+    "sources": {}
+  }
+}

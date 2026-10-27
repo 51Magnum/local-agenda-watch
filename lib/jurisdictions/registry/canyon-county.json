@@ -1,0 +1,262 @@
+{
+  "id": "canyon-county",
+  "name": "Canyon County",
+  "type": "county",
+  "state": "id",
+  "timezone": "America/Boise",
+  "color": "#334155",
+  "mapOrder": 1,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1",
+    "where": "1=1",
+    "outSR": 4326
+  },
+  "agenda": [
+    {
+      "adapter": "countyLandHearings",
+      "params": {
+        "baseUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing"
+      },
+      "bodies": [
+        "P&Z",
+        "Board of County Commissioners",
+        "Hearing Examiner"
+      ]
+    }
+  ],
+  "applications": {
+    "adapter": "arcgisFeatureLayer",
+    "params": {
+      "url": "https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0",
+      "where": "1=1"
+    }
+  },
+  "gis": {
+    "parcels": "https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0",
+    "futureLandUse": "https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1"
+  },
+  "hearingBodies": [
+    {
+      "key": "P&Z",
+      "name": "Planning & Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "Planning & Zoning Commission"
+    },
+    {
+      "key": "Board of County Commissioners",
+      "name": "Board of County Commissioners",
+      "role": "deciding",
+      "agendaBodyMatch": "Board of County Commissioners"
+    },
+    {
+      "key": "Hearing Examiner",
+      "name": "Hearing Examiner",
+      "role": "recommending",
+      "agendaBodyMatch": "Hearing Examiner"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\b[A-Z]{1,5}\\d{4}-\\d{4}\\b"
+  ],
+  "participation": {
+    "deadlineRules": []
+  },
+  "costCaps": {
+    "backfillUsd": 15,
+    "monthlyUsd": 15,
+    "perDocMaxTokens": 1100000
+  },
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "enabled": true,
+  "launchStatus": "public",
+  "legacyPublic": true,
+  "sourcesVerifiedAt": "2026-10-23",
+  "notes": [
+    "Existing published adapter; retain its source-specific interpretation and completeness."
+  ],
+  "cachedBoundaryFile": "../areas/boundaries/canyon-county.json",
+  "cachedCoverageBoundaryFile": "../areas/boundaries/canyon-county-jurisdiction.json",
+  "area": {
+    "residentAccess": {
+      "excludedHosts": [],
+      "archiveUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing"
+    },
+    "timeline": {
+      "adapter": "county",
+      "hosts": [
+        "agenda.canyoncounty.id.gov",
+        "landhearingsagenda.canyoncounty.id.gov",
+        "www.canyoncounty.id.gov",
+        "canyoncounty.id.gov",
+        "docs.canyoncounty.id.gov",
+        "maps.canyonco.org"
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff[\\s_-]*report|agency.*comment|ACHD.*(?:FINAL|REPORT)"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        },
+        {
+          "kind": "pz-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:PZ|P&Z|planning.*zoning)"
+        },
+        {
+          "kind": "council-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:council|board|BOCC)"
+        },
+        {
+          "kind": "findings",
+          "pattern": "reasoned|findings|FCO|decision|determination|action[\\s_-]*letter"
+        }
+      ]
+    },
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.7,
+      43.63
+    ],
+    "boundaryLabel": "Unincorporated Canyon County",
+    "coverageNote": "County land-use cases. Incorporated cities have separate planning authorities; a postal city does not determine jurisdiction.",
+    "boundarySources": [
+      "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1",
+      "https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0"
+    ],
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning & Zoning Commission",
+        "shortLabel": "Planning / Examiner",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "Board of County Commissioners",
+        "label": "Board of County Commissioners",
+        "shortLabel": "Board",
+        "stageLabel": "Board hearing"
+      },
+      "additional": [
+        {
+          "id": "Hearing Examiner",
+          "label": "Hearing Examiner",
+          "shortLabel": "Examiner",
+          "stageLabel": "Hearing Examiner"
+        }
+      ]
+    },
+    "meetingRules": {
+      "agendaNotice": "Staff reports are published seven days before the scheduled hearing.",
+      "commentInstructions": "Use the case-specific comment deadline and contact shown in the County's hearing record. Confirm how to submit comments and the hearing location in the published notice."
+    },
+    "commentInstructionsUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+    "sources": {
+      "cases": "https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0",
+      "hearingsSchedule": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "geometry": [
+        "https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0"
+      ],
+      "flum": "https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1",
+      "agendas": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "parcelFallback": "https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"
+    }
+  },
+  "catalogOrder": 2,
+  "legacyRuntime": {
+    "mapOnHub": true,
+    "zoom": 10,
+    "bounds": [
+      -117.2,
+      43.15,
+      -116.3,
+      44
+    ],
+    "caseGeometry": {
+      "layers": [
+        "https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0"
+      ],
+      "where": "Status = 'Active' OR AppSubmitted >= date '2025-01-01' OR DecisionDate >= date '2025-01-01'",
+      "caseIdField": "PermitNum",
+      "fields": {
+        "type": "AppType",
+        "phase": "Status",
+        "status": "ApprovalStatus",
+        "title": "Description",
+        "parcel": "ACCOUNT"
+      },
+      "parcelFallback": {
+        "layerUrl": "https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0",
+        "matchField": "ACCOUNT",
+        "recordField": "ACCOUNT",
+        "ignored": []
+      }
+    },
+    "flum": {
+      "layerUrl": "https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1",
+      "categoryField": "FLU_ZONE_C",
+      "colorSource": "renderer",
+      "planName": "Canyon County 2030 Comprehensive Plan",
+      "label": "Canyon County 2030 adopted Future Land Use",
+      "adoptedDate": null,
+      "adoptionSource": "https://www.canyoncounty.id.gov/elected-officials/commissioners/development-services/dsd-gis/",
+      "dataNote": "Adopted Future Land Use layer. City plans and rural-residential overlays are separate; this designation alone does not establish zoning compatibility.",
+      "simplifyTolerance": 0.00002
+    },
+    "addressPoints": {
+      "layerUrl": "",
+      "addressField": "",
+      "where": "1=1",
+      "suffix": "ID"
+    },
+    "stages": {
+      "phase": {
+        "Review": "In review",
+        "Board": "Council/Board",
+        "Hearing Examiner": "P&Z",
+        "PZ Commission": "P&Z",
+        "Decided": "Decided"
+      },
+      "status": {
+        "Approved": "Decided",
+        "Denied": "Decided",
+        "In Progress": "In review"
+      },
+      "recorded": {
+        "phases": [],
+        "statuses": []
+      }
+    },
+    "caseTypes": {
+      "SD": "Subdivision",
+      "SPP": "Preliminary plat",
+      "SPF": "Final plat",
+      "SPS": "Short plat",
+      "CMA": "Comprehensive plan map amendment",
+      "CTA": "Comprehensive plan text amendment",
+      "CR": "Conditional rezone",
+      "CU": "Conditional use permit",
+      "RZ": "Rezone",
+      "ZV": "Variance",
+      "OR": "Ordinance amendment",
+      "AD": "Administrative request",
+      "ADR": "Administrative request",
+      "RD": "Land division",
+      "PH": "Planning request"
+    },
+    "citywideTypes": []
+  },
+  "recordPageHosts": [
+    "landhearingsagenda.canyoncounty.id.gov",
+    "agenda.canyoncounty.id.gov"
+  ]
+}

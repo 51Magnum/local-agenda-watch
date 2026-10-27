@@ -1,0 +1,11 @@
+"use client";
+import ProjectPane from "@/app/components/maps/project-pane";
+import type {PaneData} from "@/lib/maps/project-questions";
+import {useState} from "react";
+import PreviewMap from "./preview-map";
+import "@/app/components/maps/map-home.css";
+export default function PreviewProject({data}:{data:PaneData}){
+ const [sourceUrl,setSource]=useState(data.documents?.[0]?.url??""),[status,setStatus]=useState("");
+ const change=async(command:string)=>{setStatus("Reviewing…");try{const r=await fetch("/admin/jurisdictions/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({command,areaId:data.area.id,caseId:data.item.id,sourceUrl})}),j=await r.json();setStatus(r.ok?"Saved. Reload this preview to see the change.":j.error);}catch{setStatus("Image operation could not finish; check the saved result.");}};
+ return <><ProjectPane data={data} page preview onClose={()=>{}} onWatch={()=>{}} onImage={v=>window.open(v.fullSizeUrl,"_blank","noopener,noreferrer")}/>{!data.item.visual&&<section className="mt-6"><h2 className="text-xl font-semibold">Location context</h2><p>No reviewed document image yet. This map provides location context; it does not show a proposed design.{!data.item.geometry&&" A project footprint has not been verified."}</p><PreviewMap boundaries={{type:"FeatureCollection",features:[]}} cases={{type:"FeatureCollection",features:data.item.geometry?[{type:"Feature",geometry:data.item.geometry,properties:{areaId:data.area.id,caseId:data.item.id,color:"#334155"}}]:[]}}/></section>}<section className="mt-6 space-y-3 rounded border p-4"><h2 className="text-xl font-semibold">Admin image review</h2><label>Official case document <select value={sourceUrl} onChange={e=>setSource(e.target.value)} className="block max-w-full rounded border p-2">{data.documents?.map(d=><option key={d.url} value={d.url}>{d.label}</option>)}</select></label><div className="flex gap-3"><button className="min-h-11 rounded border px-4" disabled={!sourceUrl} onClick={()=>change("replace-image")}>Review image from selected document</button><button className="min-h-11 rounded border px-4" onClick={()=>change("remove-image")}>Remove preview image</button></div><p role="status">{status}</p></section></>;
+}

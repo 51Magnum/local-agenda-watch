@@ -1,13 +1,7 @@
-import {CASE_EVIDENCE} from "@/lib/case-evidence";
+import {publicJurisdictions} from "../jurisdictions/registry";
+import {registryBoundaries} from "../jurisdictions/generated";
 import { recordPageOnHosts, type RecordPageContext } from "./record-links";
-import {TIMELINE_DOCUMENT_RULES} from "./timeline-rules";
-import {IDAHO_CITIES} from "./idaho-cities";
 import type { MultiPolygon, Polygon } from "geojson";
-import nampaBoundary from "./boundaries/nampa.json";
-import nampaImpact from "./boundaries/nampa-impact.json";
-import canyonBoundary from "./boundaries/canyon-county.json";
-import meridianBoundary from "./boundaries/meridian.json";
-import canyonJurisdiction from "./boundaries/canyon-county-jurisdiction.json";
 export type AreaDefinition = {
   id:string; slug:string; country:string; countryName:string; state:string; stateName:string; stateAbbreviation:string;
   name:string; type:"city"|"county"; status:"live"|"coming soon"; timezone:string;
@@ -25,34 +19,14 @@ export type AreaDefinition = {
   };
   sources:{cases?:string;hearingsSchedule?:string;geometry?:string[];flum?:string;agendas?:string;addressPoints?:string;parcelFallback?:string};
 };
-const cityData="https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer";
-const hearings="https://utility.arcgis.com/usrsvcs/servers/757f490738bd43da906508745cf92337/rest/services/Public/PZ_Hearings/MapServer";
-export const AREAS:Record<string,AreaDefinition>={
-
-  nampa:{residentAccess:{excludedHosts:["www.cityofnampa.us","cityofnampa.us","nampaid-energovpub.tylerhost.net"],archiveUrl:"https://nampa.primegov.com/public/portal",commentUrl:"https://nampa.primegov.com/public/portal",caseRecords:Object.fromEntries(Object.entries(CASE_EVIDENCE).map(([id,e])=>[id,[e.sourceUrl]]))},timeline:{adapter:"energov-primegov",hosts:["nampa.primegov.com","www.cityofnampa.us","id-nampa2.civicplus.com","nampaid-energovpub.tylerhost.net"],storage:[{host:"pgwest.blob.core.windows.net",pathPrefix:"/us/id/nampa/"}],documentRules:TIMELINE_DOCUMENT_RULES},id:"nampa",slug:"nampa",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Nampa",type:"city",status:"live",timezone:"America/Denver",center:[-116.5635,43.5739],boundary:nampaBoundary as MultiPolygon,coverageBoundary:nampaImpact as MultiPolygon,boundaryLabel:"Official city limits",boundarySources:[cityData+"/6",cityData+"/12"],
-    addressSearch:{addressField:"SiteAddres",where:"UPPER(SiteCity) = 'NAMPA' AND SiteState = 'ID'",suffix:"Nampa, ID"},
-    flumCompatibility:{
-      zoningCodePattern:"\\b(?:RS\\s*\\d+(?:\\.\\d+)?|RML|RMH|RD|RA|RP|BN|BC|GB[12]?|IP|IL|IH|HC|U)\\b",
-      categories:{
-        "Medium Density Residential":{districts:["RS4","RS6","RS7","RS8.5"],sourceUrl:"https://www.cityofnampa.us/DocumentCenter/View/13801/3-Medium-Density-Residential"},
-        "Industrial":{districts:["IL","IP","IH"],sourceUrl:"https://www.cityofnampa.us/DocumentCenter/View/13805/7-Industrial"},
-      },
-    },
-    bodies:{planning:{id:"P&Z",label:"Planning & Zoning Commission",shortLabel:"P&Z",stageLabel:"P&Z hearing"},decision:{id:"City Council",label:"City Council",shortLabel:"Council",stageLabel:"Council hearing"}},
-    meetingRules:{defaultHearingTime:"18:00",decisionCommentDeadlineHour:12,agendaNotice:"Agenda usually posted the Thursday before the meeting",location:"Nampa City Hall, Council Chambers, 411 3rd St S, Nampa, ID",commentInstructions:"Once the agenda is posted, use the comment bubble in the meeting portal to send written comments, or the microphone button to sign up to speak. Include the relevant case number."},
-    commentInstructionsUrl:"https://www.cityofnampa.us/1616/Public-Comment",sources:{cases:hearings,hearingsSchedule:"https://www.cityofnampa.us/1433/Upcoming-Public-Hearings",geometry:[hearings+"/0",hearings+"/1"],flum:cityData+"/30",agendas:"https://nampa.primegov.com/public/portal",addressPoints:"https://utility.arcgis.com/usrsvcs/servers/2cb0c34984644eb19ebeb3f8a17b7dc9/rest/services/Public/CityInformation_Public/MapServer/35",parcelFallback:"https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"}},
-  meridian:{residentAccess:{excludedHosts:["weblink.meridiancity.org","apps.meridiancity.org","meridiancity.org","www.meridiancity.org"],archiveUrl:"https://meetings.municode.com/PublishPage/index?cid=MERIDIANID&p=1&ppid=add14759-167d-4b0f-bec9-c9affe54bcaf",commentUrl:"https://meetings.municode.com/PublishPage/index?cid=MERIDIANID&p=1&ppid=add14759-167d-4b0f-bec9-c9affe54bcaf"},timeline:{adapter:"meridian",hosts:["weblink.meridiancity.org","apps.meridiancity.org","meetings.municode.com","meridiancity.org","www.meridiancity.org","gis.meridiancity.org"],storage:[{host:"mccmeetings.blob.core.usgovcloudapi.net",pathPrefix:"/meridianid-pubu/"}],documentRules:TIMELINE_DOCUMENT_RULES},id:"meridian",slug:"meridian",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Meridian",type:"city",status:"live",timezone:"America/Denver",center:[-116.3915,43.6121],boundary:meridianBoundary as Polygon|MultiPolygon,boundaryLabel:"Official city limits",boundarySources:["https://gis.meridiancity.org/server/rest/services/CD/Boundaries_places_Webservice/MapServer/2"],coverageNote:"City planning applications. Nearby unincorporated areas may have a different planning authority.",
-    bodies:{planning:{id:"P&Z",label:"Planning & Zoning Commission",shortLabel:"P&Z",stageLabel:"P&Z hearing"},decision:{id:"City Council",label:"City Council",shortLabel:"Council",stageLabel:"Council hearing"}},
-    meetingRules:{agendaNotice:"Check the official agenda archive for the meeting agenda and packet.",location:"City Council Chambers, 33 East Broadway Avenue, Meridian, Idaho",commentInstructions:"Follow the City's public-meeting instructions to submit written testimony or sign up to speak. Confirm the deadline for your hearing; the noon exhibit deadline is separate from written testimony."},commentInstructionsUrl:"https://meridiancity.org/government/public-meeting-information/",
-    recordPage:context=>recordPageOnHosts(context,["weblink.meridiancity.org","apps.meridiancity.org","meetings.municode.com"]),
-    sources:{cases:"https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6",geometry:["https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6"],flum:"https://gis.meridiancity.org/server/rest/services/CD/FLUM_Webservice/MapServer/15",hearingsSchedule:"https://apps.meridiancity.org/CLERKSCONTENT/pubhearnot_detail.aspx",agendas:"https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",parcelFallback:"https://gis.meridiancity.org/server/rest/services/CD/Parcel_Layers/MapServer/0"}},
-  "canyon-county":{residentAccess:{excludedHosts:[],archiveUrl:"https://landhearingsagenda.canyoncounty.id.gov/Landing"},timeline:{adapter:"county",hosts:["agenda.canyoncounty.id.gov","landhearingsagenda.canyoncounty.id.gov","www.canyoncounty.id.gov","canyoncounty.id.gov","docs.canyoncounty.id.gov","maps.canyonco.org"],documentRules:TIMELINE_DOCUMENT_RULES},id:"canyon-county",slug:"canyon-county",country:"us",countryName:"United States",state:"id",stateName:"Idaho",stateAbbreviation:"ID",name:"Canyon County",type:"county",status:"live",timezone:"America/Denver",center:[-116.7,43.63],boundary:canyonBoundary as MultiPolygon,coverageBoundary:canyonJurisdiction as MultiPolygon,boundaryLabel:"Unincorporated Canyon County",coverageNote:"County land-use cases. Incorporated cities have separate planning authorities; a postal city does not determine jurisdiction.",boundarySources:["https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/1","https://maps.canyonco.org/arcgisserver/rest/services/General/CITY_LIMITS_PUBLIC/FeatureServer/0"],
-    bodies:{planning:{id:"P&Z",label:"Planning & Zoning Commission",shortLabel:"Planning / Examiner",stageLabel:"P&Z hearing"},decision:{id:"Board of County Commissioners",label:"Board of County Commissioners",shortLabel:"Board",stageLabel:"Board hearing"},additional:[{id:"Hearing Examiner",label:"Hearing Examiner",shortLabel:"Examiner",stageLabel:"Hearing Examiner"}]},
-    meetingRules:{agendaNotice:"Staff reports are published seven days before the scheduled hearing.",commentInstructions:"Use the case-specific comment deadline and contact shown in the County's hearing record. Confirm how to submit comments and the hearing location in the published notice."},commentInstructionsUrl:"https://landhearingsagenda.canyoncounty.id.gov/Landing",
-    recordPage:context=>recordPageOnHosts(context,["landhearingsagenda.canyoncounty.id.gov","agenda.canyoncounty.id.gov"]),
-    sources:{cases:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0",hearingsSchedule:"https://landhearingsagenda.canyoncounty.id.gov/Landing",geometry:["https://maps.canyonco.org/arcgisserver/rest/services/DSD/DSD_PLANNING_ZONING_APP_TRACKER/FeatureServer/0"],flum:"https://maps.canyonco.org/arcgisserver/rest/services/DSD/Future_Land_Use_2030_Adopted/MapServer/1",agendas:"https://landhearingsagenda.canyoncounty.id.gov/Landing",parcelFallback:"https://maps.canyonco.org/arcgisserver/rest/services/Assessor/CCPublicTaxparcels/MapServer/0"}},
-  ...IDAHO_CITIES,
-};
+export const AREAS:Record<string,AreaDefinition>=Object.fromEntries(publicJurisdictions().map(d=>{
+ const boundary=registryBoundaries[d.id+":boundary"] as AreaDefinition["boundary"]|undefined;
+ if(!boundary)throw Error("Published jurisdiction has no verified boundary cache: "+d.id);
+ const hosts=d.recordPageHosts;
+ return [d.id,{...d.area,id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.legacyPublic?"America/Denver":d.timezone,boundary,
+ ...(registryBoundaries[d.id+":coverageBoundary"]?{coverageBoundary:registryBoundaries[d.id+":coverageBoundary"] as AreaDefinition["boundary"]}:{}),
+ ...(hosts?{recordPage:(context:RecordPageContext)=>recordPageOnHosts(context,hosts)}:{})}];
+}));
 export const FEATURED_AREA_ID="nampa";
 export function getArea(id:string){return Object.hasOwn(AREAS,id)?AREAS[id]:undefined;}
 export function findArea(country:string,state:string,slug:string){return Object.values(AREAS).find(a=>a.country===country&&a.state===state&&a.slug===slug);}
