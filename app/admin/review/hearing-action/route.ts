@@ -10,7 +10,10 @@ export async function POST(request:Request) {
     const form=await request.formData(),area=String(form.get("area")??""),id=String(form.get("case")??""),hearing=String(form.get("hearing")??"");
     if(!/^[A-Z0-9-]{2,80}$/.test(id)||!/^.{1,80}:\d{4}-\d{2}-\d{2}$/.test(hearing))throw Error("Invalid hearing reference");
     const override=validateHearingOverride(area,form);
-    for(const field of ["meeting_url","agenda_url","packet_url","comment_deadline_source_url","speak_signup_url"] as const){
+    // Guidance and participation URLs are restricted to official hosts by the
+    // validator. CivicPlus blocks server requests to those public pages; that
+    // must not prevent correcting a separately verified meeting/document link.
+    for(const field of ["meeting_url","agenda_url","packet_url"] as const){
       if(typeof override[field]!=="string")continue;
       const response=await fetch(override[field],{method:"GET",signal:AbortSignal.timeout(10000),cache:"no-store"});
       if(!response.ok){await response.body?.cancel();throw Error("An official link could not be verified; no override was saved");}

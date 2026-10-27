@@ -27,3 +27,5 @@ For Braeburn's November 2, 2026 hearing, the staff-report deadline is October 28
 `/admin/review` lists matched meetings, links, timestamps and failure counts. Load an area/case to review an upcoming hearing before its first sweep. The manual form validates official HTTPS hosts, checks links, requires deadline provenance, and saves an override for that exact hearing. Empty manual fields remove a link; using automatic matching clears the override and resets retries.
 
 Digests and project-follow blocks include the same navigation and sourced deadlines when a hearing is within fourteen local calendar days. Agenda/packet/item changes generate explicit diff lines. Routine link-check timestamps do not change subscriber snapshot fingerprints. Email delivery remains paused; previews and tests do not send to subscribers.
+
+Manual overrides verify meeting, agenda and packet responses. Guidance and speaker-sign-up URLs must use an allowed official host; they are not rejected when CivicPlus blocks automated requests. Such a block does not prove that a resident-facing link is dead.
