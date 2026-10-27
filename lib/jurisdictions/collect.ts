@@ -8,6 +8,7 @@ import type {CaseGeometry} from "../maps/types";
 import {combinePolygons,polygonGeometry} from "../maps/gis";
 import {readStaging,saveStaging,type StagingSnapshot} from "./store";
 import {matchSignupEvents,parseTentativeTable} from "./participation-sources";
+import {matchApplications} from "./matching";
 import {discoverStagingLibraries} from "./libraries";
 export function sourceHttp(areaId:string){const d=jurisdiction(areaId);if(!d)throw Error("Unknown jurisdiction");const urls=[d.boundary.url,...Object.values(d.gis),...d.agenda.map(a=>String(a.params.baseUrl)),String(d.applications.params.url??""),...(d.area.timeline?.hosts??[]).map(h=>"https://"+h),d.participation.testimonySignupUrl??"",d.clipRule?.layer.url??""];return new SourceHttp({allowedHosts:[...new Set(urls.filter(Boolean).map(u=>new URL(u!).hostname))],maxBytes:d.documents.maxBytes});}
 export async function collectJurisdiction(areaId:string,options:{days?:number;write?:boolean;budgetMs?:number;http?:SourceHttp;now?:Date}={}){
@@ -15,7 +16,7 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  const now=options.now??new Date(),days=options.days??90;if(!Number.isInteger(days)||days<1||days>90)throw Error("Backfill window must be between 1 and 90 days");
  const range={start:new Date(now.getTime()-days*86400000).toISOString().slice(0,10),end:new Date(now.getTime()+45*86400000).toISOString().slice(0,10)},http=options.http??sourceHttp(areaId),deadline=Date.now()+(options.budgetMs??220000),old=await readStaging(areaId);
  const snapshot:StagingSnapshot={areaId,launchStatus:d.launchStatus,checkedAt:now.toISOString(),range,applications:[],meetings:(old?.meetings??[]).filter(m=>m.date>=range.start&&m.date<=range.end),pendingMeetings:[],health:http.checks,skipped:[],complete:true,aiSamples:old?.aiSamples??[],visuals:old?.visuals,runtime:old?.runtime};
- try{snapshot.applications=await applicationAdapter(d,http).listApplications(d.legacyPublic?undefined:range.start);}catch(e){snapshot.complete=false;snapshot.applications=old?.applications??[];if(!(e instanceof SourceFailure))snapshot.skipped.push({url:String(d.applications.params.url),reason:String(e)});}
+ try{snapshot.applications=await applicationAdapter(d,http).listApplications();}catch(e){snapshot.complete=false;snapshot.applications=old?.applications??[];if(!(e instanceof SourceFailure))snapshot.skipped.push({url:String(d.applications.params.url),reason:String(e)});}
  const sources=[...d.agenda].sort((a,b)=>Number((old?.pendingMeetings??[]).some(u=>u.startsWith(String(b.params.baseUrl))))-Number((old?.pendingMeetings??[]).some(u=>u.startsWith(String(a.params.baseUrl)))));
  for(const source of sources){if(Date.now()>deadline-25000){snapshot.complete=false;snapshot.pendingMeetings!.push(...(old?.pendingMeetings??[]));break;}const adapter=agendaAdapter(d,source,http);
   try{const meetings=await adapter.listMeetings(range);const ordered=meetings.sort((a,b)=>Number((old?.pendingMeetings??[]).includes(b.meetingPageUrl))-Number((old?.pendingMeetings??[]).includes(a.meetingPageUrl))||b.date.localeCompare(a.date));for(const [index,m]of ordered.entries()){if(Date.now()>deadline-25000){snapshot.complete=false;snapshot.pendingMeetings!.push(...ordered.slice(index).map(m=>m.meetingPageUrl));break;}
@@ -34,6 +35,9 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  }catch(e){snapshot.complete=false;snapshot.boundary=old?.boundary;snapshot.coverageBoundary=old?.coverageBoundary;if(!(e instanceof SourceFailure))snapshot.skipped.push({url:d.boundary.url,reason:String(e)});}
  // County public eligibility is controlled by the clipped coverage, never by a postal city.
  if(d.clipRule&&snapshot.coverageBoundary)snapshot.applications=snapshot.applications.filter(a=>!a.geometry||!polygonGeometry(a.geometry)||booleanIntersects(feature(a.geometry),feature(snapshot.coverageBoundary!)));
+ for(const meeting of snapshot.meetings)for(const item of meeting.items)item.matchedApplications=matchApplications(item,snapshot.applications);
+ const linked=new Set(snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.matchedApplications?.map(a=>a.recordId)??[])));
+ if(!d.legacyPublic)snapshot.applications=snapshot.applications.filter(a=>!a.received||a.received>=range.start||linked.has(a.recordId));
  const allCases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.caseNumbers=item.caseNumbers.filter(id=>allCases.has(id)||d.caseNumberPatterns.some(p=>new RegExp(p,"i").test(id)));
  if(options.write)await saveStaging(snapshot);return snapshot;
