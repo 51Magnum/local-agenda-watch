@@ -3,7 +3,7 @@
   "timezone": "America/Boise",
   "enabled": true,
   "launchStatus": "admin_only",
-  "sourcesVerifiedAt": null,
+  "sourcesVerifiedAt": "2026-10-27",
   "documents": {
     "maxBytes": 45000000,
     "maxPages": 80,
@@ -202,11 +202,12 @@
     "perDocMaxTokens": 60000
   },
   "notes": [
-    "Sources supplied in the owner brief; live and Vercel-runtime validation pending.",
+    "Listings, GIS, participation endpoints and per-item documents checked from local ingestion and a Git-sourced Vercel preview on 2026-10-27. Production runtime is not verified.",
     "eSCRIBE FileStream may return a Cloudflare challenge; no bypass.",
     "Council transitions 2027-01-12; per-body migration dates require verification.",
     "An item's actual decision/recommendation role must come from its source, never the body default.",
-    "The active application inventory has no received-date field; CRCompleteDate must not be presented as a filing date. The GIS layer is a table; parcel geometry requires a verified join. HPC transition date is not established; collect both sources and deduplicate."
+    "The active application inventory has no received-date field; CRCompleteDate must not be presented as a filing date. The GIS layer is a table; parcel geometry requires a verified join. HPC transition date is not established; collect both sources and deduplicate.",
+    "eSCRIBE per-item PDFs returned Cloudflare HTTP 403 in the Git-built Vercel preview and local ingestion runtime. iQM2 PDFs downloaded successfully. Keep blocked documents queued; do not bypass challenges. Active-only inventory cannot match every historical hearing case."
   ],
   "area": {
     "country": "us",
