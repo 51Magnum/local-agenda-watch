@@ -215,22 +215,6 @@
   },
   "catalogOrder": 0,
   "legacyRuntime": {
-    "reviewedApplications": {
-      "DAMO-00068-2026": {
-        "headline": "Spring Shores Commons development agreement changes",
-        "explanation": "A request to change the development agreement for Spring Shores Commons, alongside a rezone and preliminary subdivision plat. The report describes an original concept of five detached homes, 63 attached homes, one commercial lot, and seven common lots.",
-        "page": 1,
-        "sourceDate": "2026-08-17",
-        "reportUrl": "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=692e24e4-3deb-43d0-8609-530cf87e180c"
-      },
-      "ANN-00368-2026": {
-        "headline": "Annex 148.52 acres for existing concrete operations",
-        "explanation": "Americrete Land Holding and Triple Crown Development want to bring an existing concrete plant and gravel pit into Nampa with light-industrial zoning.",
-        "page": 1,
-        "sourceDate": "2026-09-15",
-        "reportUrl": "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=2dfe2f93-94c2-465e-b8aa-70833bc86e88"
-      }
-    },
     "mapOnHub": true,
     "zoom": 11,
     "bounds": [
@@ -322,36 +306,6 @@
     "citywideTypes": [
       "ZTA",
       "CTA"
-    ],
-    "caseVisuals": {
-      "ANN-00371-2026": {
-        "src": "/us/id/nampa/braeburn-concept-preview.webp",
-        "fullSizeUrl": "/us/id/nampa/toll-brothers-concept-plan.webp",
-        "alt": "Detail of the developer concept for Braeburn Creek showing proposed lots, streets and shared spaces",
-        "label": "Developer concept · March 13, 2026",
-        "note": "Detail crop. Early concept; later submissions may differ.",
-        "sourceUrl": "/us/id/nampa/toll-brothers-concept-plan.png",
-        "kind": "proposal"
-      },
-      "SPP-00184-2026": {
-        "src": "/us/id/nampa/braeburn-concept-preview.webp",
-        "fullSizeUrl": "/us/id/nampa/toll-brothers-concept-plan.webp",
-        "alt": "Detail of the developer concept for Braeburn Creek showing proposed lots, streets and shared spaces",
-        "label": "Developer concept · March 13, 2026",
-        "note": "Detail crop. Early concept; later submissions may differ.",
-        "sourceUrl": "/us/id/nampa/toll-brothers-concept-plan.png",
-        "kind": "proposal"
-      },
-      "ANN-00369-2026": {
-        "src": "/us/id/nampa/ann-00369-2026/zoning-map.webp",
-        "fullSizeUrl": "/us/id/nampa/ann-00369-2026/zoning-map.webp",
-        "alt": "Official zoning exhibit showing the Northside Logistics Center parcel marked Project Location on Northside Boulevard",
-        "label": "Zoning map · staff report",
-        "note": "Planning context, not a proposed site layout.",
-        "sourceUrl": "https://nampa.primegov.com/api/compilemeetingattachmenthistory/historyattachment/?historyId=cace2bcc-e1c6-4af8-b039-15eb63c021ab#page=15",
-        "kind": "context"
-      }
-    },
-    "recordClient": {}
+    ]
   }
 }

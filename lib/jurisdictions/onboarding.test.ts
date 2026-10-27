@@ -18,6 +18,7 @@ import {caseNumbers} from "./adapters/common";
 import {arcgisAdapter} from "./adapters/arcgis";
 import {createJurisdictionBudget,withJurisdictionAi} from "./ai-budget";
 import {structuredResponse} from "../timeline/extract";
+import {JURISDICTIONS} from "../maps/jurisdictions";
 const fixture=(name:string)=>readFileSync(path.join(__dirname,"fixtures",name),"utf8");
 afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();vi.restoreAllMocks();});
 it("validates every definition and keeps staging areas out of the public registry",()=>{
@@ -29,6 +30,7 @@ it("validates every definition and keeps staging areas out of the public registr
  expect(()=>validateJurisdictions(entries)).toThrow("recorded approval");
 });
 it("preserves the original seven area definitions and ordering",()=>{
+ expect(typeof JURISDICTIONS.nampa.recordClient?.getPlan).toBe("function");
  const expected=JSON.parse(fixture("legacy-area-manifest.json"));
  const canonical=(v:unknown):unknown=>Array.isArray(v)?v.map(canonical):v&&typeof v==="object"?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,canonical(v)])):v;
  expect(Object.keys(AREAS)).toEqual(expected.order);

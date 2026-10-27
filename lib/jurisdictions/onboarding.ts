@@ -13,6 +13,7 @@ import {extractNativePdfChunk} from "../timeline/extract";
 import {getEvidenceStore} from "../timeline/store";
 import type {PageText,SourceDocument} from "../timeline/types";
 import {documentPreview} from "../maps/visuals";
+import {ocrSamplePages} from "./pdf-sample";
 export async function validateEndpoints(areaId:string){
  const d=jurisdiction(areaId);if(!d)throw Error("Unknown jurisdiction");const http=sourceHttp(areaId),gis=arcgisAdapter(http),now=new Date(),range={start:now.toISOString().slice(0,10),end:new Date(now.getTime()+45*86400000).toISOString().slice(0,10)};
  for(const url of [...new Set([d.boundary.url,...Object.values(d.gis)])]){try{await gis.metadata(url!);}catch{}}
@@ -31,10 +32,11 @@ export async function sampleAi(areaId:string,options:{n?:number;maxUsd?:number;b
  const candidates=snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.attachments.filter(a=>a.kind==="staff_report"&&allowedAttachment(a,d)).map(a=>({meeting:m,item:i,attachment:a}))));
  for(const candidate of candidates){if(samples.length>=n||attempted>=n||Date.now()>deadline-50000)break;const {meeting,item,attachment}=candidate,caseId=item.caseNumbers[0];if(!caseId)continue;
   try{const response=await http.request(attachment.url,{},d.documents.maxBytes),bytes=response.bytes,hash=createHash("sha256").update(bytes).digest("hex");if(seen.has(hash))continue;seen.add(hash);attempted++;
-   const chunk=await extractNativePdfChunk(bytes.slice(),{deadline:Math.min(deadline-40000,Date.now()+35000)});const pages:PageText[]=[];let chars=0;for(const p of chunk.pages){if(pages.length>=d.documents.maxPages||chars+p.text.length>20000)break;pages.push(p);chars+=p.text.length;}
-   if(!pages.some(p=>p.text.trim().length>30)){snapshot.skipped.push({url:attachment.url,reason:"AI sample deferred: native text unavailable; bounded OCR is required"});continue;}
+   const chunk=await extractNativePdfChunk(bytes.slice(),{deadline:Math.min(deadline-40000,Date.now()+25000),maxPages:Math.min(12,d.documents.maxPages)});const pages:PageText[]=[];let chars=0;for(const p of chunk.pages.filter(p=>p.text.trim().length>30)){if(pages.length>=d.documents.maxPages||chars+p.text.length>20000)break;pages.push(p);chars+=p.text.length;}
+   if(!pages.length){pages.push(...await withJurisdictionAi({areaId,mode:"backfill",sample:{id,maxUsd},documentHash:hash},()=>ocrSamplePages(bytes,[1,2],Math.min(deadline-50000,Date.now()+65000))));}
+   if(!pages.some(p=>p.text.trim().length>30)){snapshot.skipped.push({url:attachment.url,reason:"AI sample deferred: first bounded pages have no usable text; remaining pages are deferred"});continue;}
    const doc:SourceDocument={areaId,url:attachment.url,title:attachment.title,caseIds:[caseId],kind:"staff-report",meeting:{body:d.hearingBodies.find(b=>b.key===meeting.body)?.name??meeting.body,date:meeting.date,isHearing:true}};
-   const run=await withJurisdictionAi({areaId,mode:"backfill",sample:{id,maxUsd},documentHash:hash},()=>ingestDocuments(store,[doc],{download:async()=>bytes,text:async()=>pages,ocr:async()=>{throw Error("AI work deferred: sample uses bounded native pages only");},budgetMs:Math.min(90000,deadline-Date.now())}));
+   const run=await withJurisdictionAi({areaId,mode:"backfill",sample:{id,maxUsd},documentHash:hash},()=>ingestDocuments(store,[doc],{download:async()=>bytes,text:async()=>pages,ocr:async()=>pages,budgetMs:Math.min(90000,deadline-Date.now())}));
    const state=store.readCase?await store.readCase(areaId,[caseId]):await store.read();const fields=Object.values(state.fields).filter(f=>f.areaId===areaId&&f.caseId===caseId&&f.documentHash===hash).map(f=>({key:f.key,value:f.value,page:f.page,sourceUrl:f.sourceUrl,status:f.status}));
    if(fields.length)samples.push({caseId,hash,sourceUrl:attachment.url,pageCount:pages.length,fields,costUsd:run.costUsd??0,tokens:run.usage?.reduce((n,u)=>n+u.totalTokens,0)??0});
    if(Date.now()<deadline-25000){try{const visual=await withJurisdictionAi({areaId,mode:"backfill",sample:{id,maxUsd},documentHash:hash},()=>documentPreview(areaId,bytes,attachment.title,attachment.url,Math.min(deadline-5000,Date.now()+20000)));if(visual)(snapshot.visuals??={})[caseId]={...visual,label:"Image from "+attachment.title+" · "+visual.label,note:visual.kind==="context"?"Location/context image, not the proposed design.":undefined};}catch(e){snapshot.skipped.push({url:attachment.url,reason:"Image review deferred: "+String(e)});}}
