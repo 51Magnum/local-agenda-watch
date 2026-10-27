@@ -50,6 +50,21 @@ export default function ProjectPane({
     (data.area.timezone === "America/Denver"
       ? " Mountain Time"
       : " " + data.area.timezone);
+  const impactRows = data.impacts.map((f, index) => (
+    <div key={f.label + ":" + index}>
+      <h3>{f.label}</h3>
+      <p>
+        {f.value}{" "}
+        {f.url && (
+          <a href={f.url} target="_blank" rel="noreferrer" title={f.sourceTitle} aria-label={"Official source for " + f.label + (f.sourcePage ? ", page " + f.sourcePage : "")}>
+            {f.sourcePage ? "Source · p. " + f.sourcePage : "Source"}
+          </a>
+        )}
+      </p>
+    </div>
+  ));
+  const visibleImpacts = page ? impactRows.length : 2;
+  const visibleConditions = page ? 5 : 2;
   return (
     <Container
       ref={ref}
@@ -181,34 +196,28 @@ export default function ProjectPane({
           <section className="law-pane-section">
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[4]}</h2>
             {!data.impacts.length && !data.conditions.length && (
-              <p>No verified impact details are available yet.</p>
+              <p>No verified impact details are available in the records reviewed.</p>
             )}
-            {data.impacts.map((f) => (
-              <div key={f.label}>
-                <h3>{f.label}</h3>
-                <p>
-                  {f.value}{" "}
-                  {f.url && (
-                    <a href={f.url} target="_blank" rel="noreferrer">
-                      Source
-                    </a>
-                  )}
-                </p>
-              </div>
-            ))}
+            {impactRows.slice(0, visibleImpacts)}
+            {impactRows.length > visibleImpacts && (
+              <details key={data.area.id + ":" + item.id + ":impacts"}>
+                <summary>More documented details ({impactRows.length - visibleImpacts})</summary>
+                {impactRows.slice(visibleImpacts)}
+              </details>
+            )}
             {data.conditions.length > 0 && (
               <>
                 <h3>Conditions</h3>{data.conditionsSource&&<a href={data.conditionsSource} target="_blank" rel="noreferrer">Source conditions</a>}
                 <ul>
-                  {data.conditions.slice(0, 5).map((c, i) => (
+                  {data.conditions.slice(0, visibleConditions).map((c, i) => (
                     <li key={i}>{c}</li>
                   ))}
                 </ul>
-                {data.conditions.length > 5 && (
+                {data.conditions.length > visibleConditions && (
                   <details>
-                    <summary>Show all conditions</summary>
+                    <summary>More conditions ({data.conditions.length - visibleConditions})</summary>
                     <ul>
-                      {data.conditions.slice(5).map((c, i) => (
+                      {data.conditions.slice(visibleConditions).map((c, i) => (
                         <li key={i}>{c}</li>
                       ))}
                     </ul>

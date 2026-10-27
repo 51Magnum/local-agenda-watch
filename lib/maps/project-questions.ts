@@ -10,6 +10,7 @@ export const RESIDENT_QUESTIONS = [
   "How it affects me",
   "How can I act",
 ] as const;
+export type ProjectImpact = { label: string; value: string; url?: string; sourceTitle?: string; sourcePage?: number };
 export type PaneData = {
   summarySource?:string;
   documents?: {label:string;url:string;hash?:string}[];
@@ -32,7 +33,7 @@ export type PaneData = {
   where?: string;
   history: { label: string; source?: string }[];
   next?: ProjectHearing & { role: string };
-  impacts: { label: string; value: string; url?: string }[];
+  impacts: ProjectImpact[];
   conditions: string[];
   conditionsSource?:string;
   commentUrl?: string;
@@ -71,6 +72,7 @@ export function questionEvidence(
           {
             label,
             value: f.value,
+            sourcePage: f.page ?? undefined,
             url: f.sourceUrl + (f.page ? "#page=" + f.page : ""),
           },
         ]

@@ -43,3 +43,8 @@ it("keeps unchecked vote tallies out of compact source outcomes", () => {
     "Approved by Council, Oct 19",
   );
 });
+
+it("preserves attributed impact wording and the physical source page", () => {
+  const fields = [{ key: "trafficSummary", sourceKind: "staff-report", value: "The traffic study estimates 180 evening peak trips; final road requirements are pending.", sourceUrl: "https://city.example/report.pdf", page: 12, createdAt: "2026-10-27" }] as EvidenceField[];
+  expect(questionEvidence(fields, AREAS.nampa).impacts).toEqual([{ label: "Traffic", value: fields[0].value, url: "https://city.example/report.pdf#page=12", sourcePage: 12 }]);
+});
