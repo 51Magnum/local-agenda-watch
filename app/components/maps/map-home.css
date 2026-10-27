@@ -32,6 +32,12 @@ body:has(.law-map-home)>header,body:has(.law-map-home)>footer{display:none}
 .law-agenda-expected{font-size:13px;line-height:1.6}
 .law-hearing-details>small{display:block;margin-top:10px}
 .law-speaking-times summary{cursor:pointer;min-height:44px;display:flex;align-items:center;text-decoration:underline}
+.law-pane-next .law-hearing-details,.law-pane-next .law-hearing-details :is(p,a,strong,summary){font-size:14px;line-height:1.6}
+.law-pane-next .law-hearing-details p{margin:8px 0}
+.law-pane-next .law-hearing-details strong{font-weight:700}
+.law-hearing-participation{border-top:1px solid #c4ded9;margin-top:14px;padding-top:14px}
+.law-pane-next .law-hearing-participation .law-meeting-secondary{display:flex}
+.law-pane-next .law-hearing-participation .law-hearing-note{margin:0 0 8px}
 .law-watch-radius{display:grid;gap:8px;margin:18px 0;font-weight:600}
 .law-watch-radius small{font-weight:400;font-size:13px;line-height:1.5;color:#475569}
 .law-watch-radius select,.law-nearby-projects select{min-height:44px;padding:8px 12px;border:1px solid #64748b;border-radius:8px;background:#fff;color:#172326;margin:4px 8px}

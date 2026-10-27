@@ -9,14 +9,14 @@ export default function HearingNext({next,timezone}:Props) {
     <strong>{next.meeting_body??next.body}</strong>
     <p>{hearingDateTime(next.meeting_datetime??next.startsAt,timezone)}{next.time_subject_to_change?" · Subject to change":""}</p>
     {next.location&&!/^Location not confirmed/i.test(next.location)&&<p>{next.location}</p>}
-    <small>{next.role}</small>
+    <p className="law-hearing-note">{next.role}</p>
     {next.agenda_item_number&&<p><strong>Agenda item {next.agenda_item_number}</strong></p>}
     {action.url&&<a className="law-meeting-primary" href={action.url} target="_blank" rel="noreferrer">{action.label} ↗</a>}
     {action.packet&&<p><a className="law-meeting-secondary" href={action.packet} target="_blank" rel="noreferrer">Staff report / packet ↗</a></p>}
     {!action.agendaPublished&&next.agenda_expected_at&&expectedSource&&<p className="law-agenda-expected">Agenda expected about {day(next.agenda_expected_at)}. {next.agenda_expected_note} <a href={expectedSource} target="_blank" rel="noreferrer">Posting guidance</a></p>}
     {deadlines.map(deadline=><div key={deadline.label} className="law-hearing-deadline"><strong>{deadline.label}</strong><p>{hearingDateTime(deadline.at,timezone)}</p>{deadline.email&&<p>Email <a href={"mailto:"+deadline.email}>{deadline.email}</a>.</p>}<a href={deadline.source} target="_blank" rel="noreferrer">Deadline source ↗</a></div>)}
-    {publicMeetingUrl(next.speak_signup_url)&&<p><a className="law-meeting-secondary" href={next.speak_signup_url} target="_blank" rel="noreferrer">Speaker sign-up / meeting participation ↗</a>{next.speak_signup_note&&<small> {next.speak_signup_note}</small>}</p>}
+    {publicMeetingUrl(next.speak_signup_url)&&<div className="law-hearing-participation"><a className="law-meeting-secondary" href={next.speak_signup_url} target="_blank" rel="noreferrer">Speaker sign-up / meeting participation ↗</a>{next.speak_signup_note&&<p className="law-hearing-note">{next.speak_signup_note}</p>}</div>}
     {publicMeetingUrl(next.testimony_source_url)&&next.testimony_rules&&<details className="law-speaking-times"><summary>Speaking time limits</summary><p>{next.testimony_rules}</p><a href={next.testimony_source_url} target="_blank" rel="noreferrer">{next.testimony_source_label??"Speaking rules"} ↗</a></details>}
-    {next.last_checked_at&&<small>Meeting links checked {hearingDateTime(next.last_checked_at,timezone)}</small>}
+    {next.last_checked_at&&<p className="law-hearing-note">Meeting links checked {hearingDateTime(next.last_checked_at,timezone)}</p>}
   </div>;
 }
