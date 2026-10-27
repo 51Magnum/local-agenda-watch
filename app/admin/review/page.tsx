@@ -9,11 +9,12 @@ import { accuracyStats } from "@/lib/timeline/review";
 import { reconcileFields, verifyCandidate } from "@/lib/timeline/verification";
 import { DECISION_KEYS } from "@/lib/timeline/types";
 import { ReviewQueue } from "./queue";
+import HearingLinksReview from "./hearing-links";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Review case evidence", robots: { index: false, follow: false } };
 export default async function ReviewPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!authorizedReviewer((await headers()).get("authorization"))) return <main className="p-8">Review access requires the configured admin password.</main>;
-  await searchParams;
+  const params=await searchParams;
   const store=getEvidenceStore();
   let state: import("@/lib/timeline/types").EvidenceState;
   try { state = await store.read();
@@ -34,6 +35,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
   const stats=accuracyStats(state);
   return <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-10">
     <h1 className="text-3xl font-semibold">Review case evidence</h1>
+    <HearingLinksReview areaId={params.hearing_area} caseId={params.hearing_case}/>
     <p>Final decisions and vote tallies always need approval. Verified speaker counts and conditions can publish automatically. Review means confirming our summary, not approving a development.</p>
     <nav className="flex gap-4 text-sm underline"><Link href="/admin/images">Image privacy review</Link><Link href="/admin/signups">Signups &amp; coverage requests</Link></nav>
     {!process.env.OPENAI_API_KEY && <p role="status">Extraction is paused: OPENAI_API_KEY is not configured. Existing evidence can still be reviewed.</p>}

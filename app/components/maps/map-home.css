@@ -25,6 +25,13 @@ body:has(.law-map-home)>header,body:has(.law-map-home)>footer{display:none}
 .law-explorer-controls button[aria-pressed=true]{background:#0f766e;color:#fff}
 .law-clear-place{position:absolute;right:16px;bottom:120px;z-index:10;min-height:44px;padding:10px 14px;border:1px solid #0f766e;border-radius:9px;background:#fff;color:#134e4a;font-size:14px;font-weight:600;box-shadow:0 2px 8px #10252324}
 .dark .law-clear-place{background:#172326;color:#99f6e4;border-color:#5eead4}
+.law-meeting-primary{display:flex;align-items:center;justify-content:center;min-height:48px;background:#007c78!important;color:#fff!important;border-radius:9px;padding:10px 16px;margin-top:16px;font-size:15px;font-weight:700;text-decoration:none!important;text-align:center}
+.law-meeting-secondary{display:inline-flex;align-items:center;min-height:44px;padding:4px 0}
+.law-hearing-deadline{border-top:1px solid #c4ded9;margin-top:14px;padding-top:14px}
+.law-hearing-deadline p{margin:6px 0!important}
+.law-agenda-expected{font-size:13px;line-height:1.6}
+.law-hearing-details>small{display:block;margin-top:10px}
+.law-speaking-times summary{cursor:pointer;min-height:44px;display:flex;align-items:center;text-decoration:underline}
 .law-watch-radius{display:grid;gap:8px;margin:18px 0;font-weight:600}
 .law-watch-radius small{font-weight:400;font-size:13px;line-height:1.5;color:#475569}
 .law-watch-radius select,.law-nearby-projects select{min-height:44px;padding:8px 12px;border:1px solid #64748b;border-radius:8px;background:#fff;color:#172326;margin:4px 8px}

@@ -6,6 +6,7 @@ import type { PaneData } from "@/lib/maps/project-questions";
 import type { MapVisual } from "@/lib/maps/types";
 import { RESIDENT_QUESTIONS } from "@/lib/maps/project-questions";
 import AlertForm from "../alert-form";
+import HearingNext from "./hearing-next";
 export default function ProjectPane({
   data,
   onClose,
@@ -164,12 +165,7 @@ export default function ProjectPane({
           <section className="law-pane-next">
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[3]}</h2>
             {data.next ? (
-              <>
-                <strong>{hearingDateTime(data.next.startsAt,data.area.timezone)}</strong>
-                <p>{data.next.body}</p>
-                <p>{data.next.location}</p>
-                <small>{data.next.role}</small>
-              </>
+              <HearingNext next={data.next} timezone={data.area.timezone}/>
             ) : (
               <p>
                 {item.stage === "Decided"
@@ -223,12 +219,13 @@ export default function ProjectPane({
           </section>
           <section>
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[5]}</h2>
-            {!data.participationClosed && !data.expiredDeadlineMessage && data.next?.commentDeadline && (
+            {!data.participationClosed && !data.expiredDeadlineMessage && data.next?.commentDeadline && data.next.commentSourceUrl && (
               <p>
                 Comment deadline: {date(data.next.commentDeadline)}
                 {data.next.commentDeadline.length > 10
                   ? " · " + time(data.next.commentDeadline)
                   : ""}
+                {" "}<a href={data.next.commentSourceUrl} target="_blank" rel="noreferrer">Deadline source</a>
               </p>
             )}
             {data.participationClosed && <p>This case is closed. See the official record for the outcome and any published appeal information.</p>}

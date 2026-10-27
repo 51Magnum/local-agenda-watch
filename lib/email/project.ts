@@ -9,7 +9,7 @@ import { distance } from "@turf/turf";
 export type ProjectSnapshot = {
   version: 2; key: string; areaId: string; caseId: string; name: string; headline: string;
   where: string; jurisdiction: string; timezone: string; status: string; decisionDate?: string;
-  next?: { body: string; startsAt: string; location?: string; role: string; deadline?: string };
+  next?: { body: string; startsAt: string; location?: string; role: string; deadline?: string; deadlineSource?:string; meetingUrl?:string; agendaUrl?:string; packetUrl?:string; agendaItem?:string;staffDeadline?:string;staffDeadlineSource?:string };
   documents: { label: string; url: string; hash?:string }[]; history: string[];
   commentInstructions?:string;commentUrl?:string;
 };
@@ -44,7 +44,7 @@ export function emailProject(data: PaneData, previous?: ProjectSnapshot, place?:
     name:displayName(item.popup?.projectName??item.title),headline:displayName(item.popup?.headline??item.title),
     where:safe.where??"Location not yet verified",jurisdiction:data.area.name,timezone:data.area.timezone,
     status:statusCopy(item.recordStatus??item.stage),decisionDate:item.decisionDate,
-    next:next?{body:next.body,startsAt:next.startsAt,location:next.location,role:next.role,deadline:next.commentDeadline}:undefined,
+    next:next?{body:next.body,startsAt:next.startsAt,location:next.location,role:next.role,deadline:next.commentSourceUrl?next.commentDeadline:undefined,deadlineSource:next.commentSourceUrl,meetingUrl:next.meeting_url,agendaUrl:next.agenda_url??next.agendaUrl,packetUrl:next.packet_url??next.packetUrl,agendaItem:next.agenda_item_number,staffDeadline:next.staff_report_deadline_source_url?next.staff_report_deadline:undefined,staffDeadlineSource:next.staff_report_deadline_source_url}:undefined,
     documents:(safe.documents??[]).map(d=>({label:d.label,url:d.url,hash:d.hash})).sort((a,b)=>a.url.localeCompare(b.url)),
     history:safe.history.map(h=>statusCopy(h.label)),
     commentInstructions:data.commentInstructions,commentUrl:data.commentUrl,
@@ -53,20 +53,24 @@ export function emailProject(data: PaneData, previous?: ProjectSnapshot, place?:
 }
 export function projectDiff(before: ProjectSnapshot, after: ProjectSnapshot): string[] {
   const changes:string[]=[];
-  if(before.next?.startsAt!==after.next?.startsAt){
+  const sameTime=(a?:string,b?:string)=>a===b||!!a&&!!b&&a.length>10&&b.length>10&&Date.parse(a)===Date.parse(b);
+  if(!sameTime(before.next?.startsAt,after.next?.startsAt)){
     if(before.next&&after.next)changes.push(`Hearing moved from ${hearingDateTime(before.next.startsAt,before.timezone)} to ${hearingDateTime(after.next.startsAt,after.timezone)}.`);
     else if(after.next)changes.push(`${after.next.body} hearing posted: ${hearingDateTime(after.next.startsAt,after.timezone)}.`);
     else if(before.next)changes.push("The previously listed hearing is no longer upcoming. Check the official record for the current schedule or outcome.");
   }
   if(before.next&&after.next&&before.next.body!==after.next.body)changes.push(`Hearing body changed from ${before.next.body} to ${after.next.body}.`);
   if(before.next&&after.next&&before.next.location!==after.next.location)changes.push(`Hearing location changed to ${after.next.location??"a location not yet published"}.`);
+  if(after.next?.agendaUrl&&before.next?.agendaUrl!==after.next.agendaUrl)changes.push("Official meeting agenda posted or updated.");
+  if(after.next?.packetUrl&&before.next?.packetUrl!==after.next.packetUrl)changes.push("New staff report / meeting packet posted.");
+  if(after.next?.agendaItem&&before.next?.agendaItem!==after.next.agendaItem)changes.push(`Agenda item ${after.next.agendaItem} matched to this project.`);
   if(before.status!==after.status||before.decisionDate!==after.decisionDate)changes.push(`${statusCopy(after.status)}${after.decisionDate?" "+dateOnly(after.decisionDate,after.timezone):""}.`);
   if(before.headline!==after.headline)changes.push(`Proposal updated: ${after.headline}.`);
   if(before.where!==after.where)changes.push(`Project location clarified: ${after.where}.`);
   for(const h of after.history)if(!before.history.includes(h)&&!/^(?:Filed|Result not yet posted)/i.test(h))changes.push(h);
   for(const d of after.documents)if(!before.documents.some(old=>old.url===d.url))changes.push(/staff.*report/i.test(d.label)?`New staff report posted: ${d.label}.`:`New official document posted: ${d.label}.`);
   else if(before.documents.some(old=>old.url===d.url&&(old.label!==d.label||old.hash&&d.hash&&old.hash!==d.hash)))changes.push(`Official document updated: ${d.label}.`);
-  if(before.next?.deadline!==after.next?.deadline&&after.next?.deadline)changes.push(`Comment deadline updated: ${hearingDateTime(after.next.deadline,after.timezone)}.`);
+  if(!sameTime(before.next?.deadline,after.next?.deadline)&&after.next?.deadline)changes.push(`Comment deadline updated: ${hearingDateTime(after.next.deadline,after.timezone)}.`);
   if(before.commentInstructions!==after.commentInstructions||before.commentUrl!==after.commentUrl)changes.push("Official comment and submission instructions changed. Review the current participation information below.");
   return [...new Set(changes)];
 }

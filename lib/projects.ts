@@ -1,11 +1,12 @@
 import{areaPath,FEATURED_AREA_ID,getArea}from"./areas/registry";
 import type { HearingFeed } from "@/lib/localities/types";
+import type { HearingMeetingFields } from "./hearings/types";
 
 export const PUBLIC_COMMENT_URL = "https://www.cityofnampa.us/1616/Public-Comment";
 export const HEARINGS_URL = "https://www.cityofnampa.us/1433/Upcoming-Public-Hearings";
 export const PROJECT_STAGES = ["Submitted", "Under review", "P&Z hearing", "Council hearing", "Decided"] as const;
 export type ProjectStage = typeof PROJECT_STAGES[number];
-export type ProjectHearing = {
+export type ProjectHearing = HearingMeetingFields & {
   agendaUrl?: string;
   packetUrl?: string;
   startsAt: string;

@@ -7,6 +7,7 @@ import { checkpointRun,safeRunSummary,withRun } from "./telemetry";
 import type { EvidenceStore } from "./store";
 import type { IngestionRun } from "./types";
 import type {SchedulePlan} from "./schedule";
+import { refreshHearingMeetings } from "../hearings/refresh";
 /** One durable run spans discovery OCR and extraction, including usage before a timeout. */
 export async function refreshTimelines(store:EvidenceStore,{budgetMs=280000,discoverOnly=false,includeMaps=true,plan,meetingDatesByArea}:{budgetMs?:number;discoverOnly?:boolean;includeMaps?:boolean;plan?:SchedulePlan;meetingDatesByArea?:Record<string,string[]>}={}){
  const deadline=Date.now()+budgetMs;
@@ -17,6 +18,7 @@ export async function refreshTimelines(store:EvidenceStore,{budgetMs=280000,disc
   try{
    const maps=includeMaps?await refreshConfiguredMaps():undefined;
    const discovery=await discoverCaseDocuments({store,run,caseIdsByArea:plan?.caseIdsByArea,meetingDatesByArea,deadline:Math.min(deadline-60000,Date.now()+100000)});
+   try{await refreshHearingMeetings(discovery.feeds,{deadline:Math.min(deadline-45000,Date.now()+45000)});}catch{run.errors.push("Upcoming meeting-link storage unavailable; existing links retained.");}
    run.errors.push(...discovery.warnings);await checkpointRun(store,run);
    let documents=discoverOnly?discovery.documents.filter(d=>d.content!==undefined):discovery.documents;
    if(plan?.modes.includes("daily-sweep")){

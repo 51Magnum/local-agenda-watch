@@ -37,6 +37,7 @@ export type HearingPhase =
  * passes P&Z and then goes on to City Council.
  */
 export type AgendaItem = {
+  itemNumber?: string;
   title: string;
   caseIds: string[];
   agendaUrl: string;
@@ -44,6 +45,9 @@ export type AgendaItem = {
 };
 
 export type AgendaMeeting = {
+  meetingUrl?: string;
+  compiledAgendaUrl?: string;
+  subjectToChange?: boolean;
   id: string;
   body: string;
   bodyLabel: string;
