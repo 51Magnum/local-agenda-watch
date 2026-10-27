@@ -81,3 +81,10 @@ it("does not send an entire compiled packet for OCR",async()=>{
  expect(ocr).not.toHaveBeenCalled();expect(d.extract).not.toHaveBeenCalled();expect(run.errors.join(" ")).toContain("whole packets are not sent");
  expect((await s.read()).documents[documentId(doc)].failCount).toBe(0);
 });
+it("extracts an unchanged staff report only once when P&Z and Council link different URLs",async()=>{
+ const s=store(),d=deps();d.extract.mockResolvedValue(empty());
+ await ingestDocuments(s,[doc],d);
+ await ingestDocuments(s,[{...doc,title:"Council staff report",url:doc.url+"-council"}],d);
+ expect(d.extract).toHaveBeenCalledTimes(1);
+ expect((await s.read()).documents[documentId(doc)].state).toBe("complete");
+});
