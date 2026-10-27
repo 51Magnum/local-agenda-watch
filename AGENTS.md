@@ -40,3 +40,13 @@ Evaluate every resident-facing change against these six questions, in order:
 6. How can I act?
 
 Make reliable answers easy to find, use sourced facts, and state uncertainty plainly. Never invent an outcome, impact, location, or deadline to fill a gap. Keep the map, project pane, full project page, and participation flow consistent with these questions.
+
+# Explain the official record
+
+The app helps residents understand nearby changes and participate without becoming planning researchers. Give useful, plain-language answers inside the app; source links let residents verify or explore those answers.
+
+- Explain what the official record says. Do not predict personal consequences such as commute delays, school assignments, property values, or individual costs without direct supporting evidence. Proximity alone does not establish an impact.
+- Preserve attribution and status: distinguish applicant proposals, study estimates, agency findings, recommended conditions, adopted requirements, and completed work. A citation does not justify overstating the source.
+- State specific unknowns when supported; absence of a finding is not evidence of no impact. Never invent missing findings or claim the whole record was searched when discovery is incomplete.
+- Keep the project pane concise: show a small number of useful documented details, with additional details expandable in place. Keep full answers and sources available on the project page. Do not add product-philosophy disclaimers to every project.
+- Every impact claim should have a nearby official source, linked to the physical PDF page when available. Keep the map pane, full page, and email summaries consistent.
