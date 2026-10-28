@@ -1,4 +1,4 @@
-import {databaseUrl} from "./runtime-environment";
+import {databaseUrl,productionWritesAllowed} from "./runtime-environment";
 import { Pool } from "./database-pool";
 import { randomUUID } from "node:crypto";
 export class AiBudgetExceeded extends Error {
@@ -63,7 +63,7 @@ type Query = (
 export function createBudgetLedger(query: Query) {
   let ready: Promise<unknown> | undefined;
   const init = () =>
-    (ready ??= query(
+    !productionWritesAllowed()?Promise.resolve():(ready ??= query(
       `CREATE TABLE IF NOT EXISTS law_ai_days(day date PRIMARY KEY,spent numeric NOT NULL DEFAULT 0,reserved numeric NOT NULL DEFAULT 0,input_tokens bigint NOT NULL DEFAULT 0,output_tokens bigint NOT NULL DEFAULT 0);CREATE TABLE IF NOT EXISTS law_ai_calls(id uuid PRIMARY KEY,day date NOT NULL,operation text NOT NULL,model text NOT NULL,reservation numeric NOT NULL,cost numeric,input_tokens bigint,output_tokens bigint,created_at timestamptz NOT NULL DEFAULT now());`,
     )
       .then(async () => {
