@@ -13,4 +13,4 @@ it("records live-area spend reservations beyond the old $15 cap without deferrin
   await expect(ledger.reserve({areaId:"nampa",mode:"monthly",sample:{id:"sample",maxUsd:1}},1.1)).rejects.toThrow("dollar cap");
   expect(Number((await db.query<{reserved:number}>("SELECT reserved FROM law_jurisdiction_ai_budgets WHERE area_id='nampa'")).rows[0].reserved)).toBe(16);
  }finally{await db.close();}
-});
+},15000); // Includes cold PGlite WASM startup on shared CI runners.
