@@ -1,8 +1,9 @@
 name: Refresh case timelines
 on:
   schedule:
-    # Both UTC times stay inside the Denver AM/PM windows in either season.
-    - cron: '0 12,21 * * *'
+    # Cover both Denver windows in MST and MDT. Extra edge hours are harmless 200 skips.
+    - cron: '0,20,40 11-16 * * *'
+    - cron: '0,20,40 20-23,0-1 * * *'
   workflow_dispatch:
     inputs:
       force:
@@ -54,8 +55,8 @@ jobs:
             "$SITE_URL/api/cron/case-timeline$QUERY"
 
           cat response.json
-          jq -e '(.status == "completed") or (.status == "skipped" and .alreadyCompleted == true)' response.json || {
-            echo "::error::Scheduler did not complete or confirm an already-completed slot."
+          jq -e '(.status == "completed") or (.status == "skipped")' response.json || {
+            echo "::error::Scheduler returned an unexpected status; inspect the reason above."
             exit 1
           }
       - name: Preserve scheduler run log
