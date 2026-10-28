@@ -78,6 +78,8 @@ L3 implementation: individual and uncertain applicantCompany values cannot auto-
 
 L5 implementation: eSCRIBE meeting fixture is reduced from 910,045 to 29,157 bytes, retaining agenda-item ancestors needed by the recorded adapter tests and removing hidden state/scripts/styles/navigation. Provenance preserves the original response hash and records the trimmed hash. All four October 27 QA report artifacts were regenerated without AI candidate prose, quotes, identities or rosters; original counts/spend/source-page/review metadata remain. The QA generator and Markdown renderer both apply redaction so future distributable artifacts cannot reintroduce candidate text. Actual source-backed candidates remain in authenticated evidence review, not in distributable reports. Redaction/fixture-size/provenance regressions and the existing recorded adapter tests pass.
 
+L6 implementation: QA upcoming hearings are deduplicated by body/date before limiting the list, with deterministic preference for confirmed agenda evidence over tentative hints and repeated calendar IDs. Past dates were already excluded and remain so. A listed meeting without agenda/item evidence stays tentative, and tentative rows no longer receive computed participation deadlines. Regression covers iQM2 5471/5472, past dates, hints and input-order independence.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.
