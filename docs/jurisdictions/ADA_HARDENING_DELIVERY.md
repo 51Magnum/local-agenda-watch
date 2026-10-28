@@ -14,23 +14,23 @@ Implementation is on `codex/ada-site-review`, PR #7. No merge, production deploy
 | A5 | Done; concrete short titles and verbatim descriptions | c002077, fd8d4d3, 402956c |
 | A6 | Done; confirmed-only participation and dated no-hearing state | ea3bcfd |
 | A7 | Done; official case-specific/source queries | 4f1e41e, a00634f |
-| A8 | Done in code; separate Neon branch/role remains unprovisioned | 8efceb8, b7a2122 |
+| A8 | Done in code; separate Neon branch/role remains unprovisioned | 8efceb8, b7a2122, a937d7c |
 | A9 | Done; nonproduction noindex and preview canonicals | 05d11b9 |
 | H1 | Done; legacy case-page OCR/extraction, early deferral/backoff | 700ff50, ab2c184, bb508fc |
-| H2 | Done; stable QA hash, twice-daily metadata, separate work | 595b6d5, e36dfff |
+| H2 | Done; stable QA hash, twice-daily metadata, separate work | 595b6d5, e36dfff, 41767a4 |
 | H3 | Done; DST-safe retries and successful scheduler no-ops | 6634dbe |
 | M1 | Done; public-only client metadata and build-enforced bundle scan | 00bd7cf, 0051fbf |
 | M2 | Done; both AI reservations cleaned up, stale holds reconciled | 4f25a86 |
 | M3 | Done; legacy per-area dollar caps exempt until measured | 4e0e33b |
 | M4 | Done in code/tests; large-report Vercel execution unverified | 514e299, bb508fc |
 | M5 | Done; alleged geometry-rate input swap skipped because already correct; counts separated | 77526bd |
-| M6 | Done; coverage rule and verified configured geometry/address joins | 62c3ded, eb38d7e, 0b877ee, 4eb251f |
+| M6 | Done; coverage rule and verified configured geometry/address joins | 62c3ded, eb38d7e, 0b877ee, 4eb251f, 41767a4 |
 | L1 | Done; authenticated approval actor, same auth policy | f7d3772 |
 | L2 | Done; migration-owned schema and reversible constraint repair | 8efceb8, 94e12c1 |
 | L3 | Done; private/uncertain applicant candidates require review | 92f6371, 42598fb |
 | L5 | Done; trimmed fixture and redacted past/future distributed QA | 73405ae |
 | L6 | Done; deduplication; past-date exclusion was already present | 008fce7 |
-| C | Partial: fresh read-only QA and checklist prepared; staging/AI/runtime/owner approval pending | 0df4311 and launch-review artifact commit |
+| C | Partial: fresh read-only QA and checklist prepared; staging/AI/runtime/owner approval pending | 0df4311, aeb2945, 41767a4 |
 
 The brief contains no L4 item. CLI public-list parsing is also covered by bf61d46.
 
@@ -54,6 +54,7 @@ Tests are alongside each corresponding module; recorded fixtures and their prove
 - **M3:** `lib/jurisdictions/ai-budget.ts`, legacy-budget tests, onboarding admin policy text.
 - **M4:** `native-sample.ts`, `onboarding.ts`, `collect.ts`, document types/validation, Ada/Boise native byte limits, `lib/ai-budget.ts`, timeline extraction/ingestion and OCR/native-limit tests.
 - **M5:** `location-metrics.ts`, `onboarding.ts`, `report.ts`, mixed metrics test.
+- **Boundary follow-up (M6/H2):** `boundary-source.ts`, identity/projection/hash regressions, Ada registry and both boundary caches, `fixtures/ada-boundary-provenance.json`, collection/read projection and QA/hash gates (41767a4). Official selection is exactly one `county_name='Ada'` feature; the former seven-county cache is rejected.
 - **M6:** `application-geolocation.ts`, `adapters/arcgis.ts`, `collect.ts`, Boise join/fallback configuration, `resident-records.ts`, `preview.ts`, `lib/maps/refresh.ts`, recorded polygon/civic-address fixtures and provenance, geolocation/configured-map tests.
 - **L1:** `lib/timeline/auth.ts`, both jurisdiction approval handlers, reviewer identity tests.
 - **L2:** `lib/jurisdictions/store.ts`, the up/down repair migration and migration test.
@@ -82,9 +83,10 @@ No secret value was committed. Production delivery approval and preview delivery
 
 ## 5. Verification
 
-- 678 tests in 138 files pass, including recorded fixtures, legacy manifests, mutation refusals, budget failures, privacy and source provenance.
+- 682 tests in 139 files pass, including recorded fixtures, legacy manifests, mutation refusals, budget failures, privacy and source provenance.
 - TypeScript passes. ESLint has zero errors and four pre-existing unused-variable warnings.
 - Final Next build passes. Its scan reports: `Client bundle isolation PASS: 41 static files; no private jurisdiction IDs, source hosts, cost caps or Ada boundary content.`
+- Corrected Ada bounds: west -116.513727, south 43.112645, east -115.974901, north 43.807428. Official source identity/count and city clipping are verified; old staging is filtered against this cache.
 - Official Ada case query HTML returned 403; verified pjson/json/geojson formats returned 200. The app uses the verified project-specific pjson source.
 - Boise live read-only check: 257 applications, 154 polygons, 93 unique address points, 10 unmapped, zero deferred source failures. The named address service in the brief is invalid; the verified organization service is `Address_Points/FeatureServer/21`.
 - No paid AI call, staging write, production cron invocation, migration application or promotion was performed in this task.
