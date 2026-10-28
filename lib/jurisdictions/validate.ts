@@ -30,6 +30,7 @@ export function validateJurisdictions(input:unknown[]):JurisdictionDefinition[] 
   for(const p of d.caseNumberPatterns)new RegExp(p,"gi");
   for(const [key,n]of Object.entries(d.costCaps))assert(Number.isFinite(n)&&n>0,d.id+" invalid cost cap "+key);
   assert(d.documents.maxBytes>0&&d.documents.maxPages>0&&d.documents.allowPackets===false,d.id+" document limits");
+  if(d.documents.maxNativeBytes!==undefined)assert(Number.isFinite(d.documents.maxNativeBytes)&&d.documents.maxNativeBytes>=d.documents.maxBytes&&d.documents.maxNativeBytes<=160000000,d.id+" native download cap");
   if(d.clipRule)assert(d.type==="county"&&d.clipRule.operation==="subtractCityLimits",d.id+" clip rule");
   return d;
  });

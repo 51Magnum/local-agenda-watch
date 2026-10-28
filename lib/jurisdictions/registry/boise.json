@@ -7,7 +7,8 @@
   "documents": {
     "maxBytes": 45000000,
     "maxPages": 80,
-    "allowPackets": false
+    "allowPackets": false,
+    "maxNativeBytes": 160000000
   },
   "id": "boise",
   "name": "Boise",

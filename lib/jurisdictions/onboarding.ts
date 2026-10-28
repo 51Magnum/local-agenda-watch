@@ -9,7 +9,7 @@ import {readStaging,saveStaging,readQa,saveQa,snapshotHash,type QaReport} from "
 import {computeDeadlines} from "./participation";
 import {withJurisdictionAi,jurisdictionSpend} from "./ai-budget";
 import {ingestDocuments} from "../timeline/ingest";
-import {extractNativePdfChunk} from "../timeline/extract";
+import {readNativeSample,nativeSampleAllowed} from "./native-sample";
 import {getEvidenceStore} from "../timeline/store";
 import type {PageText,SourceDocument} from "../timeline/types";
 import {documentPreview} from "../maps/visuals";
@@ -29,10 +29,10 @@ export async function sampleAi(areaId:string,options:{n?:number;maxUsd?:number;b
  const n=options.n??5,maxUsd=options.maxUsd??1;if(!Number.isInteger(n)||n<1||n>5||!Number.isFinite(maxUsd)||maxUsd<=0||maxUsd>1)throw Error("AI sample accepts 1–5 documents and a hard cap of at most $1");
  if(!process.env.OPENAI_API_KEY||!process.env.DATABASE_URL)return{areaId,status:"deferred",reason:"AI samples require configured durable budget storage and server-side OpenAI credentials",sampled:0,spentUsd:0};
  const id=randomUUID(),http=sourceHttp(areaId),store=getEvidenceStore(),deadline=Date.now()+(options.budgetMs??220000),seen=new Set(snapshot.aiSamples?.map(s=>s.hash)),samples=snapshot.aiSamples??[];let attempted=0;
- const candidates=snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.attachments.filter(a=>a.kind==="staff_report"&&allowedAttachment(a,d)).map(a=>({meeting:m,item:i,attachment:a}))));
+ const candidates=snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.attachments.filter(a=>nativeSampleAllowed(a,d)).map(a=>({meeting:m,item:i,attachment:a}))));
  for(const candidate of candidates){if(samples.length>=n||attempted>=n||Date.now()>deadline-50000)break;const {meeting,item,attachment}=candidate,caseId=item.caseNumbers[0];if(!caseId)continue;
-  try{const response=await http.request(attachment.url,{},d.documents.maxBytes),bytes=response.bytes,hash=createHash("sha256").update(bytes).digest("hex");if(seen.has(hash))continue;seen.add(hash);attempted++;
-   const chunk=await extractNativePdfChunk(bytes.slice(),{deadline:Math.min(deadline-40000,Date.now()+25000),maxPages:Math.min(12,d.documents.maxPages)});const pages:PageText[]=[];let chars=0;for(const p of chunk.pages.filter(p=>p.text.trim().length>30)){if(pages.length>=d.documents.maxPages||chars+p.text.length>20000)break;pages.push(p);chars+=p.text.length;}
+  try{const sampled=await readNativeSample(http,attachment,d,deadline),{bytes,chunk}=sampled,hash=createHash("sha256").update(bytes).digest("hex");if(seen.has(hash))continue;seen.add(hash);attempted++;
+   const pages:PageText[]=sampled.pages;
    if(!pages.length){pages.push(...await withJurisdictionAi({areaId,mode:"backfill",sample:{id,maxUsd},documentHash:hash},()=>ocrSamplePages(bytes,[1,2],Math.min(deadline-50000,Date.now()+65000))));}
    if(!pages.some(p=>p.text.trim().length>30)){snapshot.skipped.push({url:attachment.url,reason:"AI sample deferred: first bounded pages have no usable text; remaining pages are deferred"});continue;}
    const doc:SourceDocument={areaId,url:attachment.url,title:attachment.title,caseIds:[caseId],kind:"staff-report",meeting:{body:d.hearingBodies.find(b=>b.key===meeting.body)?.name??meeting.body,date:meeting.date,isHearing:true}};

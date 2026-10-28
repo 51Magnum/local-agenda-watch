@@ -1,4 +1,5 @@
-vi.mock("../ai-budget",()=>({aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
+vi.mock("unpdf",()=>({definePDFJSModule:vi.fn(),getDocumentProxy:vi.fn().mockResolvedValue({numPages:20,loadingTask:{destroy:vi.fn()}}),renderPageAsImage:vi.fn().mockResolvedValue(new Uint8Array([1,2,3]).buffer)}));
+vi.mock("../ai-budget",async original=>({...await original<typeof import("../ai-budget")>(),aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
 vi.mock("../jurisdictions/ai-budget",()=>({currentJurisdictionAi:()=>undefined,jurisdictionAiBudget:{reserve:vi.fn().mockResolvedValue("area-reservation"),settle:vi.fn().mockResolvedValue(.0001)}}));
 import {afterEach,expect,it,vi} from "vitest";
 import {ingestDocuments,documentId,officialDocumentUrl} from "./ingest";
@@ -68,7 +69,7 @@ it("resets a permanently failed fingerprint when new bytes appear",async()=>{
 });
 it("persists OCR text before extraction fails so the next run does not pay for OCR again",async()=>{
  vi.spyOn(console,"error").mockImplementation(()=>{});vi.stubEnv("OPENAI_API_KEY","test");vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-23T12:00:00Z"));
- const fetch=vi.fn().mockResolvedValue(Response.json({status:"completed",usage:{input_tokens:30,output_tokens:10,total_tokens:40},output:[{content:[{type:"output_text",text:JSON.stringify({pages:[{page:1,text:"Scanned official planning staff report text."}]})}]}]}));vi.stubGlobal("fetch",fetch);
+ const fetch=vi.fn().mockResolvedValue(Response.json({status:"completed",usage:{input_tokens:30,output_tokens:10,total_tokens:40},output:[{content:[{type:"output_text",text:JSON.stringify({text:"Scanned official planning staff report text."})}]}]}));vi.stubGlobal("fetch",fetch);
  const s=store(),d=deps();d.text.mockResolvedValue([{page:1,text:"",method:"native"}]);await ingestDocuments(s,[doc],d);
  expect((await s.read()).documents[documentId(doc)].pages[0].method).toBe("ocr");expect(fetch).toHaveBeenCalledTimes(1);
  vi.setSystemTime(new Date("2026-10-24T12:00:00Z"));d.extract.mockResolvedValue(empty());await ingestDocuments(s,[doc],d);expect(fetch).toHaveBeenCalledTimes(1);

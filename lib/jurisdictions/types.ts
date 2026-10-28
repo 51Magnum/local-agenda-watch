@@ -14,7 +14,7 @@ export type JurisdictionDefinition = {
  hearingBodies:HearingBody[];caseNumberPatterns:string[];
  participation:{hearingsUrl?:string;legalNoticesUrl?:string;testimonySignupUrl?:string;signupUrlRule?:string;signupEventsUrl?:string;writtenCommentEmails?:Record<string,string[]>;deadlineRules:DeadlineRule[]};
  costCaps:{backfillUsd:number;monthlyUsd:number;perDocMaxTokens:number};
- documents:{maxBytes:number;maxPages:number;allowPackets:false};
+ documents:{maxNativeBytes?:number;maxBytes:number;maxPages:number;allowPackets:false};
  enabled:boolean;launchStatus:LaunchStatus;sourcesVerifiedAt:string|null;notes:string[];
  legacyPublic?:boolean;publication?:{approvalId:string;qaHash:string};
  /** Compatibility facts are moved, not copied, from the original area registry. */

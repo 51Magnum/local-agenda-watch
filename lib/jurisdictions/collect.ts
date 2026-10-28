@@ -3,6 +3,7 @@ import {jurisdiction} from "./registry";
 import {SourceHttp,SourceFailure} from "./http";
 import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
 import {agendaAdapter} from "./adapters";
+import {nativeSampleAllowed} from "./native-sample";
 import {allowedAttachment} from "./adapters/common";
 import type {CaseGeometry} from "../maps/types";
 import {combinePolygons,polygonGeometry} from "../maps/gis";
@@ -30,7 +31,7 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  if(d.participation.signupUrlRule==="umbracoEvents"&&d.participation.signupEventsUrl){try{const url=d.participation.signupEventsUrl.replace("{start}",range.start).replace("{end}",range.end),events=await http.json<{Events:{title:string;start:string;url:string}[]}>(url);snapshot.meetings=matchSignupEvents(d,snapshot.meetings,events.Events??[],url);}catch{snapshot.complete=false;}}
  for(const source of d.agenda)if(source.params.hearingsUrl&&source.params.scheduleYear&&source.params.scheduleTables){try{const url=String(source.params.hearingsUrl);snapshot.calendarHints=parseTentativeTable(await http.text(url),url,Number(source.params.scheduleYear),source.params.scheduleTables as {index:number;body:string}[]);}catch{snapshot.complete=false;}}
  await discoverStagingLibraries(snapshot,Math.min(deadline-20000,Date.now()+30000));
- for(const m of snapshot.meetings)for(const a of [...m.attachments,...m.items.flatMap(i=>i.attachments)])if(!allowedAttachment(a,d))snapshot.skipped.push({url:a.url,reason:a.kind==="packet"?"Compiled meeting packet excluded from AI":a.sizeBytes&&a.sizeBytes>d.documents.maxBytes?"Attachment exceeds byte cap":"Private attendance material excluded",bytes:a.sizeBytes});
+ for(const m of snapshot.meetings)for(const a of [...m.attachments,...m.items.flatMap(i=>i.attachments)])if(!allowedAttachment(a,d))snapshot.skipped.push({url:a.url,reason:a.kind==="packet"?"Compiled meeting packet excluded from AI":nativeSampleAllowed(a,d)?"Large report queued for bounded native/page-image sample; remaining pages deferred":a.sizeBytes&&a.sizeBytes>d.documents.maxBytes?"Attachment exceeds native download cap":"Private attendance material excluded",bytes:a.sizeBytes});
  try{const gis=arcgisAdapter(http),boundary=combinePolygons((await gis.query(d.boundary.url,d.boundary.where)).features);if(!boundary)throw Error("Boundary source has no polygons");snapshot.boundary=simplify(feature(boundary),{tolerance:.00005,highQuality:true}).geometry;
   if(d.clipRule){const cities=(await gis.query(d.clipRule.layer.url,d.clipRule.layer.where)).features.filter(f=>polygonGeometry(f.geometry)).map(f=>simplify(feature(f.geometry as CaseGeometry),{tolerance:.00005,highQuality:true}));const clipped=difference(featureCollection([feature(snapshot.boundary),...cities]));if(!clipped)throw Error("County clipping produced no coverage");snapshot.coverageBoundary=clipped.geometry;}
   if(d.gis.impactAreas)snapshot.impactAreas=await gis.query(d.gis.impactAreas);

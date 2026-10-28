@@ -88,6 +88,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         if (pages.some((page) => page.method === "native" && page.text.trim().length < 30) && deadline - Date.now() < 50000) throw new Error("OCR deferred to next run: processing budget reached");
         pages = await (dependencies.ocr ?? ocrMissingPages)(bytes, pages);
         await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
+        if(pages.some(p=>p.method==="native"&&p.text.trim().length<30))throw Error("OCR deferred to next run: bounded page images saved; remaining scanned pages retained");
       }
       if(document.content===undefined&&pages.some(p=>p.method==="ocr"))await store.flush?.();
       const facts: EvidenceField[] = [];

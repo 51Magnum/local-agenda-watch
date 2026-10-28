@@ -41,6 +41,11 @@ export function usageCost(model: string, usage: Usage) {
     1e6
   );
 }
+export function inputTokenBound(content:object[],instructions:string,schema:object){
+ if(content.some(c=>"file_data" in c))throw Error("AI work deferred: use physically bounded page images instead of a whole PDF");
+ const bounded=content.map(c=>Object.fromEntries(Object.entries(c).filter(([key])=>key!=="image_url")));
+ return Buffer.byteLength(JSON.stringify([instructions,schema,bounded]))+1024+content.filter(c=>"image_url" in c).length*8192;
+}
 export function reserveCost(
   model: string,
   content: object[],
@@ -48,26 +53,7 @@ export function reserveCost(
   schema: object,
   maxOutput: number,
 ) {
-  // UTF-8 bytes conservatively bound text tokens; reserve the full model input limit for PDFs.
-  const text = JSON.stringify([
-    instructions,
-    schema,
-    content.map((c) =>
-      Object.fromEntries(
-        Object.entries(c).filter(
-          ([k]) => !["image_url", "file_data"].includes(k),
-        ),
-      ),
-    ),
-  ]);
-  const tokens = content.some((c) => "file_data" in c)
-    ? 1047576
-    : Math.min(
-        1047576,
-        Buffer.byteLength(text) +
-          1024 +
-          content.filter((c) => "image_url" in c).length * 8192,
-      );
+  const tokens=inputTokenBound(content,instructions,schema);
   return usageCost(model, { input_tokens: tokens, output_tokens: maxOutput });
 }
 type Query = (

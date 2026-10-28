@@ -46,8 +46,8 @@ it("atomically blocks overlapping calls at a $0.01 ceiling, then replaces reserv
     await db.close();
   }
 });
-it("reserves PDF context and requested output before calling, accounts for cached tokens, and fails closed on an unpriced model", () => {
-  expect(
+it("rejects unbounded PDFs before reserving, accounts for cached tokens, and fails closed on an unpriced model", () => {
+  expect(() =>
     reserveCost(
       "gpt-4.1-mini",
       [{ type: "input_file", file_data: "data:application/pdf;base64,AA==" }],
@@ -55,7 +55,7 @@ it("reserves PDF context and requested output before calling, accounts for cache
       {},
       512,
     ),
-  ).toBeGreaterThan(0.01);
+  ).toThrow("physically bounded page images");
   expect(
     usageCost("gpt-4.1-mini", {
       input_tokens: 1000,
