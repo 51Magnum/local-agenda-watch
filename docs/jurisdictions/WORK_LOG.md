@@ -42,6 +42,8 @@ A5 implementation: a deterministic type-plus-source-subject title is bounded to 
 
 A6 implementation: only an actual, non-tentative agenda appearance supplies the next hearing, signup or computed deadlines. Otherwise both pane and full page show a dated no-hearing message with official hearings and legal-notices links. The latter URL was taken from the cached official hearings page, not guessed. Parsed agenda times flow through unchanged. Six focused copy/hearing/pane tests and TypeScript pass. Tentative calendar hints remain separate and do not advertise a project hearing.
 
+A7 implementation: application source and record links now resolve to a case-specific query, including previously stored records at presentation time. The suggested Ada HTML format returned HTTP 403; ordinary public json/pjson/geojson queries all returned HTTP 200 and contained project 202601398, without access challenges. The registry uses the verified, readable pjson format with geometry omitted. It exposes the official source data rather than a tracker landing page. Source-link regressions cover the query and existing Boise deep link. Browser visual presentation of the official JSON is not claimed verified.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

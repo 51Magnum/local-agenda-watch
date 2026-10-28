@@ -90,7 +90,7 @@
       ],
       "applicantField": "APPLICANT"
     },
-    "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/"
+    "recordUrlTemplate": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27{projectNumber}%27&outFields=*&returnGeometry=false&f=pjson"
   },
   "gis": {
     "countyBoundary": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",

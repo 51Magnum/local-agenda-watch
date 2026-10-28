@@ -12,6 +12,7 @@ import {applicationScope} from "./application-scope";
 import {protectMapCase} from "../residential-privacy";
 import {groupApplications} from "./application-groups";
 import {jurisdiction} from "./registry";
+import {applicationRecordUrl} from "./application-source";
 import {applicationTitle} from "./application-copy";
 export type ConfiguredHearing=Hearing&{record:PublicCaseRecord};
 export function stagedApplications(snapshot:StagingSnapshot):Application[]{
@@ -19,7 +20,7 @@ export function stagedApplications(snapshot:StagingSnapshot):Application[]{
 }
 export function displayStagedApplication(d:JurisdictionDefinition,a:Application):Application{
  const fields=d.applications.params.fields as Record<string,string>??{};
- return{...a,...a.residentialPrivacy?{name:"Residential permit request",description:"A residential permit request. Review the official record for the proposed activity.",address:"",parcel:[]}: {},type:String(a.sourceFields[fields.type]??a.type??"Planning application").trim()||"Planning application",status:String(a.sourceFields[fields.status]??a.status??"").trim()};
+ return{...a,recordUrl:applicationRecordUrl(d,a.recordId,a.projectNumber),sourceUrl:applicationRecordUrl(d,a.recordId,a.projectNumber),...a.residentialPrivacy?{name:"Residential permit request",description:"A residential permit request. Review the official record for the proposed activity.",address:"",parcel:[]}: {},type:String(a.sourceFields[fields.type]??a.type??"Planning application").trim()||"Planning application",status:String(a.sourceFields[fields.status]??a.status??"").trim()};
 }
 export function stagedAppearances(snapshot:StagingSnapshot,a:Application){const ids=[a.recordId,...a.relatedCaseNumbers];return snapshot.meetings.filter(m=>m.items.some(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)));}
 const documents=(m:Meeting,a:Application)=>{if(a.residentialPrivacy)return [];const ids=[a.recordId,...a.relatedCaseNumbers];return m.items.filter(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)).flatMap(i=>i.attachments.filter(f=>f.kind!=="packet").map(f=>({label:f.title,filename:f.title,url:f.url,sourceUrl:m.meetingPageUrl})));};
