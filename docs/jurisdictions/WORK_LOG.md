@@ -90,6 +90,8 @@ Fresh Ada read-only verification: 34 retained projects, zero duplicated project 
 
 Final source/read-only audit: new-jurisdiction impact-area, future-plan and boundary verification links now use official data queries rather than bare GIS layer landing pages. An overlap is described as overlap, not a claim that the whole parcel is within an impact area. Legacy area outputs remain unchanged. Preview global-budget reads now skip both runtime DDL and historical spend seeding, allowing existing spend to be read without attempting writes. Both behaviors have focused regressions.
 
+Final handoff audit: the normal map builder could previously add every raw GIS row not already in the staged feed, which would reintroduce historical/staff records after a future owner promotion. New nonlegacy public/review jurisdictions now build from the grouped, scoped staging snapshot, retaining source geometry/address-point provenance and privacy; existing public-access checks remain mandatory. Seven legacy builders are unchanged. A synthetic configured-jurisdiction regression proves the raw historic layer is never fetched and a private jurisdiction cannot use this path. Official descriptions also retain their source whitespace at the ingestion boundary, and agenda-only/current/past hearing links retain physical PDF item-page citations.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.
