@@ -1,9 +1,7 @@
-import {bbox} from "@turf/turf";
+import {applicationMapLocation} from "./application-geolocation";
 import type {Hearing,HearingFeed} from "../localities/types";
 import type {PublicCaseRecord,RecordEvent} from "../localities/record-types";
-import type {MapSnapshot,CaseGeometry} from "../maps/types";
-import {geometryCentroid} from "../maps/spatial";
-import {polygonGeometry} from "../maps/gis";
+import type {MapSnapshot} from "../maps/types";
 import {cleanResidentTitle} from "../resident-copy";
 import type {JurisdictionDefinition} from "./types";
 import type {Application,Meeting} from "./adapters/types";
@@ -35,9 +33,9 @@ export function stagedFeed(d:JurisdictionDefinition,snapshot:StagingSnapshot):He
 export function stagedMapSnapshot(d:JurisdictionDefinition,snapshot:StagingSnapshot):MapSnapshot{
  const feed=stagedFeed(d,snapshot),applications=stagedApplications(snapshot),today=new Date().toISOString().slice(0,10);
  return{version:1,jurisdiction:d.id,updatedAt:snapshot.checkedAt,warnings:[],cases:feed.active.map(h=>{
-  const a=applications.find(a=>a.recordId===h.appId)!,geometry=a.geometry&&polygonGeometry(a.geometry)?a.geometry as CaseGeometry:null;
+  const a=applications.find(a=>a.recordId===h.appId)!,location=applicationMapLocation(a);
   const next=h.meetings.filter(m=>m.date>=today).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  return protectMapCase(d.id,{id:h.appId,residentialPrivacy:a.residentialPrivacy,areaId:d.id,title:h.displayTitle??h.appId,summary:h.description??"",type:h.appType,typeLabel:h.appTypeLabel,recordStatus:h.appStatus,stage:next?/board|council/i.test(next.body)?"Council/Board":"P&Z":"In review",href:`/${d.area.country}/${d.state}/${d.id}/plan/${encodeURIComponent(h.appId)}`,geometry,centroid:geometry?geometryCentroid(geometry):null,bounds:geometry?bbox(geometry).slice(0,4) as [number,number,number,number]:undefined,source:geometry?"polygon":"none",sourceUrl:a.sourceUrl,confidence:geometry?"exact":"approximate",citywide:false,flumCategories:[],parcelIds:a.parcel,...next?{nextHearing:{date:next.date,body:next.body,label:next.body+" · "+next.date}}:{}});
+  return protectMapCase(d.id,{id:h.appId,residentialPrivacy:a.residentialPrivacy,areaId:d.id,title:h.displayTitle??h.appId,summary:h.description??"",type:h.appType,typeLabel:h.appTypeLabel,recordStatus:h.appStatus,stage:next?/board|council/i.test(next.body)?"Council/Board":"P&Z":"In review",href:`/${d.area.country}/${d.state}/${d.id}/plan/${encodeURIComponent(h.appId)}`,...location,sourceUrl:a.geometrySourceUrl??applicationRecordUrl(d,a.recordId,a.projectNumber),citywide:false,flumCategories:[],parcelIds:a.parcel,...next?{nextHearing:{date:next.date,body:next.body,label:next.body+" · "+next.date}}:{}});
  })};
 }
 export function configuredRecord(h:Hearing):PublicCaseRecord{return(h as ConfiguredHearing).record??{sourceUrl:h.externalUrl??undefined,address:"",sourceStatus:h.appStatus,approvalStatus:"",events:[],documents:[]};}

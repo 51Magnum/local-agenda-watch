@@ -1,0 +1,16 @@
+[
+  {
+    "file": "boise-permit-geometry.json",
+    "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Planning_Permits/FeatureServer/160/query?where=CaseNumber+IN+%28%27PLN23-00040%27%2C%27CVA24-00026%27%29&outFields=CaseNumber&returnGeometry=true&outSR=4326&f=geojson",
+    "status": 200,
+    "retrievedAt": "2026-10-28T18:29:36.792Z",
+    "sha256": "32f5526e8eaae7eb20d518e61a57421870c9a3c52aca2addc018a4fa9d9b8a41"
+  },
+  {
+    "file": "ada-address-point.json",
+    "url": "https://services2.arcgis.com/dgGjZc6xAH5m5JyP/arcgis/rest/services/Address_Points/FeatureServer/21/query?where=AddNum%3D150+AND+UPPER%28StName%29%3D%27CAPITOL%27&outFields=AddNum%2CStPreDir%2CStName%2CStSuffix&returnGeometry=true&outSR=4326&f=geojson",
+    "status": 200,
+    "retrievedAt": "2026-10-28T18:29:37.304Z",
+    "sha256": "909cf79f821d5e410e4a510471d1a60c2a940ccbe815461b62bf56c3adb0368f"
+  }
+]
