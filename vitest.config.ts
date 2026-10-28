@@ -7,5 +7,6 @@ export default defineConfig({
   test: {
     include: ["**/*.test.{ts,tsx}"],
     environment: "node",
+    env: {VERCEL_ENV:"production"},
   },
 });

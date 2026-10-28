@@ -1,15 +1,17 @@
+import {databaseUrl} from "../runtime-environment";
+import {requireProductionMutation} from "../runtime-environment";
 import {isSiteReviewArea} from "../jurisdictions/registry";
 import {bbox} from "@turf/turf";
 import {trackedRows} from "@/lib/db-transfer";
 import {revalidateTag,unstable_cache} from "next/cache";
-import { Pool } from "pg";
+import { Pool } from "../database-pool";
 import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import type { MapSnapshot,FlumCache } from "./types";
 let pool: Pool | undefined, initialized: Promise<unknown> | undefined;
 function database() {
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 2, connectionTimeoutMillis: 10000 });
+  pool ??= new Pool({ connectionString: databaseUrl(), max: 2, connectionTimeoutMillis: 10000 });
   initialized ??= pool.query(`CREATE TABLE IF NOT EXISTS law_map_cache (jurisdiction text PRIMARY KEY, snapshot jsonb NOT NULL);
  CREATE TABLE IF NOT EXISTS law_flum_cache(jurisdiction text PRIMARY KEY,snapshot jsonb NOT NULL);
  INSERT INTO law_flum_cache SELECT jurisdiction,snapshot->'flum' FROM law_map_cache WHERE snapshot?'flum' AND snapshot->'flum'<>'null'::jsonb ON CONFLICT DO NOTHING;
@@ -19,7 +21,7 @@ function database() {
 function filename(id: string) { if (!/^[a-z0-9-]+$/.test(id)) throw new Error("Invalid map cache ID"); return path.join(process.cwd(), ".data", "maps", id + ".json"); }
 export async function readMapSnapshot(id: string,options:{caseIds?:readonly string[];includeFlum?:boolean;bounds?:readonly number[]}={includeFlum:true}): Promise<MapSnapshot | undefined> {
   if(isSiteReviewArea(id)){const snapshot=await(await import("../jurisdictions/runtime")).configuredSnapshot(id);if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));if(options.bounds)snapshot.cases=snapshot.cases.filter(c=>{const b=c.bounds,q=options.bounds!;return b&&b[0]<=q[2]&&b[2]>=q[0]&&b[1]<=q[3]&&b[3]>=q[1];});if(options.includeFlum)snapshot.flum=await readFlumSnapshot(id);return snapshot;}
- if (process.env.DATABASE_URL) {
+ if (databaseUrl()) {
    const db=database();await initialized;
    if(options.bounds){
     const query=`SELECT (snapshot-'cases')||jsonb_build_object('cases',coalesce((
@@ -41,8 +43,9 @@ export async function readMapSnapshot(id: string,options:{caseIds?:readonly stri
    if(options.includeFlum===false)delete snapshot.flum;return snapshot; } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
 }
 export async function saveMapSnapshot(snapshot: MapSnapshot) {
+  requireProductionMutation();
   if(isSiteReviewArea(snapshot.jurisdiction))return;
-  if (process.env.DATABASE_URL) {
+  if (databaseUrl()) {
    const db=database();await initialized;const {flum,...cases}=snapshot;
    await db.query("INSERT INTO law_map_cache (jurisdiction,snapshot) VALUES ($1,$2::jsonb) ON CONFLICT (jurisdiction) DO UPDATE SET snapshot=excluded.snapshot",[snapshot.jurisdiction,JSON.stringify(cases)]);
    if(flum){const result=await db.query("INSERT INTO law_flum_cache VALUES($1,$2::jsonb) ON CONFLICT(jurisdiction) DO UPDATE SET snapshot=excluded.snapshot WHERE law_flum_cache.snapshot->>'updatedAt' IS DISTINCT FROM excluded.snapshot->>'updatedAt'",[snapshot.jurisdiction,JSON.stringify(flum)]);if(result.rowCount&&process.env.NEXT_RUNTIME&&process.env.NODE_ENV!=="test")revalidateTag("map-flum",{expire:0});}
@@ -57,7 +60,7 @@ async function loadFlum(id:string):Promise<FlumCache|undefined>{const db=databas
 const cachedFlum=unstable_cache(loadFlum,["flum-storage-v2"],{revalidate:604800,tags:["map-flum"]});
 /** Bounded, authenticated offline export; public map views never call this. */
 export async function exportFlumPage(id:string,offset:number){
- if(!process.env.DATABASE_URL){const data=await readFlumSnapshot(id);const features=data?.geojson.features.slice(offset,offset+250)??[];return{updatedAt:data?.updatedAt,legend:data?.legend??[],features,nextOffset:data&&offset+features.length<data.geojson.features.length?offset+features.length:undefined};}
+ if(!databaseUrl()){const data=await readFlumSnapshot(id);const features=data?.geojson.features.slice(offset,offset+250)??[];return{updatedAt:data?.updatedAt,legend:data?.legend??[],features,nextOffset:data&&offset+features.length<data.geojson.features.length?offset+features.length:undefined};}
  const db=database();await initialized;
  const result=await db.query(`SELECT snapshot->>'updatedAt' AS "updatedAt",snapshot->'legend' AS legend,jsonb_array_length(snapshot->'geojson'->'features') AS total,
  coalesce((SELECT jsonb_agg(f ORDER BY n) FROM jsonb_array_elements(snapshot->'geojson'->'features') WITH ORDINALITY AS items(f,n) WHERE n>$2 AND n<=$2+250),'[]'::jsonb) AS features
@@ -68,7 +71,7 @@ export async function exportFlumPage(id:string,offset:number){
 }
 export async function readFlumSnapshot(id:string,options?:{bounds:readonly number[]}){
  if(isSiteReviewArea(id)){const config=(await import("./jurisdictions")).getJurisdiction(id);return config?(await import("./refresh")).fetchFlum(config):undefined;}
- if(!process.env.DATABASE_URL)return(await readMapSnapshot(id))?.flum;
+ if(!databaseUrl())return(await readMapSnapshot(id))?.flum;
  if(options?.bounds){
   const db=database();await initialized;
   const query=`SELECT (snapshot-'geojson')||jsonb_build_object('geojson',jsonb_build_object('type','FeatureCollection','features',coalesce((
@@ -83,10 +86,10 @@ export async function readFlumSnapshot(id:string,options?:{bounds:readonly numbe
 
 /** Image workers read only queue metadata, never the FLUM or all case geometries. */
 export async function mapImageCases(id:string):Promise<{id:string;hasGeometry:boolean;citywide:boolean}[]>{
- if(process.env.DATABASE_URL){const db=database();await initialized;return(await db.query("SELECT c->>'id' AS id,(c->'geometry' IS NOT NULL AND c->'geometry'<>'null'::jsonb) AS geometry,coalesce((c->>'citywide')::boolean,false) AS citywide FROM law_map_cache,jsonb_array_elements(snapshot->'cases') c WHERE jurisdiction=$1",[id])).rows.map(r=>({id:r.id,hasGeometry:r.geometry,citywide:r.citywide}));}
+ if(databaseUrl()){const db=database();await initialized;return(await db.query("SELECT c->>'id' AS id,(c->'geometry' IS NOT NULL AND c->'geometry'<>'null'::jsonb) AS geometry,coalesce((c->>'citywide')::boolean,false) AS citywide FROM law_map_cache,jsonb_array_elements(snapshot->'cases') c WHERE jurisdiction=$1",[id])).rows.map(r=>({id:r.id,hasGeometry:r.geometry,citywide:r.citywide}));}
  return (await readMapSnapshot(id,{includeFlum:false}))?.cases.map(c=>({id:c.id,hasGeometry:Boolean(c.geometry),citywide:c.citywide}))??[];
 }
 export async function markCaseVisualScan(id:string,caseId:string,finishedAt:string){
- if(process.env.DATABASE_URL){const db=database();await initialized;await db.query("UPDATE law_map_cache SET snapshot=jsonb_set(snapshot,'{cases}',(SELECT jsonb_agg(CASE WHEN c->>'id'=$2 THEN c||jsonb_build_object('visualCheckedAt',$3::text) ELSE c END) FROM jsonb_array_elements(snapshot->'cases') c)) WHERE jurisdiction=$1",[id,caseId,finishedAt]);return;}
+ if(databaseUrl()){const db=database();await initialized;await db.query("UPDATE law_map_cache SET snapshot=jsonb_set(snapshot,'{cases}',(SELECT jsonb_agg(CASE WHEN c->>'id'=$2 THEN c||jsonb_build_object('visualCheckedAt',$3::text) ELSE c END) FROM jsonb_array_elements(snapshot->'cases') c)) WHERE jurisdiction=$1",[id,caseId,finishedAt]);return;}
  const snapshot=await readMapSnapshot(id);if(snapshot){const c=snapshot.cases.find(c=>c.id===caseId);if(c)c.visualCheckedAt=finishedAt;await saveMapSnapshot(snapshot);}
 }

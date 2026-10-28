@@ -1,3 +1,4 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import {secretMatches} from "@/lib/timeline/auth";
 import {ingestionJurisdictions,publicJurisdictions,jurisdiction,isSiteReviewArea} from "@/lib/jurisdictions/registry";
 import {collectJurisdiction} from "@/lib/jurisdictions/collect";
@@ -5,6 +6,8 @@ import {validateEndpoints,sampleAi,qaReport,checkRuntimeDocuments} from "@/lib/j
 import {claimDocumentWork} from "@/lib/timeline/document-work-lease";
 export const runtime="nodejs";export const maxDuration=300;export const dynamic="force-dynamic";
 export async function GET(request:Request){
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
  if(!secretMatches(request.headers.get("authorization")??"",process.env.CRON_SECRET?"Bearer "+process.env.CRON_SECRET:undefined))return new Response("Unauthorized",{status:401});
  const q=new URL(request.url).searchParams,command=q.get("command")??"list",id=q.get("area")??"";
  if(command==="list")return Response.json({areas:(q.get("scope")==="configured"?ingestionJurisdictions().filter(d=>!d.legacyPublic):q.get("scope")==="ingestion"?ingestionJurisdictions():publicJurisdictions()).map(d=>d.id)},{headers:{"Cache-Control":"no-store"}});

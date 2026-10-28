@@ -1,8 +1,11 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import { secretMatches } from "@/lib/timeline/auth";
 import { exportMapFeatures } from "@/lib/maps/case-index";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 export async function GET(request: Request) {
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
   if (
     !secretMatches(
       request.headers.get("authorization") ?? "",

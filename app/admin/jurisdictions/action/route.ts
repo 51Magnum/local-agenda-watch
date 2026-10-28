@@ -1,3 +1,4 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import {claimDocumentWork} from "@/lib/timeline/document-work-lease";
 import {authorizedReviewer,sameOrigin} from "@/lib/timeline/auth";
 import {collectJurisdiction} from "@/lib/jurisdictions/collect";
@@ -6,6 +7,8 @@ import {approveQa} from "@/lib/jurisdictions/store";
 import {replacePrivateImage} from "@/lib/jurisdictions/images";
 export const runtime="nodejs";export const maxDuration=300;
 export async function POST(request:Request){
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
  if(!authorizedReviewer(request.headers.get("authorization"))||!sameOrigin(request))return Response.json({error:"Admin authentication and same origin required"},{status:403});
  const release=await claimDocumentWork();if(!release)return Response.json({status:"busy"},{status:409});
  try{const input=await request.json();if(typeof input.areaId!=="string"||typeof input.command!=="string")throw Error("Invalid operation");let result:unknown;

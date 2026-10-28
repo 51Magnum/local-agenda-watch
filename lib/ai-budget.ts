@@ -1,4 +1,5 @@
-import { Pool } from "pg";
+import {databaseUrl} from "./runtime-environment";
+import { Pool } from "./database-pool";
 import { randomUUID } from "node:crypto";
 export class AiBudgetExceeded extends Error {
   constructor() {
@@ -137,9 +138,9 @@ export function createBudgetLedger(query: Query) {
 }
 let pool: Pool;
 const ledger = createBudgetLedger(async (sql, values) => {
-  if (!process.env.DATABASE_URL)
+  if (!databaseUrl())
     throw Error("AI work deferred: durable budget database unavailable");
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+  pool ??= new Pool({ connectionString: databaseUrl(), max: 2 });
   return pool.query(sql, values);
 });
 export const aiBudget = ledger;

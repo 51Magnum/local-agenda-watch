@@ -1,3 +1,4 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import {revalidateTag} from "next/cache";
 import { refreshTimelines } from "@/lib/timeline/refresh";
 import { secretMatches } from "@/lib/timeline/auth";
@@ -9,6 +10,8 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
   const authorization = request.headers.get("authorization") ?? "";
   if (!secretMatches(authorization, process.env.CRON_SECRET ? "Bearer " + process.env.CRON_SECRET : undefined)) return new Response("Unauthorized", { status: 401 });
   const now=new Date(),url=new URL(request.url),manual=url.searchParams.get("manual")==="1",force=manual&&url.searchParams.get("force")==="1",discoverOnly=manual&&url.searchParams.get("discoveryOnly")==="1";
