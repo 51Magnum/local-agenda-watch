@@ -50,6 +50,10 @@ A9 implementation: nonproduction robots disallows all paths; root/area/project m
 
 H1 implementation: nonlegacy packet rejection now precedes download, processing-state replacement and evidence invalidation. A durable deferredUntil provides a 24-hour backoff without consuming failure retries. Legacy Nampa/Kuna packets are allowed and timeline extraction now explicitly selects their contiguous case pages (the prior helper was used by project-content work, not by this ingestion path). Case recognition now includes five-digit Nampa permit numbers. Nineteen focused packet/retry/content regressions and TypeScript pass; previous published document hashes/pages survive onboarding packet deferral.
 
+H1 follow-up: explicit authenticated document Retry clears deferredUntil as well as failure cooldown; covered by the deferral regression.
+
+H2 implementation: configured metadata refresh now runs twice per weekday, and only sample-ai takes the shared document lease. QA hashes use canonical reviewed content and stable key order, excluding collection clocks, rolling date windows, endpoint telemetry and runtime checks. Completeness and pending work remain bound to approval, so a degraded collection does not inherit readiness. Passing QA plus recorded approval remain mandatory, survive a telemetry-only refresh, and fail after changed application content. Six focused hash/promotion/deferral regressions and TypeScript pass. Existing approvals using the old whole-snapshot hash require one fresh QA/owner approval; no automatic approval migration is attempted.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

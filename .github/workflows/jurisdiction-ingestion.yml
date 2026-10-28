@@ -1,7 +1,8 @@
 name: Refresh configured jurisdictions
 on:
   schedule:
-    - cron: '45 * * * *'
+    # Two weekday refreshes; metadata collection does not take the live document lease.
+    - cron: '45 13,21 * * 1-5'
   workflow_dispatch:
 permissions: {}
 concurrency:

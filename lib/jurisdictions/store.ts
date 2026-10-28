@@ -2,7 +2,7 @@ import {databaseUrl} from "../runtime-environment";
 import {requireProductionMutation} from "../runtime-environment";
 import {Pool,type PoolClient} from "../database-pool";
 import {readFile,writeFile,mkdir} from "node:fs/promises";
-import {createHash,randomUUID} from "node:crypto";
+import {randomUUID} from "node:crypto";
 import path from "node:path";
 import type {Application,Meeting,SourceHealth} from "./adapters/types";
 import type {LaunchStatus} from "./types";
@@ -17,7 +17,8 @@ export async function jurisdictionDb(){
 }
 export async function jurisdictionTransaction<T>(work:(client:Pick<PoolClient,"query">)=>Promise<T>){const db=await jurisdictionDb(),client=await db.connect();try{await client.query("BEGIN");const r=await work(client);await client.query("COMMIT");return r;}catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}}
 const file=(id:string,kind:string)=>{if(!/^[a-z]+(?:-[a-z]+)*$/.test(id)||!/^\w+$/.test(kind))throw Error("Invalid staging key");return path.join(process.cwd(),".data","jurisdictions",id+"-"+kind+".json");};
-export const snapshotHash=(snapshot:StagingSnapshot)=>createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
+export {snapshotHash} from "./snapshot-hash";
+import {snapshotHash} from "./snapshot-hash";
 export async function saveStaging(snapshot:StagingSnapshot){requireProductionMutation();if(databaseUrl()){await(await jurisdictionDb()).query("INSERT INTO law_jurisdiction_snapshots(area_id,launch_status,data) VALUES($1,$2,$3) ON CONFLICT(area_id) DO UPDATE SET data=excluded.data,launch_status=excluded.launch_status,updated_at=now()",[snapshot.areaId,snapshot.launchStatus,JSON.stringify(snapshot)]);}else{await mkdir(path.dirname(file(snapshot.areaId,"snapshot")),{recursive:true});await writeFile(file(snapshot.areaId,"snapshot"),JSON.stringify(snapshot));}}
 export async function readStaging(areaId:string):Promise<StagingSnapshot|undefined>{if(databaseUrl())return(await(await jurisdictionDb()).query("SELECT data FROM law_jurisdiction_snapshots WHERE area_id=$1",[areaId])).rows[0]?.data;try{return JSON.parse(await readFile(file(areaId,"snapshot"),"utf8"));}catch{return undefined;}}
 export async function saveQa(report:QaReport){requireProductionMutation();if(databaseUrl())await(await jurisdictionDb()).query("INSERT INTO law_jurisdiction_qa(id,area_id,data,passed) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET data=excluded.data,passed=excluded.passed",[report.id,report.areaId,JSON.stringify(report),report.passed]);else{await mkdir(path.dirname(file(report.areaId,"qa")),{recursive:true});await writeFile(file(report.areaId,"qa"),JSON.stringify(report));}}
