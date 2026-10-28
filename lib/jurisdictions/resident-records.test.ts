@@ -13,3 +13,7 @@ it("maps only the staged, verified polygons and uses resident links",()=>{
  const map=stagedMapSnapshot(jurisdiction("ada-county"),snapshot);
  expect(map.cases).toHaveLength(1);expect(map.cases[0].geometry).toEqual(snapshot.applications[0].geometry);expect(map.cases[0].href).toBe("/us/id/ada-county/plan/202601398-CU-MSP");expect(map.cases[0].recordStatus).toBe("Active");
 });
+it("combines multiple parcel rows for one application into one project",()=>{
+ const copy=structuredClone(snapshot);copy.applications.push({...copy.applications[0],parcel:["R999999"],geometry:{type:"Polygon",coordinates:[[[-116.5,43.5],[-116.49,43.5],[-116.49,43.51],[-116.5,43.5]]]}});
+ const map=stagedMapSnapshot(jurisdiction("ada-county"),copy);expect(map.cases).toHaveLength(1);expect(map.cases[0].geometry?.type).toBe("MultiPolygon");expect(map.cases[0].parcelIds).toEqual(["R123456","R999999"]);
+});
