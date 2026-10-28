@@ -1,3 +1,4 @@
+import {retainRecentOrHeard} from "./collection-window";
 import {difference,feature,featureCollection,simplify} from "@turf/turf";
 import {jurisdiction} from "./registry";
 import {SourceHttp,SourceFailure} from "./http";
@@ -38,14 +39,18 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
   if(d.clipRule){const cities=(await gis.query(d.clipRule.layer.url,d.clipRule.layer.where)).features.filter(f=>polygonGeometry(f.geometry)).map(f=>simplify(feature(f.geometry as CaseGeometry),{tolerance:.00005,highQuality:true}));const clipped=difference(featureCollection([feature(snapshot.boundary),...cities]));if(!clipped)throw Error("County clipping produced no coverage");snapshot.coverageBoundary=clipped.geometry;}
   if(d.gis.impactAreas)snapshot.impactAreas=await gis.query(d.gis.impactAreas);
  }catch(e){snapshot.complete=false;snapshot.boundary=old?.boundary;snapshot.coverageBoundary=old?.coverageBoundary;if(!(e instanceof SourceFailure))snapshot.skipped.push({url:d.boundary.url,reason:String(e)});}
+ const sourceRows=snapshot.applications.length;
  snapshot.applications=groupApplications(d,snapshot.applications);
  // County public eligibility is controlled by the clipped coverage, never by a postal city.
- if(d.clipRule&&snapshot.coverageBoundary)snapshot.applications=snapshot.applications.flatMap(a=>{const eligible=coverageEligible(a,snapshot.coverageBoundary!);return eligible?[eligible]:[];});
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.matchedApplications=matchApplications(item,snapshot.applications);
  for(const meeting of snapshot.meetings)for(const item of meeting.items)for(const match of item.matchedApplications??[]){const app=snapshot.applications.find(a=>a.recordId===match.recordId);if(app)app.relatedCaseNumbers=[...new Set([...app.relatedCaseNumbers,...item.caseNumbers])];}
  const linked=new Set(snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.matchedApplications?.map(a=>a.recordId)??[])));
- if(!d.legacyPublic)snapshot.applications=snapshot.applications.filter(a=>!a.received||a.received>=range.start||linked.has(a.recordId));
+ if(!d.legacyPublic)snapshot.applications=retainRecentOrHeard(snapshot.applications,linked,range.start);
+ // Geometry intersection is bounded to the retained inventory, not all historic filings.
+ if(d.clipRule&&snapshot.coverageBoundary)snapshot.applications=snapshot.applications.flatMap(a=>{const eligible=coverageEligible(a,snapshot.coverageBoundary!);return eligible?[eligible]:[];});
+ snapshot.collectionStats={sourceRows,projectsBeforeScope:snapshot.applications.length,excludedByScope:0};
  snapshot.applications=applicationScope(d,snapshot.applications,snapshot.meetings);
+ snapshot.collectionStats.excludedByScope=snapshot.collectionStats.projectsBeforeScope-snapshot.applications.length;
  const allCases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.caseNumbers=item.caseNumbers.filter(id=>allCases.has(id)||d.caseNumberPatterns.some(p=>new RegExp(p,"i").test(id)));
  if(options.write)await saveStaging(snapshot);return snapshot;
