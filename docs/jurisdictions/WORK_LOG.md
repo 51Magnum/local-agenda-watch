@@ -36,6 +36,8 @@ A1+A2 implementation: grouping is declared by projectKey in the Ada registry, pr
 
 A3 implementation: the configured Ada hearing-suffix allowlist now scopes collection and resident reads (including existing staging snapshots). Agenda-linked staff permits remain eligible; individual applicants trigger residential privacy. The resident projection replaces private title/body/address, removes documents on protected full pages, and uses the existing approximate-area map treatment without parcel IDs. Individual/company/trust/agency detector and feed/map/full-page regressions pass (21 tests across the focused grouping/scope/record suites); TypeScript passes. Live privacy counts remain unverified.
 
+A4 implementation: Ada meeting listings no longer invent agenda items from attachments. Numbered PDF sections supply descriptions, recommendations, tabled notes, physical-page source links and actual 6 PM hearing times. Applicant headers are discarded. Document IDs remove report/memo/findings suffixes and document labels are human-readable. Agenda-only pages require a meaningful parsed description, otherwise return unavailable/404. Recorded PZC October 15 and BOCC October 14 text fixtures are redacted and their official provenance is recorded. Seven new parser regressions plus eleven existing onboarding tests pass. Full fresh-collection verification remains pending.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

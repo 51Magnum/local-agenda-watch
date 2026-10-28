@@ -21,7 +21,7 @@ export function displayStagedApplication(d:JurisdictionDefinition,a:Application)
  return{...a,...a.residentialPrivacy?{name:"Residential permit request",description:"A residential permit request. Review the official record for the proposed activity.",address:"",parcel:[]}: {},type:String(a.sourceFields[fields.type]??a.type??"Planning application").trim()||"Planning application",status:String(a.sourceFields[fields.status]??a.status??"").trim()};
 }
 export function stagedAppearances(snapshot:StagingSnapshot,a:Application){const ids=[a.recordId,...a.relatedCaseNumbers];return snapshot.meetings.filter(m=>m.items.some(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)));}
-const documents=(m:Meeting,a:Application)=>{const ids=[a.recordId,...a.relatedCaseNumbers];return m.items.filter(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)).flatMap(i=>i.attachments.filter(f=>f.kind!=="packet").map(f=>({label:f.title,filename:f.title,url:f.url,sourceUrl:m.meetingPageUrl})));};
+const documents=(m:Meeting,a:Application)=>{if(a.residentialPrivacy)return [];const ids=[a.recordId,...a.relatedCaseNumbers];return m.items.filter(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)).flatMap(i=>i.attachments.filter(f=>f.kind!=="packet").map(f=>({label:f.title,filename:f.title,url:f.url,sourceUrl:m.meetingPageUrl})));};
 export function stagedFeed(d:JurisdictionDefinition,snapshot:StagingSnapshot):HearingFeed{
  const active:ConfiguredHearing[]=stagedApplications(snapshot).map(raw=>{
   const a=displayStagedApplication(d,raw),appearances=stagedAppearances(snapshot,a);
