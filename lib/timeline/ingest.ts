@@ -1,3 +1,4 @@
+import {applicantNeedsReview} from "../applicant-privacy";
 import {jurisdiction} from "../jurisdictions/registry";
 import {caseReportPages} from "./report-pages";
 import { allowedSource, sourceRequest, isBlockedSource } from "./source-access";
@@ -98,7 +99,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         if (document.fields) {
           for (const field of document.fields) {
             if (DECISION_KEYS.has(field.key)) throw new Error("Decision fields must pass through document extraction and manual review");
-            facts.push({ ...field, areaId, caseId, id: digest(id + hash + caseId + field.key + field.value), documentId: id, documentHash: hash, sourceUrl: document.url, sourceKind: document.kind, confidence: 1, status: "auto_published", createdAt: now });
+            facts.push({ ...field, areaId, caseId, id: digest(id + hash + caseId + field.key + field.value), documentId: id, documentHash: hash, sourceUrl: document.url, sourceKind: document.kind, confidence: 1, status: field.key==="applicantCompany"&&applicantNeedsReview(field.value)?"pending":"auto_published", createdAt: now });
           }
         } else if (document.kind !== "agenda" && document.kind !== "case-record") {
           if (deadline - Date.now() < 50000) throw new Error("Case extraction deferred to next run: processing budget reached");
@@ -144,7 +145,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
               sourceUrl: document.url, sourceKind: document.kind, confidence: value.confidence,
               status: "pending", createdAt: now };
             candidate.verification=verifyCandidate(candidate,document,pages,{speakers:value.speakers,complete:value.complete,secondPass:agrees});
-            if(canAutoApprove(candidate) || (!DECISION_KEYS.has(fieldKey)&&!ocr&&value.confidence>=.95&&candidate.verification.case&&candidate.verification.quote&&candidate.verification.body))candidate.status="auto_published";
+            if(!(fieldKey==="applicantCompany"&&applicantNeedsReview(value.value))&&(canAutoApprove(candidate) || (!DECISION_KEYS.has(fieldKey)&&!ocr&&value.confidence>=.95&&candidate.verification.case&&candidate.verification.quote&&candidate.verification.body)))candidate.status="auto_published";
             facts.push(candidate);
           }
         }

@@ -1,3 +1,4 @@
+import {applicantNeedsReview} from "../applicant-privacy";
 import { DECISION_KEYS, LOW_STAKES_KEYS, type EvidenceField, type EvidenceState, type FieldKey, type PageText, type SourceDocument, type Speaker, type Verification } from "./types";
 export const exactText = (s:string) => s.replace(/\s+/g," ").trim();
 export function sourceBody(doc:SourceDocument): "pz"|"council"|"board"|undefined {
@@ -49,13 +50,14 @@ export function verifyCandidate(field:EvidenceField,doc:SourceDocument,pages:Pag
  return {version:1,case:caseOK,body:bodyOK,quote:quoteOK,value:valueOK,secondPass:second,speakers:roster,checkedAt:new Date().toISOString(),reasons:[...(!caseOK?["case mismatch or section unverified"]:[]),...(!bodyOK?["body mismatch"]:[]),...(!quoteOK?["quote not found"]:[]),...(!valueOK?["speaker evidence incomplete or inconsistent"]:[]),...(!second?["passes disagree or second pass missing"]:[])]};
 }
 export function passing(field:EvidenceField){const v=field.verification;return !!v&&v.case&&v.body&&v.quote&&v.value&&v.secondPass&&field.confidence>=.9;}
-export function canAutoApprove(field:EvidenceField){return LOW_STAKES_KEYS.has(field.key)&&passing(field);}
+export function canAutoApprove(field:EvidenceField){return !(field.key==="applicantCompany"&&applicantNeedsReview(field.value))&&LOW_STAKES_KEYS.has(field.key)&&passing(field);}
 export function queueReasons(f:EvidenceField){return [...(f.verification?.reasons??["verification needed"]),...(DECISION_KEYS.has(f.key)&&!LOW_STAKES_KEYS.has(f.key)?["decision field"]:[]),...(f.confidence<.9?["confidence below 90%"]:[])];}
 export function riskScore(f:EvidenceField){const v=f.verification;return (v?Number(!v.case)*10+Number(!v.body)*8+Number(!v.quote)*8+Number(!v.value)*6+Number(!v.secondPass)*3:4)+(1-f.confidence);}
 /** Relabel legacy rows; never grandfather them into verified publication. */
 export function reconcileFields(state:EvidenceState){let changed=0;
  for(const f of Object.values(state.fields)){
   const d=state.documents[f.documentId];if(!d||d.hash!==f.documentHash)continue;
+  if(f.key==="applicantCompany"&&applicantNeedsReview(f.value)&&f.status==="auto_published"){f.status="pending";changed++;}
   const key=correctedKey(f.key,d),label=bodyLabel(d);
   if(key!==f.key){f.key=key;f.status="pending";delete f.verification;changed++;}
   if(f.body!==label){f.body=label;changed++;}

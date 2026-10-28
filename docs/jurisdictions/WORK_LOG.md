@@ -74,6 +74,8 @@ L2 implementation: onboarding runtime DDL was removed with A8; migrations are th
 
 M6 read-only live verification (2026-10-28): current source has 257 applications, 154 polygon joins, 93 unique address points, 10 unmapped, zero deferred endpoint failures (247/257 located, 96.1%). This differs from the brief's older 267/221/42 expectation; these are measured counts, not an assertion that unmatched records lack official geometry elsewhere. No staging write or publication occurred. Detailed endpoint checks are in ignored output/jurisdictions/boise-geolocation-verification.json.
 
+L3 implementation: individual and uncertain applicantCompany values cannot auto-publish through AI prose, structured official fields or existing legacy auto-published evidence. Public reads enforce the gate immediately; reconciliation queues old auto-published identities for review. Explicitly identified organizations remain eligible under the existing evidence rules. Actual manual approval remains possible through the audited review path. Person detection also recognizes joint individual names. New tests cover high-confidence AI fallback, structured ingestion, legacy reconciliation, organizations and manual review.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

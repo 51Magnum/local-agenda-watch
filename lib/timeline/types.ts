@@ -1,3 +1,4 @@
+import {applicantNeedsReview} from "../applicant-privacy";
 export const EXTRACTED_KEYS = ["popupHeadline", "popupExplanation", "requestSummary", "acres", "units", "zoningRequested", "staffRecommendation", "keyConditions", "trafficSummary", "schoolComment", "nearbySchools", "densityContext", "buildingHeight", "parksOpenSpace", "constructionTiming", "applicantCompany", "pzConditions", "pzSpeakersFor", "pzSpeakersAgainst", "pzSpeakersNeutral", "councilConditions", "councilSpeakersFor", "councilSpeakersAgainst", "councilSpeakersNeutral", "pzHearingDate", "pzResult", "pzVote", "councilHearingDate", "councilDecision", "councilVote", "decisionDate"] as const;
 export type ExtractedKey = typeof EXTRACTED_KEYS[number];
 export type FieldKey = ExtractedKey | "appliedDate" | "caseStatus" | "lastActionDate" | "reviewDate";
@@ -39,6 +40,7 @@ export function verifiedAutoField(field:EvidenceField):boolean {
  return field.status==="auto_published"&&LOW_STAKES_KEYS.has(field.key)&&field.confidence>=.9&&v?.version===1&&v.case&&v.body&&v.quote&&v.value&&v.secondPass;
 }
 export function isPublicField(field: EvidenceField, state: EvidenceState): boolean {
+  if(field.key==="applicantCompany"&&applicantNeedsReview(field.value)&&field.status!=="approved")return false;
   if (field.key === "staffRecommendation" && isWorkflowRecommendation(field.value)) return false;
   const current = state.documents[field.documentId];
   return Boolean(current && current.hash === field.documentHash && current.state === "complete" &&
