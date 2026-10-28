@@ -1,0 +1,32 @@
+[
+  {
+    "id": "202600965-PCON",
+    "type": "PARCEL CONSOLIDATION",
+    "description": "An application for approval of a Property Consolidation to combine two parcels of Section ground to meet the 5 acre minimum in the Rural-Urban Transition (RUT) District and Variance to allow for the subject parcels to use the same access easement the neighbors are using and forgo the requirement of a Private Road application. The subject property is located at 1275 W Amity Rd; Section: 36, Township: 3 North, Range: 1 West.",
+    "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+  },
+  {
+    "id": "202601161-V",
+    "type": "VARIANCE",
+    "description": "Variance for existing detached structure in front setback. The property is located at 13999 E Hwy 21 and contains 44 acres in the Rural Preservation (RP) District; Section 20, T.3N R.4E.",
+    "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+  },
+  {
+    "id": "202601410-MSP",
+    "type": "MASTER SITE PLAN",
+    "description": "Application for approval for a Master Site Plan to allow for a 3,698 square feet for a building shell at 4522 S Seabiscuit to mirror the building at 4521 S Cloverdale Rd. The property is Lot 6, Block 1 of the Southpark Subdivision. The parking lot and lighting fixtures were installed at the time the first structures were built. The property is within the Limited Office (LO) District and contains approximately 0.4 acres; Section 28, T.3N., R.1E.",
+    "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+  },
+  {
+    "id": "202601455-AC",
+    "type": "ACCESSORY USE",
+    "description": "Application for approval of an accessory use to allow for a 793 sf detached ADU with a 3197 sf attached storage garage for a total of 3990 sf on an owner occupied property.",
+    "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+  },
+  {
+    "id": "202501845-S",
+    "type": "PRELIMINARY PLAT",
+    "description": "Final Plat application for Ned Ventoso Sub a two lot sub. The site is located at 13400 S Five Mile and contains approximately 10.12 acres currently zoned Rural Residential (RR) District; Section: 26, Town: 2N, Range: 1E.",
+    "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+  }
+]

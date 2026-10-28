@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`keeps five recorded official descriptions verbatim and titles short 1`] = `
+[
+  "Parcel Consolidation: a Property Consolidation to combine two…",
+  "Variance: Variance for existing detached structure in front setback",
+  "Master Site Plan: a Master Site Plan to allow for a 3,698 square…",
+  "Accessory Use: an accessory use to allow for a 793 sf detached ADU…",
+  "Preliminary Plat: Final Plat application for Ned Ventoso Sub a two…",
+]
+`;

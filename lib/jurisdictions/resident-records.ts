@@ -4,7 +4,7 @@ import type {PublicCaseRecord,RecordEvent} from "../localities/record-types";
 import type {MapSnapshot,CaseGeometry} from "../maps/types";
 import {geometryCentroid} from "../maps/spatial";
 import {polygonGeometry} from "../maps/gis";
-import {cleanResidentTitle,cleanResidentProse} from "../resident-copy";
+import {cleanResidentTitle} from "../resident-copy";
 import type {JurisdictionDefinition} from "./types";
 import type {Application,Meeting} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
@@ -12,6 +12,7 @@ import {applicationScope} from "./application-scope";
 import {protectMapCase} from "../residential-privacy";
 import {groupApplications} from "./application-groups";
 import {jurisdiction} from "./registry";
+import {applicationTitle} from "./application-copy";
 export type ConfiguredHearing=Hearing&{record:PublicCaseRecord};
 export function stagedApplications(snapshot:StagingSnapshot):Application[]{
  const d=jurisdiction(snapshot.areaId);return applicationScope(d,groupApplications(d,snapshot.applications),snapshot.meetings);
@@ -26,7 +27,7 @@ export function stagedFeed(d:JurisdictionDefinition,snapshot:StagingSnapshot):He
  const active:ConfiguredHearing[]=stagedApplications(snapshot).map(raw=>{
   const a=displayStagedApplication(d,raw),appearances=stagedAppearances(snapshot,a);
   const events:RecordEvent[]=appearances.map(m=>({id:m.id,caseIds:[a.recordId],name:m.title,address:"",body:d.hearingBodies.find(b=>b.key===m.body)?.name??m.title,date:m.date,startsAt:m.startsAt??m.date,sourceUrl:m.meetingPageUrl,documents:documents(m,a),linkedIds:[]}));
-  return{appId:a.recordId,displayTitle:cleanResidentTitle(a.name||a.description||a.type),appType:a.type,appTypeLabel:cleanResidentTitle(a.type),appStatus:a.status,appPhase:"Review",appPhaseRaw:"Review",appScope:cleanResidentProse(a.description)||null,description:cleanResidentProse(a.description),appAcres:null,externalUrl:a.recordUrl,energovPlanId:null,meetings:appearances.map(m=>({body:d.hearingBodies.find(b=>b.key===m.body)?.name??m.title,bodyLabel:m.title,date:m.date,dateLabel:m.date,time:m.startsAt?new Intl.DateTimeFormat("en-GB",{timeZone:d.timezone,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(m.startsAt)):undefined,location:"Confirm location in the official meeting record",sourceUrl:m.meetingPageUrl,agendaUrl:m.meetingPageUrl,continuedNote:null,staffReports:documents(m,a).map(f=>({label:f.label,url:f.url}))})),record:{sourceUrl:a.recordUrl,address:a.address,appliedDate:a.received,sourceStatus:a.status,approvalStatus:"",documents:events.flatMap(e=>e.documents),events}};
+  return{appId:a.recordId,displayTitle:applicationTitle(a.type,a.description||a.name),appType:a.type,appTypeLabel:cleanResidentTitle(a.type),appStatus:a.status,appPhase:"Review",appPhaseRaw:"Review",appScope:a.description||null,description:a.description,appAcres:null,externalUrl:a.recordUrl,energovPlanId:null,meetings:appearances.map(m=>({body:d.hearingBodies.find(b=>b.key===m.body)?.name??m.title,bodyLabel:m.title,date:m.date,dateLabel:m.date,time:m.startsAt?new Intl.DateTimeFormat("en-GB",{timeZone:d.timezone,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(m.startsAt)):undefined,location:"Confirm location in the official meeting record",sourceUrl:m.meetingPageUrl,agendaUrl:m.meetingPageUrl,continuedNote:null,staffReports:documents(m,a).map(f=>({label:f.label,url:f.url}))})),record:{sourceUrl:a.recordUrl,address:a.address,appliedDate:a.received,sourceStatus:a.status,approvalStatus:"",documents:events.flatMap(e=>e.documents),events}};
  });
  return{active,completed:[],refreshedAt:snapshot.checkedAt,scheduleRefreshedAt:snapshot.checkedAt,scheduleUnavailable:!snapshot.complete,agendaMeetings:snapshot.meetings.map(m=>({id:m.id,title:m.title,body:m.body,bodyLabel:m.title,date:m.date,dateLabel:m.date,sourceUrl:m.meetingPageUrl,meetingUrl:m.meetingPageUrl,items:m.items.map(i=>({itemNumber:i.itemId,title:i.title,caseIds:i.caseNumbers,agendaUrl:m.meetingPageUrl,staffReports:i.attachments.filter(a=>a.kind==="staff_report").map(a=>({label:a.title,url:a.url}))}))}))};
 }

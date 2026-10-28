@@ -38,6 +38,8 @@ A3 implementation: the configured Ada hearing-suffix allowlist now scopes collec
 
 A4 implementation: Ada meeting listings no longer invent agenda items from attachments. Numbered PDF sections supply descriptions, recommendations, tabled notes, physical-page source links and actual 6 PM hearing times. Applicant headers are discarded. Document IDs remove report/memo/findings suffixes and document labels are human-readable. Agenda-only pages require a meaningful parsed description, otherwise return unavailable/404. Recorded PZC October 15 and BOCC October 14 text fixtures are redacted and their official provenance is recorded. Seven new parser regressions plus eleven existing onboarding tests pass. Full fresh-collection verification remains pending.
 
+A5 implementation: a deterministic type-plus-source-subject title is bounded to 70 characters. Official descriptions now bypass title/prose rewriting in resident feeds and project panes. Five recorded Ada descriptions have title snapshots and exact body assertions, including the source's Preliminary Plat / Final Plat disagreement, which remains visible. Privacy-protected records continue to use the privacy-safe replacement rather than expose private source prose. Focused regression and TypeScript pass.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.
