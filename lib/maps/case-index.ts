@@ -1,3 +1,4 @@
+import {siteReviewAreaIds} from "../jurisdictions/generated";
 import {readProjectContent} from "@/lib/project-content-store";
 import {getProjectForCase} from "@/lib/projects";
 import {cleanResidentTitle} from "@/lib/resident-copy";
@@ -19,6 +20,8 @@ import {
   type ViewportData,
 } from "./viewport";
 export const MAP_INDEX_TAG = "map-case-index-v1";
+const reviewCacheKeys=siteReviewAreaIds.length?["resident-review:"+siteReviewAreaIds.join(",")]:[];
+const reviewSnapshots=()=>Promise.all(siteReviewAreaIds.map(id=>readMapSnapshot(id,{includeFlum:false})));
 /** Compact, cached directory: never read polygon, image or document payloads for search. */
 export const projectDirectory = unstable_cache(async () => {
   const areas = Object.values(AREAS).filter((a) => a.status === "live");
@@ -28,9 +31,10 @@ export const projectDirectory = unstable_cache(async () => {
     `SELECT area_id AS "areaId",case_id AS "caseId",data->>'title' AS title,data->>'typeLabel' AS "typeLabel",data->'caseIds' AS "caseIds",data->>'summary' AS "internalSummary",data->'residentialPrivacy' AS "residentialPrivacy" FROM law_map_cases WHERE area_id=ANY($1::text[]) ORDER BY area_id,case_id`,
     [areas.map((a) => a.id)],
   );
+  for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[])result.rows.push({areaId:snapshot!.jurisdiction,caseId:c.id,title:c.title,typeLabel:c.typeLabel,caseIds:[c.id],internalSummary:c.summary,residentialPrivacy:c.residentialPrivacy});
   const overrides=await privacyOverrides();
   return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?residentialPublicTitle({...row,summary:internalSummary}):row.title, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
-}, ["project-search-directory-v2-private-names"], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
+}, ["project-search-directory-v2-private-names",...reviewCacheKeys], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
 let pool: Pool, ready: Promise<void> | undefined;
 const schema = `CREATE TABLE IF NOT EXISTS law_map_sites(site_id text PRIMARY KEY,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,data jsonb NOT NULL);
 CREATE INDEX IF NOT EXISTS law_map_sites_bbox ON law_map_sites(min_lng,max_lng,min_lat,max_lat);
@@ -230,6 +234,7 @@ async function loadViewport(
       : [];
   const overrides = await privacyOverrides();
   const grouped = process.env.DATABASE_URL?rows.map(r=>r.data):combineRadiusCases(areas.map(area=>({area,cases:rows.filter(r=>r.area_id===area.id).map(r=>r.data)})),[(b[0]+b[2])/2,(b[1]+b[3])/2],25000);
+  if(zoom>=9)for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[]){const box=c.bounds;if(box&&box[0]<=b[2]&&box[2]>=b[0]&&box[1]<=b[3]&&box[3]>=b[1])grouped.push({...c,areaId:snapshot!.jurisdiction});}
   return {
     cases: grouped.slice(0, 1000).map((c) => {const safe=protectMapCase(c.areaId!, { ...publicFeature(c, c.areaId!, zoom), residentialPrivacy:residentialCase(c.areaId!,c.id.split(":").at(-1)!,c,overrides) }, overrides);return zoom<CASE_OUTLINE_ZOOM?{...safe,geometry:null}:safe;}),
     summaries,
@@ -238,7 +243,7 @@ async function loadViewport(
     bounds: b,
   };
 }
-export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v8-private-names"],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
+export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v8-private-names",...reviewCacheKeys],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";
@@ -271,6 +276,7 @@ async function manifest() {
           ).length ?? 0,
       });
     }
+  for(const snapshot of await reviewSnapshots())if(snapshot){counts=counts.filter(c=>c.area_id!==snapshot.jurisdiction);counts.push({area_id:snapshot.jurisdiction,count:snapshot.cases.length,upcoming:snapshot.cases.filter(c=>c.nextHearing).length});}
   const summaries: MapSummary[] = Object.values(AREAS)
     .filter((a) => a.status === "live")
     .map((a) => ({
@@ -295,7 +301,7 @@ async function manifest() {
     })),
   };
 }
-export const mapManifest = unstable_cache(manifest, ["map-manifest-v1"], {
+export const mapManifest = unstable_cache(manifest, ["map-manifest-v1",...reviewCacheKeys], {
   revalidate: 3600,
   tags: [MAP_INDEX_TAG, PRIVACY_TAG],
 });
@@ -360,6 +366,7 @@ export async function exportMapFeatures(cursor = "") {
 
 /** Resolve linked site references on the server so shared links do not depend on map features arriving first. */
 export async function siteMembers(item:MapCase,areaId:string){
+ if(siteReviewAreaIds.includes(areaId))return;
  if(!item.geometry||item.citywide)return;
  if(process.env.DATABASE_URL){await ensureSites();const rows=await indexQuery("SELECT data->'members' AS members FROM law_map_sites WHERE data->'members' @> $1::jsonb LIMIT 1",[JSON.stringify([{areaId,caseId:item.id}])]);return rows.rows[0]?.members as MapCase["members"];}
  return item.members;

@@ -1,3 +1,5 @@
+import {jurisdiction} from "../jurisdictions/registry";
+import {residentProject} from "../jurisdictions/resident-project";
 import {readProjectContent} from "@/lib/project-content-store";
 import {projectLocation} from "./project-location";
 import {residentialCase,redactResidence,protectMapCase,privateResidentialDocument} from "@/lib/residential-privacy";
@@ -41,6 +43,7 @@ async function detail(
   caseId: string,
   followLead = true,
 ): Promise<PaneData | null> {
+  if(jurisdiction(areaId)&&!jurisdiction(areaId).legacyPublic)return residentProject(areaId,caseId);
   const config = getJurisdiction(areaId),
     area = config?.area;
   if (!config || !area || area.status !== "live") return null;

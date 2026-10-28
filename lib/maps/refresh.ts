@@ -26,7 +26,7 @@ export function parcelNumbers(value: unknown, ignored: string[]): string[] {
   if (typeof value !== "string") return [];
   return [...new Set(value.toUpperCase().split(/[\s,;]+/).map((s) => s.trim()).filter((s) => /^[A-Z0-9-]{3,40}$/.test(s) && !ignored.includes(s)))];
 }
-async function fetchFlum(config: JurisdictionConfig): Promise<FlumCache> {
+export async function fetchFlum(config: JurisdictionConfig): Promise<FlumCache> {
   const [metadata, source] = await Promise.all([gisJson(config.flum.layerUrl + "?f=json"), geoQuery(config.flum.layerUrl, { outFields: config.flum.categoryField, geometryPrecision: "6" })]);
   const features = source.features.filter((f) => polygonGeometry(f.geometry)).map((f) => {
     const original = feature(f.geometry as CaseGeometry, { [config.flum.categoryField]: f.properties?.[config.flum.categoryField] });

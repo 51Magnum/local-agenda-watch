@@ -62,12 +62,13 @@
       "fields": {
         "id": "APPFILE",
         "name": "AppApplicDesc",
-        "type": "AppType",
-        "status": "APPStatus",
+        "type": "APTDescription",
+        "status": "STATUS",
         "parcel": "PARCEL",
         "description": "AppApplicDesc",
         "received": "APPRcvdDate"
-      }
+      },
+      "flumField": "Name"
     },
     "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/"
   },
@@ -180,6 +181,9 @@
         }
       ]
     },
-    "sources": {}
-  }
+    "sources": {},
+    "coverageNote": "Recent planning applications in unincorporated Ada County. Earlier hearing history may be incomplete; official county records provide the full record."
+  },
+  "cachedBoundaryFile": "../areas/boundaries/ada-county.json",
+  "cachedCoverageBoundaryFile": "../areas/boundaries/ada-county-jurisdiction.json"
 }

@@ -1,3 +1,4 @@
+import {isSiteReviewArea} from "../jurisdictions/registry";
 import {bbox} from "@turf/turf";
 import {trackedRows} from "@/lib/db-transfer";
 import {revalidateTag,unstable_cache} from "next/cache";
@@ -17,7 +18,8 @@ function database() {
 }
 function filename(id: string) { if (!/^[a-z0-9-]+$/.test(id)) throw new Error("Invalid map cache ID"); return path.join(process.cwd(), ".data", "maps", id + ".json"); }
 export async function readMapSnapshot(id: string,options:{caseIds?:readonly string[];includeFlum?:boolean;bounds?:readonly number[]}={includeFlum:true}): Promise<MapSnapshot | undefined> {
-  if (process.env.DATABASE_URL) {
+  if(isSiteReviewArea(id)){const snapshot=await(await import("../jurisdictions/runtime")).configuredSnapshot(id);if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));if(options.bounds)snapshot.cases=snapshot.cases.filter(c=>{const b=c.bounds,q=options.bounds!;return b&&b[0]<=q[2]&&b[2]>=q[0]&&b[1]<=q[3]&&b[3]>=q[1];});if(options.includeFlum)snapshot.flum=await readFlumSnapshot(id);return snapshot;}
+ if (process.env.DATABASE_URL) {
    const db=database();await initialized;
    if(options.bounds){
     const query=`SELECT (snapshot-'cases')||jsonb_build_object('cases',coalesce((
@@ -39,6 +41,7 @@ export async function readMapSnapshot(id: string,options:{caseIds?:readonly stri
    if(options.includeFlum===false)delete snapshot.flum;return snapshot; } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
 }
 export async function saveMapSnapshot(snapshot: MapSnapshot) {
+  if(isSiteReviewArea(snapshot.jurisdiction))return;
   if (process.env.DATABASE_URL) {
    const db=database();await initialized;const {flum,...cases}=snapshot;
    await db.query("INSERT INTO law_map_cache (jurisdiction,snapshot) VALUES ($1,$2::jsonb) ON CONFLICT (jurisdiction) DO UPDATE SET snapshot=excluded.snapshot",[snapshot.jurisdiction,JSON.stringify(cases)]);
@@ -64,6 +67,7 @@ export async function exportFlumPage(id:string,offset:number){
  return{updatedAt:row.updatedAt,legend:row.legend,features:row.features,nextOffset:offset+row.features.length<row.total?offset+row.features.length:undefined};
 }
 export async function readFlumSnapshot(id:string,options?:{bounds:readonly number[]}){
+ if(isSiteReviewArea(id)){const config=(await import("./jurisdictions")).getJurisdiction(id);return config?(await import("./refresh")).fetchFlum(config):undefined;}
  if(!process.env.DATABASE_URL)return(await readMapSnapshot(id))?.flum;
  if(options?.bounds){
   const db=database();await initialized;

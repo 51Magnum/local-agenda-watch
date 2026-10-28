@@ -10,9 +10,11 @@ import {jurisdiction} from "./registry";
 import {readStaging} from "./store";
 import {computeDeadlines} from "./participation";
 import {polygonGeometry} from "../maps/gis";
+import {displayStagedApplication} from "./resident-records";
 export async function privateProject(areaId:string,caseId:string):Promise<PaneData|undefined>{
  const d=jurisdiction(areaId),snapshot=await readStaging(areaId);if(!d||!snapshot)return;
- const app=snapshot.applications.find(a=>a.recordId===caseId||a.relatedCaseNumbers.includes(caseId));
+ const rawApp=snapshot.applications.find(a=>a.recordId===caseId||a.relatedCaseNumbers.includes(caseId));
+ const app=rawApp?displayStagedApplication(d,rawApp):undefined;
  const ids=[...new Set([caseId,...app?[app.recordId,...app.relatedCaseNumbers]:[]])];
  const appearances=snapshot.meetings.filter(m=>m.items.some(i=>(i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(a=>ids.includes(a.recordId))))).sort((a,b)=>a.date.localeCompare(b.date));
  if(!app&&!appearances.length)return;
