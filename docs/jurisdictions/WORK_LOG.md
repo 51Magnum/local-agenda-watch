@@ -80,6 +80,10 @@ L5 implementation: eSCRIBE meeting fixture is reduced from 910,045 to 29,157 byt
 
 L6 implementation: QA upcoming hearings are deduplicated by body/date before limiting the list, with deterministic preference for confirmed agenda evidence over tentative hints and repeated calendar IDs. Past dates were already excluded and remain so. A listed meeting without agenda/item evidence stays tentative, and tentative rows no longer receive computed participation deadlines. Regression covers iQM2 5471/5472, past dates, hints and input-order independence.
 
+Validation follow-ups: full-suite testing caught that bounded OCR was waiting on unrelated short packet pages. Legacy OCR now selects case sections before OCR while retaining the entire cached packet for future case additions; Nampa/Kuna regressions assert both properties. The first live Ada dry-run exposed excessive CPU from detailed intersection checks over the entire historic inventory; it was stopped without writing staging. Agenda matching and recent-or-heard retention now precede expensive county intersection, preserving the eight explicitly reviewed older heard project numbers. A new retention regression covers all eight, unrelated old records, recent and undated filings.
+
+C preparation: a pure QA builder now permits `backfill ... --dry-run --report` to create redacted review artifacts directly from fresh in-memory collection. These reports are explicitly nonpassing, prefixed dry-run, not saved as durable QA, and cannot authorize promotion. All existing durable QA gates remain. Launch metrics record pre-scope and retained counts, duplicate project numbers, linked/privacy counts and the eight reviewed historical cases. Missing durable spend data is labeled unavailable; fresh dry-run AI spend is zero. No environment override, production staging write or approval bypass was added.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

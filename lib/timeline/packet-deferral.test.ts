@@ -10,10 +10,10 @@ const empty=()=>Object.fromEntries(EXTRACTED_KEYS.map(k=>[k,{value:null,page:nul
 it.each([["nampa","CUP-00412-2026"],["kuna","26-04-PP"]])("extracts the discovered %s packet title using only the case section",async(areaId,caseId)=>{
  const state=emptyEvidenceState(),store:EvidenceStore={read:async()=>structuredClone(state),mutate:async f=>f(state)};
  const doc:SourceDocument={areaId,url:"https://"+jurisdiction(areaId).area.timeline!.hosts[0]+"/packet.pdf",title:"Planning and Zoning Commission meeting packet — 2026-10-15",kind:"staff-report",caseIds:[caseId]};
- const extract=vi.fn().mockResolvedValue(empty());
+ const extract=vi.fn().mockResolvedValue(empty()),ocr=vi.fn(async(_bytes:Uint8Array,pages:import("./types").PageText[])=>pages);
  const own={page:2,text:caseId+" Staff report describing the proposed project.",method:"native" as const};
- const run=await ingestDocuments(store,[doc],{download:async()=>new Uint8Array([1]),text:async()=>[{page:1,text:"H-2026-9999 Another proposal",method:"native"},own,{page:3,text:"H-2026-9998 Another project",method:"native"}],ocr:async(_b,p)=>p,extract});
- expect(run.processed).toBe(1);expect(extract).toHaveBeenCalledWith(doc,caseId,[own]);
+ const run=await ingestDocuments(store,[doc],{download:async()=>new Uint8Array([1]),text:async()=>[{page:1,text:"H-2026-9999 Another proposal",method:"native"},own,{page:3,text:"H-2026-9998 Another project",method:"native"}],ocr,extract});
+ expect(run.processed).toBe(1);expect(extract).toHaveBeenCalledWith(doc,caseId,[own]);expect(ocr).toHaveBeenCalledWith(expect.any(Uint8Array),[own]);expect(state.documents[documentId(doc)].pages).toHaveLength(3);
 });
 it("defers onboarding packets before download/invalidation and backs off without consuming retries",async()=>{
  vi.spyOn(console,"error").mockImplementation(()=>{});vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-28T12:00:00Z"));

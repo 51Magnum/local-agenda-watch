@@ -87,9 +87,12 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
       if (document.content === undefined) {
         if (pages.some((page) => page.method === "native" && page.text.trim().length < 30) && deadline - Date.now() < 50000) throw new Error("OCR deferred to next run: processing budget reached");
-        pages = await (dependencies.ocr ?? ocrMissingPages)(bytes, pages);
+        const relevant=jurisdiction(areaId)?.legacyPublic&&/packet/i.test(document.title)?new Set(document.caseIds.flatMap(caseId=>caseReportPages(pages,caseId,true).map(p=>p.page))):undefined;
+        const ocrInput=relevant?.size?pages.filter(p=>relevant.has(p.page)):pages;
+        const ocrPages=await (dependencies.ocr ?? ocrMissingPages)(bytes,ocrInput),byPage=new Map(ocrPages.map(p=>[p.page,p]));
+        pages=pages.map(p=>byPage.get(p.page)??p);
         await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
-        if(pages.some(p=>p.method==="native"&&p.text.trim().length<30))throw Error("OCR deferred to next run: bounded page images saved; remaining scanned pages retained");
+        if(ocrPages.some(p=>p.method==="native"&&p.text.trim().length<30))throw Error("OCR deferred to next run: bounded page images saved; remaining scanned pages retained");
       }
       if(document.content===undefined&&pages.some(p=>p.method==="ocr"))await store.flush?.();
       const facts: EvidenceField[] = [];
