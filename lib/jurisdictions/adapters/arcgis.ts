@@ -23,7 +23,7 @@ export function arcgisAdapter(http:SourceHttp,attributeOnly=false):GisAdapter {
 export function applicationFromFeature(config:JurisdictionDefinition,f:FeatureCollection<Geometry|null>["features"][number]):Application {
  const p=f.properties??{},fields=config.applications.params.fields as Record<string,string>??{},value=(k:string)=>clean(p[fields[k]??k]),recordId=value("id");
  const date=value("received");let received:string|undefined;if(date){const d=new Date(/^\d+$/.test(date)?Number(date):date);if(!Number.isNaN(d.getTime()))received=d.toISOString().slice(0,10);}
- return{recordId,relatedCaseNumbers:caseNumbers(config,value("related")),name:value("name")||recordId,type:value("type"),status:value("status"),address:value("address"),parcel:value("parcel").split(/[;,\s]+/).filter(Boolean),description:value("description"),received,geometry:f.geometry??undefined,recordUrl:applicationRecordUrl(config,recordId),sourceUrl:applicationRecordUrl(config,recordId),sourceFields:p};
+ return{recordId,relatedCaseNumbers:caseNumbers(config,value("related")),name:value("name")||recordId,type:value("type"),status:value("status"),address:value("address"),parcel:value("parcel").split(/[;,\s]+/).filter(Boolean),description:String(p[fields.description??"description"]??""),received,geometry:f.geometry??undefined,recordUrl:applicationRecordUrl(config,recordId),sourceUrl:applicationRecordUrl(config,recordId),sourceFields:p};
 }
 export function applicationAdapter(config:JurisdictionDefinition,http:SourceHttp):ApplicationAdapter {
  if(config.legacyPublic)return legacyAdapters(config,()=>legacyFeed(config)).applications;

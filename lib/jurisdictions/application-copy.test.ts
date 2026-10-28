@@ -5,6 +5,7 @@ import {displayStagedApplication,stagedFeed} from "./resident-records";
 import {jurisdiction} from "./registry";
 import type {Application} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
+import {applicationFromFeature} from "./adapters/arcgis";
 it("keeps five recorded official descriptions verbatim and titles short",()=>{
  const d=jurisdiction("ada-county");
  for(const e of examples){
@@ -24,4 +25,8 @@ it("removes repeated procedure words so the recorded hearing subject remains in 
  const description="An application for approval of a Conditional Use and Master Site Plan for a previously approved Contractor's Yard. Request is for a continuance of use with no additional proposed structures.";
  expect(applicationTitle("CONDITIONAL USE",description)).toBe("Conditional Use: previously approved Contractor's Yard");
  expect(description).toContain("Conditional Use and Master Site Plan");
+});
+it("preserves source whitespace and legal-description casing at the GIS ingestion boundary",()=>{
+ const description="A proposal in the RUT   District.\nSection 20, T.3N R.4E.\n793 sf detached ADU.",d=jurisdiction("ada-county"),a=applicationFromFeature(d,{type:"Feature",geometry:null,properties:{APPFILE:"202601398-CU",AppApplicDesc:description,APTDescription:"CONDITIONAL USE"}});
+ expect(a.description).toBe(description);expect(displayStagedApplication(d,a).description).toBe(description);expect(applicationTitle(a.type,a.description)).not.toContain("\n");
 });
