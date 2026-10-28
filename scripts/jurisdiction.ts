@@ -7,7 +7,7 @@ import {collectJurisdiction} from "../lib/jurisdictions/collect";
 import {promoteStaging,readStaging} from "../lib/jurisdictions/store";
 async function main(){
  const [command,id,...args]=process.argv.slice(2),value=(flag:string,defaultValue:string)=>{const index=args.indexOf(flag);return index<0?defaultValue:args[index+1]??defaultValue;};
- if(command==="list"){console.log((args.includes("--public")?publicJurisdictions():ingestionJurisdictions()).map(d=>d.id).join("\n"));return;}
+ if(command==="list"){console.log(([id,...args].includes("--public")?publicJurisdictions():ingestionJurisdictions()).map(d=>d.id).join("\n"));return;}
  const d=jurisdiction(id);if(!d)throw Error("Unknown jurisdiction "+id);
  switch(command){
   case"validate":console.log(JSON.stringify(await validateEndpoints(id),null,2));break;
