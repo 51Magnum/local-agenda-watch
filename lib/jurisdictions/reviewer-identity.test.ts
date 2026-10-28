@@ -3,6 +3,7 @@ vi.mock("./store",async original=>({...await original<typeof import("./store")>(
 vi.mock("../timeline/document-work-lease",()=>({claimDocumentWork:vi.fn(async()=>async()=>{})}));
 import {reviewerIdentity,authorizedReviewer} from "../timeline/auth";
 import {approveQa} from "./store";
+import {claimDocumentWork} from "../timeline/document-work-lease";
 import {POST as action} from "../../app/admin/jurisdictions/action/route";
 import {POST as approval} from "../../app/admin/jurisdictions/approval/route";
 afterEach(()=>{vi.unstubAllEnvs();vi.clearAllMocks();});
@@ -15,4 +16,5 @@ it("passes the authenticated identity to both approval entrypoints",async()=>{
  const first=await action(new Request("https://example.test/admin/jurisdictions/action",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({command:"approve",areaId:"ada-county",qaId:"qa"})}));expect(first.status).toBe(200);
  const second=await approval(new Request("https://example.test/admin/jurisdictions/approval",{method:"POST",headers,body:new URLSearchParams({areaId:"ada-county",qaId:"qa"})}));expect(second.status).toBe(303);
  expect(approveQa).toHaveBeenNthCalledWith(1,"ada-county","qa","admin");expect(approveQa).toHaveBeenNthCalledWith(2,"ada-county","qa","admin");
+ expect(claimDocumentWork).not.toHaveBeenCalled();
 });

@@ -10,8 +10,10 @@ export async function POST(request:Request){
  const disabled=previewMutationResponse();if(disabled)return disabled;
 
  const actor=reviewerIdentity(request.headers.get("authorization"));if(!actor||!sameOrigin(request))return Response.json({error:"Admin authentication and same origin required"},{status:403});
- const release=await claimDocumentWork();if(!release)return Response.json({status:"busy"},{status:409});
- try{const input=await request.json();if(typeof input.areaId!=="string"||typeof input.command!=="string")throw Error("Invalid operation");let result:unknown;
+ let release:()=>Promise<void>=async()=>{};
+ try{const input=await request.json();if(typeof input.areaId!=="string"||typeof input.command!=="string")throw Error("Invalid operation");
+ if(["sample-ai","replace-image"].includes(input.command)){const lease=await claimDocumentWork();if(!lease)return Response.json({status:"busy"},{status:409});release=lease;}
+ let result:unknown;
  switch(input.command){case"validate":result=await validateEndpoints(input.areaId);break;case"backfill":{const s=await collectJurisdiction(input.areaId,{write:true});result={applications:s.applications.length,meetings:s.meetings.length,health:s.health,complete:s.complete};break;}case"sample-ai":result=await sampleAi(input.areaId);break;case"runtime-check":result=await checkRuntimeDocuments(input.areaId);break;case"qa-report":result=await qaReport(input.areaId);break;case"remove-image":case"replace-image":if(typeof input.caseId!=="string")throw Error("Choose a case");result=await replacePrivateImage(input.areaId,input.caseId,input.command==="replace-image"?input.sourceUrl:undefined);break;case"approve":if(typeof input.qaId!=="string")throw Error("Choose the passing QA report");result=await approveQa(input.areaId,input.qaId,actor);break;default:throw Error("Unknown operation");}
  return Response.json(result,{headers:{"Cache-Control":"private, no-store"}});
  }catch(e){return Response.json({error:e instanceof Error?e.message:"Operation failed"},{status:400,headers:{"Cache-Control":"private, no-store"}});}finally{await release();}
