@@ -64,6 +64,8 @@ M3 decision: exempt legacyPublic areas from their unmeasured monthly/backfill do
 
 M4 implementation: whole-PDF file_data submissions now refuse before reserving; token estimates use bounded text bytes plus 8,192 tokens per physical page image. OCR sends at most two page images, preserves physical numbers, saves them before deferring remaining scanned pages, and resumes using cached pages. Native onboarding samples may download individual Ada/Boise reports up to a separately validated 160 MB ceiling but inspect only the first 12 pages/20,000 characters; no larger download authorizes a whole-PDF AI upload. Large eligible reports are queued rather than permanently excluded at 45 MB, and remaining pages are explicitly deferred. Tests cover a 20-page scanned document with requests below 60k, oversized native sampling and exclusions. Actual 53–135 MB Vercel-runtime processing remains unverified; no paid sample or production write was run.
 
+M5 inspection outcome and fix: the alleged geometry-rate input swap was incorrect and is skipped; the existing row already used geometryMatchRate. The ambiguous no-location count was replaced with separate applicationsWithoutGeometry, applicationsWithoutAddress and agendaItemsWithoutMatchedLocation. The last explicitly measures matched application geometry/address, not a claim that all agenda prose was searched for an address. A mixed fixture asserts distinct 50% / 2 / 1 / 3 outputs so these measures cannot silently be interchanged.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.
