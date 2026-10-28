@@ -8,15 +8,17 @@ import {cleanResidentTitle,cleanResidentProse} from "../resident-copy";
 import type {JurisdictionDefinition} from "./types";
 import type {Application,Meeting} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
+import {applicationScope} from "./application-scope";
+import {protectMapCase} from "../residential-privacy";
 import {groupApplications} from "./application-groups";
 import {jurisdiction} from "./registry";
 export type ConfiguredHearing=Hearing&{record:PublicCaseRecord};
 export function stagedApplications(snapshot:StagingSnapshot):Application[]{
- return groupApplications(jurisdiction(snapshot.areaId),snapshot.applications);
+ const d=jurisdiction(snapshot.areaId);return applicationScope(d,groupApplications(d,snapshot.applications),snapshot.meetings);
 }
 export function displayStagedApplication(d:JurisdictionDefinition,a:Application):Application{
  const fields=d.applications.params.fields as Record<string,string>??{};
- return{...a,type:String(a.sourceFields[fields.type]??a.type??"Planning application").trim()||"Planning application",status:String(a.sourceFields[fields.status]??a.status??"").trim()};
+ return{...a,...a.residentialPrivacy?{name:"Residential permit request",description:"A residential permit request. Review the official record for the proposed activity.",address:"",parcel:[]}: {},type:String(a.sourceFields[fields.type]??a.type??"Planning application").trim()||"Planning application",status:String(a.sourceFields[fields.status]??a.status??"").trim()};
 }
 export function stagedAppearances(snapshot:StagingSnapshot,a:Application){const ids=[a.recordId,...a.relatedCaseNumbers];return snapshot.meetings.filter(m=>m.items.some(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)));}
 const documents=(m:Meeting,a:Application)=>{const ids=[a.recordId,...a.relatedCaseNumbers];return m.items.filter(i=>i.caseNumbers.some(id=>ids.includes(id))||i.matchedApplications?.some(match=>match.recordId===a.recordId)).flatMap(i=>i.attachments.filter(f=>f.kind!=="packet").map(f=>({label:f.title,filename:f.title,url:f.url,sourceUrl:m.meetingPageUrl})));};
@@ -33,7 +35,7 @@ export function stagedMapSnapshot(d:JurisdictionDefinition,snapshot:StagingSnaps
  return{version:1,jurisdiction:d.id,updatedAt:snapshot.checkedAt,warnings:[],cases:feed.active.map(h=>{
   const a=applications.find(a=>a.recordId===h.appId)!,geometry=a.geometry&&polygonGeometry(a.geometry)?a.geometry as CaseGeometry:null;
   const next=h.meetings.filter(m=>m.date>=today).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  return{id:h.appId,areaId:d.id,title:h.displayTitle??h.appId,summary:h.description??"",type:h.appType,typeLabel:h.appTypeLabel,recordStatus:h.appStatus,stage:next?/board|council/i.test(next.body)?"Council/Board":"P&Z":"In review",href:`/${d.area.country}/${d.state}/${d.id}/plan/${encodeURIComponent(h.appId)}`,geometry,centroid:geometry?geometryCentroid(geometry):null,bounds:geometry?bbox(geometry).slice(0,4) as [number,number,number,number]:undefined,source:geometry?"polygon":"none",sourceUrl:a.sourceUrl,confidence:geometry?"exact":"approximate",citywide:false,flumCategories:[],parcelIds:a.parcel,...next?{nextHearing:{date:next.date,body:next.body,label:next.body+" · "+next.date}}:{}};
+  return protectMapCase(d.id,{id:h.appId,residentialPrivacy:a.residentialPrivacy,areaId:d.id,title:h.displayTitle??h.appId,summary:h.description??"",type:h.appType,typeLabel:h.appTypeLabel,recordStatus:h.appStatus,stage:next?/board|council/i.test(next.body)?"Council/Board":"P&Z":"In review",href:`/${d.area.country}/${d.state}/${d.id}/plan/${encodeURIComponent(h.appId)}`,geometry,centroid:geometry?geometryCentroid(geometry):null,bounds:geometry?bbox(geometry).slice(0,4) as [number,number,number,number]:undefined,source:geometry?"polygon":"none",sourceUrl:a.sourceUrl,confidence:geometry?"exact":"approximate",citywide:false,flumCategories:[],parcelIds:a.parcel,...next?{nextHearing:{date:next.date,body:next.body,label:next.body+" · "+next.date}}:{}});
  })};
 }
 export function configuredRecord(h:Hearing):PublicCaseRecord{return(h as ConfiguredHearing).record??{sourceUrl:h.externalUrl??undefined,address:"",sourceStatus:h.appStatus,approvalStatus:"",events:[],documents:[]};}

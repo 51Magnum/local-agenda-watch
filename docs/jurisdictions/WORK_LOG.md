@@ -34,6 +34,8 @@ Each focused implementation commit will record its validation and remaining limi
 
 A1+A2 implementation: grouping is declared by projectKey in the Ada registry, preserves source suffix aliases, unions parcels and polygons, and matches combined agenda identifiers by project number plus compatible suffix sets. Matching now happens after grouping and before the existing hearing-linked retention rule; combined agenda aliases are retained for resident links/history. Nine focused regressions pass and TypeScript passes. Fresh live backfill/counts and the eight missing heard records remain to verify after agenda parsing and preview isolation; these are not yet claimed complete.
 
+A3 implementation: the configured Ada hearing-suffix allowlist now scopes collection and resident reads (including existing staging snapshots). Agenda-linked staff permits remain eligible; individual applicants trigger residential privacy. The resident projection replaces private title/body/address, removes documents on protected full pages, and uses the existing approximate-area map treatment without parcel IDs. Individual/company/trust/agency detector and feed/map/full-page regressions pass (21 tests across the focused grouping/scope/record suites); TypeScript passes. Live privacy counts remain unverified.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

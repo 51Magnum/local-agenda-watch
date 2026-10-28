@@ -1,0 +1,20 @@
+import type {Application,Meeting} from "./adapters/types";
+import type {JurisdictionDefinition} from "./types";
+/** Conservative name classifier: organizations are excluded before person patterns. */
+export function individualApplicant(value:unknown):boolean{
+ const text=String(value??"").trim();
+ if(!text||/\b(?:LLC|L\.?L\.?C\.?|INC|CORP|COMPANY|CO\.|TRUST|LP|LLP|LTD|PARTNERS|PARTNERSHIP|HOLDINGS|ASSOCIATES|DEVELOPMENT|DEVELOPERS|HOMES|BUILDERS|CHURCH|SCHOOL|DISTRICT|COUNTY|CITY|STATE|DEPARTMENT|AUTHORITY|COMMISSION|AGENCY|FOUNDATION|UNIVERSITY|HOA|ASSOCIATION)\b/i.test(text))return false;
+ const word="[\\p{L}][\\p{L}.'’\\-]*";
+ return new RegExp(`^${word}(?: ${word})?,\\s*${word}(?: ${word}){0,2}$`,"u").test(text)||new RegExp(`^${word}(?: ${word}){1,3}$`,"u").test(text);
+}
+export function hearingApplication(d:JurisdictionDefinition,a:Application){
+ const suffixes=d.applications.params.hearingSuffixes as string[]|undefined;
+ return !suffixes||[a.recordId,...a.relatedCaseNumbers].some(id=>id.split("-").slice(1).some(s=>suffixes.includes(s)));
+}
+export function applicationScope(d:JurisdictionDefinition,applications:Application[],meetings:Meeting[]):Application[]{
+ const linked=new Set(meetings.flatMap(m=>m.items.flatMap(i=>[...i.caseNumbers,...i.matchedApplications?.map(a=>a.recordId)??[]])));
+ return applications.filter(a=>hearingApplication(d,a)||[a.recordId,...a.relatedCaseNumbers].some(id=>linked.has(id))).map(a=>{
+  const field=String(d.applications.params.applicantField??"");
+  return {...a,...!hearingApplication(d,a)&&field&&individualApplicant(a.sourceFields[field])?{residentialPrivacy:true}:{}};
+ });
+}

@@ -75,7 +75,20 @@
           "PRJProjectNum"
         ],
         "pattern": "^\\d{9}"
-      }
+      },
+      "hearingSuffixes": [
+        "ZC",
+        "DA",
+        "S",
+        "PUD",
+        "CU",
+        "V",
+        "VAC",
+        "A",
+        "CPA",
+        "TE"
+      ],
+      "applicantField": "APPLICANT"
     },
     "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/"
   },

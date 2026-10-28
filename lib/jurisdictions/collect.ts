@@ -8,6 +8,7 @@ import type {CaseGeometry} from "../maps/types";
 import {combinePolygons,polygonGeometry} from "../maps/gis";
 import {readStaging,saveStaging,type StagingSnapshot} from "./store";
 import {matchSignupEvents,parseTentativeTable} from "./participation-sources";
+import {applicationScope} from "./application-scope";
 import {groupApplications} from "./application-groups";
 import {matchApplications} from "./matching";
 import {discoverStagingLibraries} from "./libraries";
@@ -41,6 +42,7 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  for(const meeting of snapshot.meetings)for(const item of meeting.items)for(const match of item.matchedApplications??[]){const app=snapshot.applications.find(a=>a.recordId===match.recordId);if(app)app.relatedCaseNumbers=[...new Set([...app.relatedCaseNumbers,...item.caseNumbers])];}
  const linked=new Set(snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.matchedApplications?.map(a=>a.recordId)??[])));
  if(!d.legacyPublic)snapshot.applications=snapshot.applications.filter(a=>!a.received||a.received>=range.start||linked.has(a.recordId));
+ snapshot.applications=applicationScope(d,snapshot.applications,snapshot.meetings);
  const allCases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.caseNumbers=item.caseNumbers.filter(id=>allCases.has(id)||d.caseNumberPatterns.some(p=>new RegExp(p,"i").test(id)));
  if(options.write)await saveStaging(snapshot);return snapshot;
