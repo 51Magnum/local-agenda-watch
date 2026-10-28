@@ -3,15 +3,16 @@ import type {Hearing,HearingFeed} from "../localities/types";
 import type {PublicCaseRecord,RecordEvent} from "../localities/record-types";
 import type {MapSnapshot,CaseGeometry} from "../maps/types";
 import {geometryCentroid} from "../maps/spatial";
-import {polygonGeometry,combinePolygons} from "../maps/gis";
+import {polygonGeometry} from "../maps/gis";
 import {cleanResidentTitle,cleanResidentProse} from "../resident-copy";
 import type {JurisdictionDefinition} from "./types";
 import type {Application,Meeting} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
+import {groupApplications} from "./application-groups";
+import {jurisdiction} from "./registry";
 export type ConfiguredHearing=Hearing&{record:PublicCaseRecord};
 export function stagedApplications(snapshot:StagingSnapshot):Application[]{
- const grouped=new Map<string,Application[]>();for(const a of snapshot.applications)grouped.set(a.recordId,[...(grouped.get(a.recordId)??[]),a]);
- return[...grouped.values()].map(rows=>({...rows[0],parcel:[...new Set(rows.flatMap(a=>a.parcel))],relatedCaseNumbers:[...new Set(rows.flatMap(a=>a.relatedCaseNumbers))],geometry:combinePolygons(rows.flatMap(a=>a.geometry&&polygonGeometry(a.geometry)?[{type:"Feature" as const,geometry:a.geometry,properties:{}}]:[]))??undefined}));
+ return groupApplications(jurisdiction(snapshot.areaId),snapshot.applications);
 }
 export function displayStagedApplication(d:JurisdictionDefinition,a:Application):Application{
  const fields=d.applications.params.fields as Record<string,string>??{};

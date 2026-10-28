@@ -68,7 +68,14 @@
         "description": "AppApplicDesc",
         "received": "APPRcvdDate"
       },
-      "flumField": "Name"
+      "flumField": "Name",
+      "projectKey": {
+        "fields": [
+          "APPFileNum",
+          "PRJProjectNum"
+        ],
+        "pattern": "^\\d{9}"
+      }
     },
     "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/"
   },
