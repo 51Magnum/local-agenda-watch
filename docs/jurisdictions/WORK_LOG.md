@@ -60,6 +60,8 @@ M1 implementation: generator now emits a public-only lightweight metadata module
 
 M2 implementation: structured provider requests settle both jurisdiction and global reservations in finally on network, non-OK and timeout errors. Successful usage is settled once; cleanup failures retain a safe retry message. Both ledgers release reservations older than one hour before new reservations; global reconciliation uses an atomic CTE, and jurisdiction reconciliation uses locked transactional rows across all buckets. Paid/settled calls are not released twice. Nineteen focused provider/budget/onboarding regressions pass, including stale-vs-fresh reservations; TypeScript passes. No paid live AI sample was run for this fix.
 
+M3 decision: exempt legacyPublic areas from their unmeasured monthly/backfill dollar caps until actual spend is measured. Their durable per-area spend/reservations remain recorded, the global daily budget remains enforced, and explicit AI sample limits remain enforced. The onboarding admin page states this policy. New areas retain configured area caps. Seven legacy-area policy regressions and a durable over-$15/sample-limit test cover the exemption. No registry publication or legacy source behavior changed.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.
