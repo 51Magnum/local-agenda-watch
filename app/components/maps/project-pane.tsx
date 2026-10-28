@@ -49,7 +49,7 @@ export default function ProjectPane({
       minute: "2-digit",
       timeZone: data.area.timezone,
     }).format(new Date(v)) +
-    (["America/Denver", "America/Boise"].includes(data.area.timezone)
+    (new Intl.DateTimeFormat("en-US",{timeZone:data.area.timezone,timeZoneName:"long"}).formatToParts(new Date(v)).some(p=>p.type==="timeZoneName"&&/^Mountain /.test(p.value))
       ? " Mountain Time"
       : " " + data.area.timezone);
   const impactRows = data.impacts.map((f, index) => (

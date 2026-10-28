@@ -1,6 +1,6 @@
 import { approvedImageCheck } from "@/lib/maps/image-policy";
 import type { MapCase, MapVisual } from "@/lib/maps/types";
-import { getArea } from "@/lib/areas/registry";
+import { getArea } from "@/lib/areas/public-registry";
 import { buildPopupModel, popupProjectName } from "@/lib/maps/popup-model";
 
 export const popupDisposers = new WeakMap<HTMLElement, () => void>();

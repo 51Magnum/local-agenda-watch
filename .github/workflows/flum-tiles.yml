@@ -32,7 +32,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           test -n "$CRON_SECRET" || { echo 'Configure the existing cron secret before running this export.'; exit 1; }
-          npx tsx scripts/prepare-flum-tiles.ts
+          node --conditions=react-server --import tsx scripts/prepare-flum-tiles.ts
       - name: Publish prepared static assets through the normal deployment
         run: |
           git add public/flum

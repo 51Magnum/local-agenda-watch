@@ -2,7 +2,7 @@
 import {useEffect,useRef,useState} from "react";
 import type {Map as LibreMap,Popup} from "maplibre-gl";
 import {bbox} from "@turf/turf";
-import {areaPath,type AreaDefinition} from "@/lib/areas/registry";
+import {areaPath,type AreaDefinition} from "@/lib/areas/public-registry";
 import {coverageColor,coverageLabel} from "@/lib/areas/coverage-style";
 import "maplibre-gl/dist/maplibre-gl.css";
 export default function CoverageMap({areas}:{areas:AreaDefinition[]}){

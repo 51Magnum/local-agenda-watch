@@ -18,4 +18,6 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx tsc --noEmit
-      # Vercel's Git-sourced preview is the build check with deployment configuration.
+      - run: npx eslint .
+      - run: npm run build
+      - run: npm run check:client-bundle

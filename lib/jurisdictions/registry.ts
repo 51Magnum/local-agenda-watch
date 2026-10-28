@@ -1,3 +1,4 @@
+import "server-only";
 import {registryEntries,siteReviewAreaIds} from "./generated";
 import {validateJurisdictions} from "./validate";
 export const JURISDICTION_REGISTRY=Object.fromEntries(validateJurisdictions(registryEntries).map(d=>[d.id,d]));
