@@ -1,4 +1,5 @@
 import "server-only";
+import {officialGisLink} from "../jurisdictions/official-gis-link";
 import {publicJurisdictions} from "../jurisdictions/registry";
 import {registryBoundaries} from "../jurisdictions/generated";
 import { recordPageOnHosts, type RecordPageContext } from "./record-links";
@@ -24,7 +25,7 @@ export const AREAS:Record<string,AreaDefinition>=Object.fromEntries(publicJurisd
  const boundary=registryBoundaries[d.id+":boundary"] as AreaDefinition["boundary"]|undefined;
  if(!boundary)throw Error("Published jurisdiction has no verified boundary cache: "+d.id);
  const hosts=d.recordPageHosts;
- return [d.id,{...d.area,...!d.legacyPublic?{color:d.color}:{},id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.legacyPublic?"America/Denver":d.timezone,boundary,
+ return [d.id,{...d.area,...!d.legacyPublic?{color:d.color,boundarySources:d.area.boundarySources.map(url=>officialGisLink(url)!)}:{},id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.legacyPublic?"America/Denver":d.timezone,boundary,
  ...(registryBoundaries[d.id+":coverageBoundary"]?{coverageBoundary:registryBoundaries[d.id+":coverageBoundary"] as AreaDefinition["boundary"]}:{}),
  ...(hosts?{recordPage:(context:RecordPageContext)=>recordPageOnHosts(context,hosts)}:{})}];
 }));
