@@ -43,8 +43,10 @@ export function coverageEligible(app:Application,coverage:CaseGeometry){
  if(!app.geometry)return {...app,locationVerification:"unverified" as const};
  if(app.geometry.type==="Point")return booleanPointInPolygon(app.geometry,coverage)?app:undefined;
  if(!polygonGeometry(app.geometry))return {...app,geometry:undefined,locationVerification:"unverified" as const};
- const polygon=feature(app.geometry as CaseGeometry),inside=booleanPointInPolygon(pointOnFeature(polygon),coverage),overlap=intersect(featureCollection([polygon,feature(coverage)])),ratio=overlap?area(overlap)/area(polygon):0;
- return inside||ratio>.5?app:undefined;
+ const polygon=feature(app.geometry as CaseGeometry);
+ if(booleanPointInPolygon(pointOnFeature(polygon),coverage))return app;
+ const overlap=intersect(featureCollection([polygon,feature(coverage)])),ratio=overlap?area(overlap)/area(polygon):0;
+ return ratio>.5?app:undefined;
 }
 /** Address points get an explicitly approximate marker, never a claimed parcel boundary. */
 export function applicationMapLocation(app:Application){

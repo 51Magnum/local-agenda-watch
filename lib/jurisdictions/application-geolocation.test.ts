@@ -1,5 +1,7 @@
 import {readFileSync} from "node:fs";
 import {expect,it,vi} from "vitest";
+vi.mock("@turf/turf",async original=>{const actual=await original<typeof import("@turf/turf")>();return {...actual,intersect:vi.fn(actual.intersect)};});
+import {intersect} from "@turf/turf";
 import type {FeatureCollection} from "geojson";
 import {coverageEligible,geolocateApplications,applicationMapLocation} from "./application-geolocation";
 import {jurisdiction} from "./registry";
@@ -16,6 +18,9 @@ it("keeps majority coverage with a city sliver, drops mostly-city parcels, and f
  expect(applicationMapLocation(coverageEligible(a,coverage)!)).toMatchObject({geometry:null,centroid:null,statusNote:"Location unverified"});
 });
 it("also permits the explicitly configured point-on-feature rule",()=>expect(coverageEligible({...app("CASE"),geometry:box(0,0,10,10)},box(4,0,6,10))).toBeDefined());
+it("avoids expensive overlay work when the point-on-feature rule already establishes eligibility",()=>{
+ vi.mocked(intersect).mockClear();expect(coverageEligible({...app("CASE"),geometry:box(1,1,2,2)},box(0,0,10,10))).toBeDefined();expect(intersect).not.toHaveBeenCalled();
+});
 it("joins recorded permit geometry through source child-case numbers",async()=>{
  const a={...app("PLN23-00040"),relatedCaseNumbers:["CVA24-00026"],sourceFields:{RecordID:"PLN23-00040",ChildRecords:"CVA24-00026"}},query=vi.fn().mockResolvedValue(fixture("boise-permit-geometry.json"));
  const [located]=await geolocateApplications(d,[a],{query} as unknown as GisAdapter);
