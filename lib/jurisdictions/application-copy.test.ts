@@ -20,3 +20,8 @@ it("keeps five recorded official descriptions verbatim and titles short",()=>{
  expect(applicationTitle(disagreement.type,disagreement.description)).toMatch(/^Preliminary Plat: Final Plat/);
  expect(disagreement.description).toContain("Final Plat");
 });
+it("removes repeated procedure words so the recorded hearing subject remains in the title",()=>{
+ const description="An application for approval of a Conditional Use and Master Site Plan for a previously approved Contractor's Yard. Request is for a continuance of use with no additional proposed structures.";
+ expect(applicationTitle("CONDITIONAL USE",description)).toBe("Conditional Use: previously approved Contractor's Yard");
+ expect(description).toContain("Conditional Use and Master Site Plan");
+});
