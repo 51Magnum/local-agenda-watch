@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Preserve legacy locality links while making country/state/area paths canonical.
-export function proxy(request: NextRequest) {
+function routeProxy(request: NextRequest) {
   if(request.nextUrl.pathname === "/_next/image") {
     const source=request.nextUrl.searchParams.get("url")??"";
     if(/\/api\/maps\/.+\/visual\/|\/(?:nampa|us\/id\/nampa)\/.+\.(?:png|jpe?g|webp)/i.test(source)) return new NextResponse("Image removed pending privacy verification",{status:410,headers:{"Cache-Control":"private, no-store, max-age=0"}});
@@ -33,4 +33,5 @@ export function proxy(request: NextRequest) {
     }
   }
 }
+export function proxy(request:NextRequest){const response=routeProxy(request);if(process.env.VERCEL_ENV==="production")return response;const result=response??NextResponse.next();result.headers.set("X-Robots-Tag","noindex, nofollow");return result;}
 export const config={matcher:["/((?!_next/static|favicon.ico).*)"]};

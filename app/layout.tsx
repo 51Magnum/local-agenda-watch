@@ -1,3 +1,4 @@
+import {environmentMetadata} from "@/lib/environment-metadata";
 import ThemeSelector from "./components/theme-selector";
 import {THEME_BOOTSTRAP} from "@/lib/theme";
 import type { Metadata } from "next";
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.localagendawatch.com"),
+  ...environmentMetadata(),
   title: {
     default: "Local Agenda Watch",
     template: "%s · Local Agenda Watch",
