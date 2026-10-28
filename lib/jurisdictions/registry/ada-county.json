@@ -18,8 +18,12 @@
   "boundary": {
     "source": "arcgis",
     "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",
-    "where": "1=1",
-    "outSR": 4326
+    "where": "county_name='Ada'",
+    "outSR": 4326,
+    "expectedFeatureCount": 1,
+    "expectedProperties": {
+      "county_name": "Ada"
+    }
   },
   "clipRule": {
     "operation": "subtractCityLimits",
@@ -148,7 +152,8 @@
     "Close of business has no verified clock time; retain a date and qualified label, never invent 17:00.",
     "Use DS_Agendas only, never the general BOCCAgendas archive.",
     "Tentative hearing schedule is context; an actual agenda confirms a hearing.",
-    "Application metadata has no address field. Do not manufacture an address from a parcel number."
+    "Application metadata has no address field. Do not manufacture an address from a parcel number.",
+    "County boundary selection is county_name='Ada'; layer 9 also contains six neighboring counties and must never be collected with where=1=1. Verified 2026-10-28."
   ],
   "area": {
     "country": "us",
@@ -161,7 +166,7 @@
     ],
     "boundaryLabel": "Unincorporated Ada County",
     "boundarySources": [
-      "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9"
+      "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9/query?where=county_name%3D%27Ada%27&outFields=*&outSR=4326&f=pjson"
     ],
     "bodies": {
       "planning": {

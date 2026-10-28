@@ -1,7 +1,7 @@
 import type {AreaDefinition} from "../areas/registry";
 export type LaunchStatus = "draft" | "qa" | "admin_only" | "public";
 export type AgendaPlatform = "primegov" | "iqm2" | "escribe" | "adaFileBrowse" | "municipalClerk" | "countyLandHearings" | "civicplusArchive" | "municodePublishPage" | "sanityNotices" | "granicusPublisher";
-export type LayerSource = {source:"arcgis";url:string;where:string;outSR:4326};
+export type LayerSource = {expectedFeatureCount?:number;expectedProperties?:Record<string,string|number>;source:"arcgis";url:string;where:string;outSR:4326};
 export type HearingBody = {key:string;name:string;role:"recommending"|"deciding"|"design"|"quasi-judicial";agendaBodyMatch:string};
 export type AgendaSource = {adapter:AgendaPlatform;params:Record<string,unknown>;bodies:string[];activeFrom?:string;activeUntil?:string;bodyWindows?:Record<string,{activeFrom?:string;activeUntil?:string}>};
 export type DeadlineRule = {kind:"written"|"signup"|"remote";rule:string;bodyKeys?:string[];sourceUrl:string;timeVerified?:boolean};

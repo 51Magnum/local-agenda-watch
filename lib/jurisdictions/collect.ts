@@ -1,3 +1,4 @@
+import {verifyBoundarySource,collectionCoverage} from "./boundary-source";
 import {retainRecentOrHeard} from "./collection-window";
 import {difference,feature,featureCollection,simplify} from "@turf/turf";
 import {jurisdiction} from "./registry";
@@ -35,10 +36,11 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  for(const source of d.agenda)if(source.params.hearingsUrl&&source.params.scheduleYear&&source.params.scheduleTables){try{const url=String(source.params.hearingsUrl);snapshot.calendarHints=parseTentativeTable(await http.text(url),url,Number(source.params.scheduleYear),source.params.scheduleTables as {index:number;body:string}[]);}catch{snapshot.complete=false;}}
  await discoverStagingLibraries(snapshot,Math.min(deadline-20000,Date.now()+30000));
  for(const m of snapshot.meetings)for(const a of [...m.attachments,...m.items.flatMap(i=>i.attachments)])if(!allowedAttachment(a,d))snapshot.skipped.push({url:a.url,reason:a.kind==="packet"?"Compiled meeting packet excluded from AI":nativeSampleAllowed(a,d)?"Large report queued for bounded native/page-image sample; remaining pages deferred":a.sizeBytes&&a.sizeBytes>d.documents.maxBytes?"Attachment exceeds native download cap":"Private attendance material excluded",bytes:a.sizeBytes});
- try{const gis=arcgisAdapter(http),boundary=combinePolygons((await gis.query(d.boundary.url,d.boundary.where)).features);if(!boundary)throw Error("Boundary source has no polygons");snapshot.boundary=simplify(feature(boundary),{tolerance:.00005,highQuality:true}).geometry;
+ try{const gis=arcgisAdapter(http),boundaryData=await gis.query(d.boundary.url,d.boundary.where);verifyBoundarySource(d.boundary,boundaryData);const boundary=combinePolygons(boundaryData.features);if(!boundary)throw Error("Boundary source has no polygons");snapshot.boundary=simplify(feature(boundary),{tolerance:.00005,highQuality:true}).geometry;
   if(d.clipRule){const cities=(await gis.query(d.clipRule.layer.url,d.clipRule.layer.where)).features.filter(f=>polygonGeometry(f.geometry)).map(f=>simplify(feature(f.geometry as CaseGeometry),{tolerance:.00005,highQuality:true}));const clipped=difference(featureCollection([feature(snapshot.boundary),...cities]));if(!clipped)throw Error("County clipping produced no coverage");snapshot.coverageBoundary=clipped.geometry;}
+  snapshot.boundarySource={url:d.boundary.url,where:d.boundary.where};
   if(d.gis.impactAreas)snapshot.impactAreas=await gis.query(d.gis.impactAreas);
- }catch(e){snapshot.complete=false;snapshot.boundary=old?.boundary;snapshot.coverageBoundary=old?.coverageBoundary;if(!(e instanceof SourceFailure))snapshot.skipped.push({url:d.boundary.url,reason:String(e)});}
+ }catch(e){snapshot.complete=false;snapshot.boundary=old?.boundary;snapshot.coverageBoundary=old?.coverageBoundary;snapshot.boundarySource=old?.boundarySource;if(!(e instanceof SourceFailure))snapshot.skipped.push({url:d.boundary.url,reason:String(e)});}
  const sourceRows=snapshot.applications.length;
  snapshot.applications=groupApplications(d,snapshot.applications);
  // County public eligibility is controlled by the clipped coverage, never by a postal city.
@@ -47,7 +49,8 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  const linked=new Set(snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.matchedApplications?.map(a=>a.recordId)??[])));
  if(!d.legacyPublic)snapshot.applications=retainRecentOrHeard(snapshot.applications,linked,range.start);
  // Geometry intersection is bounded to the retained inventory, not all historic filings.
- if(d.clipRule&&snapshot.coverageBoundary)snapshot.applications=snapshot.applications.flatMap(a=>{const eligible=coverageEligible(a,snapshot.coverageBoundary!);return eligible?[eligible]:[];});
+ const coverage=collectionCoverage(d,snapshot);
+ if(d.clipRule&&coverage)snapshot.applications=snapshot.applications.flatMap(a=>{const eligible=coverageEligible(a,coverage);return eligible?[eligible]:[];});
  snapshot.collectionStats={sourceRows,projectsBeforeScope:snapshot.applications.length,excludedByScope:0};
  snapshot.applications=applicationScope(d,snapshot.applications,snapshot.meetings);
  snapshot.collectionStats.excludedByScope=snapshot.collectionStats.projectsBeforeScope-snapshot.applications.length;

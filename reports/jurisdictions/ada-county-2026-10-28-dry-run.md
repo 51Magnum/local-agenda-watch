@@ -1,6 +1,6 @@
 # ada-county onboarding QA
 
-As of 2026-10-28T19:12:41.034Z. **Not ready for public launch. Admin-only.**
+As of 2026-10-28T19:29:38.054Z. **Not ready for public launch. Admin-only.**
 
 [Detailed JSON](ada-county-2026-10-28-dry-run.json) contains endpoint results, source URLs, skipped attachments and field review metadata. Candidate text is withheld; review it in authenticated admin.
 
@@ -97,3 +97,4 @@ The JSON records 12 skips/deferred outcomes. Compiled packets and over-limit PDF
 - Use DS_Agendas only, never the general BOCCAgendas archive.
 - Tentative hearing schedule is context; an actual agenda confirms a hearing.
 - Application metadata has no address field. Do not manufacture an address from a parcel number.
+- County boundary selection is county_name='Ada'; layer 9 also contains six neighboring counties and must never be collected with where=1=1. Verified 2026-10-28.

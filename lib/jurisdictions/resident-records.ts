@@ -1,3 +1,5 @@
+import {collectionCoverage} from "./boundary-source";
+import {coverageEligible} from "./application-geolocation";
 import {applicationMapLocation} from "./application-geolocation";
 import type {Hearing,HearingFeed} from "../localities/types";
 import type {PublicCaseRecord,RecordEvent} from "../localities/record-types";
@@ -14,7 +16,7 @@ import {applicationRecordUrl} from "./application-source";
 import {applicationTitle} from "./application-copy";
 export type ConfiguredHearing=Hearing&{record:PublicCaseRecord};
 export function stagedApplications(snapshot:StagingSnapshot):Application[]{
- const d=jurisdiction(snapshot.areaId);return applicationScope(d,groupApplications(d,snapshot.applications),snapshot.meetings);
+ const d=jurisdiction(snapshot.areaId),coverage=collectionCoverage(d,snapshot),apps=applicationScope(d,groupApplications(d,snapshot.applications),snapshot.meetings);return d.clipRule&&coverage?apps.flatMap(a=>{const eligible=coverageEligible(a,coverage);return eligible?[eligible]:[];}):apps;
 }
 export function displayStagedApplication(d:JurisdictionDefinition,a:Application):Application{
  const fields=d.applications.params.fields as Record<string,string>??{};
