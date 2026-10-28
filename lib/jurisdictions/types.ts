@@ -12,7 +12,7 @@ export type JurisdictionDefinition = {
  applications:{adapter:"arcgisFeatureLayer"|"accelaAca"|"none";params:Record<string,unknown>;recordUrlTemplate?:string};
  gis:Partial<Record<"parcels"|"zoning"|"futureLandUse"|"cityLimits"|"impactAreas"|"countyBoundary",string>>;
  hearingBodies:HearingBody[];caseNumberPatterns:string[];
- participation:{testimonySignupUrl?:string;signupUrlRule?:string;signupEventsUrl?:string;writtenCommentEmails?:Record<string,string[]>;deadlineRules:DeadlineRule[]};
+ participation:{hearingsUrl?:string;legalNoticesUrl?:string;testimonySignupUrl?:string;signupUrlRule?:string;signupEventsUrl?:string;writtenCommentEmails?:Record<string,string[]>;deadlineRules:DeadlineRule[]};
  costCaps:{backfillUsd:number;monthlyUsd:number;perDocMaxTokens:number};
  documents:{maxBytes:number;maxPages:number;allowPackets:false};
  enabled:boolean;launchStatus:LaunchStatus;sourcesVerifiedAt:string|null;notes:string[];

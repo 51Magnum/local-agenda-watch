@@ -132,7 +132,9 @@
         "timeVerified": false,
         "sourceUrl": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/"
       }
-    ]
+    ],
+    "hearingsUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/",
+    "legalNoticesUrl": "https://adacounty.id.gov/legal-notices/"
   },
   "costCaps": {
     "backfillUsd": 5,

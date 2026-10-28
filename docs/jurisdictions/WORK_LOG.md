@@ -40,6 +40,8 @@ A4 implementation: Ada meeting listings no longer invent agenda items from attac
 
 A5 implementation: a deterministic type-plus-source-subject title is bounded to 70 characters. Official descriptions now bypass title/prose rewriting in resident feeds and project panes. Five recorded Ada descriptions have title snapshots and exact body assertions, including the source's Preliminary Plat / Final Plat disagreement, which remains visible. Privacy-protected records continue to use the privacy-safe replacement rather than expose private source prose. Focused regression and TypeScript pass.
 
+A6 implementation: only an actual, non-tentative agenda appearance supplies the next hearing, signup or computed deadlines. Otherwise both pane and full page show a dated no-hearing message with official hearings and legal-notices links. The latter URL was taken from the cached official hearings page, not guessed. Parsed agenda times flow through unchanged. Six focused copy/hearing/pane tests and TypeScript pass. Tentative calendar hints remain separate and do not advertise a project hearing.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

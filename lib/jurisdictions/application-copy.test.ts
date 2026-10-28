@@ -11,7 +11,7 @@ it("keeps five recorded official descriptions verbatim and titles short",()=>{
   const a:Application={recordId:e.id,name:e.description,type:e.type,description:e.description,status:"Active",address:"",parcel:[],relatedCaseNumbers:[],recordUrl:e.sourceUrl,sourceUrl:e.sourceUrl,sourceFields:{}};
   expect(displayStagedApplication(d,a).description).toBe(e.description);
   // Include an agenda so staff-type examples exercise their eligible presentation.
-  const snapshot={areaId:d.id,checkedAt:"2026-10-28",complete:true,applications:[a],meetings:[{date:"2026-10-15",body:"pzc",title:"PZC",meetingPageUrl:e.sourceUrl,items:[{caseNumbers:[e.id],attachments:[]}]}]} as StagingSnapshot;
+  const snapshot:StagingSnapshot={areaId:d.id,launchStatus:"admin_only",range:{start:"2026-08-01",end:"2026-12-01"},health:[],skipped:[],checkedAt:"2026-10-28",complete:true,applications:[a],meetings:[{id:"pzc",date:"2026-10-15",body:"pzc",title:"PZC",meetingPageUrl:e.sourceUrl,attachments:[],items:[{itemId:"1",body:"pzc",title:"Source proposal",meetingDateTime:"2026-10-15",meetingPageUrl:e.sourceUrl,caseNumbers:[e.id],attachments:[]}]}]};
   expect(stagedFeed(d,snapshot).active[0].description).toBe(e.description);
   expect(applicationTitle(e.type,e.description).length).toBeLessThanOrEqual(70);
  }

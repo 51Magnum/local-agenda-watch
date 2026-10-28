@@ -186,15 +186,16 @@ export default function ProjectPane({
               <HearingNext next={data.next} timezone={data.area.timezone}/>
             ) : (
               <p>
-                {item.stage === "Decided"
+                {data.noHearing?.message ?? (item.stage === "Decided"
                   ? (item.popup?.progress.find((p) => p.state === "current")
                       ?.label ??
                     "Decision recorded; outcome not specified in the available record")
                   : item.stage === "Recorded"
                     ? "Recorded in official records."
-                    : "No hearing is confirmed in the available records."}
+                    : "No hearing is confirmed in the available records.")}
               </p>
             )}
+            {!data.next && data.noHearing?.sources.map(s=><a key={s.url} className="mr-3 underline" href={s.url} target="_blank" rel="noreferrer">{s.label}</a>)}
           </section>
           <section className="law-pane-section">
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[4]}</h2>
