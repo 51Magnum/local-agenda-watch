@@ -65,7 +65,7 @@ export async function releaseLease(store: EvidenceStore, name: string, token: st
 export async function resetDocumentRetry(store:EvidenceStore,id:string){
  await store.mutate(state=>{
   const doc=state.documents[id];if(!doc)throw new Error("Document not found");
-  doc.failCount=0;delete doc.lastAttemptAt;delete doc.error;
+  doc.failCount=0;delete doc.lastAttemptAt;delete doc.error;delete doc.deferredUntil;
   if(doc.state==="failed-permanent"||doc.state==="error")doc.state="processing";
   (state.retryAudit??=[]).push({documentId:id,at:new Date().toISOString()});
  });

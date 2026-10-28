@@ -3,6 +3,7 @@ import {ingestDocuments,documentId,digest,retryDue} from "./ingest";
 import {emptyEvidenceState,EXTRACTED_KEYS,type SourceDocument} from "./types";
 import {jurisdiction} from "../jurisdictions/registry";
 import type {EvidenceStore} from "./store";
+import {resetDocumentRetry} from "./store";
 import type {Extraction} from "./extract";
 afterEach(()=>{vi.restoreAllMocks();vi.useRealTimers();});
 const empty=()=>Object.fromEntries(EXTRACTED_KEYS.map(k=>[k,{value:null,page:null,quote:null,confidence:0}])) as Extraction;
@@ -25,4 +26,5 @@ it("defers onboarding packets before download/invalidation and backs off without
  expect(retryDue(state.documents[id])).toBe(false);
  await ingestDocuments(store,[doc],{download,text,extract});expect(download).not.toHaveBeenCalled();
  vi.setSystemTime(new Date("2026-10-29T12:00:00Z"));expect(retryDue(state.documents[id])).toBe(true);
+ vi.setSystemTime(new Date("2026-10-28T13:00:00Z"));await resetDocumentRetry(store,id);expect(state.documents[id].deferredUntil).toBeUndefined();expect(retryDue(state.documents[id])).toBe(true);
 });
