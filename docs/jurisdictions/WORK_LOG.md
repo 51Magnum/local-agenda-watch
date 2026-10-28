@@ -70,6 +70,10 @@ M6 implementation: county inventory eligibility now requires majority polygon ov
 
 L1 implementation: both approval handlers derive and record the successfully authenticated Basic username via reviewerIdentity. The authentication policy still accepts only admin with the configured password; this change does not add users or broaden authorization. New helper and route tests cover identity propagation and reject a different username.
 
+L2 implementation: onboarding runtime DDL was removed with A8; migrations are the schema source. Added reversible 20261028_onboarding_constraints up/down repair for the missing launch-status, nonempty admin identity and nonnegative budget CHECK constraints on old runtime-created tables. It is idempotent, validates existing rows without altering them, and rollback drops only its own named constraints. A PGlite migration test verifies rejection, repeat application/rollback, data retention and preservation of unrelated constraints. Not applied to Neon or production.
+
+M6 read-only live verification (2026-10-28): current source has 257 applications, 154 polygon joins, 93 unique address points, 10 unmapped, zero deferred endpoint failures (247/257 located, 96.1%). This differs from the brief's older 267/221/42 expectation; these are measured counts, not an assertion that unmatched records lack official geometry elsewhere. No staging write or publication occurred. Detailed endpoint checks are in ignored output/jurisdictions/boise-geolocation-verification.json.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.
