@@ -26,6 +26,8 @@ export async function structuredResponse(name: string, schema: object, content: 
   const jurisdictionReservation=work?await jurisdictionAiBudget.reserve(work,amount):undefined;
   let reservation:string;
   try{reservation=await aiBudget.reserve(name,model,amount);}catch(error){if(jurisdictionReservation)await jurisdictionAiBudget.settle(jurisdictionReservation,model,{});throw error;}
+  let usage:import("../ai-budget").Usage={},globalSettled=false,areaSettled=false;
+  try{
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST", headers: { Authorization: "Bearer " + process.env.OPENAI_API_KEY, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(options.timeoutMs??45000),
@@ -39,14 +41,22 @@ export async function structuredResponse(name: string, schema: object, content: 
     throw new Error("Extraction API HTTP " + response.status + safeCode);
   }
   const result = await response.json();
-  const cost=await aiBudget.settle(reservation,model,result.usage??{});
-  if(jurisdictionReservation)await jurisdictionAiBudget.settle(jurisdictionReservation,model,result.usage??{});
+  usage=result.usage??{};
+  const cost=await aiBudget.settle(reservation,model,usage);globalSettled=true;
+  if(jurisdictionReservation){await jurisdictionAiBudget.settle(jurisdictionReservation,model,usage);areaSettled=true;}
   await recordUsage(name, result.usage,cost);
   console.info('[ai:cost]',JSON.stringify({operation:name,model,cost,inputTokens:result.usage?.input_tokens,outputTokens:result.usage?.output_tokens}));
   if (result.status !== "completed") throw new Error("Extraction did not complete");
   const text = (result.output ?? []).flatMap((item: { content?: { type: string; text?: string }[] }) => item.content ?? []).filter((item: { type: string }) => item.type === "output_text").map((item: { text: string }) => item.text).join("");
   if (!text) throw new Error("Extraction returned no structured text");
   return JSON.parse(text);
+  }finally{
+   const cleanup=await Promise.allSettled([
+    ...!globalSettled?[aiBudget.settle(reservation,model,usage)]:[],
+    ...jurisdictionReservation&&!areaSettled?[jurisdictionAiBudget.settle(jurisdictionReservation,model,usage)]:[],
+   ]);
+   if(cleanup.some(r=>r.status==="rejected"))console.error("[ai:budget] Reservation cleanup deferred; stale reconciliation will retry");
+  }
 }
 export const normalizeQuote = (text: string) => text.normalize("NFKC").replace(/\s+/g, " ").trim();
 export function validateExtraction(value: unknown, pages: PageText[], options: { warnings?: string[]; retainFlagged?: boolean } = {}): Extraction {

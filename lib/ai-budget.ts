@@ -93,7 +93,9 @@ export function createBudgetLedger(query: Query) {
         ready = undefined;
         throw e;
       }));
+  const reconcile=async(now=new Date())=>{await init();return query(`WITH stale AS (UPDATE law_ai_calls SET cost=0,input_tokens=0,output_tokens=0 WHERE cost IS NULL AND created_at < $1::timestamptz - interval '1 hour' RETURNING day,reservation), released AS (SELECT day,sum(reservation) AS amount FROM stale GROUP BY day) UPDATE law_ai_days d SET reserved=greatest(0,d.reserved-r.amount) FROM released r WHERE d.day=r.day RETURNING d.day`,[now.toISOString()]);};
   return {
+    reconcile,
     async reserve(
       operation: string,
       model: string,
@@ -101,7 +103,7 @@ export function createBudgetLedger(query: Query) {
       limit = budgetLimit(),
       now = new Date(),
     ) {
-      await init();
+      await reconcile(now);
       const day = now.toISOString().slice(0, 10),
         id = randomUUID();
       const result = await query(
