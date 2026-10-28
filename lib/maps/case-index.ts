@@ -20,7 +20,7 @@ import {
   type ViewportData,
 } from "./viewport";
 export const MAP_INDEX_TAG = "map-case-index-v1";
-const reviewCacheKeys=siteReviewAreaIds.length?["resident-review:"+siteReviewAreaIds.join(",")]:[];
+const reviewCacheKeys=siteReviewAreaIds.length?["resident-review:"+siteReviewAreaIds.join(",")+":"+(process.env.VERCEL_GIT_COMMIT_SHA??"local")]:[];
 const reviewSnapshots=()=>Promise.all(siteReviewAreaIds.map(id=>readMapSnapshot(id,{includeFlum:false})));
 /** Compact, cached directory: never read polygon, image or document payloads for search. */
 export const projectDirectory = unstable_cache(async () => {
