@@ -22,6 +22,7 @@ export function recordHost(areaId:string,url:string,outcome:HostCheck["outcome"]
 }
 
 export function currentRun(){return context.getStore()?.run;}
+export function currentDocument(){const c=context.getStore();return c?.areaId?{areaId:c.areaId,documentId:c.documentId}:undefined;}
 export function hostWasBlocked(areaId:string,url:string){const host=new URL(url).hostname;return Boolean(context.getStore()?.run.hosts?.some(h=>h.areaId===areaId&&h.host===host&&h.outcome==="blocked"));}
 
 /** Aggregate diagnostics contain no credentials, addresses, quotes, or resident information. */

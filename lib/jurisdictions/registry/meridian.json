@@ -1,0 +1,248 @@
+{
+  "id": "meridian",
+  "name": "Meridian",
+  "type": "city",
+  "state": "id",
+  "timezone": "America/Boise",
+  "color": "#d97706",
+  "mapOrder": 100,
+  "boundary": {
+    "source": "arcgis",
+    "url": "https://gis.meridiancity.org/server/rest/services/CD/Boundaries_places_Webservice/MapServer/2",
+    "where": "1=1",
+    "outSR": 4326
+  },
+  "agenda": [
+    {
+      "adapter": "municipalClerk",
+      "params": {
+        "baseUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx"
+      },
+      "bodies": [
+        "P&Z",
+        "City Council"
+      ]
+    }
+  ],
+  "applications": {
+    "adapter": "arcgisFeatureLayer",
+    "params": {
+      "url": "https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6",
+      "where": "1=1"
+    }
+  },
+  "gis": {
+    "parcels": "https://gis.meridiancity.org/server/rest/services/CD/Parcel_Layers/MapServer/0",
+    "futureLandUse": "https://gis.meridiancity.org/server/rest/services/CD/FLUM_Webservice/MapServer/15"
+  },
+  "hearingBodies": [
+    {
+      "key": "P&Z",
+      "name": "Planning & Zoning Commission",
+      "role": "recommending",
+      "agendaBodyMatch": "Planning & Zoning Commission"
+    },
+    {
+      "key": "City Council",
+      "name": "City Council",
+      "role": "deciding",
+      "agendaBodyMatch": "City Council"
+    }
+  ],
+  "caseNumberPatterns": [
+    "\\bH-\\d{4}-\\d{4}\\b"
+  ],
+  "participation": {
+    "deadlineRules": []
+  },
+  "costCaps": {
+    "backfillUsd": 15,
+    "monthlyUsd": 15,
+    "perDocMaxTokens": 1100000
+  },
+  "documents": {
+    "maxBytes": 45000000,
+    "maxPages": 80,
+    "allowPackets": false
+  },
+  "enabled": true,
+  "launchStatus": "public",
+  "legacyPublic": true,
+  "sourcesVerifiedAt": "2026-10-23",
+  "notes": [
+    "Existing published adapter; retain its source-specific interpretation and completeness."
+  ],
+  "cachedBoundaryFile": "../areas/boundaries/meridian.json",
+  "area": {
+    "residentAccess": {
+      "excludedHosts": [
+        "weblink.meridiancity.org",
+        "apps.meridiancity.org",
+        "meridiancity.org",
+        "www.meridiancity.org"
+      ],
+      "archiveUrl": "https://meetings.municode.com/PublishPage/index?cid=MERIDIANID&p=1&ppid=add14759-167d-4b0f-bec9-c9affe54bcaf",
+      "commentUrl": "https://meetings.municode.com/PublishPage/index?cid=MERIDIANID&p=1&ppid=add14759-167d-4b0f-bec9-c9affe54bcaf"
+    },
+    "timeline": {
+      "adapter": "meridian",
+      "hosts": [
+        "weblink.meridiancity.org",
+        "apps.meridiancity.org",
+        "meetings.municode.com",
+        "meridiancity.org",
+        "www.meridiancity.org",
+        "gis.meridiancity.org"
+      ],
+      "storage": [
+        {
+          "host": "mccmeetings.blob.core.usgovcloudapi.net",
+          "pathPrefix": "/meridianid-pubu/"
+        }
+      ],
+      "documentRules": [
+        {
+          "kind": "staff-report",
+          "pattern": "staff[\\s_-]*report|agency.*comment|ACHD.*(?:FINAL|REPORT)"
+        },
+        {
+          "kind": "minutes",
+          "pattern": "minutes"
+        },
+        {
+          "kind": "pz-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:PZ|P&Z|planning.*zoning)"
+        },
+        {
+          "kind": "council-decision",
+          "pattern": "(?:decision|determination|action|findings).*(?:council|board|BOCC)"
+        },
+        {
+          "kind": "findings",
+          "pattern": "reasoned|findings|FCO|decision|determination|action[\\s_-]*letter"
+        }
+      ]
+    },
+    "country": "us",
+    "countryName": "United States",
+    "stateName": "Idaho",
+    "stateAbbreviation": "ID",
+    "center": [
+      -116.3915,
+      43.6121
+    ],
+    "boundaryLabel": "Official city limits",
+    "boundarySources": [
+      "https://gis.meridiancity.org/server/rest/services/CD/Boundaries_places_Webservice/MapServer/2"
+    ],
+    "coverageNote": "City planning applications. Nearby unincorporated areas may have a different planning authority.",
+    "bodies": {
+      "planning": {
+        "id": "P&Z",
+        "label": "Planning & Zoning Commission",
+        "shortLabel": "P&Z",
+        "stageLabel": "P&Z hearing"
+      },
+      "decision": {
+        "id": "City Council",
+        "label": "City Council",
+        "shortLabel": "Council",
+        "stageLabel": "Council hearing"
+      }
+    },
+    "meetingRules": {
+      "agendaNotice": "Check the official agenda archive for the meeting agenda and packet.",
+      "location": "City Council Chambers, 33 East Broadway Avenue, Meridian, Idaho",
+      "commentInstructions": "Follow the City's public-meeting instructions to submit written testimony or sign up to speak. Confirm the deadline for your hearing; the noon exhibit deadline is separate from written testimony."
+    },
+    "commentInstructionsUrl": "https://meridiancity.org/government/public-meeting-information/",
+    "sources": {
+      "cases": "https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6",
+      "geometry": [
+        "https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6"
+      ],
+      "flum": "https://gis.meridiancity.org/server/rest/services/CD/FLUM_Webservice/MapServer/15",
+      "hearingsSchedule": "https://apps.meridiancity.org/CLERKSCONTENT/pubhearnot_detail.aspx",
+      "agendas": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "parcelFallback": "https://gis.meridiancity.org/server/rest/services/CD/Parcel_Layers/MapServer/0"
+    }
+  },
+  "catalogOrder": 1,
+  "legacyRuntime": {
+    "mapOnHub": true,
+    "zoom": 11,
+    "bounds": [
+      -116.58,
+      43.46,
+      -116.23,
+      43.8
+    ],
+    "caseGeometry": {
+      "layers": [
+        "https://gis.meridiancity.org/server/rest/services/CD/Development_Feature_Layer/FeatureServer/6"
+      ],
+      "where": "Active = 'Y' OR App_Year >= 2025",
+      "caseIdField": "App_ID",
+      "fields": {
+        "type": "App_ID",
+        "phase": "Hearing_Type",
+        "status": "Action",
+        "title": "Name",
+        "link": "Weblink"
+      },
+      "parcelFallback": {
+        "layerUrl": "https://gis.meridiancity.org/server/rest/services/CD/Parcel_Layers/MapServer/0",
+        "matchField": "PARCEL",
+        "recordField": "parcel",
+        "ignored": []
+      }
+    },
+    "flum": {
+      "layerUrl": "https://gis.meridiancity.org/server/rest/services/CD/FLUM_Webservice/MapServer/15",
+      "categoryField": "class2",
+      "colorSource": "renderer",
+      "planName": "Meridian Comprehensive Plan",
+      "label": "Meridian Comprehensive Plan, Future Land Use",
+      "adoptedDate": null,
+      "adoptionSource": "https://meridiancity.org/community-development/planning/comprehensive-plan/",
+      "dataNote": "Plan designation only. Listed zoning examples are not exhaustive; compatibility is not inferred from an unlisted district.",
+      "simplifyTolerance": 0.00002
+    },
+    "addressPoints": {
+      "layerUrl": "",
+      "addressField": "",
+      "where": "1=1",
+      "suffix": "Meridian, ID"
+    },
+    "stages": {
+      "phase": {
+        "Review": "In review",
+        "City Council": "Council/Board",
+        "PZ Commission": "P&Z",
+        "Decided": "Decided"
+      },
+      "status": {},
+      "recorded": {
+        "phases": [],
+        "statuses": []
+      }
+    },
+    "caseTypes": {
+      "SPP": "Preliminary plat",
+      "SPF": "Final plat",
+      "CUP": "Conditional use permit",
+      "ANN": "Annexation",
+      "ZMA": "Rezone",
+      "CMA": "Comprehensive plan amendment",
+      "ZTA": "Zoning text amendment",
+      "CTA": "Comprehensive plan text amendment",
+      "PLAN": "Planning application"
+    },
+    "citywideTypes": []
+  },
+  "recordPageHosts": [
+    "weblink.meridiancity.org",
+    "apps.meridiancity.org",
+    "meetings.municode.com"
+  ]
+}

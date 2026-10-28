@@ -81,6 +81,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         : before?.hash === hash && before.pages.length ? before.pages : await (dependencies.text ?? extractNativePdfPages)(bytes);
       await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
       if (document.content === undefined) {
+        if (/compiled|meeting[ _-]*packet|agenda[ _-]*(?:packet|package)/i.test(document.title)) throw new Error("AI work deferred: compiled packet requires a per-item report or bounded page OCR; whole packets are not sent to OpenAI");
         if (pages.some((page) => page.method === "native" && page.text.trim().length < 30) && deadline - Date.now() < 50000) throw new Error("OCR deferred to next run: processing budget reached");
         pages = await (dependencies.ocr ?? ocrMissingPages)(bytes, pages);
         await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });

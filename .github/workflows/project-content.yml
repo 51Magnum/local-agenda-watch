@@ -19,7 +19,8 @@ jobs:
         shell: bash
         run: |
           test -n "$CRON_SECRET" || { echo '::error::CRON_SECRET is missing'; exit 1; }
-          for area in nampa meridian canyon-county kuna eagle star middleton; do
+          AREAS=$(curl --fail-with-body --silent --show-error --max-time 30 --header "Authorization: Bearer $CRON_SECRET" "https://www.localagendawatch.com/api/cron/jurisdictions?scope=public" | jq -r '.areas[]')
+          for area in $AREAS; do
             curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 290 \
               --header "Authorization: Bearer $CRON_SECRET" \
               "https://www.localagendawatch.com/api/cron/project-content?area=$area"

@@ -1,4 +1,5 @@
 vi.mock("../ai-budget",()=>({aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
+vi.mock("../jurisdictions/ai-budget",()=>({currentJurisdictionAi:()=>undefined,jurisdictionAiBudget:{reserve:vi.fn().mockResolvedValue("area-reservation"),settle:vi.fn().mockResolvedValue(.0001)}}));
 import {afterEach,expect,it,vi} from "vitest";
 import {ingestDocuments,documentId,officialDocumentUrl} from "./ingest";
 import {emptyEvidenceState,EXTRACTED_KEYS,publicFields,type SourceDocument} from "./types";
@@ -74,3 +75,16 @@ it("persists OCR text before extraction fails so the next run does not pay for O
 });
 
 it("retains failure limits when an official document moves URL without changing its bytes",async()=>{vi.spyOn(console,"error").mockImplementation(()=>{});const s=store(),d=deps();await ingestDocuments(s,[doc],d);const moved={...doc,url:doc.url+"-new"};await ingestDocuments(s,[moved],d);expect(d.extract).toHaveBeenCalledTimes(1);expect((await s.read()).documents[documentId(doc)].failCount).toBe(1);d.download.mockResolvedValue(new Uint8Array([2]));d.extract.mockResolvedValue(empty());await ingestDocuments(s,[moved],d);expect(d.extract).toHaveBeenCalledTimes(2);});
+it("does not send an entire compiled packet for OCR",async()=>{
+ const s=store(),d=deps(),ocr=vi.fn();d.text.mockResolvedValue([{page:1,text:"",method:"native"}]);
+ const run=await ingestDocuments(s,[{...doc,title:"Council compiled meeting packet"}],{...d,ocr});
+ expect(ocr).not.toHaveBeenCalled();expect(d.extract).not.toHaveBeenCalled();expect(run.errors.join(" ")).toContain("whole packets are not sent");
+ expect((await s.read()).documents[documentId(doc)].failCount).toBe(0);
+});
+it("extracts an unchanged staff report only once when P&Z and Council link different URLs",async()=>{
+ const s=store(),d=deps();d.extract.mockResolvedValue(empty());
+ await ingestDocuments(s,[doc],d);
+ await ingestDocuments(s,[{...doc,title:"Council staff report",url:doc.url+"-council"}],d);
+ expect(d.extract).toHaveBeenCalledTimes(1);
+ expect((await s.read()).documents[documentId(doc)].state).toBe("complete");
+});

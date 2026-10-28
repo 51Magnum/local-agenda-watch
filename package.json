@@ -12,9 +12,12 @@
     "test:watch": "vitest",
     "timeline:sync": "tsx --env-file-if-exists=.env.local scripts/sync-case-timeline.ts",
     "maps:sync": "tsx --env-file-if-exists=.env.local scripts/refresh-maps.ts",
-    "prebuild": "node scripts/prepare-map-assets.mjs",
-    "predev": "node scripts/prepare-map-assets.mjs",
-    "postbuild": "node scripts/report-db-transfer.mjs"
+    "prebuild": "node scripts/generate-jurisdictions.mjs && node scripts/prepare-map-assets.mjs",
+    "predev": "node scripts/generate-jurisdictions.mjs && node scripts/prepare-map-assets.mjs",
+    "postbuild": "node scripts/report-db-transfer.mjs",
+    "jurisdictions:generate": "node scripts/generate-jurisdictions.mjs",
+    "pretest": "node scripts/generate-jurisdictions.mjs",
+    "law:jurisdiction": "node scripts/run-jurisdiction.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.13",

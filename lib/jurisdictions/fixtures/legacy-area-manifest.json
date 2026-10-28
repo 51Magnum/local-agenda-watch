@@ -1,0 +1,20 @@
+{
+  "order": [
+    "nampa",
+    "meridian",
+    "canyon-county",
+    "kuna",
+    "star",
+    "middleton",
+    "eagle"
+  ],
+  "hashes": {
+    "nampa": "b07fbd5f9bc94c104e13e3e4462420bcef3e0382e5eebc288b87df0b55be2821",
+    "meridian": "6bc01dd79a9248a9be793b274ca680c65974d8aefe8d9f8c93d567a2f607ff72",
+    "canyon-county": "2e706f37810f4c8daee3fb13107dfe571308a634ec8d9180797e483b7dfb2f9f",
+    "kuna": "c39e5496644998acf256a4bfe537add16bd28508791dd382b9c95a73fd0ef8a1",
+    "star": "27422b7dad4bb4a304f63d4dc5f69fff8d6ee16a2bd105e88b0d9b5e8e856122",
+    "middleton": "56e6067d20b642ba18f99b63705c95b4c24b0db07b7568ea9e2ddfbb39b8c6c6",
+    "eagle": "2adf19f786c0f22a835ffaaa6f42a14d8653a32f69f40f8b6d32b6986dfd569c"
+  }
+}
