@@ -76,6 +76,8 @@ M6 read-only live verification (2026-10-28): current source has 257 applications
 
 L3 implementation: individual and uncertain applicantCompany values cannot auto-publish through AI prose, structured official fields or existing legacy auto-published evidence. Public reads enforce the gate immediately; reconciliation queues old auto-published identities for review. Explicitly identified organizations remain eligible under the existing evidence rules. Actual manual approval remains possible through the audited review path. Person detection also recognizes joint individual names. New tests cover high-confidence AI fallback, structured ingestion, legacy reconciliation, organizations and manual review.
 
+L5 implementation: eSCRIBE meeting fixture is reduced from 910,045 to 29,157 bytes, retaining agenda-item ancestors needed by the recorded adapter tests and removing hidden state/scripts/styles/navigation. Provenance preserves the original response hash and records the trimmed hash. All four October 27 QA report artifacts were regenerated without AI candidate prose, quotes, identities or rosters; original counts/spend/source-page/review metadata remain. The QA generator and Markdown renderer both apply redaction so future distributable artifacts cannot reintroduce candidate text. Actual source-backed candidates remain in authenticated evidence review, not in distributable reports. Redaction/fixture-size/provenance regressions and the existing recorded adapter tests pass.
+
 Branch: codex/jurisdiction-onboarding. User brief: attached 2026-10-27-jurisdiction-onboarding-boise-ada.md.txt.
 
 Scope: reusable registry/platform onboarding first; Boise and Ada admin-only second. Never publish either. Keep live email approval intact.

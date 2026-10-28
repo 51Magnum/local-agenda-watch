@@ -6,6 +6,7 @@ import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
 import {agendaAdapter} from "./adapters";
 import {allowedAttachment} from "./adapters/common";
 import {readStaging,saveStaging,readQa,saveQa,snapshotHash,type QaReport} from "./store";
+import {redactQaReport} from "./report-privacy";
 import {locationMetrics} from "./location-metrics";
 import {computeDeadlines} from "./participation";
 import {withJurisdictionAi,jurisdictionSpend} from "./ai-budget";
@@ -56,7 +57,7 @@ export async function qaReport(areaId:string){
  const budgetSpend=process.env.DATABASE_URL?await jurisdictionSpend(areaId):[];
  const spent=budgetSpend.filter(b=>b.bucket.startsWith("sample:")).reduce((n,b)=>n+b.spent,0);
  const report:QaReport={id:createHash("sha256").update(snapshotHash(snapshot)+JSON.stringify(checks)).digest("hex"),areaId,createdAt:new Date().toISOString(),passed:checks.every(c=>c.passed),snapshotHash:snapshotHash(snapshot),checks,data:{health:snapshot.health,runtime:snapshot.runtime,meetings:snapshot.meetings.length,items:items.length,applications:snapshot.applications.length,applicationWindow:"Recent applications plus older active records linked to collected hearings; undated active records retained",caseMatchRate:items.length?matched.length/items.length:0,...locationMetrics(snapshot),skipped:snapshot.skipped,aiSamples:snapshot.aiSamples??[],tokens:snapshot.aiSamples?.reduce((n,s)=>n+s.tokens,0)??0,spentUsd:spent,budgetSpend,extractionOnlySpendUsd:snapshot.aiSamples?.reduce((n,s)=>n+s.costUsd,0)??0,projectedMonthlyUsd:{low:d.type==="county"?0:3,high:d.type==="county"?2:10,basis:"Planning estimate from onboarding brief, not measured spend; validate after one month"},nextHearings:next,mapChecklist:["Official boundary verified","County clipped below city layers","Distinct jurisdiction color","No location invented for unmapped applications","No public map, sitemap, search or email exposure"],notes:d.notes}};
- await saveQa(report);return report;
+ const safeReport=redactQaReport(report);await saveQa(safeReport);return safeReport;
 }
 export {reportMarkdown} from "./report";
 export {readQa};

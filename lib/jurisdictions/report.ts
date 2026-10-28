@@ -1,3 +1,4 @@
+import {redactQaReport} from "./report-privacy";
 import type {QaReport} from "./store";
 import type {SourceHealth} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
@@ -5,6 +6,7 @@ import type {computeDeadlines} from "./participation";
 type ComputedDeadline=ReturnType<typeof computeDeadlines>[number];
 const cell=(v:unknown)=>String(v??"—").replaceAll("|","\\|").replace(/\s+/g," ");
 export function reportMarkdown(report:QaReport){
+ report=redactQaReport(report);
  const d=report.data,lines=[`# ${report.areaId} onboarding QA`,"",`As of ${report.createdAt}. **${report.passed?"QA passing; owner approval still required":"Not ready for public launch"}. Admin-only.**`,"",`[Detailed JSON](${report.areaId}-${report.createdAt.slice(0,10)}.json) contains every endpoint result, source URL, skipped attachment and extracted field.`,"","## Collection","","| Measure | Result |","| --- | --- |",...[["Applications retained",d.applications],["Meetings",d.meetings],["Case-bearing hearing items",d.items],["Application match rate",`${(Number(d.caseMatchRate)*100).toFixed(1)}%`],["Application geometry rate",`${(Number(d.geometryMatchRate)*100).toFixed(1)}%`],["Applications without geometry",d.applicationsWithoutGeometry],["Applications without address",d.applicationsWithoutAddress],["Agenda items without matched geometry/address",d.agendaItemsWithoutMatchedLocation]].map(([k,v])=>`| ${k} | ${cell(v)} |`),"",String(d.applicationWindow??""),"","## Launch checks","",...report.checks.map(c=>`- [${c.passed?"x":" "}] ${c.name}: ${c.detail}`),"","## Endpoint health","","| Host | OK | Blocked | Unavailable | Skipped |","| --- | ---: | ---: | ---: | ---: |"];
  const health=(d.health??[]) as SourceHealth[];
  for(const host of [...new Set(health.map(h=>new URL(h.url).hostname))]){const rows=health.filter(h=>new URL(h.url).hostname===host);lines.push(`| ${host} | ${["ok","blocked","unavailable","skipped"].map(s=>rows.filter(r=>r.state===s).length).join(" | ")} |`);}

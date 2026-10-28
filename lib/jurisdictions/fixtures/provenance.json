@@ -21,7 +21,9 @@
     "file": "escribe-meeting.html",
     "url": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English",
     "recordedAt": "2026-10-27T14:29:08.918Z",
-    "hash": "a465625828534812d96f43c5aa87852c8d0a9ee3c157fa064e3ca6d6c39f8e42"
+    "hash": "d90e0273d0f736fa5af83f629f64aa576480fb75a950f81f32c9ba4dbb588fac",
+    "originalHash": "a465625828534812d96f43c5aa87852c8d0a9ee3c157fa064e3ca6d6c39f8e42",
+    "note": "Recorded official agenda attachment/item nodes only. Removed ViewState, hidden form state, scripts, styles and navigation. Original response hash retained as originalHash; hash identifies the trimmed fixture."
   },
   {
     "file": "iqm2-meeting.html",
