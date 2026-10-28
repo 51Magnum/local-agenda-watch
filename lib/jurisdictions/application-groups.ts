@@ -20,7 +20,7 @@ export function groupApplications(config:JurisdictionDefinition,applications:App
 export function projectCaseMatches(app:Application,id:string){
  if(!app.projectNumber)return false;
  const prefix=app.projectNumber+"-";if(!id.startsWith(prefix))return false;
- const suffixes=new Set([app.recordId,...app.relatedCaseNumbers].filter(v=>v.startsWith(prefix)).flatMap(v=>v.slice(prefix.length).split("-"))),agendaSuffixes=new Set(id.slice(prefix.length).split("-"));
+ const sourceSets=[app.recordId,...app.relatedCaseNumbers].filter(v=>v.startsWith(prefix)).map(v=>new Set(v.slice(prefix.length).split("-"))),suffixes=new Set(sourceSets.flatMap(s=>[...s])),agendaSuffixes=new Set(id.slice(prefix.length).split("-"));
  // Source rows can contain one component of a combined agenda case; never match by number alone.
- return suffixes.size>0&&agendaSuffixes.size>0&&([...suffixes].every(s=>agendaSuffixes.has(s))||[...agendaSuffixes].every(s=>suffixes.has(s)));
+ return suffixes.size>0&&agendaSuffixes.size>0&&(sourceSets.some(s=>[...s].every(part=>agendaSuffixes.has(part)))||[...agendaSuffixes].every(s=>suffixes.has(s)));
 }

@@ -9,6 +9,7 @@ it.each([
  ["202601398",["CU","MSP"],"CU-MSP"],
  ["202601614",["VAC","PCON"],"VAC-PCON"],
  ["202601395",["ALT"],"CU-MSP-ALT"],
+ ["202103209",["S","HD"],"S-TE"],
 ])("groups and links source components for %s",(number,suffixes,combined)=>{
  const grouped=groupApplications(jurisdiction("ada-county"),suffixes.map((s,i)=>app(number+"-"+s,"R"+i)));
  expect(grouped).toHaveLength(1);expect(grouped[0].projectNumber).toBe(number);
