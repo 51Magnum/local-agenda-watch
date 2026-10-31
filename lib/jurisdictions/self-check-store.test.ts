@@ -1,9 +1,10 @@
 import {readFileSync} from "node:fs";
 import {PGlite} from "@electric-sql/pglite";
 import {expect,it,vi} from "vitest";
-const h=vi.hoisted(()=>({db:undefined as unknown as PGlite}));
+const h=vi.hoisted(()=>({driftPass:true,db:undefined as unknown as PGlite}));
 vi.mock("./store",()=>({jurisdictionDb:async()=>h.db,jurisdictionTransaction:async(work:(db:PGlite)=>Promise<unknown>)=>h.db.transaction(tx=>work(tx as unknown as PGlite))}));
-vi.mock("../runtime-environment",()=>({databaseUrl:()=>"fixture",requireOnboardingMutation:()=>{}}));
+vi.mock("../runtime-environment",()=>({isPreview:()=>false,databaseUrl:()=>"fixture",requireOnboardingMutation:()=>{}}));
+vi.mock("./review-snapshot",()=>({readReviewSnapshot:()=>undefined,snapshotDrift:()=>({pass:h.driftPass,reason:"Fixture baseline comparison"})}));
 import {persistSelfCheck,readPublished,pauseJurisdiction,publicationSnapshot} from "./self-check-store";
 import {selfCheck} from "./self-check";
 import {jurisdiction} from "./registry";
@@ -22,6 +23,7 @@ it("records automatic approval atomically, removes failing records, blocks new r
   const failed={...report,goLive:false,passRate:0,records:report.records.map(r=>({...r,publish:false}))};expect(publicationSnapshot(s,failed,s).applications).toHaveLength(0);
   expect(publicationSnapshot(s,{...report,goLive:false},{...s,applications:[]}).applications).toHaveLength(0);
   await pauseJurisdiction(d.id,"admin");expect(await readPublished(d.id)).toBeUndefined();await persistSelfCheck(s,report);expect(await readPublished(d.id)).toBeUndefined();
+  h.driftPass=false;await persistSelfCheck(s,report);expect(report.goLive).toBe(false);expect(report.queue.some(q=>q.check.check==="review-snapshot-matches")).toBe(true);
   await expect(persistSelfCheck({...s,applications:[]},report)).rejects.toThrow("match snapshot");
  }finally{await h.db.close();}
 });

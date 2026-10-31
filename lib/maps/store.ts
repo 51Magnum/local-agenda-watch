@@ -1,4 +1,6 @@
 import {databaseUrl} from "../runtime-environment";
+import {isPreview} from "../runtime-environment";
+import {readReviewSnapshot} from "../jurisdictions/review-snapshot";
 import {requireProductionMutation} from "../runtime-environment";
 import {jurisdiction,isSiteReviewArea} from "../jurisdictions/registry";
 import {bbox} from "@turf/turf";
@@ -20,6 +22,7 @@ function database() {
 }
 function filename(id: string) { if (!/^[a-z0-9-]+$/.test(id)) throw new Error("Invalid map cache ID"); return path.join(process.cwd(), ".data", "maps", id + ".json"); }
 export async function readMapSnapshot(id: string,options:{caseIds?:readonly string[];includeFlum?:boolean;bounds?:readonly number[]}={includeFlum:true}): Promise<MapSnapshot | undefined> {
+  if(isPreview()){const review=readReviewSnapshot(id);if(!review)return;const snapshot=structuredClone(review.map);if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));return snapshot;}
   if(jurisdiction(id)&&!jurisdiction(id).legacyPublic){const snapshot=await(await import("../jurisdictions/runtime")).configuredSnapshot(id);if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));if(options.bounds)snapshot.cases=snapshot.cases.filter(c=>{const b=c.bounds,q=options.bounds!;return b&&b[0]<=q[2]&&b[2]>=q[0]&&b[1]<=q[3]&&b[3]>=q[1];});if(options.includeFlum)snapshot.flum=await readFlumSnapshot(id);return snapshot;}
  if (databaseUrl()) {
    const db=database();await initialized;
@@ -70,6 +73,7 @@ export async function exportFlumPage(id:string,offset:number){
  return{updatedAt:row.updatedAt,legend:row.legend,features:row.features,nextOffset:offset+row.features.length<row.total?offset+row.features.length:undefined};
 }
 export async function readFlumSnapshot(id:string,options?:{bounds:readonly number[]}){
+ if(isPreview())return undefined;
  if(isSiteReviewArea(id)){const config=(await import("./jurisdictions")).getJurisdiction(id);return config?(await import("./refresh")).fetchFlum(config):undefined;}
  if(!databaseUrl())return(await readMapSnapshot(id))?.flum;
  if(options?.bounds){

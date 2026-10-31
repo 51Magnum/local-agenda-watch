@@ -17,7 +17,7 @@ export type JurisdictionDefinition = {
  documents:{maxNativeBytes?:number;maxBytes:number;maxPages:number;allowPackets:false};
  enabled:boolean;launchStatus:LaunchStatus;sourcesVerifiedAt:string|null;notes:string[];
  legacyPublic?:boolean;publication?:{approvalId:string;qaHash:string};
- selfCheck?:{minPassRate?:number;mustInclude?:string[];typeOrder?:string[];fixtures?:{calendar:string;meeting:string;start:string;end:string}};
+ selfCheck?:{minPassRate?:number;mustInclude?:string[];typeOrder?:string[];fixtures?:{calendar:string;meeting:string;start:string;end:string;boundary?:string}};
  /** Compatibility facts are moved, not copied, from the original area registry. */
  cachedBoundaryFile?:string;cachedCoverageBoundaryFile?:string;
  area:Omit<AreaDefinition,"id"|"slug"|"name"|"type"|"state"|"timezone"|"status"|"recordPage"|"boundary"|"coverageBoundary">;

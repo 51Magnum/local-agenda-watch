@@ -1,20 +1,18 @@
 import {Pool as PgPool,type PoolConfig} from "pg";
-import {databaseUrl,productionWritesAllowed,requireProductionMutation} from "./runtime-environment";
+import {isPreview,productionWritesAllowed,requireProductionMutation} from "./runtime-environment";
 export type {PoolClient} from "pg";
-/** Previews use a separate DSN when supplied and are read-only at the PG session level. */
+/** Defense in depth: no preview code may even construct a database pool. */
 export class Pool extends PgPool{
  constructor(config:PoolConfig&{previewSignups?:boolean}={}){
-  const {previewSignups,...pgConfig}=config,production=productionWritesAllowed();
-  const signupDatabase=!production&&previewSignups&&!!process.env.DATABASE_URL_PREVIEW&&process.env.DATABASE_URL_PREVIEW!==process.env.DATABASE_URL;
-  const previewWriter=process.env.LAW_DB_TARGET==="preview"&&!production;
-  const connectionString=production?config.connectionString:databaseUrl()??config.connectionString;
-  super({...pgConfig,connectionString,...!production&&!signupDatabase&&!previewWriter?{options:(config.options??"")+" -c default_transaction_read_only=on"}:{}});
+  if(isPreview())throw Error("Database pools are not available in preview; use committed review snapshots");
+  const {previewSignups,...pgConfig}=config;void previewSignups;
+  const production=productionWritesAllowed();
+  super({...pgConfig,...!production?{options:(config.options??"")+" -c default_transaction_read_only=on"}:{}});
   const query=this.query.bind(this);
   this.query=((...args:unknown[])=>{
    const sql=typeof args[0]==="string"?args[0]:String((args[0] as {text?:string})?.text??"");
-   // Existing schema belongs to migrations/production initialization. Never issue preview DDL.
-   if(!production&&/^\s*(?:CREATE|ALTER)\b/i.test(sql))return Promise.resolve({rows:[],rowCount:0,command:"DISABLED_IN_PREVIEW",fields:[]});
-   if(!production&&!signupDatabase&&!previewWriter&&!/^\s*(?:SELECT|WITH|SHOW|EXPLAIN)\b/i.test(sql))requireProductionMutation();
+   if(!production&&/^\s*(?:CREATE|ALTER)\b/i.test(sql))return Promise.resolve({rows:[],rowCount:0,command:"DISABLED_OUTSIDE_PRODUCTION",fields:[]});
+   if(!production&&!/^\s*(?:SELECT|WITH|SHOW|EXPLAIN)\b/i.test(sql))requireProductionMutation();
    return Reflect.apply(query,this,args);
   }) as PgPool["query"];
  }

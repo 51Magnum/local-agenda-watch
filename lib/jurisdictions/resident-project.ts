@@ -4,8 +4,11 @@ import {residentialCase,protectMapCase,redactResidence,privateResidentialDocumen
 import {privacyOverrides} from "../residential-privacy-store";
 import {readPublished} from "./self-check-store";
 import {jurisdiction} from "./registry";
+import {isPreview} from "../runtime-environment";
+import {readReviewSnapshot} from "./review-snapshot";
 /** Resident projection shares the sourced six-question record without admin links. */
 export async function residentProject(areaId:string,caseId:string){
+ if(isPreview())return readReviewSnapshot(areaId)?.records.find(r=>r.caseId===caseId||r.aliases.includes(caseId))?.project??null;
  await visibleAreas();
  const area=getArea(areaId);if(!area)return null;
  const snapshot=await readPublished(areaId);if(!snapshot)return null;

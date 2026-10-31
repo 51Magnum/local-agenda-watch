@@ -1,0 +1,227 @@
+{
+  "runtime": "Node 24.18.0; Playwright Chromium; next build + next start",
+  "environment": {
+    "VERCEL_ENV": "preview",
+    "VERCEL": "1",
+    "databaseVariables": [],
+    "LAW_SITE_REVIEW_AREAS": null
+  },
+  "checks": [
+    {
+      "name": "map",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Ada County, ID Development Map | Local Agenda Watch",
+      "errors": [],
+      "file": "map-1440x900.png",
+      "sha256": "2f65bf3b827487888a4df1d70761471cc3f1429e11ba845ea32ffc6b5684e608"
+    },
+    {
+      "name": "list",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Ada County, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "list-1440x900.png",
+      "sha256": "809d5b34adbdd1c1f3119a66af6aaf7c3f4a11fa65e26ef797b7e37df91536cf"
+    },
+    {
+      "name": "combined",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Zoning Map Amendment near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "combined-1440x900.png",
+      "sha256": "7caba70f4ed0fa89cec8c338d5654a0ebc469f82314047a52853fd30846fcba9"
+    },
+    {
+      "name": "appeal",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "PRIVATE ROAD near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "appeal-1440x900.png",
+      "sha256": "73d5bf918e671a237d70cccc7aca242b2a575c934240cf634cadb19a88649de7"
+    },
+    {
+      "name": "agenda-only",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Conditional Use near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "agenda-only-1440x900.png",
+      "sha256": "be1c77c898f855cf051b9476006a4faacfe21cc8493797c4d3010e242e6a6c9f"
+    },
+    {
+      "name": "organization",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "PRELIMINARY PLAT near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "organization-1440x900.png",
+      "sha256": "e3b71df327d845e0d33461e1fda872f0475aa12435ac8ff0a3f7a86ac61efa18"
+    },
+    {
+      "name": "exceptions",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Review case evidence \u00b7 Local Agenda Watch",
+      "errors": [],
+      "file": "exceptions-1440x900.png",
+      "sha256": "d7b7f69cb1d06bb6cba9d22b8c639f393b7ac58cf5dfbaf9bb7f65e454040e03"
+    },
+    {
+      "name": "boise-404",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 404,
+      "title": "404: This page could not be found.",
+      "errors": [],
+      "file": "boise-404-1440x900.png",
+      "sha256": "1994c86907515d5a1f55b88a11e56a86321e0ce362d7a3bfb77663847cbb467d"
+    },
+    {
+      "name": "sample-escribe",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Fixture eSCRIBE sample, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "sample-escribe-1440x900.png",
+      "sha256": "38e36a5a9326ac1b063a47bad775eeeffd1547c5a711a508153b3eab7a0a3864"
+    },
+    {
+      "name": "map",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Ada County, ID Development Map | Local Agenda Watch",
+      "errors": [],
+      "file": "map-390x844.png",
+      "sha256": "6516bc2ea7d090d8e33a92ad2b02dae3cdfbf97981448fd5337a3bcf21951656"
+    },
+    {
+      "name": "list",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Ada County, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "list-390x844.png",
+      "sha256": "92d1e59695669b0624cd1fad6fd92e1adbd484ff32a8874d5d8f04ea4eb08f31"
+    },
+    {
+      "name": "combined",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Zoning Map Amendment near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "combined-390x844.png",
+      "sha256": "a1976226edd38211b38827cdfd9e5547407d6253d209d35d1b891f9229185da1"
+    },
+    {
+      "name": "appeal",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "PRIVATE ROAD near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "appeal-390x844.png",
+      "sha256": "939ae890e38c4b4dde0db7736fd63bbeb544d3b1ed1b74c3b9abc7f10f587a58"
+    },
+    {
+      "name": "agenda-only",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Conditional Use near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "agenda-only-390x844.png",
+      "sha256": "dece60f9156b134910d8529400d76b0b060849de4788fb5690a61df4a50c101d"
+    },
+    {
+      "name": "organization",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "PRELIMINARY PLAT near Location not published \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "organization-390x844.png",
+      "sha256": "e83d7f096f0e89f8b5dcacb214d9a716b6f8810007a28abc887fa64762a2e844"
+    },
+    {
+      "name": "exceptions",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Review case evidence \u00b7 Local Agenda Watch",
+      "errors": [],
+      "file": "exceptions-390x844.png",
+      "sha256": "aab054d752f4ac84b1358d6b4513602d8ba53dc220747a6a9a96fc5b7ac638b8"
+    },
+    {
+      "name": "boise-404",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 404,
+      "title": "404: This page could not be found.",
+      "errors": [],
+      "file": "boise-404-390x844.png",
+      "sha256": "efb9f5f27fd5b0c0061ea80383dbe301216c78bfc1e4a1b0c76c30e9c5a231fa"
+    },
+    {
+      "name": "sample-escribe",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Fixture eSCRIBE sample, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "sample-escribe-390x844.png",
+      "sha256": "11227d1a1cc66c66add548ad459b535619e67997b18336b88c659725645297d9"
+    }
+  ]
+}

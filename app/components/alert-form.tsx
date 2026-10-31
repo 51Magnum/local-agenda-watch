@@ -1,4 +1,5 @@
 "use client";
+import {previewBuild} from "@/lib/jurisdictions/generated-public";
 import { useState } from "react";
 import type { WatchTarget } from "@/lib/alerts";
 export default function AlertForm({
@@ -12,6 +13,7 @@ export default function AlertForm({
     [website, setWebsite] = useState(""),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState("");
+  if(previewBuild)return <p role="status">Subscriptions are not available in preview.</p>;
   return (
     <form
       className="space-y-4"

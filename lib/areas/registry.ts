@@ -2,6 +2,8 @@ import "server-only";
 import {officialGisLink} from "../jurisdictions/official-gis-link";
 import {routeJurisdictions,publicJurisdictions} from "../jurisdictions/registry";
 import {registryBoundaries} from "../jurisdictions/generated";
+import {readReviewSnapshot} from "../jurisdictions/review-snapshot";
+import {isPreview} from "../runtime-environment";
 import { recordPageOnHosts, type RecordPageContext } from "./record-links";
 import type { MultiPolygon, Polygon } from "geojson";
 export type AreaDefinition = {
@@ -22,6 +24,7 @@ export type AreaDefinition = {
   sources:{cases?:string;hearingsSchedule?:string;geometry?:string[];flum?:string;agendas?:string;addressPoints?:string;parcelFallback?:string};
 };
 const ROUTE_AREAS:Record<string,AreaDefinition>=Object.fromEntries(routeJurisdictions().map(d=>{
+ if(isPreview()){const review=readReviewSnapshot(d.id);return review?[d.id,review.area]:[];}
  const boundary=registryBoundaries[d.id+":boundary"] as AreaDefinition["boundary"]|undefined;
  if(!boundary){if(d.legacyPublic)throw Error("Published jurisdiction has no verified boundary cache: "+d.id);return [];}
  const hosts=d.recordPageHosts;
@@ -32,6 +35,7 @@ const ROUTE_AREAS:Record<string,AreaDefinition>=Object.fromEntries(routeJurisdic
 export const AREAS:Record<string,AreaDefinition>=Object.fromEntries(publicJurisdictions().map(d=>[d.id,ROUTE_AREAS[d.id]]));
 export const FEATURED_AREA_ID="nampa";
 export async function visibleAreas(){
+ if(isPreview())return publicJurisdictions().flatMap(d=>{const area=readReviewSnapshot(d.id)?.area;if(!area)return [];ROUTE_AREAS[d.id]=area;AREAS[d.id]=area;return [area];});
  return (await Promise.all(routeJurisdictions().map(async d=>{
   if(d.legacyPublic)return ROUTE_AREAS[d.id];
   try{const snapshot=await(await import("../jurisdictions/self-check-store")).readPublished(d.id);if(!snapshot?.boundary){delete AREAS[d.id];return;}

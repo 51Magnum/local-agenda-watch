@@ -25,4 +25,7 @@ export const registryEntries = [entry0,entry1,entry2,entry3,entry4,entry5,entry6
 export const registryBoundaries=Object.fromEntries([["ada-county:boundary",boundary0_boundary],["ada-county:coverageBoundary",boundary0_coverageBoundary],["canyon-county:boundary",boundary2_boundary],["canyon-county:coverageBoundary",boundary2_coverageBoundary],["eagle:boundary",boundary3_boundary],["kuna:boundary",boundary4_boundary],["meridian:boundary",boundary5_boundary],["middleton:boundary",boundary6_boundary],["nampa:boundary",boundary7_boundary],["nampa:coverageBoundary",boundary7_coverageBoundary],["star:boundary",boundary9_boundary]]);
 export const municipalIds=["kuna","star","middleton","eagle"] as const;
 export const municipalSources={"kuna":entry4.legacyMunicipal,"star":entry9.legacyMunicipal,"middleton":entry6.legacyMunicipal,"eagle":entry3.legacyMunicipal};
+import review0 from "../../data/review/ada-county.json";
+import review1 from "../../data/review/sample-escribe.json";
+export const reviewSnapshots={"ada-county":review0,"sample-escribe":review1};
 export const siteReviewAreaIds:readonly string[]=[];

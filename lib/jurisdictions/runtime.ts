@@ -6,9 +6,11 @@ import {getArea,areaPath} from "../areas/registry";
 import {jurisdiction} from "./registry";
 
 import {readPublished} from "./self-check-store";
+import {isPreview} from "../runtime-environment";
+import {readReviewSnapshot} from "./review-snapshot";
 import {stagedFeed,stagedMapSnapshot,configuredRecord} from "./resident-records";
-export async function configuredFeed(id:string):Promise<HearingFeed>{const d=jurisdiction(id),snapshot=await readPublished(id);if(!d)throw Error("Jurisdiction unavailable");if(!snapshot)return{active:[],completed:[],scheduleUnavailable:true,dataUnavailable:true};return stagedFeed(d,snapshot);}
-export async function configuredSnapshot(id:string):Promise<import("../maps/types").MapSnapshot>{const d=jurisdiction(id),snapshot=await readPublished(id);if(!d)throw Error("Jurisdiction unavailable");if(!snapshot)return{version:1,jurisdiction:id,updatedAt:new Date().toISOString(),cases:[],warnings:["Official records are being collected; check the county source for the full record."]};return stagedMapSnapshot(d,snapshot);}
+export async function configuredFeed(id:string):Promise<HearingFeed>{if(isPreview())return readReviewSnapshot(id)?.feed??{active:[],completed:[],scheduleUnavailable:true,dataUnavailable:true};const d=jurisdiction(id),snapshot=await readPublished(id);if(!d)throw Error("Jurisdiction unavailable");if(!snapshot)return{active:[],completed:[],scheduleUnavailable:true,dataUnavailable:true};return stagedFeed(d,snapshot);}
+export async function configuredSnapshot(id:string):Promise<import("../maps/types").MapSnapshot>{if(isPreview()){const review=readReviewSnapshot(id);if(!review)throw Error("No committed review snapshot");return review.map;}const d=jurisdiction(id),snapshot=await readPublished(id);if(!d)throw Error("Jurisdiction unavailable");if(!snapshot)return{version:1,jurisdiction:id,updatedAt:new Date().toISOString(),cases:[],warnings:["Official records are being collected; check the county source for the full record."]};return stagedMapSnapshot(d,snapshot);}
 export const publicConfiguredFeed=(id:string)=>configuredFeed(id);
 export function configuredLocality(id:string):Locality {const d=jurisdiction(id);return{slug:id,displayName:d.name,fullName:d.name+", Idaho",portalUrl:String(d.agenda[0].params.baseUrl),dataAttribution:"Official planning records and hearing documents",tracked:[],getHearings:()=>publicConfiguredFeed(id)};}
 export function configuredMap(id:string):JurisdictionConfig{

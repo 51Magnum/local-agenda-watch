@@ -15,7 +15,7 @@ import {polygonGeometry} from "../maps/gis";
 import {displayStagedApplication,stagedApplications} from "./resident-records";
 import {applicationTitle} from "./application-copy";
 import {jurisdictionToday} from "./hearing-state";
-export async function privateProject(areaId:string,caseId:string,publishedSnapshot?:StagingSnapshot):Promise<PaneData|undefined>{
+export async function privateProject(areaId:string,caseId:string,publishedSnapshot?:StagingSnapshot,options:{evidence?:boolean}={}):Promise<PaneData|undefined>{
  const d=jurisdiction(areaId),snapshot=publishedSnapshot??await readStaging(areaId);if(!d||!snapshot)return;
  const rawApp=stagedApplications(snapshot).find(a=>a.recordId===caseId||a.relatedCaseNumbers.includes(caseId));
  const app=rawApp?displayStagedApplication(d,rawApp):undefined;
@@ -28,7 +28,7 @@ export async function privateProject(areaId:string,caseId:string,publishedSnapsh
  const title=app?.selfCheckTitle??applicationTitle(app?.type??"Planning application",app?.description||app?.name||agendaItem!.title);
  const location=app?applicationMapLocation(app):{geometry:null,centroid:null,confidence:"approximate" as const,source:"none" as const},geometry=location.geometry;
  let evidence:ReturnType<typeof questionEvidence>|undefined;let approvedSummary:string|undefined;let approvedSummarySource:string|undefined;
- try{const store=getEvidenceStore(),state=store.readCase?await store.readCase(areaId,ids):await store.read();const fields=publicFields(state,ids,areaId);const summaryField=fields.filter(f=>["popupExplanation","requestSummary"].includes(f.key)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))[0];approvedSummary=summaryField?.value;approvedSummarySource=summaryField?evidenceSourceHref(summaryField):undefined;evidence=questionEvidence(fields,{...d.area,id:areaId,timezone:d.timezone} as never);}catch{}
+ if(options.evidence!==false)try{const store=getEvidenceStore(),state=store.readCase?await store.readCase(areaId,ids):await store.read();const fields=publicFields(state,ids,areaId);const summaryField=fields.filter(f=>["popupExplanation","requestSummary"].includes(f.key)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt))[0];approvedSummary=summaryField?.value;approvedSummarySource=summaryField?evidenceSourceHref(summaryField):undefined;evidence=questionEvidence(fields,{...d.area,id:areaId,timezone:d.timezone} as never);}catch{}
  const rawVisual=ids.map(id=>snapshot.visuals?.[id]).find(Boolean),visual=rawVisual?{...rawVisual,src:rawVisual.src.replace("/api/maps/","/admin/jurisdictions/"),fullSizeUrl:rawVisual.fullSizeUrl.replace("/api/maps/","/admin/jurisdictions/")}:undefined;
  const deadlines=hearing.deadlines,written=deadlines.find(r=>r.kind==="written");
  const impactArea=app?.geometry&&polygonGeometry(app.geometry)&&geometry&&snapshot.impactAreas?.features.find(f=>f.geometry&&polygonGeometry(f.geometry)&&booleanIntersects(feature(geometry),feature(f.geometry)));

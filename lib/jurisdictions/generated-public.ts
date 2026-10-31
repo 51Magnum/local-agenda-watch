@@ -410,3 +410,4 @@ export const publicAreaEntries=[
     "color": "#0891b2"
   }
 ];
+export const previewBuild=false;

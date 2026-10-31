@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile, rename, rmdir, stat } from "node:fs/promise
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { emptyEvidenceState, type EvidenceState } from "./types";
+import {isPreview} from "../runtime-environment";
 
 export interface EvidenceStore {
   read(): Promise<EvidenceState>;
@@ -43,6 +44,7 @@ export function createFileStore(filename: string): EvidenceStore {
   } };
 }
 export function getEvidenceStore(options:{buffered?:boolean}={}): EvidenceStore {
+  if(isPreview())return {read:async()=>emptyEvidenceState(),readCase:async()=>emptyEvidenceState(),pages:async()=>[],mutate:async()=>{throw Error("Not available in preview");}};
   if (!process.env.DATABASE_URL) {
     if (process.env.VERCEL) throw new Error("DATABASE_URL is required for durable timeline storage on Vercel");
     return createFileStore(process.env.TIMELINE_LOCAL_PATH ?? path.join(process.cwd(), ".data", "timeline.json"));

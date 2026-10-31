@@ -1,6 +1,8 @@
 import {jurisdiction} from "../jurisdictions/registry";
 import {visibleAreas} from "@/lib/areas/registry";
 import {databaseUrl} from "../runtime-environment";
+import {isPreview} from "../runtime-environment";
+import {allReviewSnapshots} from "../jurisdictions/review-snapshot";
 import {siteReviewAreaIds} from "../jurisdictions/generated";
 import {readProjectContent} from "@/lib/project-content-store";
 import {getProjectForCase} from "@/lib/projects";
@@ -29,6 +31,7 @@ const reviewSnapshots=async()=>Promise.all((await visibleAreas()).filter(a=>!jur
 /** Compact, cached directory: never read polygon, image or document payloads for search. */
 export const projectDirectory = unstable_cache(async () => {
   const areas = (await visibleAreas()).filter((a) => a.status === "live");
+  if(isPreview())return allReviewSnapshots().filter(r=>areas.some(a=>a.id===r.areaId)).flatMap(r=>r.records.map(record=>({areaId:r.areaId,caseId:record.caseId,title:record.project.item.title,typeLabel:record.project.item.typeLabel,caseIds:[record.caseId,...record.aliases],areaName:r.area.name,aiTitle:record.project.item.aiTitle})));
   if (!databaseUrl()) return [];
   const db = await database();
   const result = await db.query(
@@ -243,7 +246,7 @@ async function loadViewport(
       : [];
   const overrides = await privacyOverrides();
   const grouped = databaseUrl()?rows.map(r=>r.data):combineRadiusCases(areas.map(area=>({area,cases:rows.filter(r=>r.area_id===area.id).map(r=>r.data)})),[(b[0]+b[2])/2,(b[1]+b[3])/2],25000);
-  if(zoom>=9)for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[]){const box=c.bounds;if(box&&box[0]<=b[2]&&box[2]>=b[0]&&box[1]<=b[3]&&box[3]>=b[1])grouped.push({...c,areaId:snapshot!.jurisdiction});}
+  if(zoom>=9&&databaseUrl())for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[]){const box=c.bounds;if(box&&box[0]<=b[2]&&box[2]>=b[0]&&box[1]<=b[3]&&box[3]>=b[1])grouped.push({...c,areaId:snapshot!.jurisdiction});}
   return {
     cases: grouped.slice(0, 1000).map((c) => {const safe=protectMapCase(c.areaId!, { ...publicFeature(c, c.areaId!, zoom), residentialPrivacy:residentialCase(c.areaId!,c.id.split(":").at(-1)!,c,overrides) }, overrides);return zoom<CASE_OUTLINE_ZOOM?{...safe,geometry:null}:safe;}),
     summaries,

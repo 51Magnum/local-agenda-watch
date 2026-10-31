@@ -1,47 +1,25 @@
-# Self-reviewing onboarding delivery — October 31, 2026
+# Zero-setup jurisdiction review — October 31, 2026
 
-Implementation remains on codex/ada-site-review / PR #7. No merge or production deployment is authorized or performed.
+Branch: `codex/ada-site-review`, PR #7. Shane controls merging.
 
-## Built
+## Onboarding
 
-- Source-backed per-record checks, configurable type priority/pass threshold/must-include list, aggregate coverage checks, redacted check reports and an offline config-only eSCRIBE sample.
-- Existing registry, adapters, collection, scope/copy, hearing state, boundary/geolocation, snapshot hashing, timeline evidence/privacy stores and both AI budget ledgers are reused. No dependency was added. The seven legacy public definitions remain covered by their unchanged manifest test.
-- Automatic database approval/publication, source-bound exception decisions in /admin/review, persistent pause, published-record filtering and internal exception alerts. Failed checks cannot be bypassed by JSON approval fields.
-- Preview requires an isolated database. CLI writer selection requires LAW_DB_TARGET=preview, a different endpoint, and distinct actual Neon branch IDs. Runtime uses the reader role. No production fallback exists.
-- AI fixer uses the existing reserved-budget gpt-4.1-mini path, bounded to three exceptions per production refresh. Development uses mocked models. Verifiable source excerpts/titles and additional document hiding are eligible; invented outcomes are rejected.
+Follow [Adding a jurisdiction](ADDING_A_JURISDICTION.md): configure an existing adapter, run the dry-run check, commit its snapshot/report, review the Git preview, then merge. No separate preview database, roles, migrations by hand, Vercel variables or protection bypass are required.
 
-## Actual source result
+`data/review/<area>.json` contains resident project projections, map/feed data, redacted checks, exceptions and the decision. It excludes raw application fields, individual applicant identities, staff contacts and documents held by privacy checks. Safe held records are visible for review and labeled unpublished; their production eligibility remains false. Preview never creates a database pool. Timeline reads are empty; subscriptions and admin writes are unavailable. The exception queue is read-only committed evidence.
 
-The live read-only collection retained 40 projects and accounted for all 41/41 case-bearing agenda items. The self-check pass rate is 0%, with 66 check exceptions across all 40 records. Automatic go-live is refused. The report records 38 failed case-link checks, 27 incomplete document privacy reviews, and one legacy-format case identity requiring verification. Its identity classification was refined to uncertainty without changing the measured source snapshot/time.
+Production refresh waits for the merged Git commit to be deployed, applies the versioned onboarding migrations under a transaction/advisory lock, and collects again. Before first publication the gate compares record identities, eligibility, source hashes and check results against the committed baseline (maximum three changed records); a changed go-live decision always blocks. Drift is queued in `/admin/review` and recorded in the report. Existing production budget caps, publication criteria and the durable pause remain active. No production run was invoked from this workspace.
 
-The county tracker find/query URLs both returned HTTP 200 but neither body contained the project number. Public tracker configuration confirms an invisible Search widget with no configured sources; its Query widget filters hearing dates. A generic map shell is not proof of a working case deep link. The curated County GIS HTML alternative did not clear the source checks. Raw JSON links were not accepted as resident application pages.
+## Ada result
 
-See reports/jurisdictions/ada-county-selfcheck-2026-10-31.json and .md. These are dry-run artifacts, not deployed staging or approval. Source text and candidate titles are withheld from distributable reports.
+Fresh read-only collection: 40 records, 41/41 agenda items accounted for, 0% record pass rate, 66 exceptions and **go-live withheld**. Exceptions comprise 38 failed source-link checks, 27 incomplete document privacy reviews and one uncertain legacy case identity. A generic HTTP-200 application shell is not accepted as a case deep link. Privacy-held documents and unverified application links are omitted from the snapshot. Unavailable location facts remain explicitly unavailable. No missing outcome, impact or deadline was invented.
+
+The disabled `sample-escribe` entry uses recorded eSCRIBE fixtures and the same command: 4 records, 100% pass, no exceptions, go-live false because it is disabled. It renders in the same local preview without changing code or environment per area.
 
 ## Verification
 
-Node v24.18.0: 715 tests in 145 files pass; TypeScript passes; ESLint has zero errors and four existing warnings; optimized build passes. Client bundle isolation PASS: 41 static files, with no private jurisdiction IDs, source hosts, cost caps or Ada boundary content.
+Node 24.18.0: 720 tests in 147 files; TypeScript passes; ESLint has zero errors and four existing warnings. The optimized hosted-semantics Preview build passes with `VERCEL_ENV=preview`, `VERCEL=1`, no database variables, and no `LAW_SITE_REVIEW_AREAS`. Its static client scan passes (39 files).
 
-The disabled sample-escribe registry entry reuses the existing eSCRIBE adapter and produces an offline fixture report: 100% record pass rate, no queue, and go-live false because the entry is disabled. No new adapter implementation is needed.
+Local Playwright screenshots: [capture manifest](screenshots/2026-10-31-ada-county/README.md). Both 1440x900 and 390x844 cover map, expanded list, four representative projects (including agenda-only and appeal), read-only queue and Boise 404, plus the disabled sample. Rendering caused no JavaScript errors or database reads. Visual review corrected overbroad redaction of ordinary words and the inherited hardcoded timezone label. Remaining source/privacy/location gaps stay visible in review and withheld from publication.
 
-| Regression | Local result |
-| --- | --- |
-| 202502399-A across August/September/October and 202502461-A | PASS: recorded source rows and agenda fixtures match by project |
-| Agenda-only 202600829 and 202600864 | PASS: retained and included in 41/41 coverage |
-| Organization subdivision 202600934 | PASS: development description retained |
-| Combined 202600273 / 202400171 item | PASS: distinct identities, heard-together relationship |
-| Five named title cases | PASS: source words/primary type, bounded length, no ellipsis |
-| Official application links | FAIL live: unresolved source checks remain queued; raw-data rejection tests pass |
-| Board stage and 9 PM Boise date | PASS: explicit regression tests |
-| PDF.js Iterator failure / Node 24 pin | PASS: incomplete collection cannot replace staging |
-| COM Hazel Center and winery MSP | PASS: recorded-source scope fixtures |
-| 37 homeowner Accessory Use permits | PASS: exclusion regression; actual current-run exclusions are separately categorized in the report |
-| Forged JSON launch and persistent pause | PASS: local PostgreSQL-compatible integration tests |
-
-## Pending external verification
-
-No preview database was provisioned or populated. DATABASE_URL_PREVIEW and the Vercel protection-bypass secret are not available locally. No deployed-preview screenshots are claimed. Required views and sizes are listed in docs/jurisdictions/screenshots/2026-11-ada/README.md.
-
-Shane must create the ada-preview Neon branch, reader and writer roles, apply the onboarding/constraint/self-check migrations, provide actual branch IDs, set Vercel Preview DATABASE_URL_PREVIEW to the reader, and configure the bypass secret. Then populate only the preview branch, resolve the source exceptions, verify the fresh Git preview and required checks, and merge only when satisfied.
-
-No production writes, no paid AI in development, no local-file deployment, and no merge.
+No production writes, paid development AI, local-file deployment, protection changes or merge.

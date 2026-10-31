@@ -1,6 +1,5 @@
 # Ada automatic onboarding verification
 
-PR #7 remains Shane's merge decision. Follow [preview database setup](PREVIEW_DATABASE.md) before refreshing deployed preview data.
 
 ## Automatic gate
 
@@ -12,11 +11,11 @@ Review decisions are tied to application and linked-source content hashes and re
 
 - [ ] Run Node 24 checks: npm test, npx tsc --noEmit, npx eslint ., npm run build. Confirm the bundle scan passes.
 - [ ] Run npm run law:jurisdiction -- check ada-county --dry-run --collect. Review redacted JSON/Markdown, particularly link failures, privacy uncertainty, exclusions and unmatched items.
-- [ ] Provision the separate Neon branch and reader/writer roles. Populate only that branch with LAW_DB_TARGET=preview.
 - [ ] Verify the Git preview uses fresh checked records. An old staging count is not proof that this code ran.
 - [ ] Review 1440x900 and 390x844 map/list, cases 202600273, 202502399, 202600864, 202600934, exception queue, and Boise's 404. Check six resident questions, source identity, Board vs P&Z, local dates, As of, AI labels where applicable, corrections link and disclaimer.
 - [ ] Preserve the shared-hearing relationship without copying another project's case IDs. Organization subdivision 202600934 retains its development description.
 - [ ] Confirm preview noindex, production email policy, and disabled preview subscriber delivery.
 - [ ] Merge only when Shane is satisfied. Production must build the merged commit through Vercel's Git integration; compare its SHA with origin/main.
 
-Screenshots and a successful preview database refresh must not be claimed while their prerequisites are unavailable. See the current self-check report for actual results.
+
+Preview onboarding uses committed, redacted snapshots. See [Adding a jurisdiction](ADDING_A_JURISDICTION.md); no separate infrastructure is required.

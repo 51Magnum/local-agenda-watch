@@ -255,7 +255,8 @@
       "meeting": "escribe-meeting.html",
       "start": "2026-11-01",
       "calendar": "escribe-calendar.json",
-      "end": "2026-11-05"
+      "end": "2026-11-05",
+      "boundary": "sample-escribe-boundary.json"
     }
   }
 }

@@ -56,12 +56,9 @@ it("uses Boise's date at 9 PM and ignores tentative project hearings",()=>{
  expect(jurisdictionToday(d.timezone,new Date("2026-10-15T03:00:00Z"))).toBe("2026-10-14");
  const s=snapshot([],[item(["202600934-S"])]);s.meetings[0].tentative=true;expect(projectHearingState(d,s.meetings,s.checkedAt,"2026-10-14").next).toBeUndefined();
 });
-it("requires a separate preview host, including pooled Neon aliases",()=>{
- vi.stubEnv("VERCEL_ENV","preview");vi.stubEnv("DATABASE_URL","postgres://user:secret@ep-main.neon.tech/db");vi.stubEnv("DATABASE_URL_PREVIEW","");expect(()=>databaseUrl()).toThrow("required");
- vi.stubEnv("DATABASE_URL_PREVIEW","postgres://reader:secret@ep-main-pooler.neon.tech/db");expect(()=>databaseUrl()).toThrow("matches production");
- vi.stubEnv("DATABASE_URL_PREVIEW","postgres://reader:secret@ep-preview.neon.tech/db");expect(databaseUrl()).toContain("ep-preview");
- expect(()=>requireOnboardingMutation()).toThrow("disabled");vi.stubEnv("LAW_DB_TARGET","preview");vi.stubEnv("DATABASE_BRANCH_ID","br-main");vi.stubEnv("DATABASE_PREVIEW_BRANCH_ID","br-preview");expect(()=>requireOnboardingMutation()).not.toThrow();
- vi.stubEnv("DATABASE_PREVIEW_BRANCH_ID","br-main");expect(()=>databaseUrl()).toThrow("branch matches");
+it("never permits a preview writer even with inherited database settings",()=>{
+ vi.stubEnv("VERCEL_ENV","preview");vi.stubEnv("DATABASE_URL","postgres://prod.invalid/db");
+ expect(databaseUrl()).toBeUndefined();expect(()=>requireOnboardingMutation()).toThrow("disabled");
 });
 it("refuses forged JSON launch approval",()=>{
  expect(()=>validateJurisdictions([{...d,launchStatus:"public",publication:{approvalId:"fake",qaHash:"fake"}}])).toThrow("recorded approval");

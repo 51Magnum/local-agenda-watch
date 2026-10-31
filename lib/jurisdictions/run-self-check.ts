@@ -10,6 +10,7 @@ import {proposeFix} from "./ai-fixer";
 import {verifiedProposal} from "./self-check";
 import {withRun} from "../timeline/telemetry";
 import {getEvidenceStore} from "../timeline/store";
+import {writeReviewSnapshot} from "./write-review-snapshot";
 export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapshot?:StagingSnapshot;previous?:StagingSnapshot;links?:(url:string)=>Promise<LinkEvidence>;reports?:boolean}={}){
  const d=jurisdiction(areaId),snapshot=options.snapshot??await readStaging(areaId);if(!d||!snapshot)throw Error("Collect a staging snapshot before checking");
  const http=sourceHttp(areaId),deadline=Date.now()+180000;
@@ -24,7 +25,7 @@ export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapsh
   return {status:data.health.status===304?200:data.health.status??0,text,documentHash};
  });
  const cached=new Map<string,Promise<LinkEvidence>>(),proof=(url:string)=>{if(!cached.has(url))cached.set(url,links(url).catch(e=>({status:e instanceof SourceFailure?e.health.status??0:0,text:"",reason:e instanceof SourceFailure&&e.health.state==="blocked"?"Official source access is blocked; no access challenge was bypassed.":Date.now()>deadline?"Source verification deferred: this run's time limit was reached.":"Official source could not be verified; retry on the next refresh."})));return cached.get(url)!;};
- const decisions=await exceptionDecisions(areaId);
+ const decisions=options.dryRun?[]:await exceptionDecisions(areaId);
  let report=await selfCheck(d,snapshot,{links:proof,previous:options.previous,decisions});
  // Development and dry runs never invoke a paid model. Production uses the existing
  // dual-ledger reservation path, bounded to three exceptional records per refresh.
@@ -51,6 +52,6 @@ export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapsh
    try{await(await import("../email/jobs")).queueCorrectionReceived({id:"self-check-"+areaId+"-"+report.snapshotHash,project:areaId,message:`Jurisdiction self-check needs attention: ${(report.passRate*100).toFixed(2)}% pass; ${report.queue.length} exceptions. No new records are being published. Review /admin/review.`,email:null});}catch{console.error("[self-check] Internal alert queue unavailable; exceptions remain in /admin/review");}
   }
  }
- if(options.reports!==false){const base=`reports/jurisdictions/${areaId}-selfcheck-${report.createdAt.slice(0,10)}`;await mkdir("reports/jurisdictions",{recursive:true});await writeFile(base+".json",JSON.stringify(redactSelfCheck(report),null,2)+"\n");await writeFile(base+".md",selfCheckMarkdown(report));}
+ if(options.reports!==false){const base=`reports/jurisdictions/${areaId}-selfcheck-${report.createdAt.slice(0,10)}`;await mkdir("reports/jurisdictions",{recursive:true});await writeFile(base+".json",JSON.stringify(redactSelfCheck(report),null,2)+"\n");await writeFile(base+".md",selfCheckMarkdown(report));if(options.dryRun)await writeReviewSnapshot(d,snapshot,report);}
  return report;
 }

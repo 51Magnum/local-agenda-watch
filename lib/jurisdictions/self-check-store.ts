@@ -4,6 +4,7 @@ import {jurisdictionDb,jurisdictionTransaction,type StagingSnapshot,type QaRepor
 import {snapshotHash} from "./snapshot-hash";
 import type {ExceptionDecision,SelfCheckReport} from "./self-check";
 import {redactSelfCheck} from "./self-check";
+import {readReviewSnapshot,snapshotDrift} from "./review-snapshot";
 export function publicationSnapshot(snapshot:StagingSnapshot,report:SelfCheckReport,previous?:StagingSnapshot){
  const oldIds=new Set(previous?.applications.map(a=>a.recordId)??[]),permitted=new Map(report.records.filter(r=>r.publish&&(report.goLive||oldIds.has(r.recordId))).map(r=>[r.recordId,r]));
  const applications=snapshot.applications.filter(a=>permitted.has(a.recordId)).map(a=>{const r=permitted.get(a.recordId)!;return {...a,selfCheckTitle:r.title,aiTitle:!!r.proposal?.title&&r.title===r.proposal.title,hiddenDocuments:!!r.proposal?.hideDocuments};});
@@ -43,8 +44,12 @@ export async function persistSelfCheck(snapshot:StagingSnapshot,report:SelfCheck
   const current=await tx.query("SELECT data FROM law_jurisdiction_snapshots WHERE area_id=$1 FOR UPDATE",[snapshot.areaId]);
   if(!current.rows[0]||snapshotHash(current.rows[0].data)!==report.snapshotHash)throw Error("Staging changed during self-check; retry");
   const previous=(await tx.query("SELECT status,data FROM law_jurisdiction_publications WHERE area_id=$1 FOR UPDATE",[snapshot.areaId])).rows[0];
+  if(previous?.status!=="public"){
+   const baseline=readReviewSnapshot(snapshot.areaId),drift=snapshotDrift(baseline,report);
+   if(!drift.pass){const check={check:"review-snapshot-matches",status:"fail" as const,reason:drift.reason,sourceUrl:"/admin/review"};report.coverage.push(check);report.counts[check.check]={pass:0,fail:1,uncertain:0};report.goLive=false;report.decision="Remain in review: production differs from the committed snapshot.";report.queue.push({recordId:snapshot.areaId+":snapshot-drift",sourceHash:report.snapshotHash,check});}
+  }
   await tx.query("DELETE FROM law_jurisdiction_exceptions WHERE area_id=$1",[snapshot.areaId]);
-  for(const record of report.records){const entries=report.queue.filter(q=>q.recordId===record.recordId);if(entries.length)await tx.query("INSERT INTO law_jurisdiction_exceptions(area_id,record_id,source_hash,data) VALUES($1,$2,$3,$4)",[snapshot.areaId,record.recordId,record.sourceHash,JSON.stringify(entries)]);}
+  for(const recordId of new Set(report.queue.map(q=>q.recordId))){const entries=report.queue.filter(q=>q.recordId===recordId);await tx.query("INSERT INTO law_jurisdiction_exceptions(area_id,record_id,source_hash,data) VALUES($1,$2,$3,$4)",[snapshot.areaId,recordId,entries[0].sourceHash,JSON.stringify(entries)]);}
   const id=randomUUID();
   const qa:QaReport={id,areaId:snapshot.areaId,createdAt:report.createdAt,snapshotHash:report.snapshotHash,passed:report.goLive,checks:report.coverage.map(c=>({name:c.check,passed:c.status==="pass",detail:c.reason})),data:{selfCheck:redactSelfCheck(report)}};
   await tx.query("INSERT INTO law_jurisdiction_qa(id,area_id,data,passed) VALUES($1,$2,$3,$4)",[id,snapshot.areaId,JSON.stringify(qa),report.goLive]);

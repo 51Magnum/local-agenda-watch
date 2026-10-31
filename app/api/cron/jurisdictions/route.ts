@@ -4,6 +4,7 @@ import {ingestionJurisdictions,publicJurisdictions,jurisdiction} from "@/lib/jur
 import {collectJurisdiction} from "@/lib/jurisdictions/collect";
 import {validateEndpoints,sampleAi,qaReport,checkRuntimeDocuments} from "@/lib/jurisdictions/onboarding";
 import {claimDocumentWork} from "@/lib/timeline/document-work-lease";
+import {ensureOnboardingSchema} from "@/lib/jurisdictions/migrations";
 export const runtime="nodejs";export const maxDuration=300;export const dynamic="force-dynamic";
 export async function GET(request:Request){
  const disabled=previewMutationResponse();if(disabled)return disabled;
@@ -12,6 +13,7 @@ export async function GET(request:Request){
  const q=new URL(request.url).searchParams,command=q.get("command")??"list",id=q.get("area")??"";
  if(command==="list")return Response.json({areas:(q.get("scope")==="configured"?ingestionJurisdictions().filter(d=>!d.legacyPublic):q.get("scope")==="ingestion"?ingestionJurisdictions():publicJurisdictions()).map(d=>d.id)},{headers:{"Cache-Control":"no-store"}});
  const d=jurisdiction(id);if(!d||d.legacyPublic)return Response.json({error:"Choose a configured onboarding jurisdiction"},{status:400});
+ await ensureOnboardingSchema();
  const release=command==="sample-ai"?await claimDocumentWork():async()=>{};if(!release)return Response.json({status:"busy"},{status:409});
  try{let result:unknown;switch(command){case"validate":result=await validateEndpoints(id);break;case"backfill":result=await collectJurisdiction(id,{days:Math.min(90,Number(q.get("days")??90)),write:true});if(!d.legacyPublic){const {revalidateTag,revalidatePath}=await import("next/cache");revalidateTag("map-area:"+id,{expire:0});revalidateTag("map-case-index-v1",{expire:0});revalidatePath("/");revalidatePath("/us/id/"+id);revalidatePath("/sitemap.xml");}break;case"sample-ai":result=await sampleAi(id,{n:Number(q.get("n")??5),maxUsd:Number(q.get("maxUsd")??1)});break;case"runtime-check":result=await checkRuntimeDocuments(id);break;case"qa-report":result=await qaReport(id);break;default:throw Error("Unknown onboarding command");}return Response.json(result,{headers:{"Cache-Control":"private, no-store"}});}catch(e){return Response.json({error:e instanceof Error?e.message:"Onboarding failed"},{status:400});}finally{await release();}
 }

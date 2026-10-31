@@ -24,6 +24,6 @@ it("preserves production robots, canonical origin and ordinary proxy behavior",(
 it("refuses preview admin mutations before missing-password/auth proxy checks",async()=>{
  vi.stubEnv("VERCEL_ENV","preview");vi.stubEnv("REVIEW_ADMIN_PASSWORD","");
  const response=proxy(new NextRequest("https://preview.test/admin/jurisdictions/action",{method:"POST"}));expect(response?.status).toBe(403);expect(await response?.text()).toContain("disabled in preview");expect(response?.headers.get("X-Robots-Tag")).toBe("noindex, nofollow");
- expect(proxy(new NextRequest("https://preview.test/admin/jurisdictions"))?.status).toBe(503);
+ expect(proxy(new NextRequest("https://preview.test/admin/jurisdictions"))?.status).toBe(403);
  vi.stubEnv("VERCEL_ENV","production");expect(proxy(new NextRequest("https://production.test/admin/jurisdictions/action",{method:"POST"}))?.status).toBe(503);
 });

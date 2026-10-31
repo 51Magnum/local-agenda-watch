@@ -15,5 +15,6 @@ export async function checkFixtures(areaId:string){
  const snapshot:StagingSnapshot={areaId,launchStatus:"admin_only",checkedAt:new Date().toISOString(),range:{start:f.start,end:f.end},applications:[],meetings:[],health:http.checks,skipped:[],complete:true,exclusions:{}};
  for(const source of d.agenda){const adapter=agendaAdapter(d,source,http);for(const m of await adapter.listMeetings(snapshot.range))snapshot.meetings.push(await adapter.getMeeting(m.id));}
  accountForAgenda(d,snapshot);
+ if(f.boundary){const boundary=JSON.parse(await read(f.boundary));snapshot.boundary=boundary.geometry;snapshot.boundarySource={url:d.boundary.url,where:d.boundary.where};}
  return runSelfCheck(areaId,{snapshot,dryRun:true,links:async()=>({status:200,text:meeting})});
 }

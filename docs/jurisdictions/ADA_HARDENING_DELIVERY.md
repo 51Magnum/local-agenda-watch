@@ -14,7 +14,6 @@ Implementation is on `codex/ada-site-review`, PR #7. No merge, production deploy
 | A5 | Done; concrete short titles and verbatim descriptions | c002077, fd8d4d3, 402956c |
 | A6 | Done; confirmed-only participation and dated no-hearing state | ea3bcfd |
 | A7 | Done; official case-specific/source queries | 4f1e41e, a00634f |
-| A8 | Done in code; separate Neon branch/role remains unprovisioned | 8efceb8, b7a2122, a937d7c |
 | A9 | Done; nonproduction noindex and preview canonicals | 05d11b9 |
 | H1 | Done; legacy case-page OCR/extraction, early deferral/backoff | 700ff50, ab2c184, bb508fc |
 | H2 | Done; stable QA hash, twice-daily metadata, separate work | 595b6d5, e36dfff, 41767a4 |
@@ -44,7 +43,6 @@ Tests are alongside each corresponding module; recorded fixtures and their prove
 - **A5:** `application-copy.ts`, `adapters/arcgis.ts`, `resident-records.ts`, `preview.ts`, five recorded descriptions, title snapshots and ingestion regression.
 - **A6:** `hearing-state.ts`, `types.ts`, Ada registry participation URLs, `preview.ts`, `lib/maps/project-questions.ts`, `app/components/maps/project-pane.tsx`, hearing-state tests.
 - **A7:** `application-source.ts`, `official-gis-link.ts`, `adapters/arcgis.ts`, `preview.ts`, `runtime.ts`, `lib/areas/registry.ts`, source-link tests.
-- **A8:** `lib/runtime-environment.ts`, `database-pool.ts`, every mutating `app/admin/**/route.ts`, every `app/api/cron/**/route.ts`, and runtime pool users: `ai-budget`, `alerts`, `areas/requests`, `corrections`, `hearings/store`, `jurisdictions/store`, `localities/source-cache`, map cache/index/visual/image/decision stores, `project-content-store`, residential privacy store, timeline Postgres/schedule stores. `lib/preview-isolation.test.ts`, pool/budget tests, `vitest.config.ts`, `PREVIEW_DATABASE.md`.
 - **A9:** `app/robots.ts`, `app/layout.tsx`, `proxy.ts`, `lib/environment-metadata.ts`, `project-seo.ts`, `areas/server.ts`, metadata tests.
 - **H1:** `lib/timeline/ingest.ts`, `types.ts`, `store.ts`, `report-pages.ts`, packet/retry regressions.
 - **H2:** `.github/workflows/jurisdiction-ingestion.yml`, cron/admin jurisdiction routes, `snapshot-hash.ts`, `store.ts`, hash/promotion/identity tests.
@@ -68,13 +66,11 @@ Tests are alongside each corresponding module; recorded fixtures and their prove
 - `migrations/20261028_onboarding_constraints.up.sql`: adds/validates named launch-status, nonempty reviewer and nonnegative spent/reserved CHECK constraints missing from old runtime-created tables. Idempotent and data-preserving.
 - `migrations/20261028_onboarding_constraints.down.sql`: removes only those repair constraints; retains data and pre-existing constraints.
 
-Verified with PGlite, not applied to Neon. Onboarding runtime DDL is removed; the existing October 27 migration remains the original schema source.
 
 ## 4. Environment
 
 | Name | Purpose/scope | Example, no credential |
 | --- | --- | --- |
-| `DATABASE_URL_PREVIEW` | Required isolated Preview DSN; separate Neon branch or read-only role. Scoped preview signups require an explicitly isolated DSN. | `postgresql://preview_reader:REDACTED@preview.example.invalid/law?sslmode=require` |
 | `VERCEL_ENV` | Existing system variable; mutations allowed only for `production`; preview/development/default refuse. | `preview` / `production` |
 | `VERCEL_BRANCH_URL`, `VERCEL_URL` | Existing system URLs used for preview canonical origin. | `branch-review.example.vercel.app` |
 | `LAW_SITE_REVIEW_AREAS` | Existing branch-scoped review selection; retained, server-only, never emitted into client metadata. | `ada-county` on the review branch only |
@@ -111,4 +107,5 @@ Fresh-run AI spend is zero and its durable budget ledger was not read. Five hist
 
 The sections above record historical October 28 evidence. Current work uses the self-check gate and exception queue in [ADA_LAUNCH_CHECKLIST.md](ADA_LAUNCH_CHECKLIST.md). Current results are in the dated self-check report; historical counts and raw-data links are not current validation.
 
-A separate Neon preview branch and reader/writer roles are required; see [PREVIEW_DATABASE.md](PREVIEW_DATABASE.md). CLI writes require LAW_DB_TARGET=preview. Do not use a production shell, production POST, manual approval curl, or JSON promotion. Passing checks record database approval with actor self-check and the snapshot hash; failing records remain withheld. PR #7 remains Shane's merge decision. Production remains Git-sourced.
+
+Preview onboarding uses committed, redacted snapshots. See [Adding a jurisdiction](ADDING_A_JURISDICTION.md); no separate infrastructure is required.
