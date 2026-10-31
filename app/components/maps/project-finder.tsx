@@ -25,7 +25,7 @@ export default function ProjectFinder({ onSelect }: { onSelect: (project: Projec
     </form>
     <p role="status">{message}</p>
     {projects.length > 0 && <ul>{projects.map((project) => <li key={project.areaId + "/" + project.caseId}>
-      <button onClick={() => onSelect(project)}>{project.title}<small>{project.areaName} · {project.caseId}</small></button>
+      <button onClick={() => onSelect(project)}>{project.title}{project.aiTitle&&<small>AI title</small>}<small>{project.areaName} · {project.caseId}</small></button>
     </li>)}</ul>}
   </div>;
 }

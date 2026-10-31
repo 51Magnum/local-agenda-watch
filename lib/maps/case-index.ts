@@ -32,10 +32,10 @@ export const projectDirectory = unstable_cache(async () => {
   if (!databaseUrl()) return [];
   const db = await database();
   const result = await db.query(
-    `SELECT area_id AS "areaId",case_id AS "caseId",data->>'title' AS title,data->>'typeLabel' AS "typeLabel",data->'caseIds' AS "caseIds",data->>'summary' AS "internalSummary",data->'residentialPrivacy' AS "residentialPrivacy" FROM law_map_cases WHERE area_id=ANY($1::text[]) ORDER BY area_id,case_id`,
+    `SELECT area_id AS "areaId",case_id AS "caseId",data->>'title' AS title,data->>'typeLabel' AS "typeLabel",data->'caseIds' AS "caseIds",data->>'summary' AS "internalSummary",data->'residentialPrivacy' AS "residentialPrivacy",data->'privacyPolicy' AS "privacyPolicy",data->'aiTitle' AS "aiTitle" FROM law_map_cases WHERE area_id=ANY($1::text[]) ORDER BY area_id,case_id`,
     [areas.map((a) => a.id)],
   );
-  for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[])result.rows.push({areaId:snapshot!.jurisdiction,caseId:c.id,title:c.title,typeLabel:c.typeLabel,caseIds:[c.id],internalSummary:c.summary,residentialPrivacy:c.residentialPrivacy});
+  for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[])result.rows.push({areaId:snapshot!.jurisdiction,caseId:c.id,title:c.title,typeLabel:c.typeLabel,caseIds:[c.id],internalSummary:c.summary,residentialPrivacy:c.residentialPrivacy,privacyPolicy:c.privacyPolicy,aiTitle:c.aiTitle});
   const overrides=await privacyOverrides();
   return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?residentialPublicTitle({...row,summary:internalSummary}):row.title, areaName: getArea(row.areaId)!.name })) as import("./project-search").ProjectMatch[];
 }, ["project-search-directory-v2-private-names",...reviewCacheKeys], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
@@ -172,6 +172,8 @@ function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
   return {
     id: c.id.includes(":") ? c.id : areaId + ":" + c.id,
     areaId,
+    aiTitle:c.aiTitle,
+    privacyPolicy:c.privacyPolicy,
     timezone: getArea(areaId)?.timezone,
     uses: ["homes", "business"].filter((f) => caseInFilter(c, f)),
     popup: c.popup

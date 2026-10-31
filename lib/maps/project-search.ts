@@ -1,4 +1,5 @@
 export type ProjectMatch = {
+  aiTitle?:boolean;
   areaId: string;
   caseId: string;
   title: string;
