@@ -1,13 +1,11 @@
 import {denverInstant} from "../../case-details";
-import type {Meeting,Attachment} from "./types";
+import type {Meeting} from "./types";
 import type {JurisdictionDefinition} from "../types";
 
 export function adaDocumentCases(filename:string){
  return [...filename.toUpperCase().matchAll(/\b\d{9}(?:-[A-Z]{1,12})+/g)].map(m=>m[0].split(/-(?:MEMO|FINDINGS|STAFF|REPORT|REVISED|DRAFT|TABLING|PZC|BOCC)(?:-|_|$)/)[0]);
 }
-export function adaDocumentLabel(kind:Attachment["kind"]){
- return ({staff_report:"Staff report",agenda:"Agenda",findings:"Findings",memo:"Memo",minutes:"Minutes",packet:"Meeting packet",other:"Official attachment"})[kind];
-}
+export {documentLabel as adaDocumentLabel} from "../document-label";
 /** Agenda text is evidence only. Header applicants are deliberately not retained. */
 export function parseAdaAgenda(text:string,meeting:Meeting,config:JurisdictionDefinition):Meeting{
  const time=text.match(/\b(\d{1,2})(?::(\d{2}))?\s*(A\.?\s*M\.?|P\.?\s*M\.?)\b/i);

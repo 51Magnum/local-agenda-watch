@@ -19,15 +19,16 @@ it("removes exact parcel, street number and private identity from resident feed 
  expect(map.cases[0].confidence).toBe("approximate");expect(map.cases[0].parcelIds).toBeUndefined();
  expect(map.cases[0].geometry).not.toEqual(snapshot.applications[0].geometry);
 });
-it("also carries existing residential-use privacy into hearing feeds, including organization applicants",()=>{
+it("preserves organization hearing descriptions when a residential use is mentioned",()=>{
  const copy=structuredClone(snapshot);copy.applications=[{...app("202601455-CU"),description:"A home occupation permit for a bridal shop at 123 Main Street.",sourceFields:{APPLICANT:"Example Homes LLC"}}];copy.meetings=[];
- expect(applicationScope(d,copy.applications,[])[0].residentialPrivacy).toBe(true);
- expect(JSON.stringify(stagedFeed(d,copy))).not.toMatch(/123 Main|Jane|Smith/);
+ expect(applicationScope(d,copy.applications,[])[0].residentialPrivacy).toBe(false);
+ expect(stagedFeed(d,copy).active[0].description).toBe(copy.applications[0].description);
 });
 it("protects the full resident page for an individual staff permit",async()=>{
  vi.doMock("./store",()=>({readStaging:async()=>snapshot}));
+ vi.doMock("./self-check-store",()=>({readPublished:async()=>snapshot}));
  vi.doMock("../timeline/store",()=>({getEvidenceStore:()=>({read:async()=>({documents:{},fields:{},runs:[]})})}));
- vi.doMock("../areas/registry",()=>({getArea:()=>({...d.area,id:d.id,name:d.name}),areaPath:()=>"/us/id/ada-county"}));
+ vi.doMock("../areas/registry",()=>({getArea:()=>({...d.area,id:d.id,name:d.name}),areaPath:()=>"/us/id/ada-county",visibleAreas:async()=>[]}));
  vi.doMock("../residential-privacy-store",()=>({privacyOverrides:async()=>({})}));
  const {residentProject}=await import("./resident-project"),page=await residentProject(d.id,"202601455-AC");
  expect(page?.item.residentialPrivacy).toBe(true);expect(JSON.stringify(page)).not.toMatch(/Jane|Smith|123 Main|R123456/);

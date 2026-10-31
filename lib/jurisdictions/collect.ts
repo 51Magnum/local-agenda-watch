@@ -12,10 +12,11 @@ import type {CaseGeometry} from "../maps/types";
 import {combinePolygons,polygonGeometry} from "../maps/gis";
 import {readStaging,saveStaging,type StagingSnapshot} from "./store";
 import {matchSignupEvents,parseTentativeTable} from "./participation-sources";
-import {applicationScope} from "./application-scope";
+import {applicationScope,individualApplicant} from "./application-scope";
 import {groupApplications} from "./application-groups";
 import {matchApplications} from "./matching";
 import {discoverStagingLibraries} from "./libraries";
+import {accountForAgenda,assertCollectionComplete,projectNumber} from "./agenda-projects";
 export function sourceHttp(areaId:string){const d=jurisdiction(areaId);if(!d)throw Error("Unknown jurisdiction");const urls=[d.boundary.url,...Object.values(d.gis),...d.agenda.map(a=>String(a.params.baseUrl)),String(d.applications.params.url??""),...(d.area.timeline?.hosts??[]).map(h=>"https://"+h),d.participation.testimonySignupUrl??"",d.clipRule?.layer.url??"",...([d.applications.params.geometryJoin,d.applications.params.addressPointFallback].filter(Boolean) as {url:string}[]).map(s=>s.url)];return new SourceHttp({allowedHosts:[...new Set(urls.filter(Boolean).map(u=>new URL(u!).hostname))],maxBytes:d.documents.maxBytes});}
 export async function collectJurisdiction(areaId:string,options:{days?:number;write?:boolean;budgetMs?:number;http?:SourceHttp;now?:Date}={}){
  const d=jurisdiction(areaId);if(!d||!d.enabled)throw Error("Jurisdiction is disabled or unknown");
@@ -45,16 +46,19 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  snapshot.applications=groupApplications(d,snapshot.applications);
  // County public eligibility is controlled by the clipped coverage, never by a postal city.
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.matchedApplications=matchApplications(item,snapshot.applications);
- for(const meeting of snapshot.meetings)for(const item of meeting.items)for(const match of item.matchedApplications??[]){const app=snapshot.applications.find(a=>a.recordId===match.recordId);if(app)app.relatedCaseNumbers=[...new Set([...app.relatedCaseNumbers,...item.caseNumbers])];}
+ for(const meeting of snapshot.meetings)for(const item of meeting.items)for(const match of item.matchedApplications??[]){const app=snapshot.applications.find(a=>a.recordId===match.recordId);if(app)app.relatedCaseNumbers=[...new Set([...app.relatedCaseNumbers,...item.caseNumbers.filter(id=>projectNumber(d,id)&&projectNumber(d,id)===app.projectNumber)])];}
  const linked=new Set(snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.matchedApplications?.map(a=>a.recordId)??[])));
  if(!d.legacyPublic)snapshot.applications=retainRecentOrHeard(snapshot.applications,linked,range.start);
  // Geometry intersection is bounded to the retained inventory, not all historic filings.
  const coverage=collectionCoverage(d,snapshot);
  if(d.clipRule&&coverage)snapshot.applications=snapshot.applications.flatMap(a=>{const eligible=coverageEligible(a,coverage);return eligible?[eligible]:[];});
  snapshot.collectionStats={sourceRows,projectsBeforeScope:snapshot.applications.length,excludedByScope:0};
+ const beforeScope=snapshot.applications;
  snapshot.applications=applicationScope(d,snapshot.applications,snapshot.meetings);
+ snapshot.exclusions={};for(const a of beforeScope.filter(a=>!snapshot.applications.some(b=>b.recordId===a.recordId))){const category=(individualApplicant(a.sourceFields[String(d.applications.params.applicantField??"")])?"Individual staff permit: ":"Outside hearing/development scope: ")+(a.type||"Unspecified type");snapshot.exclusions[category]=(snapshot.exclusions[category]??0)+1;}
  snapshot.collectionStats.excludedByScope=snapshot.collectionStats.projectsBeforeScope-snapshot.applications.length;
  const allCases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.caseNumbers=item.caseNumbers.filter(id=>allCases.has(id)||d.caseNumberPatterns.some(p=>new RegExp(p,"i").test(id)));
- if(options.write)await saveStaging(snapshot);return snapshot;
+ if(!d.legacyPublic)accountForAgenda(d,snapshot);
+ if(options.write){assertCollectionComplete(snapshot,old);await saveStaging(snapshot);if(!d.legacyPublic)await(await import("./run-self-check")).runSelfCheck(areaId,{snapshot,previous:old,reports:false});}return snapshot;
 }

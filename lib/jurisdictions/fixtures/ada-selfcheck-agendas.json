@@ -1,0 +1,682 @@
+{
+  "note": "Case identity/coverage fixture. Non-target item prose withheld; target descriptions are parsed official text. No applicant headers or attendance material retained.",
+  "meetings": [
+    {
+      "id": "bocc:2026-08-12",
+      "body": "bocc",
+      "title": "Board of County Commissioners",
+      "date": "2026-08-12",
+      "startsAt": "2026-08-13T00:00:00.000Z",
+      "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+      "documentHash": "2a961214801a9aff54188bb84e05750288a4aaafaa55209247a7c44fe433514f",
+      "recordedAt": "2026-10-31T12:18:49.685Z",
+      "attachments": [],
+      "items": [
+        {
+          "itemId": "1:202502508-ZC-DA-MSP",
+          "title": "202502508-ZC-DA-MSP",
+          "caseNumbers": [
+            "202502508-ZC-DA-MSP"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "bodyRecommendation": "Approval",
+          "tabledNote": "(Tabled from 07/15/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202103209-S-TE",
+          "title": "202103209-S-TE",
+          "caseNumbers": [
+            "202103209-S-TE"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "tabledNote": "(Tabled from the 06/23/26 Open Business Meeting; Public Hearing Re-Opened on Specific",
+          "attachments": []
+        },
+        {
+          "itemId": "1:202600638-ZC-DA-MSP",
+          "title": "202600638-ZC-DA-MSP",
+          "caseNumbers": [
+            "202600638-ZC-DA-MSP"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Table",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202502399-A",
+          "title": "202502399-A",
+          "caseNumbers": [
+            "202502399-A"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Table",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202300644-S-TE",
+          "title": "202300644-S-TE",
+          "caseNumbers": [
+            "202300644-S-TE"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "4:202600965-PCON-V",
+          "title": "202600965-PCON-V",
+          "caseNumbers": [
+            "202600965-PCON-V"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Denial",
+          "attachments": []
+        },
+        {
+          "itemId": "5:202502461-A",
+          "title": "202502461-A",
+          "caseNumbers": [
+            "202502461-A"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-08-13T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C8.12.2026_BOCC_Agenda.pdf&papp=DS_Agendas#page=3",
+          "sourcePage": 3,
+          "staffRecommendation": "Denial",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "id": "pzc:2026-08-13",
+      "body": "pzc",
+      "title": "Planning and Zoning Commission",
+      "date": "2026-08-13",
+      "startsAt": "2026-08-14T00:00:00.000Z",
+      "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+      "documentHash": "f315ab118416d0402fe73620281c433c4e784d9d800d74557d19eddcfd3aa736",
+      "recordedAt": "2026-10-31T12:18:49.373Z",
+      "attachments": [],
+      "items": [
+        {
+          "itemId": "1:202600273-ZC-S-PUD-MSP-PR-HD-ALT",
+          "title": "A zoning ordinance map amendment to rezone approximately 568.312 acres from the Rural Residential (RR) District to the Rural Urban Transition (RUT) District and a preliminary plat of 175 lots consisting of 117 residential lots, 11 vineyard lots, and 47 common lots for Bellarossa Subdivision. The applicant has also applied for a Planned Unit Development, Master Site Plan, Private Road, Hillside Development, and Alternative Compliance. There is also a Development Agreement Modification (Project #202400171 DA-DM). The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 588.6 acres; Sections 27, 28, 29, and 33, T.5N, R.1E. Brent Danielson, Senior Planner, at either (208) 287-7913 or bdanielson@adacounty.id.gov. Tabled from July 16th, 2026",
+          "caseNumbers": [
+            "202600273-ZC-S-PUD-MSP-PR-HD-ALT",
+            "202400171-DA-DM"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "tabledNote": "Tabled from July 16th, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "1:202600819-ZC-DA-S-PR",
+          "title": "202600819-ZC-DA-S-PR",
+          "caseNumbers": [
+            "202600819-ZC-DA-S-PR"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Table",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202600881-CU-MSP",
+          "title": "202600881-CU-MSP",
+          "caseNumbers": [
+            "202600881-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Table",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202601163-CU-MSP-ALT",
+          "title": "202601163-CU-MSP-ALT",
+          "caseNumbers": [
+            "202601163-CU-MSP-ALT"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "4:202600864-CU-MSP",
+          "title": "A Conditional Use and Master Site Plan application seeking approval of a 24-hour membership fitness facility in the existing structure. The gym will occupy 4,052 square feet of the existing structure. Total number of employees will be 3-5 and the daily average number of patrons expected is between 50-75. Total number of parking spaces on the property is 48, with 3 ADA spaces. The subject property is located at 4495 S Meridian Rd, Meridian, ID,; Section 25, T.3N, R.1W. Elijah Davis, Associate Planner, at either (208) 287-7998 or esdavis@adacounty.id.gov.",
+          "caseNumbers": [
+            "202600864-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "5:202601193-CU-MSP",
+          "title": "202601193-CU-MSP",
+          "caseNumbers": [
+            "202601193-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "1:201601258-DA-DM-D",
+          "title": "201601258-DA-DM-D",
+          "caseNumbers": [
+            "201601258-DA-DM-D"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-08-14T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "id": "bocc:2026-09-09",
+      "body": "bocc",
+      "title": "Board of County Commissioners",
+      "date": "2026-09-09",
+      "startsAt": "2026-09-10T00:00:00.000Z",
+      "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+      "documentHash": "47df47e5aef1a306edbe6f4c7eec86323933b51bec364faacc25980524d69eaa",
+      "recordedAt": "2026-10-31T12:18:49.029Z",
+      "attachments": [],
+      "items": [
+        {
+          "itemId": "1:202300644-S-TE",
+          "title": "202300644-S-TE",
+          "caseNumbers": [
+            "202300644-S-TE"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "tabledNote": "(Tabled from 08/12/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202502399-A",
+          "title": "202502399-A",
+          "caseNumbers": [
+            "202502399-A"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Table",
+          "tabledNote": "(Tabled from 08/12/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202600638-ZC-DA-S-V",
+          "title": "202600638-ZC-DA-S-V",
+          "caseNumbers": [
+            "202600638-ZC-DA-S-V"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "bodyRecommendation": "Approval",
+          "tabledNote": "(Tabled from 08/12/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "1:201601258-DA-DM",
+          "title": "201601258-DA-DM",
+          "caseNumbers": [
+            "201601258-DA-DM"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Table",
+          "bodyRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202600829-VAC-PCON-PBA",
+          "title": "Application for approval of a Vacation of easements between three parcels, a Property Consolidation of two parcels and a Property Boundary Adjustment between two parcels all under the same ownership to allow for future construction of a detached accessory structure. The properties are located in Dunwoody Subdivision; Lots: 2, 3, and 4; Block: 01, addressed 1682 & 1714 E Dunwoody Ct and contain a combined 3.11 acres within the Rural Urban Transition (RUT) District; Section: 29, Township: 4N, Range: 1E. Elijah Davis, Associate Planner, at (208) 287-7998 or esdavis@adacounty.id.gov.",
+          "caseNumbers": [
+            "202600829-VAC-PCON-PBA"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202300565-CU-MSP-V-TE",
+          "title": "202300565-CU-MSP-V-TE",
+          "caseNumbers": [
+            "202300565-CU-MSP-V-TE"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "4:202601161-V",
+          "title": "202601161-V",
+          "caseNumbers": [
+            "202601161-V"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-09-10T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=3",
+          "sourcePage": 3,
+          "staffRecommendation": "Denial",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "id": "pzc:2026-09-10",
+      "body": "pzc",
+      "title": "Planning and Zoning Commission",
+      "date": "2026-09-10",
+      "startsAt": "2026-09-11T00:00:00.000Z",
+      "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+      "documentHash": "abe5fb820e9e3595b631735b5f18b588fe7644c808766ce48347ead8daf9aab6",
+      "recordedAt": "2026-10-31T12:18:48.700Z",
+      "attachments": [],
+      "items": [
+        {
+          "itemId": "1:202600273-ZC-S-PUD-MSP-PR-HD-ALT",
+          "title": "A zoning ordinance map amendment to rezone approximately 568.312 acres from the Rural Residential (RR) District to the Rural Urban Transition (RUT) District and a preliminary plat of 175 lots consisting of 117 residential lots, 11 vineyard lots, and 47 common lots for Bellarossa Subdivision. The applicant has also applied for a Planned Unit Development, Master Site Plan, Private Road, Hillside Development, and Alternative Compliance. There is also a Development Agreement Modification (Project #202400171 DA-DM). The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 588.6 acres; Sections 27, 28, 29, and 33, T.5N, R.1E. Brent Danielson, Senior Planner, at either (208) 287-7913 or bdanielson@adacounty.id.gov. Tabled from August 13th, 2026",
+          "caseNumbers": [
+            "202600273-ZC-S-PUD-MSP-PR-HD-ALT",
+            "202400171-DA-DM"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-09-11T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "bodyRecommendation": "Denial",
+          "tabledNote": "Tabled from August 13th, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202600819-ZC-DA-S-PR",
+          "title": "202600819-ZC-DA-S-PR",
+          "caseNumbers": [
+            "202600819-ZC-DA-S-PR"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-09-11T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Denial",
+          "tabledNote": "Tabled from August 13th, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202600881-CU-MSP",
+          "title": "202600881-CU-MSP",
+          "caseNumbers": [
+            "202600881-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-09-11T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "tabledNote": "Tabled from August 13th, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "4:202601149-CU-MSP",
+          "title": "202601149-CU-MSP",
+          "caseNumbers": [
+            "202601149-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-09-11T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "5:202600934-S-PBA-AC-PR-V",
+          "title": "202600934-S-PBA-AC-PR-V",
+          "caseNumbers": [
+            "202600934-S-PBA-AC-PR-V"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-09-11T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "6:202601088-ZC-DA-OTD-PR",
+          "title": "202601088-ZC-DA-OTD-PR",
+          "caseNumbers": [
+            "202601088-ZC-DA-OTD-PR"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-09-11T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C9.10.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "id": "bocc:2026-10-14",
+      "body": "bocc",
+      "title": "Board of County Commissioners",
+      "date": "2026-10-14",
+      "startsAt": "2026-10-15T00:00:00.000Z",
+      "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+      "documentHash": "b2c691a0ca8a3c0e8bc1d0573e191a26281e6fff0efbb8b806677a52dde58b2c",
+      "recordedAt": "2026-10-31T12:18:48.357Z",
+      "attachments": [],
+      "items": [
+        {
+          "itemId": "1:202600638-ZC-DA-S-V",
+          "title": "202600638-ZC-DA-S-V",
+          "caseNumbers": [
+            "202600638-ZC-DA-S-V"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "bodyRecommendation": "Approval",
+          "tabledNote": "(Tabled from 09/09/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "2:201601258-DA-DM",
+          "title": "201601258-DA-DM",
+          "caseNumbers": [
+            "201601258-DA-DM"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "staffRecommendation": "Approval",
+          "bodyRecommendation": "Approval",
+          "tabledNote": "(Tabled from 09/09/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202502399-A",
+          "title": "202502399-A",
+          "caseNumbers": [
+            "202502399-A"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Denial",
+          "tabledNote": "(Tabled from 09/09/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "4:202103209-S-TE",
+          "title": "202103209-S-TE",
+          "caseNumbers": [
+            "202103209-S-TE"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "tabledNote": "(Tabled from the 08/12/26)",
+          "attachments": []
+        },
+        {
+          "itemId": "1:202601739-VAC",
+          "title": "202601739-VAC",
+          "caseNumbers": [
+            "202601739-VAC"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202601614-VAC-PCON",
+          "title": "202601614-VAC-PCON",
+          "caseNumbers": [
+            "202601614-VAC-PCON"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202601088-ZC-DA-OTD-PR",
+          "title": "202601088-ZC-DA-OTD-PR",
+          "caseNumbers": [
+            "202601088-ZC-DA-OTD-PR"
+          ],
+          "body": "bocc",
+          "meetingDateTime": "2026-10-15T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C10.14.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=3",
+          "sourcePage": 3,
+          "staffRecommendation": "Approval",
+          "bodyRecommendation": "Approval",
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "id": "pzc:2026-10-15",
+      "body": "pzc",
+      "title": "Planning and Zoning Commission",
+      "date": "2026-10-15",
+      "startsAt": "2026-10-16T00:00:00.000Z",
+      "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+      "documentHash": "d547448bb11db11c640112cc282d86a8f1ce181b7304262a4e9de4f3484efb98",
+      "recordedAt": "2026-10-31T12:18:47.998Z",
+      "attachments": [],
+      "items": [
+        {
+          "itemId": "1:202600273-ZC-S-PUD-MSP-PR-HD-ALT",
+          "title": "A zoning ordinance map amendment to rezone approximately 568.312 acres from the Rural Residential (RR) District to the Rural Urban Transition (RUT) District and a preliminary plat of 175 lots consisting of 117 residential lots, 11 vineyard lots, and 47 common lots for Bellarossa Subdivision. The applicant has also applied for a Planned Unit Development, Master Site Plan, Private Road, Hillside Development, and Alternative Compliance. There is also a Development Agreement Modification (Project #202400171 DA-DM). The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 588.6 acres; Sections 27, 28, 29, and 33, T.5N, R.1E. Brent Danielson, Senior Planner, at either (208) 287-7913 or bdanielson@adacounty.id.gov. Tabled from September 10th, 2026",
+          "caseNumbers": [
+            "202600273-ZC-S-PUD-MSP-PR-HD-ALT",
+            "202400171-DA-DM"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "bodyRecommendation": "Denial",
+          "tabledNote": "Tabled from September 10th, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "2:202600934-S-PBA-AC-PR-V",
+          "title": "202600934-S-PBA-AC-PR-V",
+          "caseNumbers": [
+            "202600934-S-PBA-AC-PR-V"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "bodyRecommendation": "Approval",
+          "tabledNote": "Tabled from September 10th, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "3:202600819-ZC-DA-S-PR",
+          "title": "202600819-ZC-DA-S-PR",
+          "caseNumbers": [
+            "202600819-ZC-DA-S-PR"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=1",
+          "sourcePage": 1,
+          "bodyRecommendation": "Approval",
+          "tabledNote": "Tabled from September 10, 2026",
+          "attachments": []
+        },
+        {
+          "itemId": "4:202601250-CU-MSP",
+          "title": "202601250-CU-MSP",
+          "caseNumbers": [
+            "202601250-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Table",
+          "attachments": []
+        },
+        {
+          "itemId": "5:202601398-CU-MSP",
+          "title": "202601398-CU-MSP",
+          "caseNumbers": [
+            "202601398-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "6:202601317-CU-MSP",
+          "title": "202601317-CU-MSP",
+          "caseNumbers": [
+            "202601317-CU-MSP"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        },
+        {
+          "itemId": "7:202601395-CU-MSP-ALT",
+          "title": "202601395-CU-MSP-ALT",
+          "caseNumbers": [
+            "202601395-CU-MSP-ALT"
+          ],
+          "body": "pzc",
+          "meetingDateTime": "2026-10-16T00:00:00.000Z",
+          "meetingPageUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas",
+          "itemUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C10.15.2026-PZC_AGENDA.pdf&papp=DS_Agendas#page=2",
+          "sourcePage": 2,
+          "staffRecommendation": "Approval",
+          "attachments": []
+        }
+      ]
+    }
+  ]
+}

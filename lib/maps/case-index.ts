@@ -1,3 +1,5 @@
+import {jurisdiction} from "../jurisdictions/registry";
+import {visibleAreas} from "@/lib/areas/registry";
 import {databaseUrl} from "../runtime-environment";
 import {siteReviewAreaIds} from "../jurisdictions/generated";
 import {readProjectContent} from "@/lib/project-content-store";
@@ -8,7 +10,7 @@ import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { Pool } from "../database-pool";
 import { bbox, simplify, feature } from "@turf/turf";
 import { unstable_cache, revalidateTag } from "next/cache";
-import { AREAS, canonicalAreaHref } from "@/lib/areas/registry";
+import { AREAS, getArea, canonicalAreaHref } from "@/lib/areas/registry";
 import { readMapSnapshot } from "./store";
 import { combineRadiusCases } from "./radius";
 import {productionWritesAllowed,requireProductionMutation} from "../runtime-environment";
@@ -23,10 +25,10 @@ import {
 } from "./viewport";
 export const MAP_INDEX_TAG = "map-case-index-v1";
 const reviewCacheKeys=siteReviewAreaIds.length?["resident-review:"+siteReviewAreaIds.join(",")+":"+(process.env.VERCEL_GIT_COMMIT_SHA??"local")]:[];
-const reviewSnapshots=()=>Promise.all(siteReviewAreaIds.map(id=>readMapSnapshot(id,{includeFlum:false})));
+const reviewSnapshots=async()=>Promise.all((await visibleAreas()).filter(a=>!jurisdiction(a.id)?.legacyPublic).map(a=>readMapSnapshot(a.id,{includeFlum:false})));
 /** Compact, cached directory: never read polygon, image or document payloads for search. */
 export const projectDirectory = unstable_cache(async () => {
-  const areas = Object.values(AREAS).filter((a) => a.status === "live");
+  const areas = (await visibleAreas()).filter((a) => a.status === "live");
   if (!databaseUrl()) return [];
   const db = await database();
   const result = await db.query(
@@ -35,7 +37,7 @@ export const projectDirectory = unstable_cache(async () => {
   );
   for(const snapshot of await reviewSnapshots())for(const c of snapshot?.cases??[])result.rows.push({areaId:snapshot!.jurisdiction,caseId:c.id,title:c.title,typeLabel:c.typeLabel,caseIds:[c.id],internalSummary:c.summary,residentialPrivacy:c.residentialPrivacy});
   const overrides=await privacyOverrides();
-  return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?residentialPublicTitle({...row,summary:internalSummary}):row.title, areaName: AREAS[row.areaId].name })) as import("./project-search").ProjectMatch[];
+  return result.rows.map(({internalSummary,...row}) => ({ ...row, title:residentialCase(row.areaId,row.caseId,{...row,summary:internalSummary},overrides)?residentialPublicTitle({...row,summary:internalSummary}):row.title, areaName: getArea(row.areaId)!.name })) as import("./project-search").ProjectMatch[];
 }, ["project-search-directory-v2-private-names",...reviewCacheKeys], { revalidate: 3600, tags: [MAP_INDEX_TAG, PRIVACY_TAG] });
 let pool: Pool, ready: Promise<void> | undefined;
 const schema = `CREATE TABLE IF NOT EXISTS law_map_sites(site_id text PRIMARY KEY,min_lng double precision,min_lat double precision,max_lng double precision,max_lat double precision,data jsonb NOT NULL);
@@ -119,10 +121,10 @@ let siteRebuild:Promise<void>|undefined,sitesDirty=false;
 function rebuildSites(){sitesDirty=true;return siteRebuild??=(async()=>{try{while(sitesDirty){sitesDirty=false;await rebuildSitesOnce();}}finally{siteRebuild=undefined;}})();}
 async function rebuildSitesOnce(){
  requireProductionMutation();
- const rows=(await indexQuery("SELECT area_id,data-'visual' AS data FROM law_map_cases WHERE area_id=ANY($1::text[])",[Object.values(AREAS).filter(a=>a.status==="live").map(a=>a.id)])).rows;
- const areas=Object.values(AREAS).filter(a=>a.status==="live");
+ const rows=(await indexQuery("SELECT area_id,data-'visual' AS data FROM law_map_cases WHERE area_id=ANY($1::text[])",[(await visibleAreas()).filter(a=>a.status==="live").map(a=>a.id)])).rows;
+ const areas=(await visibleAreas()).filter(a=>a.status==="live");
  await Promise.all(areas.map(async area=>{const matches=rows.filter(r=>r.area_id===area.id),content=await readProjectContent(area.id,matches.map(r=>r.data.id));for(const r of matches){const c=r.data,project=getProjectForCase(c.id,area.id);c.popup={headline:content[c.id]?.headline??c.popup?.headline??project?.name??cleanResidentTitle(c.title),projectName:project?.name??cleanResidentTitle(c.title),progress:[]};}}));
- const sites=combineRadiusCases(Object.values(AREAS).filter(a=>a.status==="live").map(area=>({area,cases:rows.filter(r=>r.area_id===area.id).map(r=>r.data)})),[0,0],25000);
+ const sites=combineRadiusCases((await visibleAreas()).filter(a=>a.status==="live").map(area=>({area,cases:rows.filter(r=>r.area_id===area.id).map(r=>r.data)})),[0,0],25000);
  const payload=sites.map(data=>({data,b:data.geometry?bbox(data.geometry):data.bounds??[...data.centroid!,...data.centroid!]}));
  await indexQuery(`WITH rows AS(SELECT x->'data' AS data,x->'b' AS b FROM jsonb_array_elements($1::jsonb)x), written AS(INSERT INTO law_map_sites SELECT data->>'id',(b->>0)::float,(b->>1)::float,(b->>2)::float,(b->>3)::float,data FROM rows ON CONFLICT(site_id) DO UPDATE SET min_lng=excluded.min_lng,min_lat=excluded.min_lat,max_lng=excluded.max_lng,max_lat=excluded.max_lat,data=excluded.data RETURNING site_id) DELETE FROM law_map_sites WHERE site_id NOT IN(SELECT data->>'id' FROM rows)`,[JSON.stringify(payload)]);
  await indexQuery("INSERT INTO law_map_index_meta VALUES('sites-headlines-v2',now()) ON CONFLICT(id) DO UPDATE SET updated_at=excluded.updated_at");
@@ -170,7 +172,7 @@ function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
   return {
     id: c.id.includes(":") ? c.id : areaId + ":" + c.id,
     areaId,
-    timezone: AREAS[areaId]?.timezone,
+    timezone: getArea(areaId)?.timezone,
     uses: ["homes", "business"].filter((f) => caseInFilter(c, f)),
     popup: c.popup
       ? {
@@ -206,7 +208,7 @@ async function loadViewport(
   bounds: Bounds,
   zoom: number,
 ): Promise<ViewportData> {
-  const areas = Object.values(AREAS).filter((a) => a.status === "live"),
+  const areas = (await visibleAreas()).filter((a) => a.status === "live"),
     b = bounds;
   let rows: { area_id: string; data: MapCase }[] = [];
   if (databaseUrl()) {
@@ -248,7 +250,7 @@ async function loadViewport(
     bounds: b,
   };
 }
-export function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);return unstable_cache(loadViewport,["viewport-cases-v8-private-names",...reviewCacheKeys],{revalidate:86400,tags:[...tags,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);}
+export async function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);const result=await unstable_cache(loadViewport,["viewport-cases-v8-private-names",...reviewCacheKeys],{revalidate:86400,tags:[...tags,MAP_INDEX_TAG,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);const visible=new Set((await visibleAreas()).map(a=>a.id));return {...result,cases:result.cases.filter(c=>visible.has(c.areaId!)&&(!c.members||c.members.every(m=>visible.has(m.areaId)))),summaries:result.summaries.filter(s=>visible.has(s.id))};}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";
@@ -266,7 +268,7 @@ async function manifest() {
         )
       ).rows[0]?.revision ?? "initial";
   } else
-    for (const a of Object.values(AREAS).filter((a) => a.status === "live")) {
+    for (const a of (await visibleAreas()).filter((a) => a.status === "live")) {
       const s = await readMapSnapshot(a.id, { includeFlum: false });
       counts.push({
         area_id: a.id,
@@ -282,7 +284,7 @@ async function manifest() {
       });
     }
   for(const snapshot of await reviewSnapshots())if(snapshot){counts=counts.filter(c=>c.area_id!==snapshot.jurisdiction);counts.push({area_id:snapshot.jurisdiction,count:snapshot.cases.length,upcoming:snapshot.cases.filter(c=>c.nextHearing).length});}
-  const summaries: MapSummary[] = Object.values(AREAS)
+  const summaries: MapSummary[] = (await visibleAreas())
     .filter((a) => a.status === "live")
     .map((a) => ({
       id: a.id,
@@ -295,7 +297,7 @@ async function manifest() {
   return {
     revision,
     summaries,
-    areas: Object.values(AREAS).map((a) => ({
+    areas: (await visibleAreas()).map((a) => ({
       id: a.id,
       name: a.name,
       stateAbbreviation: a.stateAbbreviation,
@@ -306,10 +308,12 @@ async function manifest() {
     })),
   };
 }
-export const mapManifest = unstable_cache(manifest, ["map-manifest-v1",...reviewCacheKeys], {
+const cachedManifest = unstable_cache(manifest, ["map-manifest-v1",...reviewCacheKeys], {
   revalidate: 3600,
   tags: [MAP_INDEX_TAG, PRIVACY_TAG],
 });
+
+export async function mapManifest(){const result=await cachedManifest(),visible=new Set((await visibleAreas()).map(a=>a.id));return {...result,areas:result.areas.filter(a=>visible.has(a.id)),summaries:result.summaries.filter(a=>visible.has(a.id))};}
 
 /** Authenticated export is paged below the serverless response limit; only public map properties leave Neon. */
 export async function exportMapFeatures(cursor = "") {
@@ -321,7 +325,7 @@ export async function exportMapFeatures(cursor = "") {
     await db.query(
       "SELECT area_id,case_id,data->'geometry' AS geometry,data->>'title' AS title,data->>'stage' AS stage,data->>'href' AS href,data->'nextHearing'->>'date' AS next_date FROM law_map_cases WHERE area_id=ANY($1::text[]) AND (area_id,case_id)>($2,$3) AND data->'geometry' IS NOT NULL AND data->'geometry'<>'null'::jsonb AND NOT coalesce((data->>'citywide')::boolean,false) ORDER BY area_id,case_id LIMIT 500",
       [
-        Object.values(AREAS)
+        (await visibleAreas())
           .filter((a) => a.status === "live")
           .map((a) => a.id),
         areaId,

@@ -1,0 +1,371 @@
+{
+  "sources": [
+    {
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=0",
+      "recordedAt": "2026-10-27T14:45:25.078Z",
+      "sourceResponseHash": "71dfc6a3726d3718795136e6b47524a1ea10a3e2c609fc9254f153af648426bd"
+    },
+    {
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=1000",
+      "recordedAt": "2026-10-27T14:45:26.540Z",
+      "sourceResponseHash": "8eb6b754c65b8a0fa7ee746603e38fdd2a4c98a4ddeb133c4b3110af61c269d5"
+    },
+    {
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=2000",
+      "recordedAt": "2026-10-27T14:45:27.653Z",
+      "sourceResponseHash": "d305d55488150bc0c17e4b065e78d0ed762d02ae35173b587d095c7d27ab5b7b"
+    },
+    {
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=3000",
+      "recordedAt": "2026-10-31T11:56:30.798Z",
+      "sourceResponseHash": "431ce1adf6535b08d799d3e57d2f8766c00a76052a99f27c24a48d27cc18a9dc"
+    },
+    {
+      "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=AppDivision%3D%27PZ%27&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=1000&resultOffset=4000",
+      "recordedAt": "2026-10-31T11:56:32.094Z",
+      "sourceResponseHash": "7eaac609e7ce21b9564c861854bea7a28a717b7e1fa8b5f6045bfa5eecc63faf"
+    }
+  ],
+  "rows": [
+    {
+      "APPFILE": "202103209-S",
+      "APPFileNum": "202103209",
+      "PRJProjectNum": 202103209,
+      "APTDescription": "PRELIMINARY PLAT",
+      "AppApplicDesc": "A Preliminary Plat and Hillside Permit for a 21-lot single family residential subdivision. The property is located at the end of E Old Pearl Ln (parcels S0234233600, S0234212458, R8528640651, and R8528640604) and contains 119.49 acres in the Rural-Urban Transition (RUT) District; Section 34, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1638748800000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202103209-HD",
+      "APPFileNum": "202103209",
+      "PRJProjectNum": 202103209,
+      "APTDescription": "HILLSIDE DEVELOPMENT",
+      "AppApplicDesc": "A Preliminary Plat and Hillside Permit for a 21-lot single family residential subdivision. The property is located at the end of E Old Pearl Ln (parcels S0234233600, S0234212458, R8528640651, and R8528640604) and contains 119.49 acres in the Rural-Urban Transition (RUT) District; Section 34, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1638748800000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202300644-S",
+      "APPFileNum": "202300644",
+      "PRJProjectNum": 202300644,
+      "APTDescription": "PRELIMINARY PLAT",
+      "AppApplicDesc": "Preliminary Plat for a seven (7) lot Subdivision. Also included is a Private Road extension, Floodplain, and Hillside Development Permit. The property is located at the end of Basin Way and contains 286 acres in the Rural-Preservation (RP) District; Section 19, T.5N, R.2E & Section 24, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1680220800000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202300644-HD",
+      "APPFileNum": "202300644",
+      "PRJProjectNum": 202300644,
+      "APTDescription": "HILLSIDE DEVELOPMENT",
+      "AppApplicDesc": "Preliminary Plat for a seven (7) lot Subdivision. Also included is a Private Road extension, Floodplain, and Hillside Development Permit. The property is located at the end of Basin Way and contains 286 acres in the Rural-Preservation (RP) District; Section 19, T.5N, R.2E & Section 24, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1680220800000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202300644-FP",
+      "APPFileNum": "202300644",
+      "PRJProjectNum": 202300644,
+      "APTDescription": "FLOODPLAIN APPLICATION",
+      "AppApplicDesc": "Preliminary Plat for a seven (7) lot Subdivision. Also included is a Private Road extension, Floodplain, and Hillside Development Permit. The property is located at the end of Basin Way and contains 286 acres in the Rural-Preservation (RP) District; Section 19, T.5N, R.2E & Section 24, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1680220800000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202300644-PR",
+      "APPFileNum": "202300644",
+      "PRJProjectNum": 202300644,
+      "APTDescription": "PRIVATE ROAD",
+      "AppApplicDesc": "Preliminary Plat for a seven (7) lot Subdivision. Also included is a Private Road extension, Floodplain, and Hillside Development Permit. The property is located at the end of Basin Way and contains 286 acres in the Rural-Preservation (RP) District; Section 19, T.5N, R.2E & Section 24, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1680220800000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-HD",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "HILLSIDE DEVELOPMENT",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1706659200000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-DA",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "DEVELOPMENT AGREEMENT",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1706659200000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-PR",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "PRIVATE ROAD",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1706659200000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-S",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "PRELIMINARY PLAT",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1706659200000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-ZC",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "ZONING ORDINANCE MAP AMENDMENT",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1706659200000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-CPA",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "COMPREHENSIVE PLAN AMENDMENT",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Variance, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1706659200000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202400171-V",
+      "APPFileNum": "202400171",
+      "PRJProjectNum": 202400171,
+      "APTDescription": "VARIANCE",
+      "AppApplicDesc": "Comprehensive Plan Amendment to change the Future Land Use from Rangeland to Rural Residential, Zone Change from the Rural Preservation (RP) District to the Rural Residential (RR) District, a Preliminary Plat, a Hillside Development, and a Private Road for fifty (50) lots. The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1718928000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202502399-PR",
+      "APPFileNum": "202502399",
+      "PRJProjectNum": 202103209,
+      "APTDescription": "PRIVATE ROAD",
+      "AppApplicDesc": "An application seeking approval for a private road within the Palermo Subdivision. The private road is proposed off the future public roadway and includes a gate. The applicant is also proposing several service drives off of the proposed private and public roads to provide access to the future pad sites.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1764892800000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202502461-CU",
+      "APPFileNum": "202502461",
+      "PRJProjectNum": 202502461,
+      "APTDescription": "CONDITIONAL USE",
+      "AppApplicDesc": "An application for the approval of a Conditional Use and Master Site Plan to operate an Event Center to include outdoor weddings and agricultural education with pack-animals. No current or proposed structures relating to this use. All events will be outdoor. Days and Hours of operation are Friday – Sunday 3:00pm – 10:00pm Spring to Fall, May-October maximum number of guests will be 150 plus a Bridal Party. The property is located at 13999 W Hwy 21 and contains approximately 44 acres in the Rural Preservation (RP) District; Sections: 20 & 29, Town: 3N, Range: 4E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1765756800000,
+      "APPLICANT": "KIMBERLITE RANCH, LLC"
+    },
+    {
+      "APPFILE": "202502461-MSP",
+      "APPFileNum": "202502461",
+      "PRJProjectNum": 202502461,
+      "APTDescription": "MASTER SITE PLAN",
+      "AppApplicDesc": "An application for the approval of a Conditional Use to operate an Event Center to include outdoor weddings and agricultural education with pack-animals.  No current or proposed structures relating to this use all events will be outdoor.  Days and Hours of operation are Friday – Sunday 3:00pm – 10:00pm Spring to Fall, May-October maximum number of guests will be 100 plus the Bridal Party.  The property is located at 13999 W Hwy 21 and contains approximately 44 acres in the Rural Preservation (RP) District; Sections: 20 & 29, Town: 3N, Range: 4E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1765756800000,
+      "APPLICANT": "KIMBERLITE RANCH, LLC"
+    },
+    {
+      "APPFILE": "202600273-ALT",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "ALTERNATIVE COMPLIANCE",
+      "AppApplicDesc": "An Alternative Compliance, Planned Unit Development, Preliminary Plat, Zoning Map Amendment (Rezone), Hillside Development, Master Site Plan, and Private Road applications for Bellarossa Subdivision of a 175 lots.  Also, a Development Agreement Modification (Project #202400171 DA-DM).  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 588.6 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600273-PUD",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "PLANNED UNIT DEVELOPMENT",
+      "AppApplicDesc": "An Alternative Compliance, Preliminary Plat, Zone Map Amendment, Hillside Development, Master Site Plan, and Private Road applications for Bellarosa Subdivision of a 175 lots.  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600273-S",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "PRELIMINARY PLAT",
+      "AppApplicDesc": "An Alternative Compliance, Preliminary Plat, Zone Map Amendment, Hillside Development, Master Site Plan, and Private Road applications for Bellarosa Subdivision of a 175 lots.  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600273-ZC",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "ZONING ORDINANCE MAP AMENDMENT",
+      "AppApplicDesc": "An Alternative Compliance, Planned Unit Development, Preliminary Plat, Zoning Map Amendment (Rezone), Hillside Development, Master Site Plan, and Private Road applications for Bellarosa Subdivision of a 175 lots.  Also, a Development Agreement Modification (Project #202400171 DA-DM).  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 588.6 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600273-HD",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "HILLSIDE DEVELOPMENT",
+      "AppApplicDesc": "An Alternative Compliance, Preliminary Plat, Zone Map Amendment, Hillside Development, Master Site Plan, and Private Road applications for Bellarosa Subdivision of a 175 lots.  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600273-MSP",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "MASTER SITE PLAN",
+      "AppApplicDesc": "An Alternative Compliance, Preliminary Plat, Zone Map Amendment, Hillside Development, Master Site Plan, and Private Road applications for Bellarosa Subdivision of a 175 lots.  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600273-PR",
+      "APPFileNum": "202600273",
+      "PRJProjectNum": 202600273,
+      "APTDescription": "PRIVATE ROAD",
+      "AppApplicDesc": "An Alternative Compliance, Preliminary Plat, Zone Map Amendment, Hillside Development, Master Site Plan, and Private Road applications for Bellarosa Subdivision of a 175 lots.  The property is generally located northeast of the intersection of Willow Creek Rd and Stillwell Dr and contains approximately 568 acres; Sections 27, 28, 29, and 33, T.5N, R.1E.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1771459200000,
+      "APPLICANT": "DAVID EVANS + ASSOCIATES INC"
+    },
+    {
+      "APPFILE": "202600934-AC",
+      "APPFileNum": "202600934",
+      "PRJProjectNum": 202600934,
+      "APTDescription": "ACCESSORY USE",
+      "AppApplicDesc": "Application for a 2 lot subdivision associated with a Private Road and Variance to allow for one lot to be under 5 acres, application will also include a Property Boundary Adjustment with the neighbor to the east to bring structures into setback compiance and an Accessory Use for a Large home occupation for a Bridal Shop.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1780272000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202600934-PBA",
+      "APPFileNum": "202600934",
+      "PRJProjectNum": 202600934,
+      "APTDescription": "PROPERTY BOUNDARY ADJUSTMENT",
+      "AppApplicDesc": "Application for a 2 lot subdivision associated with a Private Road and Variance to allow for one lot to be under 5 acres, application will also include a Property Boundary Adjustment with the neighbor to the east to bring structures into setback compiance and an Accessory Use for a Large home occupation for a Bridal Shop.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1780272000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202600934-S",
+      "APPFileNum": "202600934",
+      "PRJProjectNum": 202600934,
+      "APTDescription": "PRELIMINARY PLAT",
+      "AppApplicDesc": "An application for a two (2) lot subdivision along with a private road, accessory use application for a large home occupation (bridal shop), property boundary adjustment, and a variance for minimum lot size and for existing structures to encroach into the side yard setbacks.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1780272000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202600934-PR",
+      "APPFileNum": "202600934",
+      "PRJProjectNum": 202600934,
+      "APTDescription": "PRIVATE ROAD",
+      "AppApplicDesc": "Application for a 2 lot subdivision associated with a Private Road and Variance to allow for one lot to be under 5 acres, application will also include a Property Boundary Adjustment with the neighbor to the east to bring structures into setback compiance and an Accessory Use for a Large home occupation for a Bridal Shop.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1780272000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202600934-V",
+      "APPFileNum": "202600934",
+      "PRJProjectNum": 202600934,
+      "APTDescription": "VARIANCE",
+      "AppApplicDesc": "Application for a 2 lot subdivision associated with a Private Road and Variance to allow for one lot to be under 5 acres, application will also include a Property Boundary Adjustment with the neighbor to the east to bring structures into setback compiance and an Accessory Use for a Large home occupation for a Bridal Shop.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1780272000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202601712-COM",
+      "APPFileNum": "202601712",
+      "PRJProjectNum": 202601712,
+      "APTDescription": "PRELIM/FINAL COMBO",
+      "AppApplicDesc": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
+      "STATUS": "Active",
+      "APPRcvdDate": 1788825600000,
+      "APPLICANT": "HATCH DESIGN ARCHITECTURE"
+    },
+    {
+      "APPFILE": "202601712-MSP",
+      "APPFileNum": "202601712",
+      "PRJProjectNum": 202601712,
+      "APTDescription": "MASTER SITE PLAN",
+      "AppApplicDesc": "For approval of a Combo Preliminary/Final Plat and a Master Site Plan applications for a 8 lot Subdivision (Hazel Center Sub No 03).  The property is located at 10803 W Lake Hazel with 7.42 acres in the Neighborhood Commercial (C1) District; Section: 03; Town: 2N; Range: 1E",
+      "STATUS": "Active",
+      "APPRcvdDate": 1788825600000,
+      "APPLICANT": "HATCH DESIGN ARCHITECTURE"
+    },
+    {
+      "APPFILE": "202102022-MSP",
+      "APPFileNum": "202102022",
+      "PRJProjectNum": 202102022,
+      "APTDescription": "MASTER SITE PLAN",
+      "AppApplicDesc": "Request to an updated Master Site Plan with a change in the location and size of the additional building for wine production, storage, events, offices, and tasting room. ",
+      "STATUS": "Active",
+      "APPRcvdDate": 1790208000000,
+      "APPLICANT": "[Individual identity withheld]"
+    },
+    {
+      "APPFILE": "202601864-AC",
+      "APPFileNum": "202601864",
+      "PRJProjectNum": 202601864,
+      "APTDescription": "ACCESSORY USE",
+      "AppApplicDesc": "Application for approval of an Accessory Use to allow for an ADU, a Variance to allow for the ADU to be in the front yard and allow for forgiveness of an AG structure in the setback and the new primary dwelling and poolhouse in the Boise Greenway Easement with a Floodplain application.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1790726400000,
+      "APPLICANT": "Gardner Homes Idaho"
+    },
+    {
+      "APPFILE": "202601864-FP",
+      "APPFileNum": "202601864",
+      "PRJProjectNum": 202601864,
+      "APTDescription": "FLOODPLAIN APPLICATION",
+      "AppApplicDesc": "An Accessory Use application to convert the existing single-family dwelling into a secondary dwelling/accessory structure in order to construct a new single-family dwelling on the property.  A variance for the new single-family dwelling, pool, and pool house to encroach into the Boise River Greenway Overlay District setback; a variance for an unpermitted outbuilding to encroach into the interior side yard setback, and a variance for the secondary dwelling/accessory structure to be located in front of the principal permitted dwelling.  A floodplain for the structures and improvements being made in the floodplain. ",
+      "STATUS": "Active",
+      "APPRcvdDate": 1790726400000,
+      "APPLICANT": "Gardner Homes Idaho"
+    },
+    {
+      "APPFILE": "202601864-V",
+      "APPFileNum": "202601864",
+      "PRJProjectNum": 202601864,
+      "APTDescription": "VARIANCE",
+      "AppApplicDesc": "Application for approval of an Accessory Use to allow for an ADU, a Variance to allow for the ADU to be in the front yard and allow for forgiveness of an AG structure in the setback and the new primary dwelling and poolhouse in the Boise Greenway Easement with a Floodplain application.",
+      "STATUS": "Active",
+      "APPRcvdDate": 1790726400000,
+      "APPLICANT": "Gardner Homes Idaho"
+    }
+  ]
+}

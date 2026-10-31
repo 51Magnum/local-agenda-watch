@@ -1,6 +1,6 @@
 import "server-only";
 import {officialGisLink} from "../jurisdictions/official-gis-link";
-import {publicJurisdictions} from "../jurisdictions/registry";
+import {routeJurisdictions,publicJurisdictions} from "../jurisdictions/registry";
 import {registryBoundaries} from "../jurisdictions/generated";
 import { recordPageOnHosts, type RecordPageContext } from "./record-links";
 import type { MultiPolygon, Polygon } from "geojson";
@@ -21,17 +21,27 @@ export type AreaDefinition = {
   };
   sources:{cases?:string;hearingsSchedule?:string;geometry?:string[];flum?:string;agendas?:string;addressPoints?:string;parcelFallback?:string};
 };
-export const AREAS:Record<string,AreaDefinition>=Object.fromEntries(publicJurisdictions().map(d=>{
+const ROUTE_AREAS:Record<string,AreaDefinition>=Object.fromEntries(routeJurisdictions().map(d=>{
  const boundary=registryBoundaries[d.id+":boundary"] as AreaDefinition["boundary"]|undefined;
- if(!boundary)throw Error("Published jurisdiction has no verified boundary cache: "+d.id);
+ if(!boundary){if(d.legacyPublic)throw Error("Published jurisdiction has no verified boundary cache: "+d.id);return [];}
  const hosts=d.recordPageHosts;
  return [d.id,{...d.area,...!d.legacyPublic?{color:d.color,boundarySources:d.area.boundarySources.map(url=>officialGisLink(url)!)}:{},id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.legacyPublic?"America/Denver":d.timezone,boundary,
  ...(registryBoundaries[d.id+":coverageBoundary"]?{coverageBoundary:registryBoundaries[d.id+":coverageBoundary"] as AreaDefinition["boundary"]}:{}),
  ...(hosts?{recordPage:(context:RecordPageContext)=>recordPageOnHosts(context,hosts)}:{})}];
-}));
+}).filter(row=>row.length));
+export const AREAS:Record<string,AreaDefinition>=Object.fromEntries(publicJurisdictions().map(d=>[d.id,ROUTE_AREAS[d.id]]));
 export const FEATURED_AREA_ID="nampa";
-export function getArea(id:string){return Object.hasOwn(AREAS,id)?AREAS[id]:undefined;}
-export function findArea(country:string,state:string,slug:string){return Object.values(AREAS).find(a=>a.country===country&&a.state===state&&a.slug===slug);}
+export async function visibleAreas(){
+ return (await Promise.all(routeJurisdictions().map(async d=>{
+  if(d.legacyPublic)return ROUTE_AREAS[d.id];
+  try{const snapshot=await(await import("../jurisdictions/self-check-store")).readPublished(d.id);if(!snapshot?.boundary){delete AREAS[d.id];return;}
+   const area:AreaDefinition={...d.area,id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.timezone,color:d.color,boundary:snapshot.boundary,coverageBoundary:snapshot.coverageBoundary};
+   ROUTE_AREAS[d.id]=area;AREAS[d.id]=area;return area;
+  }catch{return;}
+ }))).filter((a):a is AreaDefinition=>!!a);
+}
+export function getArea(id:string){return Object.hasOwn(ROUTE_AREAS,id)?ROUTE_AREAS[id]:undefined;}
+export function findArea(country:string,state:string,slug:string){return Object.values(ROUTE_AREAS).find(a=>a.country===country&&a.state===state&&a.slug===slug);}
 export function areaPath(area:Pick<AreaDefinition,"country"|"state"|"slug">|string){const a=typeof area==="string"?getArea(area):area;return a?`/${a.country}/${a.state}/${a.slug}`:"/"+area;}
 export function canonicalAreaHref(id:string,path:string){const a=getArea(id);if(!a)return path;const old="/"+id;return path===old||path.startsWith(old+"/")||path.startsWith(old+"?")||path.startsWith(old+"#")?areaPath(a)+path.slice(old.length):path;}
 export function stageLabel(stage:string,area:Pick<AreaDefinition,"bodies">){return stage.startsWith("P&Z hearing")?area.bodies.planning.stageLabel+stage.slice("P&Z hearing".length):stage.startsWith("Council hearing")?area.bodies.decision.stageLabel+stage.slice("Council hearing".length):stage;}

@@ -3,6 +3,7 @@
   "timezone": "America/Boise",
   "enabled": true,
   "launchStatus": "admin_only",
+  "selfCheck": {"minPassRate": 0.95, "mustInclude": ["202600273", "202601088", "202600638", "202601398", "202601317", "202600819", "202600934", "202103209"]},
   "sourcesVerifiedAt": "2026-10-27",
   "documents": {
     "maxBytes": 45000000,
@@ -95,7 +96,7 @@
       ],
       "applicantField": "APPLICANT"
     },
-    "recordUrlTemplate": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27{projectNumber}%27&outFields=*&returnGeometry=false&f=pjson"
+    "recordUrlTemplate": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27{projectNumber}%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
   },
   "gis": {
     "countyBoundary": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",

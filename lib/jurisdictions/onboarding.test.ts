@@ -22,7 +22,7 @@ import {JURISDICTIONS} from "../maps/jurisdictions";
 const fixture=(name:string)=>readFileSync(path.join(__dirname,"fixtures",name),"utf8");
 afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();vi.restoreAllMocks();});
 it("validates every definition and keeps staging areas out of the public registry",()=>{
- expect(validateJurisdictions(registryEntries)).toHaveLength(9);
+ expect(validateJurisdictions(registryEntries)).toHaveLength(10);
  expect(publicJurisdictions().map(d=>d.id)).toEqual(Object.keys(AREAS));
  expect(AREAS.boise).toBeUndefined();expect(AREAS["ada-county"]).toBeUndefined();
  for(const id of ["boise","ada-county"]){expect(jurisdiction(id)).toMatchObject({launchStatus:"admin_only",enabled:true});expect(contrastWithWhite(jurisdiction(id).color)).toBeGreaterThanOrEqual(4.5);}

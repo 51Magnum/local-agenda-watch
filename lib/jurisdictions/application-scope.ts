@@ -15,9 +15,16 @@ export function hearingApplication(d:JurisdictionDefinition,a:Application){
 }
 export function applicationScope(d:JurisdictionDefinition,applications:Application[],meetings:Meeting[]):Application[]{
  const linked=new Set(meetings.flatMap(m=>m.items.flatMap(i=>[...i.caseNumbers,...i.matchedApplications?.map(a=>a.recordId)??[]])));
- return applications.filter(a=>hearingApplication(d,a)||[a.recordId,...a.relatedCaseNumbers].some(id=>linked.has(id))).map(a=>{
+ return applications.filter(a=>hearingApplication(d,a)||[a.recordId,...a.relatedCaseNumbers].some(id=>linked.has(id))||organizationDevelopment(d,a)).map(a=>{
   const field=String(d.applications.params.applicantField??"");
-  const protect=residentialCase(d.id,a.recordId,a)||(!hearingApplication(d,a)&&field&&individualApplicant(a.sourceFields[field]));
-  return {...a,...protect?{residentialPrivacy:true}:{}};
+  const protect=d.legacyPublic?residentialCase(d.id,a.recordId,a):!!(!hearingApplication(d,a)&&field&&individualApplicant(a.sourceFields[field])&&(residentialCase(d.id,a.recordId,a)||/accessory use|residential/i.test(a.type)));
+  return {...a,...!d.legacyPublic?{privacyPolicy:"staff-individual" as const}:{},...protect?{residentialPrivacy:true}:!d.legacyPublic?{residentialPrivacy:false}:{}};
  });
+}
+export function organizationDevelopment(d:JurisdictionDefinition,a:Application){
+ const applicant=a.sourceFields[String(d.applications.params.applicantField??"")];
+ const organization=organizationApplicant(String(applicant??""))||/\bARCHITECTURE|ENGINEERING|SURVEYING\b/i.test(String(applicant??""));
+ // A named individual may be the filing agent for an explicitly commercial project.
+ const commercial=/commercial development|retail|\bwinery\b|wine production|tasting room/i.test(a.description);
+ return (organization||commercial)&&/-(?:COM|MSP)(?:-|$)/i.test([a.recordId,...a.relatedCaseNumbers].join(" "))&&!/home.?occupation|single.?family|accessory use/i.test(a.description);
 }

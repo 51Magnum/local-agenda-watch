@@ -21,6 +21,6 @@ it("renders County map controls now that County coverage is enabled", async () =
   expect(html).toContain('id="case-map"');
 });
 
-it("rejects an unregistered area", async () => {
-  await expect(MapPage({ params: params("unknown") })).rejects.toThrow("not-found");
+it.each(["unknown","boise"])("rejects an unregistered or unpublished area: %s", async (id) => {
+  await expect(MapPage({ params: params(id) })).rejects.toThrow("not-found");
 });

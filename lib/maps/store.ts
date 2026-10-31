@@ -1,6 +1,6 @@
 import {databaseUrl} from "../runtime-environment";
 import {requireProductionMutation} from "../runtime-environment";
-import {isSiteReviewArea} from "../jurisdictions/registry";
+import {jurisdiction,isSiteReviewArea} from "../jurisdictions/registry";
 import {bbox} from "@turf/turf";
 import {trackedRows} from "@/lib/db-transfer";
 import {revalidateTag,unstable_cache} from "next/cache";
@@ -20,7 +20,7 @@ function database() {
 }
 function filename(id: string) { if (!/^[a-z0-9-]+$/.test(id)) throw new Error("Invalid map cache ID"); return path.join(process.cwd(), ".data", "maps", id + ".json"); }
 export async function readMapSnapshot(id: string,options:{caseIds?:readonly string[];includeFlum?:boolean;bounds?:readonly number[]}={includeFlum:true}): Promise<MapSnapshot | undefined> {
-  if(isSiteReviewArea(id)){const snapshot=await(await import("../jurisdictions/runtime")).configuredSnapshot(id);if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));if(options.bounds)snapshot.cases=snapshot.cases.filter(c=>{const b=c.bounds,q=options.bounds!;return b&&b[0]<=q[2]&&b[2]>=q[0]&&b[1]<=q[3]&&b[3]>=q[1];});if(options.includeFlum)snapshot.flum=await readFlumSnapshot(id);return snapshot;}
+  if(jurisdiction(id)&&!jurisdiction(id).legacyPublic){const snapshot=await(await import("../jurisdictions/runtime")).configuredSnapshot(id);if(options.caseIds)snapshot.cases=snapshot.cases.filter(c=>options.caseIds!.includes(c.id));if(options.bounds)snapshot.cases=snapshot.cases.filter(c=>{const b=c.bounds,q=options.bounds!;return b&&b[0]<=q[2]&&b[2]>=q[0]&&b[1]<=q[3]&&b[3]>=q[1];});if(options.includeFlum)snapshot.flum=await readFlumSnapshot(id);return snapshot;}
  if (databaseUrl()) {
    const db=database();await initialized;
    if(options.bounds){

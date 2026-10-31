@@ -74,7 +74,7 @@ Verified with PGlite, not applied to Neon. Onboarding runtime DDL is removed; th
 
 | Name | Purpose/scope | Example, no credential |
 | --- | --- | --- |
-| `DATABASE_URL_PREVIEW` | New optional Preview DSN; separate Neon branch or read-only role. Scoped preview signups require an explicitly isolated DSN. | `postgresql://preview_reader:REDACTED@preview.example.invalid/law?sslmode=require` |
+| `DATABASE_URL_PREVIEW` | Required isolated Preview DSN; separate Neon branch or read-only role. Scoped preview signups require an explicitly isolated DSN. | `postgresql://preview_reader:REDACTED@preview.example.invalid/law?sslmode=require` |
 | `VERCEL_ENV` | Existing system variable; mutations allowed only for `production`; preview/development/default refuse. | `preview` / `production` |
 | `VERCEL_BRANCH_URL`, `VERCEL_URL` | Existing system URLs used for preview canonical origin. | `branch-review.example.vercel.app` |
 | `LAW_SITE_REVIEW_AREAS` | Existing branch-scoped review selection; retained, server-only, never emitted into client metadata. | `ada-county` on the review branch only |
@@ -107,27 +107,8 @@ Six of 41 hearing items remain unmatched to retained application records; their 
 
 Fresh-run AI spend is zero and its durable budget ledger was not read. Five historical October 27 Ada samples have measured spend $0.0282872; source hashes must be current before reuse. The fresh dry-run deliberately fails launch readiness for missing current AI/runtime/staged-QA prerequisites.
 
-## 7. Remaining setup and unverified work
+## 7. Automatic onboarding supersedes the former manual launch ritual
 
-- Provision/verify a separate Neon preview branch/read-only role if desired; configure `DATABASE_URL_PREVIEW` and its schema. No Neon provisioning tool was connected.
-- Apply the repair migration through the migration owner on the intended database.
-- Fresh 34-project data is in the review report, **not written to deployed staging**. The preview may still read the earlier staging snapshot. Populate staging only through the normal authorized maintenance environment; never make a preview writable.
-- Current AI sample and Git-runtime PDF check remain prerequisites before recorded QA/approval. Large-report Vercel memory/runtime behavior and visual map/mobile review are not claimed verified.
-- After owner deployment, verify production workflow success and per-area `lastSuccessAt`/Braeburn Creek **Last checked** advancing. No success timestamp was fabricated.
-- No merge or public launch is authorized by this delivery. Both registry statuses remain private.
+The sections above record historical October 28 evidence. Current work uses the self-check gate and exception queue in [ADA_LAUNCH_CHECKLIST.md](ADA_LAUNCH_CHECKLIST.md). Current results are in the dated self-check report; historical counts and raw-data links are not current validation.
 
-## 8. Owner checklist and exact approval/promotion path
-
-Use [ADA_LAUNCH_CHECKLIST.md](ADA_LAUNCH_CHECKLIST.md) for eight review pages, privacy/clip/hearing/noindex checks and the maintenance prerequisites.
-
-After fresh durable QA passes and Shane reviews the actual staged site, use the existing authenticated approval route (password prompted, not placed in the command):
-
-```powershell
-curl.exe --fail --show-error --user admin --output output/ada-owner-qa.json https://www.localagendawatch.com/admin/jurisdictions/ada-county/report
-$adaQa = Get-Content -LiteralPath output/ada-owner-qa.json -Raw | ConvertFrom-Json
-if (-not $adaQa.passed -or $adaQa.id.StartsWith('dry-run-')) { throw 'Current durable QA is not passing' }
-curl.exe --fail --show-error --user admin --header 'Origin: https://www.localagendawatch.com' --form-string 'areaId=ada-county' --form-string "qaId=$($adaQa.id)" https://www.localagendawatch.com/admin/jurisdictions/approval
-npm run law:jurisdiction -- promote ada-county --to public
-```
-
-The final CLI command requires the authorized production maintenance environment and rechecks current passing QA plus recorded approval. Then generate config, run required checks, commit/push a new PR, verify the Git-sourced preview and merge only with Shane's approval. Verify production's Git SHA against `origin/main`. Codex did not execute these commands.
+A separate Neon preview branch and reader/writer roles are required; see [PREVIEW_DATABASE.md](PREVIEW_DATABASE.md). CLI writes require LAW_DB_TARGET=preview. Do not use a production shell, production POST, manual approval curl, or JSON promotion. Passing checks record database approval with actor self-check and the snapshot hash; failing records remain withheld. PR #7 remains Shane's merge decision. Production remains Git-sourced.

@@ -1,4 +1,4 @@
-import {publicJurisdictions,jurisdiction} from "../jurisdictions/registry";
+import {routeJurisdictions,jurisdiction} from "../jurisdictions/registry";
 import {configuredLocality} from "../jurisdictions/runtime";
 import {MUNICIPAL_LOCALITIES} from "./municipal";
 import { caseCatalog } from "@/lib/case-catalog";
@@ -18,7 +18,7 @@ export type {
 export { getUpcomingMeetings, type UpcomingMeeting } from "./meetings";
 
 const providers:Record<string,Locality>={primegov:nampa,municipalClerk:meridian,countyLandHearings:canyonCounty,...Object.fromEntries(Object.entries(MUNICIPAL_LOCALITIES).map(([id,l])=>[jurisdiction(id).agenda[0].adapter,l]))};
-const LOCALITIES:Record<string,Locality>=Object.fromEntries(publicJurisdictions().map(d=>[d.id,d.legacyPublic?providers[d.agenda[0].adapter]:configuredLocality(d.id)]));
+const LOCALITIES:Record<string,Locality>=Object.fromEntries(routeJurisdictions().map(d=>[d.id,d.legacyPublic?providers[d.agenda[0].adapter]:configuredLocality(d.id)]));
 
 export function getLocality(slug:string):Locality|null {return LOCALITIES[slug]??null;}
 export function listLocalities():Locality[]{return Object.values(LOCALITIES);}

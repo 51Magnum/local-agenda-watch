@@ -1,0 +1,3050 @@
+{
+  "areaId": "ada-county",
+  "createdAt": "2026-10-31T12:18:51.194Z",
+  "snapshotHash": "cb6727427accf8fe8241052f5b420232c8767011d423c89d76d403dadf5518c6",
+  "passRate": 0,
+  "records": [
+    {
+      "recordId": "201601258-CPA",
+      "sourceHash": "5cdda5f9b05535671479c4292f9c4a64ae4f5fa5851a41e48be4b744c5b8601b",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C7-PZC-201601258-DA-DM-D-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202103209-S",
+      "sourceHash": "12f0087400fd5088b7d732a51a354e8dc2c5deceded8a2f13729ee66ffdf5b8d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202103209%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202103209%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content does not identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C02-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202103209%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202103209%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C02-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202103209%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202103209%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202300565-CU",
+      "sourceHash": "a4de6b2fe94dec5a5ac861249d802e916af7bd2b17421dce89410a822a4459a0",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C06-BOCC-202300565-CU-MSP-V-TE-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202300644-S",
+      "sourceHash": "74ede4f784deac311011a325407908b4eb1c126be2f805acf7116180dafb35bc",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300644%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300644%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C05-BOCC-202300644-S-TE-B_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300644%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300644%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C05-BOCC-202300644-S-TE-B_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300644%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300644%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202400171-CPA",
+      "sourceHash": "34bd7f1265b2de184697499feb989bf5a0d1b656ce7f6a621d4bdf8fb4bae854",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202400171%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202400171%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content does not identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202400171%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202400171%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202400171%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202400171%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202502399-PR",
+      "sourceHash": "c70f7fae12c41b3dec8fd8651da82526047111dbc2204fa19f1d0e3813fd5e00",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C04-BOCC-202502399-A_MEMO.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202502461-CU",
+      "sourceHash": "b2ea8b78197a01778269b1c6cb2f2913b76cc21938e8b92157a1691e6e4f0bb9",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502461%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502461%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content does not identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C07-BOCC-202502461-A-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502461%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502461%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C07-BOCC-202502461-A-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502461%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502461%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202502508-ZC",
+      "sourceHash": "36f29b09280ecea536f5e9a6e1c14b5fc50573d8a8178db1144b3c9ea8d12fa9",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502508%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502508%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C01-BOCC-202502508-ZC-DA-MSP-FINDINGS.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502508%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502508%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C01-BOCC-202502508-ZC-DA-MSP-FINDINGS.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502508%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502508%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600273-ZC",
+      "sourceHash": "abc31cfaebd83360809997a75c8f27de060c2f3006c7eaf48d8202c201686849",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600273%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600273%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content does not identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600273%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600273%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600273%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600273%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600638-ZC",
+      "sourceHash": "6b9fbb9530b4a91d6f47f6e4de5e9e784b0d58d07720377588fc6ad3c1acef32",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C03-BOCC-202600638-ZC-DA-S-V_MEMO.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600819-ZC",
+      "sourceHash": "49d9ac1716e8c39ea8e8136d03ae058b58635a12391f8f60d833a6a9ccfdbfa1",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600819%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600819%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content does not identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C02-PZC-202600819-ZC-DA-S-PR-PZC-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600819%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600819%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C2-PZC-202600819-ZC-DA-S-PR-MEMO.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600819%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600819%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600881-CU",
+      "sourceHash": "46c3dab41dd560ed3e2649e5857f334ea63029f34ce409ff855c729b7e8893e3",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600881%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600881%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C3-PZC-202600881-CU-MSP-MEMO.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600881%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600881%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C3-PZC-202600881-CU-MSP-MEMO.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600881%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600881%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600934-S",
+      "sourceHash": "45632a7b135cd6a8a0bf7cb47d82ed71566c800c5e361408e4871fabf733cb61",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C05-PZC-202600934-S-PR-AC-PBA-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600965-V",
+      "sourceHash": "3a3b21d6efe818d06a203cf5a06d236ca8545f410c616d15a9a014993167e6fe",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C06-BOCC-202600965-PCON-V-REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601088-ZC",
+      "sourceHash": "23faf2ac1d3aadf8c5088ee7f4091bd86598d446f95e303538bbaf06115e319b",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C06-PZC-202601088-ZC-DA-OTD-PR-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601149-CU",
+      "sourceHash": "cdce7718b8329c8eba35750e715c27692ff4a521d7d9446dd05077b51fc1588d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601149%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601149%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C04-PZC-202601149-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601149%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601149%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C04-PZC-202601149-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601149%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601149%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601161-V",
+      "sourceHash": "52ee903833b6164e31be066d995f39d5a4f1dae7aba33d32d5741ac2d9db324e",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C07-BOCC-202601161-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601163-CU",
+      "sourceHash": "5a5e03a00771f6e70f0b84968a6ff05ec15d613636c35f7cc11e03a87b4c5137",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601163%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601163%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C4-PZC-202601163-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601163%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601163%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C4-PZC-202601163-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601163%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601163%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601193-CU",
+      "sourceHash": "53849b2513d547ced8f9619c09ba00311ee76ac03cd16f569ae88723039dce32",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601193%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601193%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C6-PZC-202601193-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601193%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601193%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C6-PZC-202601193-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601193%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601193%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601250-CU",
+      "sourceHash": "9738d5cc4d9bcdc64cca44511a1d165a72c33adf4171548482428bb5c40b285b",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C04-PZC-202601250-CU-MSP-TABLING_MEMO.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601317-CU",
+      "sourceHash": "af0ef32223965c59b515ca58b6e47f959edbf0d110e89e9767b8370850a7e573",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601317%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601317%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601317%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601317%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601317%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601317%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601395-CU",
+      "sourceHash": "8073258ec1c0eef3a652e6b73c0cc9673796ef2344be79ee67d879bc3820b46b",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601395%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601395%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601395%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601395%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601395%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601395%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601398-CU",
+      "sourceHash": "ca09e3b16bd7a569dcf7576f8909ee3d5fab0647f075cfeb433dbbfe2edcb17d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601398%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601398%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601398%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601398%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601398%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601398%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "03006-CU",
+      "sourceHash": "ac8c8adf009212e57c34a19f2e4ee24fc442f6e1ecd5fe1fa99e192d90a192ea",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "uncertain",
+          "reason": "A legacy case number needs source-backed project identity verification.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601614-VAC",
+      "sourceHash": "13ba80ddc0f509bc534dec2ed24804c47a67332e3c1e198c939b6de62f797ee8",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601614%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601614%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C06-BOCC-202601614-VAC-PCON-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601614%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601614%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C06-BOCC-202601614-VAC-PCON-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601614%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601614%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601703-CU",
+      "sourceHash": "7accbd0ad9a59340d4e1f518154cd0c3ad42da7861db42f23752286fdefce324",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601712-COM",
+      "sourceHash": "8f61603a0ff4506bb47ec0eb47488e229fea9555406d9cbf0fb5114db8306555",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601739-VAC",
+      "sourceHash": "8e3fbe18c4fc88e7a704f0f086b2ad76da4feb82753f41a7d06f1a0e687430c3",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601739%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601739%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Linked content exposes individual applicant or staff contact details.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C05-BOCC-202601739-VAC-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601739%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601739%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C05-BOCC-202601739-VAC-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601739%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601739%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601753-CU",
+      "sourceHash": "c9a2645f0d3bf6f3394095f5e3c8c05ea905b516d417ff7172ba7ff12f05ff61",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601786-PUD",
+      "sourceHash": "f880f2490a38c08bf0d0f179ef33d5d2f9fdaf5281b4259c3a12c97841a2e40c",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202102022-MSP",
+      "sourceHash": "6f94874df8db00ec1df7c4d85f8e2dfea69055dfc56d409bdf86c57c2ca4ec65",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601837-CU",
+      "sourceHash": "e1f127078749558e517ad35a33917fd8e8445dbc23b5b7ddf98b09b93943dadb",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601864-V",
+      "sourceHash": "0c1f1d606097b247b3533be7fc21a380a8c62c15efc93b8bcc6d56b4fedd6b39",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601913-CU",
+      "sourceHash": "a6e7ef577895834fbdbcdda0a90e54341ad6f1f7be0054b68cd5648d13a29b27",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601939-CU",
+      "sourceHash": "55db684040d5cd2a34f6960426c0fc78c8cac47f84cfac076dae087aa08956c2",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601987-CU",
+      "sourceHash": "30fbd9b83f469d3a9e9673561b486f5d9cef989a6b434291f2056b5da723027d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202601988-VAC",
+      "sourceHash": "132fa32cfbd9b90e7dd699531ea2c264c981ddbfdaf93f3b2e58f8db6ee9a4a4",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202602012-CU",
+      "sourceHash": "aa796b44c6cea4d87a7bc6a1eb5ae1bf89a7fa40a2cddcda3419db603c2d13cd",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "Official source access is blocked; no access challenge was bypassed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600829-VAC-PCON-PBA",
+      "sourceHash": "54d0647ba2d3fee0e6720d40edbf12f9d2b1d639135b36a596c36db39d9b40ee",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Every case link returned a source containing this case or project number.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C05-BOCC-202600829-VAC-PCON-PBA-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202600864-CU-MSP",
+      "sourceHash": "4e7795239e8df201ff84481b76ef6db04796d08bdb6fdc512c7998743d79b81e",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Every case link returned a source containing this case or project number.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "privacy",
+          "status": "uncertain",
+          "reason": "Document privacy review is incomplete; withhold the record pending review.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C5-PZC-202600864-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    }
+  ],
+  "counts": {
+    "title-from-source": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "description-verbatim": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "link-resolves-to-case": {
+      "pass": 2,
+      "fail": 38,
+      "uncertain": 0
+    },
+    "location-in-boundary": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "case-identity": {
+      "pass": 39,
+      "fail": 0,
+      "uncertain": 1
+    },
+    "privacy": {
+      "pass": 13,
+      "fail": 0,
+      "uncertain": 27
+    },
+    "ai-labeled": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "stage-and-date": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "hearing-items-accounted": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "collection-complete": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "scope-explained": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    }
+  },
+  "coverage": [
+    {
+      "check": "hearing-items-accounted",
+      "status": "pass",
+      "reason": "Every case-bearing agenda item has a project.",
+      "sourceUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/"
+    },
+    {
+      "check": "collection-complete",
+      "status": "pass",
+      "reason": "Complete collection; hearing-linked inventory retained.",
+      "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/"
+    },
+    {
+      "check": "scope-explained",
+      "status": "pass",
+      "reason": "Exclusions must be counted by category; hearing types, agenda items and organization development applications are in scope.",
+      "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+    }
+  ],
+  "agendaItems": {
+    "accounted": 41,
+    "total": 41
+  },
+  "unmatched": [],
+  "exclusions": {
+    "Individual staff permit: ACCESSORY USE": 18,
+    "Outside hearing/development scope: ACCESSORY USE": 15,
+    "Outside hearing/development scope: FLOODPLAIN APPLICATION": 2,
+    "Individual staff permit: ALTERNATIVE COMPLIANCE": 2,
+    "Individual staff permit: TEMPORARY USE": 4,
+    "Individual staff permit: FLOODPLAIN APPLICATION": 2,
+    "Outside hearing/development scope: HILLSIDE DEVELOPMENT": 1,
+    "Individual staff permit: PROPERTY BOUNDARY ADJUSTMENT": 2,
+    "Outside hearing/development scope: TEMPORARY USE": 1,
+    "Outside hearing/development scope: ONE-TIME DIVISION": 1,
+    "Outside hearing/development scope: ALTERNATIVE COMPLIANCE": 1,
+    "Individual staff permit: PARCEL CONSOLIDATION": 1
+  },
+  "queue": [
+    {
+      "recordId": "201601258-CPA",
+      "sourceHash": "5cdda5f9b05535671479c4292f9c4a64ae4f5fa5851a41e48be4b744c5b8601b",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27201601258%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "201601258-CPA",
+      "sourceHash": "5cdda5f9b05535671479c4292f9c4a64ae4f5fa5851a41e48be4b744c5b8601b",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C7-PZC-201601258-DA-DM-D-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202103209-S",
+      "sourceHash": "12f0087400fd5088b7d732a51a354e8dc2c5deceded8a2f13729ee66ffdf5b8d",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content does not identify this project.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C02-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202103209-S",
+      "sourceHash": "12f0087400fd5088b7d732a51a354e8dc2c5deceded8a2f13729ee66ffdf5b8d",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C02-BOCC-202103209-S-TE-B-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202300565-CU",
+      "sourceHash": "a4de6b2fe94dec5a5ac861249d802e916af7bd2b17421dce89410a822a4459a0",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202300565%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202300565-CU",
+      "sourceHash": "a4de6b2fe94dec5a5ac861249d802e916af7bd2b17421dce89410a822a4459a0",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C06-BOCC-202300565-CU-MSP-V-TE-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202300644-S",
+      "sourceHash": "74ede4f784deac311011a325407908b4eb1c126be2f805acf7116180dafb35bc",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C05-BOCC-202300644-S-TE-B_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202300644-S",
+      "sourceHash": "74ede4f784deac311011a325407908b4eb1c126be2f805acf7116180dafb35bc",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C05-BOCC-202300644-S-TE-B_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202400171-CPA",
+      "sourceHash": "34bd7f1265b2de184697499feb989bf5a0d1b656ce7f6a621d4bdf8fb4bae854",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content does not identify this project.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202400171-CPA",
+      "sourceHash": "34bd7f1265b2de184697499feb989bf5a0d1b656ce7f6a621d4bdf8fb4bae854",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202502399-PR",
+      "sourceHash": "c70f7fae12c41b3dec8fd8651da82526047111dbc2204fa19f1d0e3813fd5e00",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202502399%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202502399-PR",
+      "sourceHash": "c70f7fae12c41b3dec8fd8651da82526047111dbc2204fa19f1d0e3813fd5e00",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C04-BOCC-202502399-A_MEMO.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202502461-CU",
+      "sourceHash": "b2ea8b78197a01778269b1c6cb2f2913b76cc21938e8b92157a1691e6e4f0bb9",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content does not identify this project.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C07-BOCC-202502461-A-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202502461-CU",
+      "sourceHash": "b2ea8b78197a01778269b1c6cb2f2913b76cc21938e8b92157a1691e6e4f0bb9",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C07-BOCC-202502461-A-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202502508-ZC",
+      "sourceHash": "36f29b09280ecea536f5e9a6e1c14b5fc50573d8a8178db1144b3c9ea8d12fa9",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C01-BOCC-202502508-ZC-DA-MSP-FINDINGS.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202502508-ZC",
+      "sourceHash": "36f29b09280ecea536f5e9a6e1c14b5fc50573d8a8178db1144b3c9ea8d12fa9",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C01-BOCC-202502508-ZC-DA-MSP-FINDINGS.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600273-ZC",
+      "sourceHash": "abc31cfaebd83360809997a75c8f27de060c2f3006c7eaf48d8202c201686849",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content does not identify this project.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600273-ZC",
+      "sourceHash": "abc31cfaebd83360809997a75c8f27de060c2f3006c7eaf48d8202c201686849",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C1-PZC-202600273-ZC-S-PUD-MSP-PR-HD-ALT-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600638-ZC",
+      "sourceHash": "6b9fbb9530b4a91d6f47f6e4de5e9e784b0d58d07720377588fc6ad3c1acef32",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600638%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202600638-ZC",
+      "sourceHash": "6b9fbb9530b4a91d6f47f6e4de5e9e784b0d58d07720377588fc6ad3c1acef32",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C03-BOCC-202600638-ZC-DA-S-V_MEMO.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600819-ZC",
+      "sourceHash": "49d9ac1716e8c39ea8e8136d03ae058b58635a12391f8f60d833a6a9ccfdbfa1",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content does not identify this project.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C02-PZC-202600819-ZC-DA-S-PR-PZC-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600819-ZC",
+      "sourceHash": "49d9ac1716e8c39ea8e8136d03ae058b58635a12391f8f60d833a6a9ccfdbfa1",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C2-PZC-202600819-ZC-DA-S-PR-MEMO.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600881-CU",
+      "sourceHash": "46c3dab41dd560ed3e2649e5857f334ea63029f34ce409ff855c729b7e8893e3",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C3-PZC-202600881-CU-MSP-MEMO.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600881-CU",
+      "sourceHash": "46c3dab41dd560ed3e2649e5857f334ea63029f34ce409ff855c729b7e8893e3",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C3-PZC-202600881-CU-MSP-MEMO.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600934-S",
+      "sourceHash": "45632a7b135cd6a8a0bf7cb47d82ed71566c800c5e361408e4871fabf733cb61",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600934%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202600934-S",
+      "sourceHash": "45632a7b135cd6a8a0bf7cb47d82ed71566c800c5e361408e4871fabf733cb61",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C05-PZC-202600934-S-PR-AC-PBA-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600965-V",
+      "sourceHash": "3a3b21d6efe818d06a203cf5a06d236ca8545f410c616d15a9a014993167e6fe",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202600965%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202600965-V",
+      "sourceHash": "3a3b21d6efe818d06a203cf5a06d236ca8545f410c616d15a9a014993167e6fe",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CBOCC%5C06-BOCC-202600965-PCON-V-REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601088-ZC",
+      "sourceHash": "23faf2ac1d3aadf8c5088ee7f4091bd86598d446f95e303538bbaf06115e319b",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601088%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601088-ZC",
+      "sourceHash": "23faf2ac1d3aadf8c5088ee7f4091bd86598d446f95e303538bbaf06115e319b",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C06-PZC-202601088-ZC-DA-OTD-PR-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601149-CU",
+      "sourceHash": "cdce7718b8329c8eba35750e715c27692ff4a521d7d9446dd05077b51fc1588d",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C04-PZC-202601149-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601149-CU",
+      "sourceHash": "cdce7718b8329c8eba35750e715c27692ff4a521d7d9446dd05077b51fc1588d",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CPZC%5C04-PZC-202601149-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601161-V",
+      "sourceHash": "52ee903833b6164e31be066d995f39d5a4f1dae7aba33d32d5741ac2d9db324e",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601161%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601161-V",
+      "sourceHash": "52ee903833b6164e31be066d995f39d5a4f1dae7aba33d32d5741ac2d9db324e",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C07-BOCC-202601161-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601163-CU",
+      "sourceHash": "5a5e03a00771f6e70f0b84968a6ff05ec15d613636c35f7cc11e03a87b4c5137",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C4-PZC-202601163-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601163-CU",
+      "sourceHash": "5a5e03a00771f6e70f0b84968a6ff05ec15d613636c35f7cc11e03a87b4c5137",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C4-PZC-202601163-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601193-CU",
+      "sourceHash": "53849b2513d547ced8f9619c09ba00311ee76ac03cd16f569ae88723039dce32",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C6-PZC-202601193-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601193-CU",
+      "sourceHash": "53849b2513d547ced8f9619c09ba00311ee76ac03cd16f569ae88723039dce32",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C6-PZC-202601193-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601250-CU",
+      "sourceHash": "9738d5cc4d9bcdc64cca44511a1d165a72c33adf4171548482428bb5c40b285b",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601250%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601250-CU",
+      "sourceHash": "9738d5cc4d9bcdc64cca44511a1d165a72c33adf4171548482428bb5c40b285b",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C04-PZC-202601250-CU-MSP-TABLING_MEMO.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601317-CU",
+      "sourceHash": "af0ef32223965c59b515ca58b6e47f959edbf0d110e89e9767b8370850a7e573",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601317-CU",
+      "sourceHash": "af0ef32223965c59b515ca58b6e47f959edbf0d110e89e9767b8370850a7e573",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601395-CU",
+      "sourceHash": "8073258ec1c0eef3a652e6b73c0cc9673796ef2344be79ee67d879bc3820b46b",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601395-CU",
+      "sourceHash": "8073258ec1c0eef3a652e6b73c0cc9673796ef2344be79ee67d879bc3820b46b",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601398-CU",
+      "sourceHash": "ca09e3b16bd7a569dcf7576f8909ee3d5fab0647f075cfeb433dbbfe2edcb17d",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601398-CU",
+      "sourceHash": "ca09e3b16bd7a569dcf7576f8909ee3d5fab0647f075cfeb433dbbfe2edcb17d",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "03006-CU",
+      "sourceHash": "ac8c8adf009212e57c34a19f2e4ee24fc442f6e1ecd5fe1fa99e192d90a192ea",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "03006-CU",
+      "sourceHash": "ac8c8adf009212e57c34a19f2e4ee24fc442f6e1ecd5fe1fa99e192d90a192ea",
+      "check": {
+        "check": "case-identity",
+        "status": "uncertain",
+        "reason": "A legacy case number needs source-backed project identity verification.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601614-VAC",
+      "sourceHash": "13ba80ddc0f509bc534dec2ed24804c47a67332e3c1e198c939b6de62f797ee8",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C06-BOCC-202601614-VAC-PCON-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601614-VAC",
+      "sourceHash": "13ba80ddc0f509bc534dec2ed24804c47a67332e3c1e198c939b6de62f797ee8",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C06-BOCC-202601614-VAC-PCON-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601703-CU",
+      "sourceHash": "7accbd0ad9a59340d4e1f518154cd0c3ad42da7861db42f23752286fdefce324",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601703%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601712-COM",
+      "sourceHash": "8f61603a0ff4506bb47ec0eb47488e229fea9555406d9cbf0fb5114db8306555",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601712%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601739-VAC",
+      "sourceHash": "8e3fbe18c4fc88e7a704f0f086b2ad76da4feb82753f41a7d06f1a0e687430c3",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Linked content exposes individual applicant or staff contact details.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C05-BOCC-202601739-VAC-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601739-VAC",
+      "sourceHash": "8e3fbe18c4fc88e7a704f0f086b2ad76da4feb82753f41a7d06f1a0e687430c3",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C05-BOCC-202601739-VAC-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202601753-CU",
+      "sourceHash": "c9a2645f0d3bf6f3394095f5e3c8c05ea905b516d417ff7172ba7ff12f05ff61",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601753%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601786-PUD",
+      "sourceHash": "f880f2490a38c08bf0d0f179ef33d5d2f9fdaf5281b4259c3a12c97841a2e40c",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601786%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202102022-MSP",
+      "sourceHash": "6f94874df8db00ec1df7c4d85f8e2dfea69055dfc56d409bdf86c57c2ca4ec65",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202102022%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601837-CU",
+      "sourceHash": "e1f127078749558e517ad35a33917fd8e8445dbc23b5b7ddf98b09b93943dadb",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601837%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601864-V",
+      "sourceHash": "0c1f1d606097b247b3533be7fc21a380a8c62c15efc93b8bcc6d56b4fedd6b39",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601864%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601913-CU",
+      "sourceHash": "a6e7ef577895834fbdbcdda0a90e54341ad6f1f7be0054b68cd5648d13a29b27",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601913%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601939-CU",
+      "sourceHash": "55db684040d5cd2a34f6960426c0fc78c8cac47f84cfac076dae087aa08956c2",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601939%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601987-CU",
+      "sourceHash": "30fbd9b83f469d3a9e9673561b486f5d9cef989a6b434291f2056b5da723027d",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601987%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202601988-VAC",
+      "sourceHash": "132fa32cfbd9b90e7dd699531ea2c264c981ddbfdaf93f3b2e58f8db6ee9a4a4",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202601988%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202602012-CU",
+      "sourceHash": "aa796b44c6cea4d87a7bc6a1eb5ae1bf89a7fa40a2cddcda3419db603c2d13cd",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "Official source access is blocked; no access challenge was bypassed.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFileNum%3D%27202602012%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=html"
+      }
+    },
+    {
+      "recordId": "202600829-VAC-PCON-PBA",
+      "sourceHash": "54d0647ba2d3fee0e6720d40edbf12f9d2b1d639135b36a596c36db39d9b40ee",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C05-BOCC-202600829-VAC-PCON-PBA-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    },
+    {
+      "recordId": "202600864-CU-MSP",
+      "sourceHash": "4e7795239e8df201ff84481b76ef6db04796d08bdb6fdc512c7998743d79b81e",
+      "check": {
+        "check": "privacy",
+        "status": "uncertain",
+        "reason": "Document privacy review is incomplete; withhold the record pending review.",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C5-PZC-202600864-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+      }
+    }
+  ],
+  "aiCostUsd": 0,
+  "goLive": false,
+  "decision": "Remain in review; no new records published.",
+  "classificationNote": "Legacy-format identity failures reclassified as uncertainty after classifier review. The measured official-source snapshot and its collection time are unchanged."
+}

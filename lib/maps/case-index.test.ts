@@ -88,7 +88,7 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     expect(data.cases[0].summary).toBe("");
     const calls = h.calls;
     await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
-    expect(h.calls).toBe(calls);
+    expect(h.calls).toBe(calls+2); // Publication/pause authority is rechecked outside the viewport cache.
     const shapes = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
     expect(shapes.cases[0].geometry).not.toBeNull();
     const restored = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 11);

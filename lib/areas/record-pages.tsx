@@ -19,16 +19,16 @@ import type {Hearing,HearingFeed} from "@/lib/localities/types";
 import { caseCatalog } from "@/lib/case-catalog";
 import { getCaseNextHearing } from "@/lib/case-details";
 import type {PublicCaseRecord,RecordEvent} from "@/lib/localities/record-types";
-import { areaPath, AREAS } from "./registry";
+import { areaPath, getArea } from "./registry";
 import { areaDate, areaTime, hearingDateTime } from "./format";
 import { readMapSnapshot } from "@/lib/maps/store";
 import { hearingCalendar } from "@/lib/projects";
 type RecordCase=Hearing&{record:PublicCaseRecord};
 export function createRecordAreaPages(config:{areaId:string;loadFeed:()=>Promise<HearingFeed>;record:(hearing:Hearing)=>PublicCaseRecord;title:(hearing:Hearing)=>string;summary:(hearing:Hearing)=>string;stage:(hearing:Hearing)=>string;sourceLabel:string;sourceUrl:string;dataWindow:string;showMap?:boolean;groupMeetings?:boolean;facts?:(hearing:Hearing)=>import("@/lib/project-overview").ProjectOverview}){
-const area=AREAS[config.areaId], base=areaPath(area), pill="rounded-full border border-zinc-300 px-4 py-2 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900";
+const area=getArea(config.areaId)!, base=areaPath(area), pill="rounded-full border border-zinc-300 px-4 py-2 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900";
 const date=(value:string)=>areaDate(value,area,{month:"short",day:"numeric",year:"numeric"});
 const stage=(h:RecordCase)=>{const value=config.stage(h);return value==="Council/Board"?area.bodies.decision.stageLabel:value==="P&Z"?area.bodies.planning.stageLabel:value;};
-const titleForCase=config.title,summaryForCase=config.summary;
+const titleForCase=(h:Hearing)=>config.title(h)+(h.aiTitle?" (AI title)":""),summaryForCase=config.summary;
 const loadFeed=config.loadFeed;
 const recordUrl=(h:RecordCase, cases:RecordCase[]=[]):string|undefined=>{
  const urlsFor=(c:RecordCase)=>[c.externalUrl,...(c.record.documents??[]).map(d=>d.url),...c.record.events.flatMap(e=>[e.sourceUrl,...e.documents.map(d=>d.url)]),c.record.sourceUrl];

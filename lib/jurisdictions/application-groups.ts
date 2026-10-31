@@ -11,7 +11,9 @@ export function groupApplications(config:JurisdictionDefinition,applications:App
   groups.set(id,[...(groups.get(id)??[]),{...app,...number?{projectNumber:number}:{}}]);
  }
  return [...groups.values()].map(rows=>{
-  rows.sort((a,b)=>a.recordId.localeCompare(b.recordId));
+  const order=config.selfCheck?.typeOrder??["CPA","ZC","PUD","S","COM","CU","A","VAC","V","MSP","HD","FP","ALT","AC"];
+  const rank=(a:Application)=>Math.min(...a.recordId.split("-").slice(1).map(s=>{const n=order.findIndex(code=>code.split("/").includes(s));return n<0?999:n;}),999);
+  rows.sort((a,b)=>rank(a)-rank(b)||a.recordId.localeCompare(b.recordId));
   const first=rows[0],received=rows.flatMap(a=>a.received?[a.received]:[]).sort()[0];
   const polygons=rows.flatMap(a=>a.geometry&&polygonGeometry(a.geometry)?[{type:"Feature" as const,geometry:a.geometry,properties:{}}]:[]);
   return {...first,received,parcel:[...new Set(rows.flatMap(a=>a.parcel))].sort(),relatedCaseNumbers:[...new Set(rows.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]))].filter(id=>id!==first.recordId).sort(),geometry:combinePolygons(polygons)??rows.find(a=>a.geometry)?.geometry};
@@ -20,6 +22,8 @@ export function groupApplications(config:JurisdictionDefinition,applications:App
 export function projectCaseMatches(app:Application,id:string){
  if(!app.projectNumber)return false;
  const prefix=app.projectNumber+"-";if(!id.startsWith(prefix))return false;
+ // An appeal is a hearing about this project, even when no appeal row exists in GIS.
+ if(id===prefix+"A")return true;
  const sourceSets=[app.recordId,...app.relatedCaseNumbers].filter(v=>v.startsWith(prefix)).map(v=>new Set(v.slice(prefix.length).split("-"))),suffixes=new Set(sourceSets.flatMap(s=>[...s])),agendaSuffixes=new Set(id.slice(prefix.length).split("-"));
  // Source rows can contain one component of a combined agenda case; never match by number alone.
  return suffixes.size>0&&agendaSuffixes.size>0&&(sourceSets.some(s=>[...s].every(part=>agendaSuffixes.has(part)))||[...agendaSuffixes].every(s=>suffixes.has(s)));

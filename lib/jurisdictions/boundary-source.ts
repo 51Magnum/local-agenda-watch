@@ -9,5 +9,5 @@ export function verifyBoundarySource(source:LayerSource,data:FeatureCollection<G
 }
 export function boundarySourceMatches(d:JurisdictionDefinition,snapshot:StagingSnapshot){return snapshot.boundarySource?.url===d.boundary.url&&snapshot.boundarySource?.where===d.boundary.where;}
 export function collectionCoverage(d:JurisdictionDefinition,snapshot:StagingSnapshot):CaseGeometry|undefined{
- return boundarySourceMatches(d,snapshot)?snapshot.coverageBoundary:registryBoundaries[d.id+":coverageBoundary"] as CaseGeometry|undefined;
+ return boundarySourceMatches(d,snapshot)?snapshot.coverageBoundary??(!d.clipRule?snapshot.boundary:undefined):(registryBoundaries[d.id+":coverageBoundary"]??(!d.clipRule?registryBoundaries[d.id+":boundary"]:undefined)) as CaseGeometry|undefined;
 }

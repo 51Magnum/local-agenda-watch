@@ -10,9 +10,9 @@ it.each(["preview","development",""])("refuses mutations for environment %s",env
 });
 it("keeps production mutation authorization unchanged",()=>{vi.stubEnv("VERCEL_ENV","production");expect(previewMutationResponse()).toBeUndefined();expect(()=>requireProductionMutation()).not.toThrow();});
 it("selects the isolated preview DSN only outside production",()=>{
- vi.stubEnv("DATABASE_URL","production-placeholder");vi.stubEnv("DATABASE_URL_PREVIEW","preview-placeholder");
- vi.stubEnv("VERCEL_ENV","preview");expect(databaseUrl()).toBe("preview-placeholder");
- vi.stubEnv("VERCEL_ENV","production");expect(databaseUrl()).toBe("production-placeholder");
+ vi.stubEnv("DATABASE_URL","postgres://prod.invalid/main");vi.stubEnv("DATABASE_URL_PREVIEW","postgres://preview.invalid/staging");
+ vi.stubEnv("VERCEL_ENV","preview");expect(databaseUrl()).toBe("postgres://preview.invalid/staging");
+ vi.stubEnv("VERCEL_ENV","production");expect(databaseUrl()).toBe("postgres://prod.invalid/main");
 });
 const guarded=routes.flatMap(file=>[...readFileSync(file,"utf8").matchAll(/export async function (GET|POST|PUT|PATCH|DELETE)\(/g)].filter(m=>m[1]!=="GET"||file.includes("cron")).map(m=>({file,method:m[1]})));
 it.each(guarded)("blocks $method $file before authentication, leases or database work",async({file,method})=>{

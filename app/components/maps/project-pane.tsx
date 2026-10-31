@@ -108,6 +108,7 @@ export default function ProjectPane({
       </button>
       <div className="law-pane-content">
         <h1>{item.popup?.projectName ?? item.title}</h1>
+        {item.aiTitle&&<p className="text-xs text-zinc-500">AI-generated title; check the linked official source.</p>}
         <section aria-labelledby="question-what">
           <h2 className="law-question-heading" id="question-what">
             {RESIDENT_QUESTIONS[0]}

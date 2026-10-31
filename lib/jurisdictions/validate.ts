@@ -5,7 +5,7 @@ export function contrastWithWhite(hex:string) {
  const channels=hex.slice(1).match(/../g)!.map(s=>parseInt(s,16)/255).map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4);
  return 1.05/(.2126*channels[0]+.7152*channels[1]+.0722*channels[2]+.05);
 }
-export function validateJurisdictions(input:unknown[]):JurisdictionDefinition[] {
+export function validateJurisdictions(input:unknown[],recordedApprovals:ReadonlySet<string>=new Set()):JurisdictionDefinition[] {
  const ids=new Set<string>(),colors=new Set<string>();
  return input.map(raw=>{
   const d=raw as JurisdictionDefinition;
@@ -17,7 +17,8 @@ export function validateJurisdictions(input:unknown[]):JurisdictionDefinition[] 
   assert(d.legacyPublic||contrastWithWhite(d.color)>=4.5,d.id+" color must contrast with white >=4.5");
   assert(Number.isInteger(d.mapOrder)&&d.mapOrder>0&&(d.type!=="city"||d.mapOrder>=100),d.id+" map order");
   assert(["draft","qa","admin_only","public"].includes(d.launchStatus)&&typeof d.enabled==="boolean",d.id+" launch policy");
-  assert(d.launchStatus!=="public"||d.legacyPublic||d.publication?.approvalId&&d.publication.qaHash,d.id+" public launch requires QA and recorded approval");
+  assert(d.launchStatus!=="public"||d.legacyPublic||recordedApprovals.has(d.id),d.id+" public launch requires database QA and recorded approval; JSON publication fields are not evidence");
+  if(d.selfCheck?.minPassRate!==undefined)assert(d.selfCheck.minPassRate>=0&&d.selfCheck.minPassRate<=1,d.id+" invalid self-check pass rate");
   assert(d.boundary?.source==="arcgis"&&d.boundary.outSR===4326,d.id+" boundary");
   const urls=[d.boundary.url,...Object.values(d.gis),...d.agenda.map(s=>String(s.params.baseUrl??s.params.url??"")),...(d.participation.testimonySignupUrl?[d.participation.testimonySignupUrl]:[])];
   for(const url of urls.filter(Boolean)){const u=new URL(url!);assert(u.protocol==="https:"&&!u.username&&!u.password,d.id+" HTTPS endpoint required");}
