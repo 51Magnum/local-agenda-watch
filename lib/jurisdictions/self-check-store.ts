@@ -1,8 +1,9 @@
 import {randomUUID} from "node:crypto";
 import {databaseUrl,requireOnboardingMutation} from "../runtime-environment";
-import {jurisdictionDb,jurisdictionTransaction,type StagingSnapshot} from "./store";
+import {jurisdictionDb,jurisdictionTransaction,type StagingSnapshot,type QaReport} from "./store";
 import {snapshotHash} from "./snapshot-hash";
 import type {ExceptionDecision,SelfCheckReport} from "./self-check";
+import {redactSelfCheck} from "./self-check";
 export function publicationSnapshot(snapshot:StagingSnapshot,report:SelfCheckReport,previous?:StagingSnapshot){
  const oldIds=new Set(previous?.applications.map(a=>a.recordId)??[]),permitted=new Map(report.records.filter(r=>r.publish&&(report.goLive||oldIds.has(r.recordId))).map(r=>[r.recordId,r]));
  const applications=snapshot.applications.filter(a=>permitted.has(a.recordId)).map(a=>{const r=permitted.get(a.recordId)!;return {...a,selfCheckTitle:r.title,aiTitle:!!r.proposal?.title&&r.title===r.proposal.title,hiddenDocuments:!!r.proposal?.hideDocuments};});
@@ -45,7 +46,8 @@ export async function persistSelfCheck(snapshot:StagingSnapshot,report:SelfCheck
   await tx.query("DELETE FROM law_jurisdiction_exceptions WHERE area_id=$1",[snapshot.areaId]);
   for(const record of report.records){const entries=report.queue.filter(q=>q.recordId===record.recordId);if(entries.length)await tx.query("INSERT INTO law_jurisdiction_exceptions(area_id,record_id,source_hash,data) VALUES($1,$2,$3,$4)",[snapshot.areaId,record.recordId,record.sourceHash,JSON.stringify(entries)]);}
   const id=randomUUID();
-  await tx.query("INSERT INTO law_jurisdiction_qa(id,area_id,data,passed) VALUES($1,$2,$3,$4)",[id,snapshot.areaId,JSON.stringify({id,areaId:snapshot.areaId,snapshotHash:report.snapshotHash,passed:report.goLive,checks:report.coverage,data:{selfCheck:report}}),report.goLive]);
+  const qa:QaReport={id,areaId:snapshot.areaId,createdAt:report.createdAt,snapshotHash:report.snapshotHash,passed:report.goLive,checks:report.coverage.map(c=>({name:c.check,passed:c.status==="pass",detail:c.reason})),data:{selfCheck:redactSelfCheck(report)}};
+  await tx.query("INSERT INTO law_jurisdiction_qa(id,area_id,data,passed) VALUES($1,$2,$3,$4)",[id,snapshot.areaId,JSON.stringify(qa),report.goLive]);
   let approval:string|null=null;
   if(report.goLive){approval=randomUUID();await tx.query("INSERT INTO law_jurisdiction_approvals(id,area_id,qa_id,admin_user) VALUES($1,$2,$3,'self-check')",[approval,snapshot.areaId,id]);}
   const published=publicationSnapshot(snapshot,report,previous?.data);

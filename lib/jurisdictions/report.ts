@@ -1,4 +1,5 @@
 import {redactQaReport} from "./report-privacy";
+import {redactSelfCheck,selfCheckMarkdown,type SelfCheckReport} from "./self-check";
 import type {QaReport} from "./store";
 import type {SourceHealth} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
@@ -6,6 +7,7 @@ import type {computeDeadlines} from "./participation";
 type ComputedDeadline=ReturnType<typeof computeDeadlines>[number];
 const cell=(v:unknown)=>String(v??"—").replaceAll("|","\\|").replace(/\s+/g," ");
 export function reportMarkdown(report:QaReport){
+ if(report.data.selfCheck)return selfCheckMarkdown(redactSelfCheck(report.data.selfCheck as SelfCheckReport));
  report=redactQaReport(report);
  const d=report.data,lines=[`# ${report.areaId} onboarding QA`,"",`As of ${report.createdAt}. **${report.passed?"QA passing; owner approval still required":"Not ready for public launch"}. Admin-only.**`,"",`[Detailed JSON](${report.areaId}-${report.createdAt.slice(0,10)}${d.collectionMode==="dry-run"?"-dry-run":""}.json) contains endpoint results, source URLs, skipped attachments and field review metadata. Candidate text is withheld; review it in authenticated admin.`,"","## Collection","","| Measure | Result |","| --- | --- |",...[["Projects retained",d.projects??d.applications],["Projects before hearing scope",d.projectsBeforeScope],["Excluded by hearing scope",d.excludedByScope],["Duplicate project records",d.duplicateProjectNumbers],["Hearing-linked projects",d.hearingLinkedProjects],["Privacy-protected projects",d.privacyProtectedProjects],["Meetings",d.meetings],["Case-bearing hearing items",d.items],["Application match rate",`${(Number(d.caseMatchRate)*100).toFixed(1)}%`],["Application geometry rate",`${(Number(d.geometryMatchRate)*100).toFixed(1)}%`],["Applications without geometry",d.applicationsWithoutGeometry],["Applications without address",d.applicationsWithoutAddress],["Agenda items without matched geometry/address",d.agendaItemsWithoutMatchedLocation]].map(([k,v])=>`| ${k} | ${cell(v)} |`),"",String(d.applicationWindow??""),"","## Launch checks","",...report.checks.map(c=>`- [${c.passed?"x":" "}] ${c.name}: ${c.detail}`),"","## Endpoint health","","| Host | OK | Blocked | Unavailable | Skipped |","| --- | ---: | ---: | ---: | ---: |"];
  const reviewed=d.reviewedOldHeardProjects as {projectNumber:string;present:boolean;recordUrl?:string;hearingSources:{date:string;url:string}[]}[]|undefined;
