@@ -1,4 +1,5 @@
 "use client";
+import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import { PROJECT_FILL_OPACITY, PROJECT_POLYGON_LAYERS } from "@/lib/maps/project-style";
 import FLUM_TILES from "@/public/flum/manifest.json";
 import Link from "next/link";
@@ -79,9 +80,6 @@ export default function MapHome() {
     openRef = useRef<(c: MapCase) => void>(() => {}),
     choosePlaceRef = useRef<(p: Place) => void>(() => {}),
     dropPinRef = useRef(false),
-    boundaryCache = useRef(new Map<string, Promise<{
-      polygons: FeatureCollection; labels: FeatureCollection; uncovered: FeatureCollection;
-    }>>()),
     cache = useRef(new Map<string, ViewportData>()),
     inflight = useRef(new Map<string, Promise<ViewportData>>()),
     revision = useRef("initial"),
@@ -718,15 +716,7 @@ export default function MapHome() {
         cells = gridCells(bounds, z);
       setZoom(z);
       setLoading(true);
-      const boundaryKey = "static-v1";
-      let boundaryRequest = boundaryCache.current.get(boundaryKey);
-      if (!boundaryRequest) {
-        boundaryRequest = fetch("/map-data/boundaries.json")
-          .then((r) => { if (!r.ok) throw Error("Boundaries unavailable"); return r.json(); });
-        boundaryCache.current.set(boundaryKey, boundaryRequest);
-        if (boundaryCache.current.size > 24) boundaryCache.current.delete(boundaryCache.current.keys().next().value!);
-        void boundaryRequest.catch(() => boundaryCache.current.delete(boundaryKey));
-      }
+      const boundaryRequest=loadAreaBoundaries();
       void boundaryRequest.then((d) => {
         if (current === generation.current && !destroyed.current) {
           (m.getSource("law-boundaries") as GeoJSONSource)?.setData(d.polygons);
