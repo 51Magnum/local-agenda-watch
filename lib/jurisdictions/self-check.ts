@@ -63,7 +63,7 @@ export async function selfCheck(d:JurisdictionDefinition,snapshot:StagingSnapsho
   if(hasPerson(residentText)||contact.test(residentText)){privacyStatus="fail";privacyReason="LAW resident text exposes an individual applicant name or staff contact.";}
   if(!decision?.proposal?.hideDocuments)for(const attachment of attachments){
    const kind=attachmentKind(attachment.title,attachment.url),county=officialDocument(d,attachment.url)&&d.documents.countyAuthoredKinds?.includes(kind);
-   if(a.residentialPrivacy||person.length&&!county&&["application","narrative","letter","public_comment","other"].includes(kind)){
+   if(a.residentialPrivacy||person.length&&!county){
     privacyStatus="fail";privacyReason=a.residentialPrivacy?"Residential documents are withheld; review or hide the record.":"An individual applicant's submitted or unclassified document is withheld pending review.";privacySource=attachment.url;
    }
   }

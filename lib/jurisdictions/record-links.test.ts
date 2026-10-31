@@ -46,3 +46,8 @@ it("verifies a legacy case only from one exact source row without conflicting al
 it.each(["Jane Smith","planner@county.gov"])("rejects private identity/contact copied into LAW URL queries: %s",async value=>{
  const a=app();a.recordUrl+="&contact="+encodeURIComponent(value);const r=await selfCheck(d,snapshot([a]),{links:evidence});expect(r.counts.privacy.fail).toBe(1);
 });
+
+it("requires configured public-record provenance before trusting a staff-report label",async()=>{
+ const attachment={...staff,url:"https://official.test/unclassified?doc=202600934-STAFF_REPORT.pdf"};
+ const r=await selfCheck(d,snapshot([app()],[attachment]),{links:evidence});expect(r.counts.privacy.fail).toBe(1);
+});

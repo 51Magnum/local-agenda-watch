@@ -37,6 +37,6 @@ All PR migrations have down files: 20261026 hearing meetings, 20261027 onboardin
 
 ## Validation and release
 
-Node 24.18.0; 732 tests in 149 files; TypeScript passes; ESLint zero errors/four existing warnings. Optimized Preview builds with VERCEL_ENV=preview, VERCEL=1 and no database or area-selection variables. Snapshot-only preview, pool-creation prohibition, pause, production drift gate and AI budget caps remain active. Screenshots: `screenshots/2026-10-31-ada-county-tuned/` at 1440x900 and 390x844.
+Node 24.18.0; 733 tests in 149 files; TypeScript passes; ESLint zero errors/four existing warnings. Optimized Preview builds with VERCEL_ENV=preview, VERCEL=1 and no database or area-selection variables. Snapshot-only preview, pool-creation prohibition, pause, production drift gate and AI budget caps remain active. Screenshots: `screenshots/2026-10-31-ada-county-tuned/` at 1440x900 and 390x844.
 
 With this gate passing, merging PR #7 enables automatic production refresh/publication of the 38 passing Ada records. The two ambiguous records stay held; fresh production checks and the existing snapshot-drift gate still run. Shane controls merging. No production writes, paid development AI, bypass/protection changes, local-file deployment or merge occurred.
