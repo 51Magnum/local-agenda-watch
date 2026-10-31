@@ -1,0 +1,323 @@
+{
+  "areaId": "sample-escribe",
+  "createdAt": "2026-10-31T13:29:14.731Z",
+  "snapshotHash": "96e5ecfef95272fea288095e3ec7343d9f72e998700fd01c9616b62234bec7ac",
+  "passRate": 1,
+  "records": [
+    {
+      "recordId": "CAR26-00013",
+      "sourceHash": "d60b1f38a5ac16b30cc590bb460b71bfef3a40851718d3b9dd444c0957be1bda",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Every case link returned a source containing this case or project number.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "CPA26-00003",
+      "sourceHash": "3e4ec93e0d575982459ee96f8580630266a6b17c79527933097fc3d281c82df7",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Every case link returned a source containing this case or project number.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "CUP24-00046",
+      "sourceHash": "490d73c8d145bf47c71bf15b94f05f516bac8493c856b7a40a5f56fe2b8c0979",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Every case link returned a source containing this case or project number.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "CAR24-00018",
+      "sourceHash": "600b649c3f0cb1e5878a03dcecd439ee5bb9e3d7fa53d7a7a409dbf91cbea339",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Every case link returned a source containing this case or project number.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "All case IDs belong to this project.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "No captured individual applicant identity is exposed.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://pub-cityofboise.escribemeetings.com/Meeting.aspx?Id=a28d9af5-10b6-4bc5-9f3c-0078d469bffd&Agenda=Agenda&lang=English"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    }
+  ],
+  "counts": {
+    "title-from-source": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "description-verbatim": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "link-resolves-to-case": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "location-in-boundary": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "case-identity": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "privacy": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "ai-labeled": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "stage-and-date": {
+      "pass": 4,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "hearing-items-accounted": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "collection-complete": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "scope-explained": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    }
+  },
+  "coverage": [
+    {
+      "check": "hearing-items-accounted",
+      "status": "pass",
+      "reason": "Every case-bearing agenda item has a project.",
+      "sourceUrl": ""
+    },
+    {
+      "check": "collection-complete",
+      "status": "pass",
+      "reason": "Complete collection; hearing-linked inventory retained.",
+      "sourceUrl": "https://pub-cityofboise.escribemeetings.com"
+    },
+    {
+      "check": "scope-explained",
+      "status": "pass",
+      "reason": "Exclusions must be counted by category; hearing types, agenda items and organization development applications are in scope.",
+      "sourceUrl": ""
+    }
+  ],
+  "agendaItems": {
+    "accounted": 16,
+    "total": 16
+  },
+  "unmatched": [],
+  "exclusions": {},
+  "queue": [],
+  "aiCostUsd": 0,
+  "goLive": false,
+  "decision": "Disabled registry sample; report only."
+}

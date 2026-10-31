@@ -4,9 +4,9 @@ import MeetingList from "@/app/components/meeting-list";
 export const revalidate=86400;
 export const dynamic="force-dynamic";
 export function generateStaticParams(){return [];}
-export async function generateMetadata({params}:{params:Promise<AreaParams>}){return areaMetadata(routeArea(await params),"/meetings");}
+export async function generateMetadata({params}:{params:Promise<AreaParams>}){return areaMetadata(await routeArea(await params),"/meetings");}
 export default async function Page({params,searchParams}:{params:Promise<AreaParams>;searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const area=routeArea(await params),query=await searchParams;
+ const area=await routeArea(await params),query=await searchParams;
  const currentYear=Number(new Intl.DateTimeFormat("en-US",{year:"numeric",timeZone:area.timezone}).format(new Date()));
  const candidate=Number(query.year??currentYear),year=Number.isInteger(candidate)&&candidate>=2023&&candidate<=currentYear?candidate:currentYear;
  const data=await meetingsList(area.id,year);

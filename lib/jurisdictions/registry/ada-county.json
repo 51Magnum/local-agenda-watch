@@ -3,11 +3,44 @@
   "timezone": "America/Boise",
   "enabled": true,
   "launchStatus": "admin_only",
+  "selfCheck": {
+    "minPassRate": 0.95,
+    "mustInclude": [
+      "202600273",
+      "202601088",
+      "202600638",
+      "202601398",
+      "202601317",
+      "202600819",
+      "202600934",
+      "202103209"
+    ]
+  },
   "sourcesVerifiedAt": "2026-10-27",
   "documents": {
     "maxBytes": 45000000,
     "maxPages": 80,
-    "allowPackets": false
+    "allowPackets": false,
+    "maxNativeBytes": 160000000,
+    "countyAuthoredKinds": [
+      "report",
+      "agenda",
+      "staff_report",
+      "findings",
+      "memo",
+      "tabling_memo",
+      "minutes",
+      "notice"
+    ],
+    "officialPaths": [
+      {
+        "host": "apps.adacounty.id.gov",
+        "pathname": "/AdaFileBrowse/Home/OpenDocument",
+        "query": {
+          "papp": "DS_Agendas"
+        }
+      }
+    ]
   },
   "id": "ada-county",
   "name": "Ada County",
@@ -17,8 +50,12 @@
   "boundary": {
     "source": "arcgis",
     "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",
-    "where": "1=1",
-    "outSR": 4326
+    "where": "county_name='Ada'",
+    "outSR": 4326,
+    "expectedFeatureCount": 1,
+    "expectedProperties": {
+      "county_name": "Ada"
+    }
   },
   "clipRule": {
     "operation": "subtractCityLimits",
@@ -62,14 +99,35 @@
       "fields": {
         "id": "APPFILE",
         "name": "AppApplicDesc",
-        "type": "AppType",
-        "status": "APPStatus",
+        "type": "APTDescription",
+        "status": "STATUS",
         "parcel": "PARCEL",
         "description": "AppApplicDesc",
         "received": "APPRcvdDate"
-      }
+      },
+      "flumField": "Name",
+      "projectKey": {
+        "fields": [
+          "APPFileNum",
+          "PRJProjectNum"
+        ],
+        "pattern": "^\\d{9}"
+      },
+      "hearingSuffixes": [
+        "ZC",
+        "DA",
+        "S",
+        "PUD",
+        "CU",
+        "V",
+        "VAC",
+        "A",
+        "CPA",
+        "TE"
+      ],
+      "applicantField": "APPLICANT"
     },
-    "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/"
+    "recordUrlTemplate": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find={recordId}"
   },
   "gis": {
     "countyBoundary": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",
@@ -111,7 +169,9 @@
         "timeVerified": false,
         "sourceUrl": "https://adacounty.id.gov/developmentservices/public-hearing-testimony-sign-up/"
       }
-    ]
+    ],
+    "hearingsUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/",
+    "legalNoticesUrl": "https://adacounty.id.gov/legal-notices/"
   },
   "costCaps": {
     "backfillUsd": 5,
@@ -124,7 +184,8 @@
     "Close of business has no verified clock time; retain a date and qualified label, never invent 17:00.",
     "Use DS_Agendas only, never the general BOCCAgendas archive.",
     "Tentative hearing schedule is context; an actual agenda confirms a hearing.",
-    "Application metadata has no address field. Do not manufacture an address from a parcel number."
+    "Application metadata has no address field. Do not manufacture an address from a parcel number.",
+    "County boundary selection is county_name='Ada'; layer 9 also contains six neighboring counties and must never be collected with where=1=1. Verified 2026-10-28."
   ],
   "area": {
     "country": "us",
@@ -137,7 +198,7 @@
     ],
     "boundaryLabel": "Unincorporated Ada County",
     "boundarySources": [
-      "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9"
+      "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9/query?where=county_name%3D%27Ada%27&outFields=*&outSR=4326&f=pjson"
     ],
     "bodies": {
       "planning": {
@@ -180,6 +241,23 @@
         }
       ]
     },
-    "sources": {}
+    "sources": {},
+    "coverageNote": "Recent planning applications in unincorporated Ada County. Earlier hearing history may be incomplete; official county records provide the full record."
+  },
+  "cachedBoundaryFile": "../areas/boundaries/ada-county.json",
+  "cachedCoverageBoundaryFile": "../areas/boundaries/ada-county-jurisdiction.json",
+  "recordLinks": {
+    "kind": "jsApp",
+    "verifyUrlTemplate": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27{recordId}%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true",
+    "idField": "APPFILE",
+    "dataFields": [
+      "APPFILE",
+      "APPFileNum",
+      "PRJProjectNum",
+      "APTDescription",
+      "AppApplicDesc",
+      "STATUS"
+    ],
+    "dataLabel": "County records (data)"
   }
 }

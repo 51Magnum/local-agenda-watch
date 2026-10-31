@@ -1,4 +1,4 @@
-import { areaPath, canonicalAreaHref } from "./areas/registry";
+import { areaPath, canonicalAreaHref } from "./areas/public-registry";
 import type { MapCase } from "./maps/types";
 export const WATCH_STORAGE_KEY = "law:watches:v1";
 const WATCH_EVENT = "law:watches-changed";

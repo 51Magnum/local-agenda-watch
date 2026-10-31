@@ -1,4 +1,4 @@
-import{FEATURED_AREA_ID}from"./areas/registry";
+import{FEATURED_AREA_ID}from"./areas/public-registry";
 import{displayArea}from"./areas/format";
 import { CASE_EVIDENCE } from "@/lib/case-evidence";
 import { getCaseStage, getCaseStatus } from "@/lib/localities/stages";

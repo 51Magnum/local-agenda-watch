@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -116.201482706733,
+          43.6152300240823
+        ]
+      },
+      "properties": {
+        "AddNum": 150,
+        "StPreDir": "N",
+        "StName": "CAPITOL",
+        "StSuffix": "BLVD"
+      }
+    }
+  ]
+}

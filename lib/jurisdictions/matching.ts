@@ -1,9 +1,10 @@
 import type {AgendaItem,Application} from "./adapters/types";
+import {projectCaseMatches} from "./application-groups";
 export type ApplicationMatch={recordId:string;method:"case"|"parcel"|"address";sourceUrl:string};
 const words=(value:string)=>value.toUpperCase().replace(/[^A-Z0-9]+/g," ").trim();
 /** Case IDs take precedence. Parcel/address fallbacks must identify exactly one record. */
 export function matchApplications(item:AgendaItem,applications:Application[]):ApplicationMatch[]{
- const exact=applications.filter(a=>[a.recordId,...a.relatedCaseNumbers].some(id=>item.caseNumbers.includes(id)));
+ const exact=applications.filter(a=>[a.recordId,...a.relatedCaseNumbers].some(id=>item.caseNumbers.includes(id))||item.caseNumbers.some(id=>projectCaseMatches(a,id)));
  if(exact.length)return exact.map(a=>({recordId:a.recordId,method:"case",sourceUrl:a.recordUrl}));
  const text=" "+words(item.title)+" ";
  const parcel=applications.filter(a=>a.parcel.some(p=>words(p).length>=6&&text.includes(" "+words(p)+" ")));

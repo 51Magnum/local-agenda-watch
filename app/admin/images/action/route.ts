@@ -1,3 +1,4 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import {readMapSnapshot} from "@/lib/maps/store";
 import {fallbackCaseImage} from "@/lib/maps/fallback-image";
 import {imageReviews} from "@/lib/maps/image-review-store";
@@ -12,6 +13,8 @@ import { revalidatePath } from "next/cache";
 export const runtime="nodejs";
 export const maxDuration=300;
 export async function POST(request:Request){
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
  if(!authorizedReviewer(request.headers.get("authorization")))return new Response("Unauthorized",{status:401});
  if(!sameOrigin(request))return new Response("Origin not allowed",{status:403});
  const form=await request.formData(),action=form.get("action");

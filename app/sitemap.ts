@@ -1,4 +1,5 @@
-import{AREAS,areaPath}from"@/lib/areas/registry";
+import {visibleAreas} from "@/lib/areas/registry";
+import{areaPath}from"@/lib/areas/registry";
 import{caseCatalog}from"@/lib/case-catalog";
 import type{MetadataRoute}from"next";
 import{getLocality}from"@/lib/localities";
@@ -7,7 +8,7 @@ import{SITE_ORIGIN}from"@/lib/site-config";
 export const revalidate=3600;
 export default async function sitemap():Promise<MetadataRoute.Sitemap>{
  const urls=new Set(["/","/about","/contact","/privacy"]);
- for(const a of Object.values(AREAS)){
+ for(const a of (await visibleAreas())){
   const base=areaPath(a);urls.add("/"+a.country);urls.add("/"+a.country+"/"+a.state);urls.add(base);
   if(a.status!=="live")continue;
   urls.add(base+"/map");urls.add(base+"/meetings");

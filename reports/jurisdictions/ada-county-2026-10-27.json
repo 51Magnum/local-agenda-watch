@@ -342,229 +342,229 @@
     ],
     "aiSamples": [
       {
-        "hash": "c95008f5dd0abb81945b329435a87bac5954d9338c1384905c07985900875812",
         "caseId": "202601398-CU-MSP",
+        "hash": "c95008f5dd0abb81945b329435a87bac5954d9338c1384905c07985900875812",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "pageCount": 9,
+        "costUsd": 0.0059496,
+        "tokens": 9783,
         "fields": [
           {
             "key": "acres",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "10.77 acres",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "staffRecommendation",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 6,
-            "value": "Staff recommends approval of the renewal of the contractor's yard Conditional Use and Master Site Plan as it complies with Ada County Code.",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "applicantCompany",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Gary A. Lee",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "pzHearingDate",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "2026-10-15",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           }
-        ],
-        "tokens": 9783,
-        "costUsd": 0.0059496,
-        "pageCount": 9,
-        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C05-PZC-202601398-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        ]
       },
       {
-        "hash": "e9ac05fc684e1a92365fade392a2615f3e826d6e742d26dd2b901155115905a3",
         "caseId": "202601317-CU-MSP",
+        "hash": "e9ac05fc684e1a92365fade392a2615f3e826d6e742d26dd2b901155115905a3",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "pageCount": 11,
+        "costUsd": 0.005212800000000001,
+        "tokens": 8229,
         "fields": [
           {
             "key": "popupHeadline",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Conditional Use and Master Site Plan for 40-acre gravel pit operation",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "densityContext",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 3,
-            "value": "The proposed gravel pit meets the purpose of the Rural Preservation District with minimal impact on prime farmland and no extension of public services required.",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "constructionTiming",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 2,
-            "value": "Extraction period proposed for twenty (20) years.",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "applicantCompany",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Quality Sand & Gravel Inc",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "pzHearingDate",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "2026-10-15",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
           }
-        ],
-        "tokens": 8229,
-        "costUsd": 0.005212800000000001,
-        "pageCount": 11,
-        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C06-PZC-202601317-CU-MSP-STAFF_REPORT.pdf&papp=DS_Agendas"
+        ]
       },
       {
-        "hash": "6d9dc7c1d9f268e191d44d180579e59b08f92070ae1f631b3944ea02393607fe",
         "caseId": "202601395-CU-MSP-ALT",
+        "hash": "6d9dc7c1d9f268e191d44d180579e59b08f92070ae1f631b3944ea02393607fe",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas",
+        "pageCount": 8,
+        "costUsd": 0.0053484000000000005,
+        "tokens": 8112,
         "fields": [
           {
             "key": "popupHeadline",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Renewal of contractor's yard and shop operation on 9.271 acres in Rural Urban Transition zone",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "acres",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "9.271 acres",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "staffRecommendation",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 5,
-            "value": "Recommend approval as set out in the Findings of Fact and Conclusions of Law attached hereto",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "trafficSummary",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 5,
-            "value": "Ada County Highway District has no comments or required improvements for this application.",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "densityContext",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 4,
-            "value": "The property is in a transitional district with the contractor’s yard use allowed for up to five years or until annexation. The use is consistent with the Rural Urban Transition district's purpose as a transitional use.",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "applicantCompany",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Risa Roe",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "pzHearingDate",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "2026-10-15",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
           }
-        ],
-        "tokens": 8112,
-        "costUsd": 0.0053484000000000005,
-        "pageCount": 8,
-        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CPZC%5C07-PZC-202601395-CU-MSP-ALT-STAFf_REPORT.pdf&papp=DS_Agendas"
+        ]
       },
       {
-        "hash": "d04f9552b41063c38746980c839b16991eabfa70e273e32de89a2b1c887473ee",
         "caseId": "202600638-ZC-DA-S-V",
+        "hash": "d04f9552b41063c38746980c839b16991eabfa70e273e32de89a2b1c887473ee",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "pageCount": 6,
+        "costUsd": 0.005588800000000001,
+        "tokens": 8659,
         "fields": [
           {
             "key": "popupHeadline",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Subdivision into two lots with zoning change and variance for undersized lot",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "acres",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "9.36 acres",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "units",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 2,
-            "value": "2 lots",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "zoningRequested",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Rural-Urban Transition (RUT) District",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "staffRecommendation",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 4,
-            "value": "recommend approval",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "applicantCompany",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Ackerman-Estvold",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "councilHearingDate",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "2026-10-14",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
           }
-        ],
-        "tokens": 8659,
-        "costUsd": 0.005588800000000001,
-        "pageCount": 6,
-        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C01-BOCC-202600638-ZC-DA-S-V-STAFF_REPORT.pdf&papp=DS_Agendas"
+        ]
       },
       {
-        "hash": "0c2994364533289719b74516bea1937add5dfaa4adcc9ef87dc76ad0cb950cd6",
         "caseId": "202601258-DA-DM",
+        "hash": "0c2994364533289719b74516bea1937add5dfaa4adcc9ef87dc76ad0cb950cd6",
+        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas",
+        "pageCount": 11,
+        "costUsd": 0.0061876000000000006,
+        "tokens": 10297,
         "fields": [
           {
             "key": "popupHeadline",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 1,
-            "value": "Dry Creek Ranch Planned Community periodic evaluation and development update",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas"
           },
           {
             "key": "acres",
+            "value": "[Candidate text withheld; review in authenticated admin]",
             "page": 2,
-            "value": "1,414 acres",
             "status": "auto_published",
             "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas"
           }
-        ],
-        "tokens": 10297,
-        "costUsd": 0.0061876000000000006,
-        "pageCount": 11,
-        "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C10-October%5CBOCC%5C02-BOCC-202601258-DA-DM-STAFF_REPORT.pdf&papp=DS_Agendas"
+        ]
       }
     ],
     "tokens": 45080,
@@ -866,6 +866,7 @@
     },
     "adminPreviewUrl": "https://local-agenda-watch-38011rsxl-shane-s-projects-e4093d06.vercel.app/admin/jurisdictions",
     "pendingMeetings": [],
-    "visualsFound": 0
+    "visualsFound": 0,
+    "redactionPolicy": "AI candidate text is withheld from distributable reports; review source-backed candidates in authenticated admin."
   }
 }

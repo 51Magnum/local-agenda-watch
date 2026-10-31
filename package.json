@@ -8,16 +8,17 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "check:links": "tsx scripts/check-resident-links.ts",
+    "check:links": "node --conditions=react-server --import tsx scripts/check-resident-links.ts",
     "test:watch": "vitest",
-    "timeline:sync": "tsx --env-file-if-exists=.env.local scripts/sync-case-timeline.ts",
-    "maps:sync": "tsx --env-file-if-exists=.env.local scripts/refresh-maps.ts",
+    "timeline:sync": "node --conditions=react-server --import tsx --env-file-if-exists=.env.local scripts/sync-case-timeline.ts",
+    "maps:sync": "node --conditions=react-server --import tsx --env-file-if-exists=.env.local scripts/refresh-maps.ts",
     "prebuild": "node scripts/generate-jurisdictions.mjs && node scripts/prepare-map-assets.mjs",
     "predev": "node scripts/generate-jurisdictions.mjs && node scripts/prepare-map-assets.mjs",
-    "postbuild": "node scripts/report-db-transfer.mjs",
+    "postbuild": "node scripts/report-db-transfer.mjs && node scripts/check-client-bundle.mjs",
     "jurisdictions:generate": "node scripts/generate-jurisdictions.mjs",
     "pretest": "node scripts/generate-jurisdictions.mjs",
-    "law:jurisdiction": "node scripts/run-jurisdiction.mjs"
+    "law:jurisdiction": "node scripts/run-jurisdiction.mjs",
+    "check:client-bundle": "node scripts/check-client-bundle.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.13",
@@ -31,6 +32,7 @@
     "pmtiles": "4.5.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "server-only": "^0.0.1",
     "sharp": "^0.34.5",
     "unpdf": "^1.9.1"
   },

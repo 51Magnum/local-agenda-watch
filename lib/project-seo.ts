@@ -3,23 +3,24 @@ import type { PaneData } from "./maps/project-questions";
 import { projectDetail } from "./maps/project-detail";
 import { getProjectForCase } from "./projects";
 import { AREAS, areaPath } from "./areas/registry";
-import { SITE_ORIGIN } from "./site-config";
+import {metadataOrigin,environmentMetadata} from "./environment-metadata";
 export function projectCanonical(data: PaneData) {
   const project = getProjectForCase(
     data.item.id.split(":").at(-1)!,
     data.area.id,
   );
   return (
-    SITE_ORIGIN +
+    metadataOrigin() +
     (project
       ? areaPath(data.area.id) + "/" + project.slug
       : data.item.href || areaPath(data.area.id) + "/plan/" + data.item.id)
   );
 }
 export function projectMetadata(data: PaneData): Metadata {
-  const headline = data.item.popup?.headline ?? data.item.title;
-  const specific = headline.toLowerCase().replace(/[^a-z]/g, "") === data.item.typeLabel?.toLowerCase().replace(/[^a-z]/g, "") && data.where
-    ? headline + " near " + data.where : headline;
+  const popupHeadline=data.item.popup?.headline;
+  const generic=popupHeadline?.toLowerCase().replace(/[^a-z]/g,"")===data.item.typeLabel?.toLowerCase().replace(/[^a-z]/g,"");
+  const headline = generic ? data.item.title : popupHeadline ?? data.item.title;
+  const specific = headline;
   const title =
     specific +
     " · " +
@@ -30,13 +31,14 @@ export function projectMetadata(data: PaneData): Metadata {
     `See what's proposed, what's happened, the next step, and official records for ${data.item.title} in ${data.area.name}.`;
   const url = projectCanonical(data),
     image =
-      SITE_ORIGIN +
+      metadataOrigin() +
       "/api/og/project?" +
       new URLSearchParams({
         area: data.area.id,
         case: data.item.id.split(":").at(-1)!,
       });
   return {
+    ...environmentMetadata(),
     title: { absolute: title },
     description,
     alternates: { canonical: url },

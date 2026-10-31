@@ -7,7 +7,8 @@
   "documents": {
     "maxBytes": 45000000,
     "maxPages": 80,
-    "allowPackets": false
+    "allowPackets": false,
+    "maxNativeBytes": 160000000
   },
   "id": "boise",
   "name": "Boise",
@@ -103,7 +104,24 @@
         "address": "FullAddress",
         "related": "ChildRecords"
       },
-      "attributeOnly": true
+      "attributeOnly": true,
+      "geometryJoin": {
+        "url": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Planning_Permits/FeatureServer/160",
+        "caseField": "CaseNumber",
+        "applicationFields": [
+          "RecordID",
+          "ChildRecords"
+        ]
+      },
+      "addressPointFallback": {
+        "url": "https://services2.arcgis.com/dgGjZc6xAH5m5JyP/arcgis/rest/services/Address_Points/FeatureServer/21",
+        "fields": {
+          "number": "AddNum",
+          "direction": "StPreDir",
+          "street": "StName",
+          "suffix": "StSuffix"
+        }
+      }
     },
     "recordUrlTemplate": "https://permits.cityofboise.org/CitizenAccess/Cap/GlobalSearchResults.aspx?QueryText={recordId}"
   },
@@ -207,7 +225,8 @@
     "Council transitions 2027-01-12; per-body migration dates require verification.",
     "An item's actual decision/recommendation role must come from its source, never the body default.",
     "The active application inventory has no received-date field; CRCompleteDate must not be presented as a filing date. The GIS layer is a table; parcel geometry requires a verified join. HPC transition date is not established; collect both sources and deduplicate.",
-    "eSCRIBE per-item PDFs returned Cloudflare HTTP 403 in the Git-built Vercel preview and local ingestion runtime. iQM2 PDFs downloaded successfully. Keep blocked documents queued; do not bypass challenges. Active-only inventory cannot match every historical hearing case."
+    "eSCRIBE per-item PDFs returned Cloudflare HTTP 403 in the Git-built Vercel preview and local ingestion runtime. iQM2 PDFs downloaded successfully. Keep blocked documents queued; do not bypass challenges. Active-only inventory cannot match every historical hearing case.",
+    "Permit polygons join exactly on CaseNumber from RecordID/ChildRecords. Unique official Address_Points/21 component matches are approximate; blank/citywide/ambiguous addresses remain unverified. Verified 2026-10-28: the brief's Ada_County_Addresses/0 URL is invalid; the organization publishes Address_Points/21."
   ],
   "area": {
     "country": "us",

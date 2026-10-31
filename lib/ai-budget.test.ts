@@ -12,6 +12,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
+it("reads existing preview spend without runtime schema or historical-spend writes",async()=>{
+ vi.stubEnv("VERCEL_ENV","preview");const query=vi.fn().mockResolvedValue({rows:[{spent:"0.1",reserved:"0",input_tokens:"10",output_tokens:"2"}]}),ledger=createBudgetLedger(query);
+ expect((await ledger.today()).spent).toBe(.1);expect(query).toHaveBeenCalledOnce();expect(query.mock.calls[0][0]).toMatch(/^SELECT spent/);
+});
 it("atomically blocks overlapping calls at a $0.01 ceiling, then replaces reservations with actual usage exactly once", async () => {
   const db = new PGlite();
   try {
@@ -46,8 +50,8 @@ it("atomically blocks overlapping calls at a $0.01 ceiling, then replaces reserv
     await db.close();
   }
 });
-it("reserves PDF context and requested output before calling, accounts for cached tokens, and fails closed on an unpriced model", () => {
-  expect(
+it("rejects unbounded PDFs before reserving, accounts for cached tokens, and fails closed on an unpriced model", () => {
+  expect(() =>
     reserveCost(
       "gpt-4.1-mini",
       [{ type: "input_file", file_data: "data:application/pdf;base64,AA==" }],
@@ -55,7 +59,7 @@ it("reserves PDF context and requested output before calling, accounts for cache
       {},
       512,
     ),
-  ).toBeGreaterThan(0.01);
+  ).toThrow("physically bounded page images");
   expect(
     usageCost("gpt-4.1-mini", {
       input_tokens: 1000,

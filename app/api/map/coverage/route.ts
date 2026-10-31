@@ -1,5 +1,7 @@
+import {visibleAreas} from "@/lib/areas/registry";
+import {liveAreaAtPoint,locationMapUrl} from "@/lib/areas/coverage";
 import { isLonLat } from "@/lib/maps/types";
-import { AREAS } from "@/lib/areas/registry";
+
 import { circle, booleanIntersects, feature } from "@turf/turf";
 export async function POST(request: Request) {
   try {
@@ -14,7 +16,9 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid location" }, { status: 400 });
     return Response.json(
       {
-        areas: Object.values(AREAS)
+        area: (()=>{const a=liveAreaAtPoint(d.coordinates);return a?{id:a.id}:undefined;})(),
+        mapUrl:locationMapUrl(d.coordinates,undefined,d.radius),
+        areas: (await visibleAreas())
           .filter(
             (a) =>
               a.status === "live" &&

@@ -1,4 +1,5 @@
-import { Pool } from "pg";
+import {databaseUrl,productionWritesAllowed} from "./runtime-environment";
+import { Pool } from "./database-pool";
 import { randomUUID } from "node:crypto";
 export class AiBudgetExceeded extends Error {
   constructor() {
@@ -40,6 +41,11 @@ export function usageCost(model: string, usage: Usage) {
     1e6
   );
 }
+export function inputTokenBound(content:object[],instructions:string,schema:object){
+ if(content.some(c=>"file_data" in c))throw Error("AI work deferred: use physically bounded page images instead of a whole PDF");
+ const bounded=content.map(c=>Object.fromEntries(Object.entries(c).filter(([key])=>key!=="image_url")));
+ return Buffer.byteLength(JSON.stringify([instructions,schema,bounded]))+1024+content.filter(c=>"image_url" in c).length*8192;
+}
 export function reserveCost(
   model: string,
   content: object[],
@@ -47,26 +53,7 @@ export function reserveCost(
   schema: object,
   maxOutput: number,
 ) {
-  // UTF-8 bytes conservatively bound text tokens; reserve the full model input limit for PDFs.
-  const text = JSON.stringify([
-    instructions,
-    schema,
-    content.map((c) =>
-      Object.fromEntries(
-        Object.entries(c).filter(
-          ([k]) => !["image_url", "file_data"].includes(k),
-        ),
-      ),
-    ),
-  ]);
-  const tokens = content.some((c) => "file_data" in c)
-    ? 1047576
-    : Math.min(
-        1047576,
-        Buffer.byteLength(text) +
-          1024 +
-          content.filter((c) => "image_url" in c).length * 8192,
-      );
+  const tokens=inputTokenBound(content,instructions,schema);
   return usageCost(model, { input_tokens: tokens, output_tokens: maxOutput });
 }
 type Query = (
@@ -76,7 +63,7 @@ type Query = (
 export function createBudgetLedger(query: Query) {
   let ready: Promise<unknown> | undefined;
   const init = () =>
-    (ready ??= query(
+    !productionWritesAllowed()?Promise.resolve():(ready ??= query(
       `CREATE TABLE IF NOT EXISTS law_ai_days(day date PRIMARY KEY,spent numeric NOT NULL DEFAULT 0,reserved numeric NOT NULL DEFAULT 0,input_tokens bigint NOT NULL DEFAULT 0,output_tokens bigint NOT NULL DEFAULT 0);CREATE TABLE IF NOT EXISTS law_ai_calls(id uuid PRIMARY KEY,day date NOT NULL,operation text NOT NULL,model text NOT NULL,reservation numeric NOT NULL,cost numeric,input_tokens bigint,output_tokens bigint,created_at timestamptz NOT NULL DEFAULT now());`,
     )
       .then(async () => {
@@ -92,7 +79,9 @@ export function createBudgetLedger(query: Query) {
         ready = undefined;
         throw e;
       }));
+  const reconcile=async(now=new Date())=>{await init();return query(`WITH stale AS (UPDATE law_ai_calls SET cost=0,input_tokens=0,output_tokens=0 WHERE cost IS NULL AND created_at < $1::timestamptz - interval '1 hour' RETURNING day,reservation), released AS (SELECT day,sum(reservation) AS amount FROM stale GROUP BY day) UPDATE law_ai_days d SET reserved=greatest(0,d.reserved-r.amount) FROM released r WHERE d.day=r.day RETURNING d.day`,[now.toISOString()]);};
   return {
+    reconcile,
     async reserve(
       operation: string,
       model: string,
@@ -100,7 +89,7 @@ export function createBudgetLedger(query: Query) {
       limit = budgetLimit(),
       now = new Date(),
     ) {
-      await init();
+      await reconcile(now);
       const day = now.toISOString().slice(0, 10),
         id = randomUUID();
       const result = await query(
@@ -137,9 +126,9 @@ export function createBudgetLedger(query: Query) {
 }
 let pool: Pool;
 const ledger = createBudgetLedger(async (sql, values) => {
-  if (!process.env.DATABASE_URL)
+  if (!databaseUrl())
     throw Error("AI work deferred: durable budget database unavailable");
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+  pool ??= new Pool({ connectionString: databaseUrl(), max: 2 });
   return pool.query(sql, values);
 });
 export const aiBudget = ledger;

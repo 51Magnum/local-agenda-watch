@@ -95,6 +95,8 @@ export type ScheduledMeeting = {
 };
 
 export type Hearing = {
+  aiTitle?:boolean;
+  residentialPrivacy?:boolean;privacyPolicy?:"staff-individual";
   /** Provider-authored short title and neutral summary, when available. */
   citywide?: boolean;
   displayTitle?: string;

@@ -1,8 +1,11 @@
 name: Refresh configured jurisdictions
 on:
   schedule:
-    - cron: '45 * * * *'
+    # Two weekday refreshes; metadata collection does not take the live document lease.
+    - cron: '45 13,21 * * 1-5'
   workflow_dispatch:
+  push:
+    branches: [main]
 permissions: {}
 concurrency:
   group: configured-jurisdiction-ingestion
@@ -12,7 +15,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Refresh registry-enabled source adapters without AI or publication
+      - name: Wait for the merged Git deployment
+        if: github.event_name == 'push'
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            actual=$(curl --fail --silent --max-time 15 https://www.localagendawatch.com/api/version | jq -r '.commit // empty') || actual=''
+            if [ "$actual" = "$EXPECTED_SHA" ]; then exit 0; fi
+            sleep 10
+          done
+          echo '::error::Production has not built the merged Git commit; collection was not started.'
+          exit 1
+      - name: Refresh registry-enabled adapters and apply automatic self-check gates
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         shell: bash

@@ -1,4 +1,5 @@
 import { parseWatchTarget, subscribeAlert } from "@/lib/alerts";
+import {visibleAreas} from "@/lib/areas/registry";
 import { sameOrigin } from "@/lib/timeline/auth";
 export async function POST(request: Request) {
   const headers = { "Cache-Control": "no-store" };
@@ -15,6 +16,7 @@ export async function POST(request: Request) {
     );
   let data, target;
   try {
+    await visibleAreas();
     data = JSON.parse(text);
     if (data.website) return Response.json({ ok: true }, { headers });
     target = parseWatchTarget(data.target);

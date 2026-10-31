@@ -1,9 +1,12 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import { secretMatches } from "@/lib/timeline/auth";
 import { exportFlumPage } from "@/lib/maps/store";
 import { getJurisdiction } from "@/lib/maps/jurisdictions";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 export async function GET(request: Request) {
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
   if (
     !secretMatches(
       request.headers.get("authorization") ?? "",

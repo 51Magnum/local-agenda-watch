@@ -1,4 +1,4 @@
-import{areaPath,FEATURED_AREA_ID,getArea}from"./areas/registry";
+import{areaPath,FEATURED_AREA_ID,getArea}from"./areas/public-registry";
 import type { HearingFeed } from "@/lib/localities/types";
 import type { HearingMeetingFields } from "./hearings/types";
 

@@ -8,4 +8,4 @@ it("leases one case at a time, checkpoints only that row, and resets discovery o
  try{await enqueueImages([{areaId:"nampa",caseId:"ONE"},{areaId:"nampa",caseId:"TWO"}]);const first=await claimImageJob(),second=await claimImageJob();expect(first?.caseId).toBe("ONE");expect(second?.caseId).toBe("TWO");expect(await claimImageJob()).toBeUndefined();
  first!.status="complete";first!.discoveryComplete=true;first!.dueAt=new Date(Date.now()+86400000).toISOString();await saveImageJob(first!,true);await rescanCase("nampa","ONE");const again=await claimImageJob({areaId:"nampa",caseId:"ONE"});expect(again?.discoveryComplete).toBe(false);expect(again?.status).toBe("pending");expect((await imageJobs()).length).toBe(2);
  }finally{vi.unstubAllEnvs();await db.close();}
-});
+},15000); // Includes cold PGlite WASM startup on shared CI runners.

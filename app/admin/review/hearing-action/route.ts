@@ -1,9 +1,12 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import { revalidateTag } from "next/cache";
 import { authorizedReviewer, sameOrigin } from "@/lib/timeline/auth";
 import { validateHearingOverride } from "@/lib/hearings/overrides";
 import { saveHearingOverride } from "@/lib/hearings/store";
 export const maxDuration=60;
 export async function POST(request:Request) {
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
   if(!authorizedReviewer(request.headers.get("authorization"))||!sameOrigin(request))return new Response("Admin authentication and same-origin submission required",{status:403});
   if(Number(request.headers.get("content-length"))>16000)return new Response("Request too long",{status:413});
   try{

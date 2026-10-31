@@ -1236,7 +1236,7 @@ export default function MapHome() {
             <p>{nearby.length} projects in this map view within this radius.</p>
             {nearby.map((c) => (
               <button key={c.id} onClick={() => openRef.current(c)}>
-                {c.title}
+                {c.title}{c.aiTitle&&<span className="ml-2 text-xs text-zinc-500">AI title</span>}
                 <small>
                   {c.miles.toFixed(1)} mi ·{" "}
                   {c.areaId ? areas.find((a) => a.id === c.areaId)?.name : ""}

@@ -10,6 +10,7 @@ export function residentialPublicTitle(value: unknown) {
 const known=new Set(["nampa/CUP-00412-2026","nampa/CUP-00413-2026"]);
 export function residentialCase(area:string,id:string,value:unknown,overrides:PrivacyOverrides={}) {
  const override=overrides[area+"/"+id];if(override)return override.mode==="protect";
+ if(value&&typeof value==="object"&&"privacyPolicy" in value&&value.privacyPolicy==="staff-individual"&&"residentialPrivacy" in value&&value.residentialPrivacy===false)return false;
  if(known.has(area+"/"+id)||(value&&typeof value==="object"&&"residentialPrivacy" in value&&value.residentialPrivacy===true))return true;
  const text=JSON.stringify(value);
  return /home[ -]*(?:occupation|day[ -]*care)|in[ -]*home\s+(?:daycare|childcare)|single[ -]*family\s+(?:home|residence|dwelling)|existing\s+(?:home|residence)/i.test(text) && /home[ -]*(?:occupation|day[ -]*care)|in[ -]*home|variance|conditional use|\bpermit\b/i.test(text);

@@ -1,0 +1,30 @@
+{
+  "verifiedAt": "2026-10-28T19:25:22.428Z",
+  "source": {
+    "source": "arcgis",
+    "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/9",
+    "where": "county_name='Ada'",
+    "outSR": 4326
+  },
+  "featureCount": 1,
+  "selectedCounty": "Ada",
+  "originalGeojsonSha256": "ff62b5079a3ad0b11b4117ac5d05eb59a9fee7147cd6298e1e9814873bf70e82",
+  "boundaryBounds": [
+    -116.51372685365834,
+    43.112645160077285,
+    -115.97490055173638,
+    43.80742780601322
+  ],
+  "coverageBounds": [
+    -116.51372685365834,
+    43.112645160077285,
+    -115.97490055173638,
+    43.80742780601322
+  ],
+  "clipSource": {
+    "source": "arcgis",
+    "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3",
+    "where": "1=1",
+    "outSR": 4326
+  }
+}

@@ -1,3 +1,5 @@
+import {jurisdiction} from "../jurisdictions/registry";
+import {residentProject} from "../jurisdictions/resident-project";
 import {readProjectContent} from "@/lib/project-content-store";
 import {projectLocation} from "./project-location";
 import {residentialCase,redactResidence,protectMapCase,privateResidentialDocument} from "@/lib/residential-privacy";
@@ -41,6 +43,7 @@ async function detail(
   caseId: string,
   followLead = true,
 ): Promise<PaneData | null> {
+  if(jurisdiction(areaId)&&!jurisdiction(areaId).legacyPublic)return residentProject(areaId,caseId);
   const config = getJurisdiction(areaId),
     area = config?.area;
   if (!config || !area || area.status !== "live") return null;
@@ -242,4 +245,4 @@ async function detail(
   if(sensitive){result.item=protectMapCase(areaId,{...result.item,residentialPrivacy:true},await privacyOverrides());result.relatedCases=result.relatedCases?.map(c=>({...c,title:result.item.title}));result.where=result.where?redactResidence(result.where)+" · Approximate area shown to protect a residential location.":"Approximate residential area; exact address withheld.";return redactResidence(result);}
   return result;
 }
-export function projectDetail(areaId:string,caseId:string){return unstable_cache(detail,["map-project-questions-v16-hearing-links"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}
+export function projectDetail(areaId:string,caseId:string){if(jurisdiction(areaId)&&!jurisdiction(areaId).legacyPublic)return detail(areaId,caseId);return unstable_cache(detail,["map-project-questions-v16-hearing-links"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}

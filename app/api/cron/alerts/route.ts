@@ -1,3 +1,4 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import { alertReadiness, sendDigests } from "@/lib/alerts";
 import { secretMatches } from "@/lib/timeline/auth";
 import {
@@ -7,6 +8,8 @@ import {
 } from "@/lib/timeline/store";
 export const maxDuration = 300;
 export async function GET(request: Request) {
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
   if (
     !secretMatches(
       (request.headers.get("authorization") ?? "").replace(/^Bearer /, ""),

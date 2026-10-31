@@ -1,0 +1,30 @@
+import {afterEach,expect,it,vi} from "vitest";
+import {ingestDocuments,documentId,digest,retryDue} from "./ingest";
+import {emptyEvidenceState,EXTRACTED_KEYS,type SourceDocument} from "./types";
+import {jurisdiction} from "../jurisdictions/registry";
+import type {EvidenceStore} from "./store";
+import {resetDocumentRetry} from "./store";
+import type {Extraction} from "./extract";
+afterEach(()=>{vi.restoreAllMocks();vi.useRealTimers();});
+const empty=()=>Object.fromEntries(EXTRACTED_KEYS.map(k=>[k,{value:null,page:null,quote:null,confidence:0}])) as Extraction;
+it.each([["nampa","CUP-00412-2026"],["kuna","26-04-PP"]])("extracts the discovered %s packet title using only the case section",async(areaId,caseId)=>{
+ const state=emptyEvidenceState(),store:EvidenceStore={read:async()=>structuredClone(state),mutate:async f=>f(state)};
+ const doc:SourceDocument={areaId,url:"https://"+jurisdiction(areaId).area.timeline!.hosts[0]+"/packet.pdf",title:"Planning and Zoning Commission meeting packet — 2026-10-15",kind:"staff-report",caseIds:[caseId]};
+ const extract=vi.fn().mockResolvedValue(empty()),ocr=vi.fn(async(_bytes:Uint8Array,pages:import("./types").PageText[])=>pages);
+ const own={page:2,text:caseId+" Staff report describing the proposed project.",method:"native" as const};
+ const run=await ingestDocuments(store,[doc],{download:async()=>new Uint8Array([1]),text:async()=>[{page:1,text:"H-2026-9999 Another proposal",method:"native"},own,{page:3,text:"H-2026-9998 Another project",method:"native"}],ocr,extract});
+ expect(run.processed).toBe(1);expect(extract).toHaveBeenCalledWith(doc,caseId,[own]);expect(ocr).toHaveBeenCalledWith(expect.any(Uint8Array),[own]);expect(state.documents[documentId(doc)].pages).toHaveLength(3);
+});
+it("defers onboarding packets before download/invalidation and backs off without consuming retries",async()=>{
+ vi.spyOn(console,"error").mockImplementation(()=>{});vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-28T12:00:00Z"));
+ const doc:SourceDocument={areaId:"ada-county",url:"https://apps.adacounty.id.gov/AdaFileBrowse/packet.pdf",title:"PZC compiled meeting packet",kind:"staff-report",caseIds:["202601398-CU"]},id=documentId(doc),state=emptyEvidenceState();
+ state.documents[id]={...doc,id,hash:digest(new Uint8Array([1])),pages:[{page:1,text:"Prior official report",method:"native"}],state:"complete",checkedAt:"2026-10-27",failCount:0};
+ const store:EvidenceStore={read:async()=>structuredClone(state),mutate:async f=>f(state)},download=vi.fn(),text=vi.fn(),extract=vi.fn();
+ await ingestDocuments(store,[doc],{download,text,extract});
+ expect(download).not.toHaveBeenCalled();expect(text).not.toHaveBeenCalled();expect(extract).not.toHaveBeenCalled();
+ expect(state.documents[id]).toMatchObject({hash:digest(new Uint8Array([1])),state:"complete",failCount:0,pages:[{text:"Prior official report"}]});
+ expect(retryDue(state.documents[id])).toBe(false);
+ await ingestDocuments(store,[doc],{download,text,extract});expect(download).not.toHaveBeenCalled();
+ vi.setSystemTime(new Date("2026-10-29T12:00:00Z"));expect(retryDue(state.documents[id])).toBe(true);
+ vi.setSystemTime(new Date("2026-10-28T13:00:00Z"));await resetDocumentRetry(store,id);expect(state.documents[id].deferredUntil).toBeUndefined();expect(retryDue(state.documents[id])).toBe(true);
+});

@@ -1,4 +1,5 @@
-vi.mock("../ai-budget",()=>({aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
+vi.mock("unpdf",()=>({definePDFJSModule:vi.fn(),getDocumentProxy:vi.fn().mockResolvedValue({numPages:20,loadingTask:{destroy:vi.fn()}}),renderPageAsImage:vi.fn().mockResolvedValue(new Uint8Array([1,2,3]).buffer)}));
+vi.mock("../ai-budget",async original=>({...await original<typeof import("../ai-budget")>(),aiBudget:{reserve:vi.fn().mockResolvedValue("reservation"),settle:vi.fn().mockResolvedValue(.0001)},reserveCost:()=>.01}));
 vi.mock("../jurisdictions/ai-budget",()=>({currentJurisdictionAi:()=>undefined,jurisdictionAiBudget:{reserve:vi.fn().mockResolvedValue("area-reservation"),settle:vi.fn().mockResolvedValue(.0001)}}));
 import {afterEach,expect,it,vi} from "vitest";
 import {ingestDocuments,documentId,officialDocumentUrl} from "./ingest";
@@ -68,7 +69,7 @@ it("resets a permanently failed fingerprint when new bytes appear",async()=>{
 });
 it("persists OCR text before extraction fails so the next run does not pay for OCR again",async()=>{
  vi.spyOn(console,"error").mockImplementation(()=>{});vi.stubEnv("OPENAI_API_KEY","test");vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-23T12:00:00Z"));
- const fetch=vi.fn().mockResolvedValue(Response.json({status:"completed",usage:{input_tokens:30,output_tokens:10,total_tokens:40},output:[{content:[{type:"output_text",text:JSON.stringify({pages:[{page:1,text:"Scanned official planning staff report text."}]})}]}]}));vi.stubGlobal("fetch",fetch);
+ const fetch=vi.fn().mockResolvedValue(Response.json({status:"completed",usage:{input_tokens:30,output_tokens:10,total_tokens:40},output:[{content:[{type:"output_text",text:JSON.stringify({text:"Scanned official planning staff report text."})}]}]}));vi.stubGlobal("fetch",fetch);
  const s=store(),d=deps();d.text.mockResolvedValue([{page:1,text:"",method:"native"}]);await ingestDocuments(s,[doc],d);
  expect((await s.read()).documents[documentId(doc)].pages[0].method).toBe("ocr");expect(fetch).toHaveBeenCalledTimes(1);
  vi.setSystemTime(new Date("2026-10-24T12:00:00Z"));d.extract.mockResolvedValue(empty());await ingestDocuments(s,[doc],d);expect(fetch).toHaveBeenCalledTimes(1);
@@ -77,9 +78,9 @@ it("persists OCR text before extraction fails so the next run does not pay for O
 it("retains failure limits when an official document moves URL without changing its bytes",async()=>{vi.spyOn(console,"error").mockImplementation(()=>{});const s=store(),d=deps();await ingestDocuments(s,[doc],d);const moved={...doc,url:doc.url+"-new"};await ingestDocuments(s,[moved],d);expect(d.extract).toHaveBeenCalledTimes(1);expect((await s.read()).documents[documentId(doc)].failCount).toBe(1);d.download.mockResolvedValue(new Uint8Array([2]));d.extract.mockResolvedValue(empty());await ingestDocuments(s,[moved],d);expect(d.extract).toHaveBeenCalledTimes(2);});
 it("does not send an entire compiled packet for OCR",async()=>{
  const s=store(),d=deps(),ocr=vi.fn();d.text.mockResolvedValue([{page:1,text:"",method:"native"}]);
- const run=await ingestDocuments(s,[{...doc,title:"Council compiled meeting packet"}],{...d,ocr});
+ const run=await ingestDocuments(s,[{...doc,areaId:"ada-county",url:"https://apps.adacounty.id.gov/AdaFileBrowse/report.pdf",title:"Council compiled meeting packet"}],{...d,ocr});
  expect(ocr).not.toHaveBeenCalled();expect(d.extract).not.toHaveBeenCalled();expect(run.errors.join(" ")).toContain("whole packets are not sent");
- expect((await s.read()).documents[documentId(doc)].failCount).toBe(0);
+ expect(Object.values((await s.read()).documents)[0].failCount).toBe(0);
 });
 it("extracts an unchanged staff report only once when P&Z and Council link different URLs",async()=>{
  const s=store(),d=deps();d.extract.mockResolvedValue(empty());

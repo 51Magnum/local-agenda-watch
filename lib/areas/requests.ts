@@ -1,5 +1,6 @@
+import {databaseUrl} from "../runtime-environment";
 import {liveAreasInRadius} from "@/lib/maps/radius";
-import {Pool} from "pg";
+import {Pool} from "../database-pool";
 import {mkdir,readFile,writeFile,rename} from "node:fs/promises";
 import path from "node:path";
 import {randomUUID} from "node:crypto";
@@ -8,7 +9,7 @@ export type SavedCoverageRequest=CoverageRequest&{id?:string};
 let pool:Pool|undefined,initialized:Promise<unknown>|undefined;
 let writes:Promise<unknown>=Promise.resolve();
 async function database(){
- pool??=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:10000});
+ pool??=new Pool({connectionString:databaseUrl(),max:2,connectionTimeoutMillis:10000});
  initialized??=(async()=>{
   await pool!.query("CREATE TABLE IF NOT EXISTS law_coverage_requests (id uuid PRIMARY KEY, kind text NOT NULL, area_requested text NOT NULL, latitude double precision, longitude double precision, email text, created_at timestamptz NOT NULL, address text, interests text)");
   // Existing waitlist entries are preserved; new fields are optional.
@@ -20,14 +21,14 @@ async function database(){
 const filename=()=>path.join(process.cwd(),".data","coverage-requests.json");
 async function localRequests():Promise<SavedCoverageRequest[]>{try{return JSON.parse(await readFile(filename(),"utf8"));}catch(error){if((error as NodeJS.ErrnoException).code!=="ENOENT")throw error;return [];}}
 export async function saveCoverageRequest(input:CoverageRequest){
- if(process.env.DATABASE_URL){const db=await database();await db.query("INSERT INTO law_coverage_requests(id,kind,area_requested,latitude,longitude,email,created_at,radius_miles,address,interests) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",[randomUUID(),input.kind,input.areaRequested,input.location?.lat??null,input.location?.lng??null,input.email,input.createdAt,input.location?input.radiusMiles??1:null,input.address??null,input.interests??null]);return;}
+ if(databaseUrl()){const db=await database();await db.query("INSERT INTO law_coverage_requests(id,kind,area_requested,latitude,longitude,email,created_at,radius_miles,address,interests) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",[randomUUID(),input.kind,input.areaRequested,input.location?.lat??null,input.location?.lng??null,input.email,input.createdAt,input.location?input.radiusMiles??1:null,input.address??null,input.interests??null]);return;}
  if(process.env.VERCEL)throw new Error("Coverage request storage unavailable");
  const task=writes.catch(()=>{}).then(async()=>{await mkdir(path.dirname(filename()),{recursive:true});const items=await localRequests();items.push({...input,id:randomUUID()});const temporary=filename()+"."+randomUUID()+".tmp";await writeFile(temporary,JSON.stringify(items),{mode:0o600});await rename(temporary,filename());});writes=task;await task;
 }
 export async function listCoverageRequests(options:{kind?:"coverage"|"follow";page?:number}={}){
  const kind=options.kind==="coverage"||options.kind==="follow"?options.kind:undefined;
  const page=Math.max(1,Math.min(100000,Math.floor(options.page??1)||1)),pageSize=50,offset=(page-1)*pageSize;
- if(process.env.DATABASE_URL){
+ if(databaseUrl()){
   const db=await database();
   const [count,records]=await Promise.all([
    db.query("SELECT count(*)::int AS all, (count(*) FILTER (WHERE kind='follow'))::int AS follow, (count(*) FILTER (WHERE kind='coverage'))::int AS coverage FROM law_coverage_requests"),

@@ -49,4 +49,4 @@ jobs:
           BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
         run: |
           npm ci --ignore-scripts
-          npx tsx scripts/export-map-tiles.ts --upload
+          node --conditions=react-server --import tsx scripts/export-map-tiles.ts --upload

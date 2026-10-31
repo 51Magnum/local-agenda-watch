@@ -22,7 +22,7 @@ import {JURISDICTIONS} from "../maps/jurisdictions";
 const fixture=(name:string)=>readFileSync(path.join(__dirname,"fixtures",name),"utf8");
 afterEach(()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();vi.restoreAllMocks();});
 it("validates every definition and keeps staging areas out of the public registry",()=>{
- expect(validateJurisdictions(registryEntries)).toHaveLength(9);
+ expect(validateJurisdictions(registryEntries)).toHaveLength(10);
  expect(publicJurisdictions().map(d=>d.id)).toEqual(Object.keys(AREAS));
  expect(AREAS.boise).toBeUndefined();expect(AREAS["ada-county"]).toBeUndefined();
  for(const id of ["boise","ada-county"]){expect(jurisdiction(id)).toMatchObject({launchStatus:"admin_only",enabled:true});expect(contrastWithWhite(jurisdiction(id).color)).toBeGreaterThanOrEqual(4.5);}
@@ -94,7 +94,7 @@ it("enforces monthly, backfill and sample dollar caps in one durable transaction
 it("normalizes recorded Boise table and Ada polygon features without inventing dates or addresses",async()=>{
  const cache=await mkdtemp(path.join(tmpdir(),"law-feature-contract-"));
  try{
-  const table=new SourceHttp({cacheDir:cache,delayMs:0,fetch:vi.fn().mockResolvedValue(Response.json(JSON.parse(fixture("arcgis-boise.json"))))});
+  const table=new SourceHttp({cacheDir:cache,delayMs:0,fetch:vi.fn().mockImplementation(url=>Promise.resolve(Response.json(String(url).includes("PDS_Zoning_Activities")?JSON.parse(fixture("arcgis-boise.json")):{type:"FeatureCollection",features:[]})))});
   const [boise]=await applicationAdapter(jurisdiction("boise"),table).listApplications();
   expect(boise.recordId).toBe("PLN23-00040");expect(boise.relatedCaseNumbers).toContain("CVA24-00026");expect(boise.geometry).toBeUndefined();expect(boise.received).toBeUndefined();
   const features=JSON.parse(fixture("arcgis-ada-county.json"));

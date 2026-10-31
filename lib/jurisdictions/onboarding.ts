@@ -1,3 +1,5 @@
+import {databaseUrl} from "../runtime-environment";
+import {buildQaReport} from "./qa-builder";
 import {createHash,randomUUID} from "node:crypto";
 import {jurisdiction} from "./registry";
 import {sourceHttp} from "./collect";
@@ -5,11 +7,10 @@ import {SourceFailure} from "./http";
 import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
 import {agendaAdapter} from "./adapters";
 import {allowedAttachment} from "./adapters/common";
-import {readStaging,saveStaging,readQa,saveQa,snapshotHash,type QaReport} from "./store";
-import {computeDeadlines} from "./participation";
+import {readStaging,saveStaging,readQa,saveQa} from "./store";
 import {withJurisdictionAi,jurisdictionSpend} from "./ai-budget";
 import {ingestDocuments} from "../timeline/ingest";
-import {extractNativePdfChunk} from "../timeline/extract";
+import {readNativeSample,nativeSampleAllowed} from "./native-sample";
 import {getEvidenceStore} from "../timeline/store";
 import type {PageText,SourceDocument} from "../timeline/types";
 import {documentPreview} from "../maps/visuals";
@@ -29,10 +30,10 @@ export async function sampleAi(areaId:string,options:{n?:number;maxUsd?:number;b
  const n=options.n??5,maxUsd=options.maxUsd??1;if(!Number.isInteger(n)||n<1||n>5||!Number.isFinite(maxUsd)||maxUsd<=0||maxUsd>1)throw Error("AI sample accepts 1–5 documents and a hard cap of at most $1");
  if(!process.env.OPENAI_API_KEY||!process.env.DATABASE_URL)return{areaId,status:"deferred",reason:"AI samples require configured durable budget storage and server-side OpenAI credentials",sampled:0,spentUsd:0};
  const id=randomUUID(),http=sourceHttp(areaId),store=getEvidenceStore(),deadline=Date.now()+(options.budgetMs??220000),seen=new Set(snapshot.aiSamples?.map(s=>s.hash)),samples=snapshot.aiSamples??[];let attempted=0;
- const candidates=snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.attachments.filter(a=>a.kind==="staff_report"&&allowedAttachment(a,d)).map(a=>({meeting:m,item:i,attachment:a}))));
+ const candidates=snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.attachments.filter(a=>nativeSampleAllowed(a,d)).map(a=>({meeting:m,item:i,attachment:a}))));
  for(const candidate of candidates){if(samples.length>=n||attempted>=n||Date.now()>deadline-50000)break;const {meeting,item,attachment}=candidate,caseId=item.caseNumbers[0];if(!caseId)continue;
-  try{const response=await http.request(attachment.url,{},d.documents.maxBytes),bytes=response.bytes,hash=createHash("sha256").update(bytes).digest("hex");if(seen.has(hash))continue;seen.add(hash);attempted++;
-   const chunk=await extractNativePdfChunk(bytes.slice(),{deadline:Math.min(deadline-40000,Date.now()+25000),maxPages:Math.min(12,d.documents.maxPages)});const pages:PageText[]=[];let chars=0;for(const p of chunk.pages.filter(p=>p.text.trim().length>30)){if(pages.length>=d.documents.maxPages||chars+p.text.length>20000)break;pages.push(p);chars+=p.text.length;}
+  try{const sampled=await readNativeSample(http,attachment,d,deadline),{bytes,chunk}=sampled,hash=createHash("sha256").update(bytes).digest("hex");if(seen.has(hash))continue;seen.add(hash);attempted++;
+   const pages:PageText[]=sampled.pages;
    if(!pages.length){pages.push(...await withJurisdictionAi({areaId,mode:"backfill",sample:{id,maxUsd},documentHash:hash},()=>ocrSamplePages(bytes,[1,2],Math.min(deadline-50000,Date.now()+65000))));}
    if(!pages.some(p=>p.text.trim().length>30)){snapshot.skipped.push({url:attachment.url,reason:"AI sample deferred: first bounded pages have no usable text; remaining pages are deferred"});continue;}
    const doc:SourceDocument={areaId,url:attachment.url,title:attachment.title,caseIds:[caseId],kind:"staff-report",meeting:{body:d.hearingBodies.find(b=>b.key===meeting.body)?.name??meeting.body,date:meeting.date,isHearing:true}};
@@ -48,14 +49,8 @@ export async function sampleAi(areaId:string,options:{n?:number;maxUsd?:number;b
 }
 export async function qaReport(areaId:string){
  const d=jurisdiction(areaId),snapshot=await readStaging(areaId);if(!d||!snapshot)throw Error("Run backfill --write first");
- const aliases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers])),items=snapshot.meetings.flatMap(m=>m.items).filter(i=>i.caseNumbers.length),matched=items.filter(i=>i.caseNumbers.some(id=>aliases.has(id))||i.matchedApplications?.length),located=snapshot.applications.filter(a=>a.geometry),unknownLocation=snapshot.applications.filter(a=>!a.geometry&&!a.address&&!a.parcel.length);
- const checks=[{name:"hard-fact sources",passed:snapshot.health.some(h=>h.state==="ok"),detail:"Actual endpoint checks recorded; failures retained."},{name:"collection complete",passed:snapshot.complete,detail:snapshot.complete?"Bounded collection completed":"Some collection work is deferred or unavailable"},{name:"boundary",passed:!!snapshot.boundary&&(!d.clipRule||!!snapshot.coverageBoundary),detail:d.clipRule?"County coverage must exclude all incorporated cities":"Official city boundary"},{name:"case matching",passed:items.length>0&&matched.length/items.length>=.8,detail:matched.length+" of "+items.length+" hearing items match the application inventory"},{name:"AI sample",passed:(snapshot.aiSamples??[]).filter(s=>Array.isArray(s.fields)&&s.fields.length>0).length>=1,detail:"At least one source-backed AI sample is required; sensitive fields stay under review"},{name:"runtime download check",passed:!!snapshot.runtime?.gitCommit&&snapshot.runtime.checks.length>0&&snapshot.runtime.checks.every(h=>h.state==="ok"),detail:"A Git-sourced Vercel-runtime document check is required separately"}];
- const upcoming=[...snapshot.meetings.map(m=>({date:m.date,body:m.body,meetingUrl:m.meetingPageUrl,tentative:false})),...(snapshot.calendarHints??[]).filter(m=>!m.backup).map(m=>({date:m.date,body:m.body,meetingUrl:m.sourceUrl,tentative:true}))];
- const next=upcoming.filter(m=>m.date>=new Date().toISOString().slice(0,10)).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,2).map(m=>({...m,deadlines:computeDeadlines(d,m.date,m.body)}));
- const budgetSpend=process.env.DATABASE_URL?await jurisdictionSpend(areaId):[];
- const spent=budgetSpend.filter(b=>b.bucket.startsWith("sample:")).reduce((n,b)=>n+b.spent,0);
- const report:QaReport={id:createHash("sha256").update(snapshotHash(snapshot)+JSON.stringify(checks)).digest("hex"),areaId,createdAt:new Date().toISOString(),passed:checks.every(c=>c.passed),snapshotHash:snapshotHash(snapshot),checks,data:{health:snapshot.health,runtime:snapshot.runtime,meetings:snapshot.meetings.length,items:items.length,applications:snapshot.applications.length,applicationWindow:"Recent applications plus older active records linked to collected hearings; undated active records retained",caseMatchRate:items.length?matched.length/items.length:0,geometryMatchRate:snapshot.applications.length?located.length/snapshot.applications.length:0,itemsWithNoLocation:unknownLocation.length,skipped:snapshot.skipped,aiSamples:snapshot.aiSamples??[],tokens:snapshot.aiSamples?.reduce((n,s)=>n+s.tokens,0)??0,spentUsd:spent,budgetSpend,extractionOnlySpendUsd:snapshot.aiSamples?.reduce((n,s)=>n+s.costUsd,0)??0,projectedMonthlyUsd:{low:d.type==="county"?0:3,high:d.type==="county"?2:10,basis:"Planning estimate from onboarding brief, not measured spend; validate after one month"},nextHearings:next,mapChecklist:["Official boundary verified","County clipped below city layers","Distinct jurisdiction color","No location invented for unmapped applications","No public map, sitemap, search or email exposure"],notes:d.notes}};
- await saveQa(report);return report;
+ const available=!!databaseUrl(),spend=available?await jurisdictionSpend(areaId):[];
+ const report=buildQaReport(d,snapshot,spend,{budgetLedgerAvailable:available});await saveQa(report);return report;
 }
 export {reportMarkdown} from "./report";
 export {readQa};

@@ -1,8 +1,11 @@
+import {previewMutationResponse} from "@/lib/runtime-environment";
 import {revalidateTag} from "next/cache";
 import { authorizedReviewer, sameOrigin } from "@/lib/timeline/auth";
 import { resetDocumentRetry, getEvidenceStore } from "@/lib/timeline/store";
 import { reviewBatch, undoBatch, reviewField, type ReviewInput } from "@/lib/timeline/review";
 export async function POST(request: Request) {
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+
   if (!authorizedReviewer(request.headers.get("authorization"))) return new Response("Unauthorized", { status: 401 });
   if (!sameOrigin(request)) return new Response("Origin not allowed", { status: 403 });
   if(request.headers.get("content-type")?.includes("application/json")){

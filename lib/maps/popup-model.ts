@@ -2,6 +2,7 @@ import {hearingDateTime} from "@/lib/areas/format";
 import {cleanResidentTitle,cleanResidentProse} from "@/lib/resident-copy";
 import { caseProjectName } from "@/lib/case-details";
 import type { AreaDefinition } from "@/lib/areas/registry";
+type PopupArea=Pick<AreaDefinition,"id"|"name"|"type"|"timezone"|"bodies">;
 import type { Hearing, ScheduledMeeting } from "@/lib/localities/types";
 import type { EvidenceField } from "@/lib/timeline/types";
 import type { MapCase } from "./types";
@@ -11,10 +12,10 @@ const caseCode = /\b(?:[A-Z]{1,4}-?\d{4,5}-\d{2,6}(?:-(?:APL|MOD))?)\b/g;
 export function popupProjectName(title: string): string {
   return title.replace(caseCode, "").split(/[:—]/)[0].replace(/\(\s*\)/g, "").replace(/\s+/g, " ").replace(/[\s·–-]+$/, "").trim() || "Proposed development";
 }
-function shortDate(value: string, area: AreaDefinition, weekday = false) {
+function shortDate(value: string, area: PopupArea, weekday = false) {
   return new Intl.DateTimeFormat("en-US", { timeZone: area.timezone, ...(weekday ? { weekday: "short" } : {}), month: "short", day: "numeric" }).format(new Date(value.slice(0, 10) + "T12:00:00Z")).replace(/,/g, "");
 }
-function meetingLabel(meeting: ScheduledMeeting, area: AreaDefinition) {
+function meetingLabel(meeting: ScheduledMeeting, area: PopupArea) {
   const body = meeting.body === area.bodies.planning.id ? (area.type === "county" ? area.bodies.planning.label.replace(/ Commission$/, "") : area.bodies.planning.shortLabel) : meeting.body === area.bodies.decision.id ? area.bodies.decision.label : meeting.bodyLabel || meeting.body;
   const time = meeting.time?.match(/^(\d{1,2}):(\d{2})$/);
   return body + " · " + hearingDateTime(meeting.date, area.timezone) + (time ? " · " + (+time[1] % 12 || 12) + (time[2] === "00" ? "" : ":" + time[2]) + (+time[1] >= 12 ? " PM" : " AM") + (area.timezone==="America/Denver"?" Mountain Time":" "+area.timezone) : "");
@@ -36,7 +37,7 @@ export function popupApplicationCopy(fields: EvidenceField[]) {
   return { headline, explanation: explanation && words(explanation) <= 60 ? explanation : undefined, source: applicationFields.find(f => f.documentId === document && f.key === (fact("popupExplanation") ? "popupExplanation" : "requestSummary")) };
 }
 /** Only public evidence is passed in; pending AI decisions never enter the model. */
-export function buildPopupModel(item: MapCase, area: AreaDefinition, hearing?: Hearing, fields: EvidenceField[] = [], now = new Date()): NonNullable<MapCase["popup"]> {
+export function buildPopupModel(item: MapCase, area: PopupArea, hearing?: Hearing, fields: EvidenceField[] = [], now = new Date()): NonNullable<MapCase["popup"]> {
   const newest = (key: string) => fields.filter(f => f.key === key).sort((a,b) => (b.reviewedAt ?? b.createdAt).localeCompare(a.reviewedAt ?? a.createdAt))[0];
   const officialTitle = hearing?.displayTitle ?? item.title;
   const noticeTitle = hearing?.description?.includes(hearing.appId) ? hearing.description.split(hearing.appId)[0].replace(/[\s(:–—-]+$/g, "") : undefined;

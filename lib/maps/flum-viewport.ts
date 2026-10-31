@@ -1,5 +1,6 @@
+import {visibleAreas} from "@/lib/areas/registry";
 import { unstable_cache } from "next/cache";
-import { AREAS } from "@/lib/areas/registry";
+
 import { getJurisdiction } from "./jurisdictions";
 import { readFlumSnapshot } from "./store";
 import { clipCombinedFlum } from "./radius";
@@ -9,7 +10,7 @@ import type { Bounds } from "./viewport";
 export const combinedFlumViewport = unstable_cache(
   async (bounds: Bounds) => {
     const warnings: string[] = [];
-    const areas = Object.values(AREAS).filter(
+    const areas = (await visibleAreas()).filter(
       (a) => a.status === "live" && getJurisdiction(a.id)?.flum.layerUrl,
     );
     const layers = await Promise.all(
@@ -29,7 +30,7 @@ export const combinedFlumViewport = unstable_cache(
     );
     const data = clipCombinedFlum(
       layers.filter((l) => l !== undefined),
-      Object.values(AREAS).filter((a) => a.type === "city"),
+      (await visibleAreas()).filter((a) => a.type === "city"),
       [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2],
       1,
       bounds,

@@ -1,3 +1,6 @@
+import {applicantNeedsReview} from "../applicant-privacy";
+import {jurisdiction} from "../jurisdictions/registry";
+import {caseReportPages} from "./report-pages";
 import { allowedSource, sourceRequest, isBlockedSource } from "./source-access";
 import { checkpointRun, recordHost, withDocument, withRun } from "./telemetry";
 import { parseEnerGovDocumentReference, downloadEnerGovReference } from "@/lib/sources/energov-document";
@@ -24,7 +27,7 @@ export async function downloadDocument(url: string, areaId = "nampa",options:{ma
   return bytes;
 }
 export const documentId = (document:Pick<SourceDocument,"areaId"|"url">) => digest((document.areaId && document.areaId!=="nampa" ? document.areaId+":" : "")+document.url);
-export const retryDue = (document:{failCount?:number;lastAttemptAt?:string;state:string},now=Date.now()) => document.state!=="failed-permanent" && (!document.failCount || !document.lastAttemptAt || now-Date.parse(document.lastAttemptAt)>=86400000);
+export const retryDue = (document:{failCount?:number;lastAttemptAt?:string;deferredUntil?:string;state:string},now=Date.now()) => document.state!=="failed-permanent" && (!document.deferredUntil||now>=Date.parse(document.deferredUntil)) && (!document.failCount || !document.lastAttemptAt || now-Date.parse(document.lastAttemptAt)>=86400000);
 export type IngestDependencies = {
   download?: typeof downloadDocument;
   text?: (bytes: Uint8Array) => Promise<PageText[]>;
@@ -58,8 +61,10 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
     await withDocument(areaId,id,async()=>{
     try {
       const stored=previous;
+      if(stored?.deferredUntil&&Date.now()<Date.parse(stored.deferredUntil)){run.skipped++;return;}
       if(stored&&!stored.hash&&stored.state!=="failed-permanent"&&!retryDue(stored)){run.skipped++;return;}
       if (!officialDocumentUrl(document.url,areaId)) throw new Error("Invalid official source URL");
+      if(document.content===undefined&&!jurisdiction(areaId)?.legacyPublic&&/compiled|meeting[ _-]*packet|agenda[ _-]*(?:packet|package)/i.test(document.title))throw new Error("AI work deferred: compiled packet requires a per-item report or bounded page OCR; whole packets are not sent to OpenAI");
       if(document.content===undefined&&stored?.structured&&store.pages){const cached=await store.pages(id);document.content=cached[0]?.text;}
       const bytes = document.content === undefined ? await (dependencies.download ?? downloadDocument)(document.url,areaId) : new TextEncoder().encode(document.content);
       const hash = digest(bytes);
@@ -81,10 +86,13 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         : before?.hash === hash && before.pages.length ? before.pages : await (dependencies.text ?? extractNativePdfPages)(bytes);
       await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
       if (document.content === undefined) {
-        if (/compiled|meeting[ _-]*packet|agenda[ _-]*(?:packet|package)/i.test(document.title)) throw new Error("AI work deferred: compiled packet requires a per-item report or bounded page OCR; whole packets are not sent to OpenAI");
         if (pages.some((page) => page.method === "native" && page.text.trim().length < 30) && deadline - Date.now() < 50000) throw new Error("OCR deferred to next run: processing budget reached");
-        pages = await (dependencies.ocr ?? ocrMissingPages)(bytes, pages);
+        const relevant=jurisdiction(areaId)?.legacyPublic&&/packet/i.test(document.title)?new Set(document.caseIds.flatMap(caseId=>caseReportPages(pages,caseId,true).map(p=>p.page))):undefined;
+        const ocrInput=relevant?.size?pages.filter(p=>relevant.has(p.page)):pages;
+        const ocrPages=await (dependencies.ocr ?? ocrMissingPages)(bytes,ocrInput),byPage=new Map(ocrPages.map(p=>[p.page,p]));
+        pages=pages.map(p=>byPage.get(p.page)??p);
         await store.mutate((state) => { if (state.documents[id]?.hash === hash) state.documents[id].pages = pages; });
+        if(ocrPages.some(p=>p.method==="native"&&p.text.trim().length<30))throw Error("OCR deferred to next run: bounded page images saved; remaining scanned pages retained");
       }
       if(document.content===undefined&&pages.some(p=>p.method==="ocr"))await store.flush?.();
       const facts: EvidenceField[] = [];
@@ -94,12 +102,14 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
         if (document.fields) {
           for (const field of document.fields) {
             if (DECISION_KEYS.has(field.key)) throw new Error("Decision fields must pass through document extraction and manual review");
-            facts.push({ ...field, areaId, caseId, id: digest(id + hash + caseId + field.key + field.value), documentId: id, documentHash: hash, sourceUrl: document.url, sourceKind: document.kind, confidence: 1, status: "auto_published", createdAt: now });
+            facts.push({ ...field, areaId, caseId, id: digest(id + hash + caseId + field.key + field.value), documentId: id, documentHash: hash, sourceUrl: document.url, sourceKind: document.kind, confidence: 1, status: field.key==="applicantCompany"&&applicantNeedsReview(field.value)?"pending":"auto_published", createdAt: now });
           }
         } else if (document.kind !== "agenda" && document.kind !== "case-record") {
           if (deadline - Date.now() < 50000) throw new Error("Case extraction deferred to next run: processing budget reached");
           const warnings: string[] = [];
-          const candidates = await (dependencies.extract ?? extractFields)(document, caseId, pages);
+          const casePages=caseReportPages(pages,caseId,!!jurisdiction(areaId)?.legacyPublic&&/packet/i.test(document.title));
+          if(!casePages.length)continue;
+          const candidates = await (dependencies.extract ?? extractFields)(document, caseId, casePages);
           const extracted = validateExtraction(candidates, pages, { warnings, retainFlagged: true });
           const explicit = validateExtraction(explicitReportFacts(document, caseId, pages), pages);
           for (const key of Object.keys(explicit) as (keyof Extraction)[]) {
@@ -138,7 +148,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
               sourceUrl: document.url, sourceKind: document.kind, confidence: value.confidence,
               status: "pending", createdAt: now };
             candidate.verification=verifyCandidate(candidate,document,pages,{speakers:value.speakers,complete:value.complete,secondPass:agrees});
-            if(canAutoApprove(candidate) || (!DECISION_KEYS.has(fieldKey)&&!ocr&&value.confidence>=.95&&candidate.verification.case&&candidate.verification.quote&&candidate.verification.body))candidate.status="auto_published";
+            if(!(fieldKey==="applicantCompany"&&applicantNeedsReview(value.value))&&(canAutoApprove(candidate) || (!DECISION_KEYS.has(fieldKey)&&!ocr&&value.confidence>=.95&&candidate.verification.case&&candidate.verification.quote&&candidate.verification.body)))candidate.status="auto_published";
             facts.push(candidate);
           }
         }
@@ -162,7 +172,7 @@ async function ingestDocumentsInRun(store: EvidenceStore, documents: SourceDocum
       const deferred=/deferred to next run|processing budget reached|AI work deferred/i.test(message);
       await store.mutate((state) => {
         const current=state.documents[id];
-        if(deferred){if(current)current.error=message;return;}
+        if(deferred){const doc=current??(state.documents[id]={...document,id,hash:"",pages:[],checkedAt:new Date().toISOString(),state:"error",failCount:0});doc.error=message;doc.lastAttemptAt=new Date().toISOString();doc.deferredUntil=new Date(Date.now()+86400000).toISOString();return;}
         // Failed downloads never invalidate a previously published document version.
         if(!current)state.documents[id]={...document,id,hash:"",pages:[],checkedAt:new Date().toISOString(),state:"error",failCount:previous?.failCount??0,lastAttemptAt:previous?.lastAttemptAt};
         const doc=state.documents[id];

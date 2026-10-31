@@ -2,7 +2,8 @@ import {extractText} from "unpdf";
 import {SourceHttp} from "../http";
 import type {AgendaSource,JurisdictionDefinition} from "../types";
 import type {AgendaAdapter,Meeting,Attachment} from "./types";
-import {attachmentKind,caseNumbers} from "./common";
+import {attachmentKind} from "./common";
+import {adaDocumentCases,adaDocumentLabel,parseAdaAgenda} from "./ada-agenda";
 export type BrowseFile={name:string;filterPath:string;isFile:boolean;size:number;fullPath?:string;imageUrl?:string};
 /** Parse the published JSON array as data. Never evaluate embedded JavaScript. */
 export function parseAdaFiles(html:string):BrowseFile[]{
@@ -18,13 +19,13 @@ export function adaMeetings(files:BrowseFile[],config:JurisdictionDefinition,sou
  const meetings:Meeting[]=[];
  for(const f of files){const m=f.name.match(/(\d{1,2})[.\-_](\d{1,2})[.\-_](\d{4})[-_ ]+(BOCC|PZC)[-_ ]*AGENDA/i);if(!m)continue;
   const date=m[3]+"-"+m[1].padStart(2,"0")+"-"+m[2].padStart(2,"0"),body=m[4].toLowerCase();if(!source.bodies.includes(body))continue;
-  const attachments:Attachment[]=files.filter(d=>d.filterPath===f.filterPath).map(d=>({title:d.name,url:url(d),kind:attachmentKind(d.name),sizeBytes:d.size}));
-  const meetingPageUrl=url(f),items=attachments.filter(a=>a.kind!=="agenda").flatMap(a=>{const ids=caseNumbers(config,a.title);return ids.length?[{itemId:a.title,title:a.title,caseNumbers:ids,body,meetingDateTime:date,meetingPageUrl,attachments:[a]}]:[];});
+  const attachments:Attachment[]=files.filter(d=>d.filterPath===f.filterPath).map(d=>({title:adaDocumentLabel(attachmentKind(d.name)),caseNumbers:adaDocumentCases(d.name),url:url(d),kind:attachmentKind(d.name),sizeBytes:d.size}));
+  const meetingPageUrl=url(f),items:Meeting["items"]=[];
   meetings.push({id:body+":"+date,title:config.hearingBodies.find(b=>b.key===body)!.name,body,date,meetingPageUrl,attachments,items});
  }
  return [...new Map(meetings.map(m=>[m.id,m])).values()];
 }
 export function adaFileBrowseAdapter(config:JurisdictionDefinition,source:AgendaSource,http:SourceHttp):AgendaAdapter{
  const base=String(source.params.baseUrl),known=new Map<string,Meeting>();
- return{listMeetings:async range=>{const html=await http.text(base+"?papp="+encodeURIComponent(String(source.params.papp)),{},12000000),meetings=adaMeetings(parseAdaFiles(html),config,source).filter(m=>m.date>=range.start&&m.date<=range.end);meetings.forEach(m=>known.set(m.id,m));return meetings;},getMeeting:async id=>{const meeting=known.get(id);if(!meeting)throw Error("List meetings before fetching details");const result=await http.request(meeting.meetingPageUrl,{},config.documents.maxBytes);if(new TextDecoder().decode(result.bytes.subarray(0,5))!=="%PDF-")throw Error("Agenda download is not a PDF");const text=(await extractText(result.bytes.slice(),{mergePages:true})).text;for(const number of caseNumbers(config,text))if(!meeting.items.some(i=>i.caseNumbers.includes(number)))meeting.items.push({itemId:number,title:number,caseNumbers:[number],body:meeting.body,meetingDateTime:meeting.date,meetingPageUrl:meeting.meetingPageUrl,attachments:[]});return meeting;},healthcheck:async()=>{try{await http.text(base+"?papp=DS_Agendas",{},12000000);}catch{}return http.checks;}};
+ return{listMeetings:async range=>{const html=await http.text(base+"?papp="+encodeURIComponent(String(source.params.papp)),{},12000000),meetings=adaMeetings(parseAdaFiles(html),config,source).filter(m=>m.date>=range.start&&m.date<=range.end);meetings.forEach(m=>known.set(m.id,m));return meetings;},getMeeting:async id=>{const meeting=known.get(id);if(!meeting)throw Error("List meetings before fetching details");const result=await http.request(meeting.meetingPageUrl,{},config.documents.maxBytes);if(new TextDecoder().decode(result.bytes.subarray(0,5))!=="%PDF-")throw Error("Agenda download is not a PDF");const text=(await extractText(result.bytes.slice(),{mergePages:false})).text.join("\f");return parseAdaAgenda(text,meeting,config);},healthcheck:async()=>{try{await http.text(base+"?papp=DS_Agendas",{},12000000);}catch{}return http.checks;}};
 }

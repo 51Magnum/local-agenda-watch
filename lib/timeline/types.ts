@@ -1,3 +1,4 @@
+import {applicantNeedsReview} from "../applicant-privacy";
 export const EXTRACTED_KEYS = ["popupHeadline", "popupExplanation", "requestSummary", "acres", "units", "zoningRequested", "staffRecommendation", "keyConditions", "trafficSummary", "schoolComment", "nearbySchools", "densityContext", "buildingHeight", "parksOpenSpace", "constructionTiming", "applicantCompany", "pzConditions", "pzSpeakersFor", "pzSpeakersAgainst", "pzSpeakersNeutral", "councilConditions", "councilSpeakersFor", "councilSpeakersAgainst", "councilSpeakersNeutral", "pzHearingDate", "pzResult", "pzVote", "councilHearingDate", "councilDecision", "councilVote", "decisionDate"] as const;
 export type ExtractedKey = typeof EXTRACTED_KEYS[number];
 export type FieldKey = ExtractedKey | "appliedDate" | "caseStatus" | "lastActionDate" | "reviewDate";
@@ -12,7 +13,7 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
 export type DocumentKind = "staff-report" | "pz-decision" | "council-decision" | "findings" | "minutes" | "agenda" | "case-record" | "other";
 export type PageText = { page: number; text: string; method: "native" | "ocr" | "structured" };
 export type SourceDocument = { caseContexts?: {caseIds:string[];title:string}[]; areaId?: string; url: string; title: string; caseIds: string[]; kind: DocumentKind; content?: string; meeting?: { body: string; date: string; isHearing: boolean; minutesUrl?: string }; fields?: Array<{ key: FieldKey; value: string; quote: string; page: number | null }> };
-export type StoredDocument = SourceDocument & { id: string; hash: string; structured?:boolean; pageCount?:number;contentNextPage?:number;contentTotalPages?:number; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; failCount?: number; lastAttemptAt?: string; state: "processing" | "complete" | "error" | "failed-permanent" };
+export type StoredDocument = SourceDocument & { id: string; hash: string; structured?:boolean; pageCount?:number;contentNextPage?:number;contentTotalPages?:number; pages: PageText[]; checkedAt: string; extractedAt?: string; error?: string; extractionVersion?: string; processedCaseIds?: string[]; validationWarnings?: string[]; failCount?: number; lastAttemptAt?: string; deferredUntil?:string; state: "processing" | "complete" | "error" | "failed-permanent" };
 export type Speaker = { name: string; position: "support" | "oppose" | "neutral"; quote: string; page: number };
 export type Verification = { version: 1; case: boolean; body: boolean; quote: boolean; value: boolean; secondPass: boolean; reasons: string[]; speakers?: Speaker[]; checkedAt: string };
 export const LOW_STAKES_KEYS = new Set<FieldKey>(["pzConditions", "councilConditions", "pzSpeakersFor", "pzSpeakersAgainst", "pzSpeakersNeutral", "councilSpeakersFor", "councilSpeakersAgainst", "councilSpeakersNeutral"]);
@@ -39,6 +40,7 @@ export function verifiedAutoField(field:EvidenceField):boolean {
  return field.status==="auto_published"&&LOW_STAKES_KEYS.has(field.key)&&field.confidence>=.9&&v?.version===1&&v.case&&v.body&&v.quote&&v.value&&v.secondPass;
 }
 export function isPublicField(field: EvidenceField, state: EvidenceState): boolean {
+  if(field.key==="applicantCompany"&&applicantNeedsReview(field.value)&&field.status!=="approved")return false;
   if (field.key === "staffRecommendation" && isWorkflowRecommendation(field.value)) return false;
   const current = state.documents[field.documentId];
   return Boolean(current && current.hash === field.documentHash && current.state === "complete" &&

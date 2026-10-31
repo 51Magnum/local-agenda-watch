@@ -1,0 +1,20 @@
+import {boundarySourceMatches} from "./boundary-source";
+import {createHash} from "node:crypto";
+import type {JurisdictionDefinition} from "./types";
+import type {StagingSnapshot,QaReport} from "./store";
+import {snapshotHash} from "./snapshot-hash";
+import {computeDeadlines} from "./participation";
+import {nextQaHearings} from "./next-hearings";
+import {locationMetrics} from "./location-metrics";
+import {launchMetrics} from "./launch-metrics";
+import {redactQaReport} from "./report-privacy";
+export function buildQaReport(d:JurisdictionDefinition,snapshot:StagingSnapshot,budgetSpend:{bucket:string;spent:number;reserved:number}[]=[],options:{now?:Date;dryRun?:boolean;budgetLedgerAvailable?:boolean}={}){
+ const areaId=d.id;
+ const aliases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers])),items=snapshot.meetings.flatMap(m=>m.items).filter(i=>i.caseNumbers.length),matched=items.filter(i=>i.caseNumbers.some(id=>aliases.has(id))||i.matchedApplications?.length);
+ const checks=[{name:"hard-fact sources",passed:snapshot.health.some(h=>h.state==="ok"),detail:"Actual endpoint checks recorded; failures retained."},{name:"collection complete",passed:snapshot.complete,detail:snapshot.complete?"Bounded collection completed":"Some collection work is deferred or unavailable"},{name:"boundary",passed:!!snapshot.boundary&&(!d.boundary.expectedProperties||boundarySourceMatches(d,snapshot))&&(!d.clipRule||!!snapshot.coverageBoundary),detail:d.clipRule?"County coverage must exclude all incorporated cities":"Official city boundary"},{name:"case matching",passed:items.length>0&&matched.length/items.length>=.8,detail:matched.length+" of "+items.length+" hearing items match the application inventory"},{name:"AI sample",passed:(snapshot.aiSamples??[]).filter(s=>Array.isArray(s.fields)&&s.fields.length>0).length>=1,detail:"At least one source-backed AI sample is required; sensitive fields stay under review"},{name:"runtime download check",passed:!!snapshot.runtime?.gitCommit&&snapshot.runtime.checks.length>0&&snapshot.runtime.checks.every(h=>h.state==="ok"),detail:"A Git-sourced Vercel-runtime document check is required separately"}];
+ const next=nextQaHearings(snapshot,(options.now??new Date()).toISOString().slice(0,10)).map(m=>({...m,deadlines:m.tentative?[]:computeDeadlines(d,m.date,m.body)}));
+ const spent=budgetSpend.filter(b=>b.bucket.startsWith("sample:")).reduce((n,b)=>n+b.spent,0);
+ const report:QaReport={id:createHash("sha256").update(snapshotHash(snapshot)+JSON.stringify(checks)).digest("hex"),areaId,createdAt:(options.now??new Date()).toISOString(),passed:checks.every(c=>c.passed),snapshotHash:snapshotHash(snapshot),checks,data:{health:snapshot.health,runtime:snapshot.runtime,meetings:snapshot.meetings.length,items:items.length,applications:snapshot.applications.length,applicationWindow:"Recent applications plus older active records linked to collected hearings; undated active records retained",caseMatchRate:items.length?matched.length/items.length:0,...locationMetrics(snapshot),...launchMetrics(snapshot),budgetLedgerAvailable:options.budgetLedgerAvailable!==false,skipped:snapshot.skipped,aiSamples:snapshot.aiSamples??[],tokens:snapshot.aiSamples?.reduce((n,s)=>n+s.tokens,0)??0,spentUsd:spent,budgetSpend,extractionOnlySpendUsd:snapshot.aiSamples?.reduce((n,s)=>n+s.costUsd,0)??0,projectedMonthlyUsd:{low:d.type==="county"?0:3,high:d.type==="county"?2:10,basis:"Planning estimate from onboarding brief, not measured spend; validate after one month"},nextHearings:next,mapChecklist:["Official boundary verified","County clipped below city layers","Distinct jurisdiction color","No location invented for unmapped applications","No public map, sitemap, search or email exposure"],notes:d.notes}};
+ if(options.dryRun){report.id="dry-run-"+report.id;report.passed=false;report.checks.push({name:"recorded staging QA",passed:false,detail:"Read-only collection report; not saved as durable staged QA and cannot authorize publication"});report.data.collectionMode="dry-run";report.data.freshRunAiSpendUsd=0;}
+ return redactQaReport(report);
+}

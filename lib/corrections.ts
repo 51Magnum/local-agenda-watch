@@ -1,10 +1,11 @@
-import {Pool} from "pg";
+import {databaseUrl} from "./runtime-environment";
+import {Pool} from "./database-pool";
 import {createHash,randomUUID} from "node:crypto";
 import { queueCorrectionReceived } from "./email/jobs";
 let pool:Pool,ready:Promise<unknown>|undefined;
 async function db(){
- if(!process.env.DATABASE_URL)throw Error("Corrections storage not configured");
- pool??=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:10000});
+ if(!databaseUrl())throw Error("Corrections storage not configured");
+ pool??=new Pool({connectionString:databaseUrl(),max:2,connectionTimeoutMillis:10000});
  ready??=pool.query(`CREATE TABLE IF NOT EXISTS law_corrections(id uuid PRIMARY KEY,project text NOT NULL,message text NOT NULL,email text,created_at timestamptz NOT NULL DEFAULT now(),status text NOT NULL DEFAULT 'new');CREATE TABLE IF NOT EXISTS law_correction_limits(ip_hash text NOT NULL,window_start timestamptz NOT NULL,hits int NOT NULL,PRIMARY KEY(ip_hash,window_start));`).catch(e=>{ready=undefined;throw e;});
  await ready;return pool;
 }

@@ -11,6 +11,8 @@ it("refuses public promotion without current passing QA and an explicit recorded
  await expect(promoteStaging("boise","public")).rejects.toThrow("recorded admin approval");
  database.approvals=[{id:"owner-approved",admin_user:"owner",approved_at:new Date()}];
  await expect(promoteStaging("boise","public")).resolves.toMatchObject({approvalId:"owner-approved"});
- database.snapshot={areaId:"boise",launchStatus:"admin_only",checkedAt:"changed"};
+ database.snapshot={areaId:"boise",launchStatus:"admin_only",checkedAt:"new collection clock",health:[],runtime:{environment:"production",gitCommit:"new",checks:[]}};
+ await expect(promoteStaging("boise","public")).resolves.toMatchObject({approvalId:"owner-approved"});
+ database.snapshot={areaId:"boise",launchStatus:"admin_only",applications:[{recordId:"changed reviewed content"}]};
  await expect(promoteStaging("boise","public")).rejects.toThrow("current passing QA");
 });

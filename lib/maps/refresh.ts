@@ -1,4 +1,5 @@
 import {residentialCase} from "@/lib/residential-privacy";
+import {jurisdiction,isPublicJurisdiction} from "../jurisdictions/registry";
 import {indexedDecisionDate} from "./case-index";
 import { canonicalAreaHref } from "@/lib/areas/registry";
 import { bbox, feature, simplify } from "@turf/turf";
@@ -26,7 +27,7 @@ export function parcelNumbers(value: unknown, ignored: string[]): string[] {
   if (typeof value !== "string") return [];
   return [...new Set(value.toUpperCase().split(/[\s,;]+/).map((s) => s.trim()).filter((s) => /^[A-Z0-9-]{3,40}$/.test(s) && !ignored.includes(s)))];
 }
-async function fetchFlum(config: JurisdictionConfig): Promise<FlumCache> {
+export async function fetchFlum(config: JurisdictionConfig): Promise<FlumCache> {
   const [metadata, source] = await Promise.all([gisJson(config.flum.layerUrl + "?f=json"), geoQuery(config.flum.layerUrl, { outFields: config.flum.categoryField, geometryPrecision: "6" })]);
   const features = source.features.filter((f) => polygonGeometry(f.geometry)).map((f) => {
     const original = feature(f.geometry as CaseGeometry, { [config.flum.categoryField]: f.properties?.[config.flum.categoryField] });
@@ -41,6 +42,13 @@ function hearingFromFeature(config: JurisdictionConfig, item: Feature): Hearing 
   return { appId: id, appType: String(p[fields.type] ?? ""), appTypeLabel: config.caseTypes[String(p[fields.type])] ?? String(p[fields.type] ?? "Planning case"), appStatus: String(p[fields.status] ?? ""), appPhase: "Other", appPhaseRaw: String(p[fields.phase] ?? ""), appScope: p[fields.title] ? String(p[fields.title]) : null, appAcres: fields.acres && Number.isFinite(p[fields.acres]) ? Number(p[fields.acres]) : null, externalUrl: link, energovPlanId: link?.match(/\/plan\/([a-f0-9-]{36})/i)?.[1] ?? null, meetings: [] };
 }
 export async function buildMapSnapshot(config: JurisdictionConfig, previous?: MapSnapshot, options: { deadline?: number } = {}): Promise<MapSnapshot> {
+  const definition=jurisdiction(config.id);
+  if(definition?.enabled&&!definition.legacyPublic){
+    if(!isPublicJurisdiction(config.id))throw Error("Jurisdiction is not available for public maps");
+    const snapshot=await(await import("../jurisdictions/runtime")).configuredSnapshot(config.id);
+    snapshot.flum=previous?.flum&&Date.now()-Date.parse(previous.flum.updatedAt)<WEEK?previous.flum:config.flum.layerUrl?await fetchFlum(config).catch(()=>{snapshot.warnings.push("Future land use is temporarily unavailable or out of date.");return previous?.flum;}):undefined;
+    return snapshot;
+  }
   const deadline = options.deadline ?? Date.now() + 70000, now = new Date(), warnings: string[] = [];
   const oldCases = new Map(previous?.cases.map((c) => [c.id, c]));
   const [layers, feed, flum] = await Promise.all([

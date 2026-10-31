@@ -1,16 +1,26 @@
 import { AREAS, areaPath } from "@/lib/areas/registry";
 import { authorizedReviewer } from "@/lib/timeline/auth";
+import {previewMutationResponse} from "@/lib/runtime-environment";
+import {isPreview} from "@/lib/runtime-environment";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Preserve legacy locality links while making country/state/area paths canonical.
-export function proxy(request: NextRequest) {
+function routeProxy(request: NextRequest) {
+  if(isPreview()){
+    const path=request.nextUrl.pathname;
+    if(path.startsWith("/api/alerts"))return NextResponse.json({error:"Not available in preview"},{status:403});
+    if(path.startsWith("/admin")&&!["GET","HEAD"].includes(request.method))return previewMutationResponse();
+    if(path==="/admin/review")return NextResponse.next({headers:{"Cache-Control":"no-store","X-Robots-Tag":"noindex, nofollow"}});
+    if(path.startsWith("/admin"))return new NextResponse("Not available in preview",{status:403});
+  }
   if(request.nextUrl.pathname === "/_next/image") {
     const source=request.nextUrl.searchParams.get("url")??"";
     if(/\/api\/maps\/.+\/visual\/|\/(?:nampa|us\/id\/nampa)\/.+\.(?:png|jpe?g|webp)/i.test(source)) return new NextResponse("Image removed pending privacy verification",{status:410,headers:{"Cache-Control":"private, no-store, max-age=0"}});
     return;
   }
   if (request.nextUrl.pathname === "/admin" || request.nextUrl.pathname.startsWith("/admin/")) {
+    if(!["GET","HEAD"].includes(request.method)){const disabled=previewMutationResponse();if(disabled)return disabled;}
     if (!process.env.REVIEW_ADMIN_PASSWORD) return new NextResponse("Review access is not configured", { status: 503, headers: { "Cache-Control": "no-store" } });
     if (!authorizedReviewer(request.headers.get("authorization"))) return new NextResponse("Authentication required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Case evidence review", charset="UTF-8"', "Cache-Control": "no-store" } });
     return NextResponse.next({ headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" } });
@@ -33,4 +43,5 @@ export function proxy(request: NextRequest) {
     }
   }
 }
+export function proxy(request:NextRequest){const response=routeProxy(request);if(process.env.VERCEL_ENV==="production")return response;const result=response??NextResponse.next();result.headers.set("X-Robots-Tag","noindex, nofollow");return result;}
 export const config={matcher:["/((?!_next/static|favicon.ico).*)"]};

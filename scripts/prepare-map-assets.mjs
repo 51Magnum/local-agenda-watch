@@ -5,4 +5,4 @@ await copyFile("node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs", "public/m
 await copyFile("node_modules/maplibre-gl/LICENSE.txt", "public/maplibre/LICENSE.txt");
 
 const {spawnSync}=await import("node:child_process");
-const result=spawnSync(process.execPath,["node_modules/tsx/dist/cli.mjs","scripts/prepare-boundaries.ts"],{stdio:"inherit"});if(result.status!==0)process.exit(result.status??1);
+const result=spawnSync(process.execPath,["--conditions=react-server","--import","tsx","scripts/prepare-boundaries.ts"],{stdio:"inherit"});if(result.status!==0)process.exit(result.status??1);

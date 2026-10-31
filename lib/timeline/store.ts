@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile, rename, rmdir, stat } from "node:fs/promise
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { emptyEvidenceState, type EvidenceState } from "./types";
+import {isPreview} from "../runtime-environment";
 
 export interface EvidenceStore {
   read(): Promise<EvidenceState>;
@@ -43,6 +44,7 @@ export function createFileStore(filename: string): EvidenceStore {
   } };
 }
 export function getEvidenceStore(options:{buffered?:boolean}={}): EvidenceStore {
+  if(isPreview())return {read:async()=>emptyEvidenceState(),readCase:async()=>emptyEvidenceState(),pages:async()=>[],mutate:async()=>{throw Error("Not available in preview");}};
   if (!process.env.DATABASE_URL) {
     if (process.env.VERCEL) throw new Error("DATABASE_URL is required for durable timeline storage on Vercel");
     return createFileStore(process.env.TIMELINE_LOCAL_PATH ?? path.join(process.cwd(), ".data", "timeline.json"));
@@ -65,7 +67,7 @@ export async function releaseLease(store: EvidenceStore, name: string, token: st
 export async function resetDocumentRetry(store:EvidenceStore,id:string){
  await store.mutate(state=>{
   const doc=state.documents[id];if(!doc)throw new Error("Document not found");
-  doc.failCount=0;delete doc.lastAttemptAt;delete doc.error;
+  doc.failCount=0;delete doc.lastAttemptAt;delete doc.error;delete doc.deferredUntil;
   if(doc.state==="failed-permanent"||doc.state==="error")doc.state="processing";
   (state.retryAudit??=[]).push({documentId:id,at:new Date().toISOString()});
  });

@@ -13,7 +13,9 @@ As of 2026-10-27T17:18:09.104Z. **Not ready for public launch. Admin-only.**
 | Case-bearing hearing items | 92 |
 | Application match rate | 5.4% |
 | Application geometry rate | 100.0% |
-| Applications with no location | 0 |
+| Applications without geometry | — |
+| Applications without address | — |
+| Agenda items without matched geometry/address | — |
 
 Recent applications plus older active records linked to collected hearings; undated active records retained
 
@@ -58,10 +60,10 @@ Reserved cost from uncertain failed calls stays reserved until reconciled; do no
 
 | Field | Value | Physical page | Status |
 | --- | --- | ---: | --- |
-| acres | 10.77 acres | 1 | auto_published |
-| staffRecommendation | Staff recommends approval of the renewal of the contractor's yard Conditional Use and Master Site Plan as it complies with Ada County Code. | 6 | auto_published |
-| applicantCompany | Gary A. Lee | 1 | auto_published |
-| pzHearingDate | 2026-10-15 | 1 | auto_published |
+| acres | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| staffRecommendation | [Candidate text withheld; review in authenticated admin] | 6 | auto_published |
+| applicantCompany | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| pzHearingDate | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
 
 ### 202601317-CU-MSP
 
@@ -69,11 +71,11 @@ Reserved cost from uncertain failed calls stays reserved until reconciled; do no
 
 | Field | Value | Physical page | Status |
 | --- | --- | ---: | --- |
-| popupHeadline | Conditional Use and Master Site Plan for 40-acre gravel pit operation | 1 | auto_published |
-| densityContext | The proposed gravel pit meets the purpose of the Rural Preservation District with minimal impact on prime farmland and no extension of public services required. | 3 | auto_published |
-| constructionTiming | Extraction period proposed for twenty (20) years. | 2 | auto_published |
-| applicantCompany | Quality Sand & Gravel Inc | 1 | auto_published |
-| pzHearingDate | 2026-10-15 | 1 | auto_published |
+| popupHeadline | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| densityContext | [Candidate text withheld; review in authenticated admin] | 3 | auto_published |
+| constructionTiming | [Candidate text withheld; review in authenticated admin] | 2 | auto_published |
+| applicantCompany | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| pzHearingDate | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
 
 ### 202601395-CU-MSP-ALT
 
@@ -81,13 +83,13 @@ Reserved cost from uncertain failed calls stays reserved until reconciled; do no
 
 | Field | Value | Physical page | Status |
 | --- | --- | ---: | --- |
-| popupHeadline | Renewal of contractor's yard and shop operation on 9.271 acres in Rural Urban Transition zone | 1 | auto_published |
-| acres | 9.271 acres | 1 | auto_published |
-| staffRecommendation | Recommend approval as set out in the Findings of Fact and Conclusions of Law attached hereto | 5 | auto_published |
-| trafficSummary | Ada County Highway District has no comments or required improvements for this application. | 5 | auto_published |
-| densityContext | The property is in a transitional district with the contractor’s yard use allowed for up to five years or until annexation. The use is consistent with the Rural Urban Transition district's purpose as a transitional use. | 4 | auto_published |
-| applicantCompany | Risa Roe | 1 | auto_published |
-| pzHearingDate | 2026-10-15 | 1 | auto_published |
+| popupHeadline | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| acres | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| staffRecommendation | [Candidate text withheld; review in authenticated admin] | 5 | auto_published |
+| trafficSummary | [Candidate text withheld; review in authenticated admin] | 5 | auto_published |
+| densityContext | [Candidate text withheld; review in authenticated admin] | 4 | auto_published |
+| applicantCompany | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| pzHearingDate | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
 
 ### 202600638-ZC-DA-S-V
 
@@ -95,13 +97,13 @@ Reserved cost from uncertain failed calls stays reserved until reconciled; do no
 
 | Field | Value | Physical page | Status |
 | --- | --- | ---: | --- |
-| popupHeadline | Subdivision into two lots with zoning change and variance for undersized lot | 1 | auto_published |
-| acres | 9.36 acres | 1 | auto_published |
-| units | 2 lots | 2 | auto_published |
-| zoningRequested | Rural-Urban Transition (RUT) District | 1 | auto_published |
-| staffRecommendation | recommend approval | 4 | auto_published |
-| applicantCompany | Ackerman-Estvold | 1 | auto_published |
-| councilHearingDate | 2026-10-14 | 1 | auto_published |
+| popupHeadline | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| acres | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| units | [Candidate text withheld; review in authenticated admin] | 2 | auto_published |
+| zoningRequested | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| staffRecommendation | [Candidate text withheld; review in authenticated admin] | 4 | auto_published |
+| applicantCompany | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| councilHearingDate | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
 
 ### 202601258-DA-DM
 
@@ -109,8 +111,8 @@ Reserved cost from uncertain failed calls stays reserved until reconciled; do no
 
 | Field | Value | Physical page | Status |
 | --- | --- | ---: | --- |
-| popupHeadline | Dry Creek Ranch Planned Community periodic evaluation and development update | 1 | auto_published |
-| acres | 1,414 acres | 2 | auto_published |
+| popupHeadline | [Candidate text withheld; review in authenticated admin] | 1 | auto_published |
+| acres | [Candidate text withheld; review in authenticated admin] | 2 | auto_published |
 
 Projected steady-state monthly cost: $0–$2. Planning estimate from onboarding brief, not measured spend; validate after one month.
 

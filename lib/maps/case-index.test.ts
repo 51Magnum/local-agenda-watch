@@ -1,10 +1,10 @@
 import { expect, it, vi } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
-const h = vi.hoisted(() => ({ db: null as unknown as PGlite, calls: 0 }));
+const h = vi.hoisted(() => ({ db: null as unknown as PGlite, calls: 0, sql:[] as string[] }));
 vi.mock("pg", () => ({
   Pool: class {
     async query(sql: string, params?: unknown[]) {
-      h.calls++;
+      h.calls++;h.sql.push(sql);
       return params?.length
         ? await h.db.query(sql, params)
         : ((await h.db.exec(sql)).at(-1) ?? { rows: [] });
@@ -26,6 +26,11 @@ vi.mock("next/cache", () => ({
 vi.mock("@/lib/timeline/public", () => ({
   readTimelineState: async () => ({ version: 1, documents: {}, fields: {} }),
 }));
+// Cache behavior is tested against real index SQL, independent of other stores'
+// initialization. Publication authority is deliberately rechecked outside this cache.
+vi.mock("@/lib/project-content-store",()=>({readProjectContent:async()=>({})}));
+vi.mock("@/lib/residential-privacy-store",()=>({privacyOverrides:async()=>({})}));
+import {routeJurisdictions} from "../jurisdictions/registry";
 import { cachedViewport, exportMapFeatures, siteMembers, projectDirectory } from "./case-index";
 it("indexes old snapshots once, deduplicates across areas, returns only lightweight features and performs no SQL on repeated cached views", async () => {
   const db = new PGlite();
@@ -88,7 +93,9 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     expect(data.cases[0].summary).toBe("");
     const calls = h.calls;
     await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
-    expect(h.calls).toBe(calls);
+    const repeated=h.sql.slice(calls);
+    expect(repeated).toHaveLength(routeJurisdictions().filter(d=>!d.legacyPublic).length);
+    expect(repeated.every(sql=>sql.startsWith("SELECT p.data FROM law_jurisdiction_publications"))).toBe(true); // Pause checks remain uncached; no map/index SQL repeats.
     const shapes = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 14);
     expect(shapes.cases[0].geometry).not.toBeNull();
     const restored = await cachedViewport([-116.51, 43.49, -116.48, 43.52], 11);

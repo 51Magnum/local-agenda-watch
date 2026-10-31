@@ -30,6 +30,8 @@ export type JurisdictionConfig = {
   presentation?: (hearing: Hearing, plan: Parameters<typeof caseSummary>[1]) => { title: string; summary: string; href: string; hearing?: { startsAt: string; body: string } };
 };
 export type MapCase = {
+  aiTitle?:boolean;
+  privacyPolicy?:"staff-individual";
   recordStatus?: string; caseDate?: string; residentialPrivacy?: boolean;
   popup?: { headline: string; explanation?: string; aiGenerated?: boolean; projectName: string; progress: { label: string; state: "done" | "past" | "current" | "future" }[] };
   areaId?:string; jurisdictionLabel?:string; stageBody?:string; caseIds?:string[]; members?:{areaId:string;caseId:string;title:string;href:string;stage:MapStage;body:string;date?:string;status?:string}[];

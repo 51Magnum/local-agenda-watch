@@ -1,5 +1,6 @@
+import {databaseUrl} from "./runtime-environment";
 import {getProjectForCase} from "./projects";
-import { Pool } from "pg";
+import { Pool } from "./database-pool";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { AREAS } from "./areas/registry";
 import { nearbyCases } from "./maps/spatial";
@@ -27,9 +28,9 @@ export type Subscription = {
 };
 let pool: Pool, ready: Promise<unknown> | undefined;
 export async function alertsDb() {
-  if (!process.env.DATABASE_URL)
+  if (!databaseUrl())
     throw Error("Alerts storage is not configured");
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+  pool ??= new Pool({ connectionString: databaseUrl(), max: 2,previewSignups:true });
   ready ??= pool
     .query(
       `CREATE TABLE IF NOT EXISTS law_alert_subscriptions(id uuid PRIMARY KEY,scope text NOT NULL,email text NOT NULL,target jsonb NOT NULL,confirm_hash text NOT NULL,confirm_expires timestamptz NOT NULL,unsubscribe_token text NOT NULL,confirmed_at timestamptz,unsubscribed_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),state jsonb,last_sent date,UNIQUE(scope,email,target));CREATE INDEX IF NOT EXISTS law_alert_confirm ON law_alert_subscriptions(confirm_hash);CREATE TABLE IF NOT EXISTS law_alert_limits(key text NOT NULL,window_start timestamptz NOT NULL,hits int NOT NULL,PRIMARY KEY(key,window_start));CREATE TABLE IF NOT EXISTS law_alert_waitlist(id uuid PRIMARY KEY,sent_at timestamptz);
@@ -46,9 +47,9 @@ CREATE TABLE IF NOT EXISTS law_alert_recipient_checks(scope text NOT NULL,email 
   return pool;
 }
 export const alertScope = () =>
-  process.env.VERCEL_ENV === "preview"
-    ? "preview:" + process.env.VERCEL_GIT_COMMIT_REF
-    : "production";
+  process.env.VERCEL_ENV === "production"
+    ? "production"
+    : "preview:" + (process.env.VERCEL_GIT_COMMIT_REF??"local");
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
 export function parseWatchTarget(value: unknown): WatchTarget {
   if (!value || typeof value !== "object")

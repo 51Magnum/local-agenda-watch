@@ -49,7 +49,7 @@ export default function ProjectPane({
       minute: "2-digit",
       timeZone: data.area.timezone,
     }).format(new Date(v)) +
-    (["America/Denver", "America/Boise"].includes(data.area.timezone)
+    (new Intl.DateTimeFormat("en-US",{timeZone:data.area.timezone,timeZoneName:"long"}).formatToParts(new Date(v)).some(p=>p.type==="timeZoneName"&&/^Mountain /.test(p.value))
       ? " Mountain Time"
       : " " + data.area.timezone);
   const impactRows = data.impacts.map((f, index) => (
@@ -108,6 +108,7 @@ export default function ProjectPane({
       </button>
       <div className="law-pane-content">
         <h1>{item.popup?.projectName ?? item.title}</h1>
+        {item.aiTitle&&<p className="text-xs text-zinc-500">AI-generated title; check the linked official source.</p>}
         <section aria-labelledby="question-what">
           <h2 className="law-question-heading" id="question-what">
             {RESIDENT_QUESTIONS[0]}
@@ -186,15 +187,16 @@ export default function ProjectPane({
               <HearingNext next={data.next} timezone={data.area.timezone}/>
             ) : (
               <p>
-                {item.stage === "Decided"
+                {data.noHearing?.message ?? (item.stage === "Decided"
                   ? (item.popup?.progress.find((p) => p.state === "current")
                       ?.label ??
                     "Decision recorded; outcome not specified in the available record")
                   : item.stage === "Recorded"
                     ? "Recorded in official records."
-                    : "No hearing is confirmed in the available records."}
+                    : "No hearing is confirmed in the available records.")}
               </p>
             )}
+            {!data.next && data.noHearing?.sources.map(s=><a key={s.url} className="mr-3 underline" href={s.url} target="_blank" rel="noreferrer">{s.label}</a>)}
           </section>
           <section className="law-pane-section">
             <h2 className="law-question-heading">{RESIDENT_QUESTIONS[4]}</h2>

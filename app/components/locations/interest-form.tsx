@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useId,useState} from "react";
-import {AREAS} from "@/lib/areas/registry";
+import {AREAS} from "@/lib/areas/public-registry";
 export default function InterestForm({kind="coverage",areaName="",coordinates,radiusMiles=1,place=false,onSaved}:{onSaved?:()=>void;radiusMiles?:number;place?:boolean;kind?:"coverage"|"follow";areaName?:string;coordinates?:[number,number]}){
  const areas=Object.values(AREAS).map(a=>({id:a.id,label:a.name+", "+a.stateAbbreviation})).sort((a,b)=>a.label.localeCompare(b.label));
  const [customArea,setCustomArea]=useState(Boolean(areaName&&areaName!=="Any area"&&!areas.some(a=>a.label===areaName)));

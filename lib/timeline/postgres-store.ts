@@ -1,11 +1,13 @@
+import {databaseUrl} from "../runtime-environment";
+import {productionWritesAllowed} from "../runtime-environment";
 import {trackedRows} from "@/lib/db-transfer";
-import {Pool,type PoolClient} from "pg";
+import {Pool,type PoolClient} from "../database-pool";
 import {createHash,randomUUID} from "node:crypto";
 import type {EvidenceStore} from "./store";
 import {DECISION_KEYS, LOW_STAKES_KEYS,emptyEvidenceState,type EvidenceState,type StoredDocument,type EvidenceField} from "./types";
 import {compactRun,documentMetadata} from "./compact";
 let pool:Pool|undefined,initialized:Promise<void>|undefined;
-const db=()=>pool??=new Pool({connectionString:process.env.DATABASE_URL,max:3,connectionTimeoutMillis:10000});
+const db=()=>pool??=new Pool({connectionString:databaseUrl(),max:3,connectionTimeoutMillis:10000});
 const json=(v:unknown)=>JSON.stringify(v);
 const hash=(v:unknown)=>createHash("sha256").update(json(v)).digest("hex");
 const schema=`
@@ -21,6 +23,7 @@ const schema=`
 `;
 /** Migration stays inside Postgres: the legacy text archive never crosses the network. */
 async function initialize(){
+ if(!productionWritesAllowed())return;
  initialized??=(async()=>{
   const client=await db().connect();try{
    await client.query("BEGIN");await client.query("SELECT pg_advisory_xact_lock(71632024)");await client.query(schema);

@@ -1,0 +1,2409 @@
+{
+  "areaId": "ada-county",
+  "createdAt": "2026-10-31T15:28:18.769Z",
+  "snapshotHash": "6558127dbc008f25af83a4e38246eca2cd10d4584c26deef750455db1e0744ff",
+  "passRate": 0.95,
+  "records": [
+    {
+      "recordId": "201601258-CPA",
+      "sourceHash": "142d37bc9262273838c764739cdd44264cf35233696b2785f10de8ab575a3ccf",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=201601258-CPA"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202103209-S",
+      "sourceHash": "f4e75ff2cbb02c9a4cbe7c745c23a3e83c8848e049c6c58105feea7faa6d0baa",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "The county query returned 3 distinct source rows for 202103209-S; exactly one is required. Public rows disagree on AppApplicDesc. Review the county record; LAW has not selected a conflicting row for publication.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202103209-S%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202103209-S"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202300565-CU",
+      "sourceHash": "8ec5a3a5314cc3bc405f44772525fd453d1a74969730ad4521bca68b17638ae0",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300565-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202300644-S",
+      "sourceHash": "010e6ded46bfdc19c076234a3a4f6124fdb84a84c5098fff15017b15c81ca5a1",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "fail",
+          "reason": "The county query returned 2 distinct source rows for 202300644-S; exactly one is required. Public rows disagree on AppApplicDesc. Review the county record; LAW has not selected a conflicting row for publication.",
+          "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202300644-S%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202300644-S"
+        }
+      ],
+      "publish": false,
+      "hidden": false
+    },
+    {
+      "recordId": "202400171-CPA",
+      "sourceHash": "6433a5529e02380080507d3469eac648062764e5e888827cca629cf2afd200a3",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202400171-CPA"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202502399-PR",
+      "sourceHash": "b1547e92bf2412a49a04281a611060854faa570cfc73563cf4d3eb3520692521",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502399-PR"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202502461-CU",
+      "sourceHash": "c38bd323604b12d506968680179d412abd071017f256d1ecc8baf38e7eae0870",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502461-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202502508-ZC",
+      "sourceHash": "a8093bbdf4bf4e123dfd8ef164177c5cb9bcbafbe6ae3d15332117d43ab8fbd0",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202502508-ZC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600273-ZC",
+      "sourceHash": "d0d523c28efd2488028d21cbb0774e4d2e00beac2191076fd71d379ca9a2660d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600273-ZC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600638-ZC",
+      "sourceHash": "edd99a8c54f02c76d3b750f21b2d65368a7a9f43e9bfe4c5be57f06d7fe3774b",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600638-ZC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600819-ZC",
+      "sourceHash": "202e0e337c985cc04764e108b50a0d01c5223d27bff1921ba42bbaac99e37eb3",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600881-CU",
+      "sourceHash": "678b8c87e466daa0283c18ca4044e279a8c5afaac626d6e73240a87c03d16e2d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600881-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600934-S",
+      "sourceHash": "a215b3cb2c22307488861f1448e8ec7ed2203eceafeffce6830aa4cefe3dee8b",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600934-S"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600965-V",
+      "sourceHash": "f22448971941a84d4db2572c510d416744cabb2a8e1d3585f6450d8d1761cb0f",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601088-ZC",
+      "sourceHash": "e59011e4217d7cbe2380b412590b3d6cdb8f2ca588ff7223d765259cc1fccdb9",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601088-ZC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601149-CU",
+      "sourceHash": "8a767868bfe6b89e3505672780cef18ab07e6b258ad888f3ab1cd28848b9f4b1",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601149-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601161-V",
+      "sourceHash": "ab1d595afe92f5bb5a0a6f46b1119687123262f21d9b2e0b944bbcc7ad445fbb",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601161-V"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601163-CU",
+      "sourceHash": "64f2eee54d8bd1f00e3c77380213ff29105e573e1896318f8daf254ad8a29baa",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601163-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601193-CU",
+      "sourceHash": "0326d2984cfd936f2ba545ee2e7a1ac76a73bd7acedcf853f79ecb517c6688a3",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601250-CU",
+      "sourceHash": "17e14fd096a7309040d75ed24fa964ff73c606e27f33199b0743c62f88492d1d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601317-CU",
+      "sourceHash": "ad968066502b292ee4dfb03be3ed5eabf52968fcd2cd546be1773e6f580ffda7",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601317-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601395-CU",
+      "sourceHash": "af8b270b2f50d51343d71dd6b91814f9a1357f750ed83d73740cf6d3551c62c8",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601398-CU",
+      "sourceHash": "cfb07357e5d67fda39daa43adf548b2091c91c2b2fdc8fb7f4c1809ef82a83c1",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601398-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "03006-CU",
+      "sourceHash": "5bc03f6cac5e18b5bfdd5c51e4a9b37b0895381d8a6b348d0ed76806028d6fb1",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=03006-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601614-VAC",
+      "sourceHash": "03f78e5e0a3ce25296ca7fc5d808f7937415d2ab8ba90278b532f4e96c8e44c2",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601614-VAC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601703-CU",
+      "sourceHash": "ffd66a7629d0618d4c467207ba8e0906662ad00dceca6236fbcc7d9adb84a480",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601703-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601712-COM",
+      "sourceHash": "c3980b8514dd8dd2205777271d7f97047e649a9d07829b6a663226384f3bed15",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601739-VAC",
+      "sourceHash": "9a79ef5e24859c577c017fc4d5d4c472be6462d48e0687ebd684c1dbb9a7af23",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601739-VAC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601753-CU",
+      "sourceHash": "cb20104a0e8b1ba5c672f43f3010a0177bb40a2c21b885f4571bec4ddacbbad7",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601753-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601786-PUD",
+      "sourceHash": "5adc907209f4882e9b0b6e5d7ab45969591f0b4d8e159c400d7984a65771aed5",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601786-PUD"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202102022-MSP",
+      "sourceHash": "0007f2346644b352bb1e3299d3a4600fed254fec0999a5217acacdcebede397c",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202102022-MSP"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601837-CU",
+      "sourceHash": "6e32f32b9e1dca16914dd4f87da341d57374b7c1aa0e2e15e9013631333d742d",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601837-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601864-V",
+      "sourceHash": "a49bb666c5f524f3d2ade89e1349a0216f0fdf3fdd2f7e3818645d1622b41f04",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601864-V"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601913-CU",
+      "sourceHash": "08c114f110010da5bf3041f8a308c8b213e31bcafa1298894bc6053b1bd886d3",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601913-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601939-CU",
+      "sourceHash": "485931fa4dfadde1e916fe0ded1a2bd5734dfdee5d902961705cf3076748da1c",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601939-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601987-CU",
+      "sourceHash": "cf72bfc10c05aa0f18363db2fc3846e3b2b3e62e454a5df787e8f13aeb655865",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601987-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202601988-VAC",
+      "sourceHash": "160ac85cfb16d3f79501456562390593db7bedbefe5d37b781ee188a62a8ecc5",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601988-VAC"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202602012-CU",
+      "sourceHash": "e3faf04c26a8c438036e5a1134a619d051b42ad98c4b3d75c1ad92582008fe66",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location checked against the jurisdiction coverage using the point/majority rule.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600829-VAC-PCON-PBA",
+      "sourceHash": "ff38b5a97bff68c4d7c6d4f0fb746e91418d44c27b710b5dd139d8e92abae47a",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    },
+    {
+      "recordId": "202600864-CU-MSP",
+      "sourceHash": "2c5e28ad96f2790bdc54684de01eef588149c0db2842e1d11db741c8733b6f7f",
+      "title": "[Resident title withheld]",
+      "checks": [
+        {
+          "check": "title-from-source",
+          "status": "pass",
+          "reason": "Title must use source words, include the subject, and fit within 70 characters.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "description-verbatim",
+          "status": "pass",
+          "reason": "Displayed description must equal the captured official description exactly.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "link-resolves-to-case",
+          "status": "pass",
+          "reason": "Case links verified using source identity, official document filenames or the configured exact-record query.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "location-in-boundary",
+          "status": "pass",
+          "reason": "Location not published; no map location is invented.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "case-identity",
+          "status": "pass",
+          "reason": "Source APPFILE and case IDs identify this project.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "privacy",
+          "status": "pass",
+          "reason": "LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "ai-labeled",
+          "status": "pass",
+          "reason": "No AI-generated text in this record.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        },
+        {
+          "check": "stage-and-date",
+          "status": "pass",
+          "reason": "Published agenda body and jurisdiction timezone control the stage and next hearing.",
+          "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
+        }
+      ],
+      "publish": true,
+      "hidden": false
+    }
+  ],
+  "counts": {
+    "title-from-source": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "description-verbatim": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "link-resolves-to-case": {
+      "pass": 38,
+      "fail": 2,
+      "uncertain": 0
+    },
+    "location-in-boundary": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "case-identity": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "privacy": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "ai-labeled": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "stage-and-date": {
+      "pass": 40,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "hearing-items-accounted": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "collection-complete": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    },
+    "scope-explained": {
+      "pass": 1,
+      "fail": 0,
+      "uncertain": 0
+    }
+  },
+  "coverage": [
+    {
+      "check": "hearing-items-accounted",
+      "status": "pass",
+      "reason": "Every case-bearing agenda item has a project.",
+      "sourceUrl": "https://adacounty.id.gov/developmentservices/community-planning-division/public-hearings-agendas/"
+    },
+    {
+      "check": "collection-complete",
+      "status": "pass",
+      "reason": "Complete collection; hearing-linked inventory retained.",
+      "sourceUrl": "https://apps.adacounty.id.gov/AdaFileBrowse/"
+    },
+    {
+      "check": "scope-explained",
+      "status": "pass",
+      "reason": "Exclusions must be counted by category; hearing types, agenda items and organization development applications are in scope.",
+      "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14"
+    }
+  ],
+  "agendaItems": {
+    "accounted": 41,
+    "total": 41
+  },
+  "unmatched": [],
+  "exclusions": {
+    "Individual staff permit: ACCESSORY USE": 18,
+    "Outside hearing/development scope: ACCESSORY USE": 15,
+    "Outside hearing/development scope: FLOODPLAIN APPLICATION": 2,
+    "Individual staff permit: ALTERNATIVE COMPLIANCE": 2,
+    "Individual staff permit: TEMPORARY USE": 4,
+    "Individual staff permit: FLOODPLAIN APPLICATION": 2,
+    "Outside hearing/development scope: HILLSIDE DEVELOPMENT": 1,
+    "Individual staff permit: PROPERTY BOUNDARY ADJUSTMENT": 2,
+    "Outside hearing/development scope: TEMPORARY USE": 1,
+    "Outside hearing/development scope: ONE-TIME DIVISION": 1,
+    "Outside hearing/development scope: ALTERNATIVE COMPLIANCE": 1,
+    "Individual staff permit: PARCEL CONSOLIDATION": 1
+  },
+  "queue": [
+    {
+      "recordId": "202103209-S",
+      "sourceHash": "f4e75ff2cbb02c9a4cbe7c745c23a3e83c8848e049c6c58105feea7faa6d0baa",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "The county query returned 3 distinct source rows for 202103209-S; exactly one is required. Public rows disagree on AppApplicDesc. Review the county record; LAW has not selected a conflicting row for publication.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202103209-S%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
+      }
+    },
+    {
+      "recordId": "202300644-S",
+      "sourceHash": "010e6ded46bfdc19c076234a3a4f6124fdb84a84c5098fff15017b15c81ca5a1",
+      "check": {
+        "check": "link-resolves-to-case",
+        "status": "fail",
+        "reason": "The county query returned 2 distinct source rows for 202300644-S; exactly one is required. Public rows disagree on AppApplicDesc. Review the county record; LAW has not selected a conflicting row for publication.",
+        "sourceUrl": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202300644-S%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
+      }
+    }
+  ],
+  "aiCostUsd": 0,
+  "goLive": true,
+  "decision": "Automatic publication approved; Git preview remains preview until merge."
+}

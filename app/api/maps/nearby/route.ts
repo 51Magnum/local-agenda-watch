@@ -1,7 +1,8 @@
+import {visibleAreas} from "@/lib/areas/registry";
 import {combinedFlumViewport} from "@/lib/maps/flum-viewport";
 import { enrichMapPopups } from "@/lib/maps/popup-data";
 import {bbox,featureCollection,feature,distance} from "@turf/turf";
-import {AREAS} from "@/lib/areas/registry";
+
 import {getJurisdiction} from "@/lib/maps/jurisdictions";
 import {readMapSnapshot} from "@/lib/maps/store";
 import {publicMapData} from "@/lib/maps/refresh";
@@ -14,7 +15,7 @@ export async function GET(request:Request){
  let coordinates:[number,number]=[Number(q.get("lng")),Number(q.get("lat"))];const r=Number(q.get("r")??1),overview=q.get("overview")==="1",viewBounds=parseMapBounds(q.get("bbox"));
  if(q.has("bbox")&&!viewBounds)return Response.json({error:"Invalid map bounds."},{status:400});
  if(!overview&&!viewBounds&&(!q.get("lng")||!q.get("lat")||!isLonLat(coordinates)||!Number.isFinite(r)||r<.25||r>10))return Response.json({error:"Choose a location and a radius from 0.25 to 10 miles."},{status:400});
- const coverage=Object.values(AREAS).filter(a=>a.status==="live"&&(!q.get("country")||a.country===q.get("country"))&&(!q.get("state")||a.state===q.get("state")));
+ const coverage=(await visibleAreas()).filter(a=>a.status==="live"&&(!q.get("country")||a.country===q.get("country"))&&(!q.get("state")||a.state===q.get("state")));
  if(overview&&!coverage.length)return Response.json({error:"No tracked areas."},{status:404});
  const bounds=viewBounds??(overview?bbox(featureCollection(coverage.map(a=>feature(a.boundary)))).slice(0,4) as [number,number,number,number]:radiusBounds(coordinates,r));
  const areas=overview?coverage:viewBounds?liveAreasInBounds(bounds):liveAreasInRadius(coordinates,r);

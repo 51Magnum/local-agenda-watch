@@ -1,0 +1,227 @@
+{
+  "runtime": "Node 24.18.0 / Playwright Chromium / next build + next start",
+  "environment": {
+    "VERCEL_ENV": "preview",
+    "VERCEL": "1",
+    "databaseVariables": [],
+    "LAW_SITE_REVIEW_AREAS": null
+  },
+  "checks": [
+    {
+      "name": "map",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Ada County, ID Development Map | Local Agenda Watch",
+      "errors": [],
+      "file": "map-1440x900.png",
+      "sha256": "1ccf507d5ec8584e658f5de950acce03568b599b4b55e6a0b9ce2a98b072a99a"
+    },
+    {
+      "name": "list",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Ada County, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "list-1440x900.png",
+      "sha256": "87f20758faa6980f74d1e1fc0425b661cd9c1dc8202a5c2b9748fd1aea763f1e"
+    },
+    {
+      "name": "combined",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Zoning Map Amendment: Bellarosa Subdivision \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "combined-1440x900.png",
+      "sha256": "414e8915a944fb2310b201672ff7198f3990203ea05a334f6c60286ada6f253b"
+    },
+    {
+      "name": "appeal",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Private Road: Palermo Subdivision \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "appeal-1440x900.png",
+      "sha256": "fd80586c944de3b22d4914f9feae459f287e84e106456da0299576df02a995cc"
+    },
+    {
+      "name": "agenda-only",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Conditional Use: 24-hour membership fitness facility \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "agenda-only-1440x900.png",
+      "sha256": "a27327df2aa20f5030f188d92966931c655c767bdb24b4c65f1535cde11ef1aa"
+    },
+    {
+      "name": "organization",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Preliminary Plat: two (2) lot subdivision \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "organization-1440x900.png",
+      "sha256": "eea4e8f57ab2514a22a90d42b562cebb04d0bfdcdbb4c8947ceaf686dd2fc3e0"
+    },
+    {
+      "name": "exceptions",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Review case evidence \u00b7 Local Agenda Watch",
+      "errors": [],
+      "file": "exceptions-1440x900.png",
+      "sha256": "d1bf04a906b9e86fb87b9d11e161aa2de4be4aea812b17432b30b8585280dc4e"
+    },
+    {
+      "name": "boise-404",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 404,
+      "title": "404: This page could not be found.",
+      "errors": [],
+      "file": "boise-404-1440x900.png",
+      "sha256": "1994c86907515d5a1f55b88a11e56a86321e0ce362d7a3bfb77663847cbb467d"
+    },
+    {
+      "name": "sample-escribe",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "title": "Fixture eSCRIBE sample, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "sample-escribe-1440x900.png",
+      "sha256": "38e36a5a9326ac1b063a47bad775eeeffd1547c5a711a508153b3eab7a0a3864"
+    },
+    {
+      "name": "map",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Ada County, ID Development Map | Local Agenda Watch",
+      "errors": [],
+      "file": "map-390x844.png",
+      "sha256": "b94c053c901df8e72fa2fdcf7ae9541af87dfcad68eeb63fac0d5303050142ca"
+    },
+    {
+      "name": "list",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Ada County, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "list-390x844.png",
+      "sha256": "f422e1269c631e34958c318a0173903c4e3424ea6be93c74a51a974391e80fbe"
+    },
+    {
+      "name": "combined",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Zoning Map Amendment: Bellarosa Subdivision \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "combined-390x844.png",
+      "sha256": "e8cb80ebd1085e9b38f1d5097357bb6e0c9033c9982ac7dc0ba405845e738d86"
+    },
+    {
+      "name": "appeal",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Private Road: Palermo Subdivision \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "appeal-390x844.png",
+      "sha256": "ae3caf74787816b07cb46bab6938b4b759259df90738b1ab4542a0e591812259"
+    },
+    {
+      "name": "agenda-only",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Conditional Use: 24-hour membership fitness facility \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "agenda-only-390x844.png",
+      "sha256": "3a19e593b1464efbcae3250f35e281f40496cb9ec4580b42b7ce7017e7fc549f"
+    },
+    {
+      "name": "organization",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Preliminary Plat: two (2) lot subdivision \u00b7 Ada County | Local Agenda Watch",
+      "errors": [],
+      "file": "organization-390x844.png",
+      "sha256": "e93c6b0f35e3e9cc70ab41701aceb199dfd7851a4cffb8dcb75e0b162a8185b6"
+    },
+    {
+      "name": "exceptions",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Review case evidence \u00b7 Local Agenda Watch",
+      "errors": [],
+      "file": "exceptions-390x844.png",
+      "sha256": "463391e21be6e3f7adaecca110f6c2f69ba2016d44c31f7258f4a92079c2a0c8"
+    },
+    {
+      "name": "boise-404",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 404,
+      "title": "404: This page could not be found.",
+      "errors": [],
+      "file": "boise-404-390x844.png",
+      "sha256": "efb9f5f27fd5b0c0061ea80383dbe301216c78bfc1e4a1b0c76c30e9c5a231fa"
+    },
+    {
+      "name": "sample-escribe",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "Fixture eSCRIBE sample, ID Rezoning & Public Hearing Tracker | Local Agenda Watch",
+      "errors": [],
+      "file": "sample-escribe-390x844.png",
+      "sha256": "11227d1a1cc66c66add548ad459b535619e67997b18336b88c659725645297d9"
+    }
+  ]
+}
