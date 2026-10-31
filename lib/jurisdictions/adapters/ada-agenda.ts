@@ -17,7 +17,7 @@ export function parseAdaAgenda(text:string,meeting:Meeting,config:JurisdictionDe
   // BOCC uses a colon on the applicant header; PZC puts the description on the next line.
   const lead=h[3].includes(":")?h[3].slice(h[3].indexOf(":")+1).trim()+"\n":"";
   const body=lead+section;
-  const title=body.split(/(?:Staff|P&Z|PZC)\s+Recommendation\s*:|\bStaff\s*:|(?:^|\n)\s*[IVX]+\.\s|Public (?:Hearing|Meetings)/i)[0].replace(/\f/g," ").replace(/\s+/g," ").trim();
+  const title=body.split(/(?:Staff|P&Z|PZC)\s+Recommendation\s*:|\bStaff\s*:|(?:^|\n)\s*[IVX]+\.\s|Public (?:Hearing|Meetings)/i)[0].replace(/\b[\p{Lu}][\p{L}’'-]+(?:\s+[\p{Lu}][\p{L}’'-]+){1,3},\s*(?:(?:Associate|Senior|Principal|Assistant)\s+)?Planner,?[\s\S]*$/u,"").replace(/\f/g," ").replace(/\s+/g," ").trim();
   if(!title)return [];
   const caseNumbers=h[2].match(/\d{9}(?:-[A-Z]{1,5})+/g)!;
   const sourcePage=text.slice(0,h.index).split("\f").length;

@@ -16,7 +16,7 @@ export function groupApplications(config:JurisdictionDefinition,applications:App
   rows.sort((a,b)=>rank(a)-rank(b)||a.recordId.localeCompare(b.recordId));
   const first=rows[0],received=rows.flatMap(a=>a.received?[a.received]:[]).sort()[0];
   const polygons=rows.flatMap(a=>a.geometry&&polygonGeometry(a.geometry)?[{type:"Feature" as const,geometry:a.geometry,properties:{}}]:[]);
-  return {...first,received,parcel:[...new Set(rows.flatMap(a=>a.parcel))].sort(),relatedCaseNumbers:[...new Set(rows.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]))].filter(id=>id!==first.recordId).sort(),geometry:combinePolygons(polygons)??rows.find(a=>a.geometry)?.geometry};
+  return {...first,sourceRowCount:rows.reduce((n,a)=>n+(a.sourceRowCount??1),0),received,parcel:[...new Set(rows.flatMap(a=>a.parcel))].sort(),relatedCaseNumbers:[...new Set(rows.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]))].filter(id=>id!==first.recordId).sort(),geometry:combinePolygons(polygons)??rows.find(a=>a.geometry)?.geometry};
  });
 }
 export function projectCaseMatches(app:Application,id:string){

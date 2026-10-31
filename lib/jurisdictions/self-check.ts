@@ -1,3 +1,6 @@
+import {applicationRecordUrl} from "./application-source";
+import {verificationUrl,sourceRecordId,restrictedRecordData,recordDataIssue,officialDocument,filenameIdentifies} from "./record-links";
+import {attachmentKind} from "./adapters/common";
 import {createHash} from "node:crypto";
 import type {Application} from "./adapters/types";
 import type {JurisdictionDefinition} from "./types";
@@ -10,8 +13,8 @@ import {assertCollectionComplete,projectNumber} from "./agenda-projects";
 import {individualApplicant} from "./application-scope";
 import {projectHearingState} from "./hearing-state";
 export type CheckName="title-from-source"|"description-verbatim"|"link-resolves-to-case"|"location-in-boundary"|"case-identity"|"privacy"|"ai-labeled"|"stage-and-date";
-export type Check={check:string;status:"pass"|"fail"|"uncertain";reason:string;sourceUrl:string};
-export type LinkEvidence={status:number;text:string;privacyReviewed?:boolean;reason?:string;documentHash?:string};
+export type Check={check:string;status:"pass"|"fail"|"uncertain";reason:string;sourceUrl:string;retry?:boolean};
+export type LinkEvidence={status:number;text:string;privacyReviewed?:boolean;reason?:string;documentHash?:string;evidenceHash?:string;readable?:boolean};
 export type Proposal={title?:string;hideDocuments?:boolean;reason:string;aiGenerated:true;sourceUrls:string[]};
 export type ExceptionDecision={areaId:string;recordId:string;sourceHash:string;action:"approve"|"fix"|"hide";reviewer:string;proposal?:Proposal};
 export type RecordChecks={recordId:string;sourceHash:string;checks:Check[];publish:boolean;title:string;proposal?:Proposal;reviewer?:string;hidden?:boolean};
@@ -37,35 +40,57 @@ export async function selfCheck(d:JurisdictionDefinition,snapshot:StagingSnapsho
  const records:RecordChecks[]=[];
  for(const a of snapshot.applications){
   const checks:Check[]=[],add=(check:CheckName,status:Check["status"],reason:string,sourceUrl=a.sourceUrl)=>checks.push({check,status,reason,sourceUrl});
-  const allLinks=[...new Set([a.recordUrl,...snapshot.meetings.flatMap(m=>m.items.filter(i=>i.matchedApplications?.some(match=>match.recordId===a.recordId)).flatMap(i=>[i.itemUrl??m.meetingPageUrl,...(a.residentialPrivacy?[]:i.attachments.filter(f=>f.kind!=="packet").map(f=>f.url))]))])].sort();
-  const sourceContents=[];for(const url of allLinks){const proof=await evidence(url);sourceContents.push([url,proof.documentHash??createHash("sha256").update(proof.text).digest("hex")]);}
+  const ownItems=snapshot.meetings.flatMap(m=>m.items.filter(i=>i.matchedApplications?.some(match=>match.recordId===a.recordId)||i.caseNumbers.some(id=>[a.recordId,...a.relatedCaseNumbers].includes(id))).map(i=>({m,i})));
+  const attachments=ownItems.flatMap(({i})=>i.attachments.filter(f=>f.kind!=="packet"));
+  const primary=a.residentialPrivacy?(ownItems[0]?.i.itemUrl??ownItems[0]?.m.meetingPageUrl??d.participation.hearingsUrl??a.recordUrl):a.recordUrl;
+  const verify=!a.agendaOnly&&!a.residentialPrivacy&&d.recordLinks?verificationUrl(d,sourceRecordId(d,a)):undefined;
+  const allLinks=[...new Set([primary,...verify?[verify]:[],...ownItems.flatMap(({m,i})=>[i.itemUrl??m.meetingPageUrl,...a.residentialPrivacy?[]:i.attachments.filter(f=>f.kind!=="packet").map(f=>f.url)])])].sort();
+  const sourceContents=[];for(const url of allLinks){const proof=await evidence(url);sourceContents.push([url,proof.documentHash??proof.evidenceHash??createHash("sha256").update(proof.text).digest("hex")]);}
   const hash=createHash("sha256").update(JSON.stringify([sourceHash(a),sourceContents])).digest("hex"),decision=options.decisions?.find(r=>r.areaId===d.id&&r.recordId===a.recordId&&r.sourceHash===hash);
   const title=a.residentialPrivacy?"Residential permit request":decision?.action==="fix"&&decision.proposal?.title&&verifiedProposal(a,decision.proposal,d.selfCheck?.typeOrder)?decision.proposal.title:a.selfCheckTitle??applicationTitle(primaryType(a,d.selfCheck?.typeOrder),a.description);
   add("title-from-source",a.residentialPrivacy||titleFromSource(title,a,d.selfCheck?.typeOrder)?"pass":"fail","Title must use source words, include the subject, and fit within 70 characters.");
   const descriptionField=(d.applications.params.fields as Record<string,string>|undefined)?.description,sourceDescription=descriptionField?a.sourceFields[descriptionField]:undefined;
   add("description-verbatim",a.residentialPrivacy||a.agendaOnly||typeof sourceDescription==="string"&&sourceDescription===a.description?"pass":"uncertain",a.residentialPrivacy?"Residential description withheld.":"Displayed description must equal the captured official description exactly.");
-  const links=[a.recordUrl,...snapshot.meetings.flatMap(m=>m.items.filter(i=>i.matchedApplications?.some(match=>match.recordId===a.recordId)).flatMap(i=>[i.itemUrl??m.meetingPageUrl,...(a.residentialPrivacy||decision?.proposal?.hideDocuments?[]:i.attachments.filter(f=>f.kind!=="packet").map(f=>f.url))]))];
-  let linkStatus:Check["status"]="pass",linkReason="Every case link returned a source containing this case or project number.",linkSource=a.recordUrl;
-  const rejectLink=(status:"fail"|"uncertain",reason:string,url:string)=>{if(linkStatus==="fail"&&status==="uncertain")return;linkStatus=status;linkReason=reason;linkSource=url;};
-  let privacyStatus:Check["status"]=d.applications.params.applicantField||a.agendaOnly?"pass":"uncertain",privacyReason=d.applications.params.applicantField||a.agendaOnly?"No captured individual applicant identity is exposed.":"Applicant identity classification is not configured; privacy requires review.",privacySource=a.sourceUrl;
+  const links=allLinks.filter(url=>!decision?.proposal?.hideDocuments||!attachments.some(f=>f.url===url));
+  let linkStatus:Check["status"]="pass",linkReason="Case links verified using source identity, official document filenames or the configured exact-record query.",linkSource=primary,linkRetry=false;
+  const rejectLink=(status:"fail"|"uncertain",reason:string,url:string,retry=false)=>{if(linkStatus==="fail"&&status==="uncertain")return;linkStatus=status;linkReason=reason;linkSource=url;linkRetry=retry;};
+  let privacyStatus:Check["status"]=d.applications.params.applicantField||a.agendaOnly?"pass":"uncertain",privacyReason=d.applications.params.applicantField||a.agendaOnly?"LAW resident text contains no captured individual identity or staff contacts. Official document contents are not reproduced.":"Applicant identity classification is not configured; privacy requires review.",privacySource=a.sourceUrl;
   const applicant=String(a.sourceFields[String(d.applications.params.applicantField??"")]??"");
-  const person=individualApplicant(applicant)?applicant.split(/[,\s]+/).filter(w=>w.length>2):[];
-  const hasPerson=(text:string)=>person.length>0&&person.every(w=>text.toLowerCase().includes(w.toLowerCase()));
-  if(!a.residentialPrivacy&&hasPerson(title+" "+a.description+" "+a.address)){privacyStatus="fail";privacyReason="An individual applicant's name appears in resident text.";}
-  for(const url of new Set(links)){
-   let raw=false;try{const u=new URL(url);raw=/^(?:p?json)$/i.test(u.searchParams.get("f")??"")||[...u.searchParams.values()].some(v=>hasPerson(v));}catch{raw=true;}
-   const proof=await evidence(url),identity=a.projectNumber??a.recordId;
-   raw||=/^\s*[\[{]/.test(proof.text);
-   if(raw||proof.status!==200||!proof.text.includes(identity))rejectLink(raw||proof.status!==0?"fail":"uncertain",raw?"Resident link exposes raw data or a personal name.":proof.status!==200?(proof.reason??"Case link has not returned HTTP 200."):"Linked content does not identify this project.",url);
-   if(hasPerson(proof.text)||/mailto:|\b(?:staff contact|planner email)\b/i.test(proof.text))rejectLink("fail","Linked content exposes individual applicant or staff contact details.",url);
-   if(privacyStatus!=="fail"&&/\.pdf(?:[?#&]|$)/i.test(decodeURIComponent(url))&&!a.residentialPrivacy&&!decision?.proposal?.hideDocuments&&!proof.privacyReviewed){privacySource=url;privacyStatus="uncertain";privacyReason="Document privacy review is incomplete; withhold the record pending review.";}
+  const person=individualApplicant(applicant)?applicant.split(/[,\s]+/).filter(w=>w.length>=2):[];
+  const hasPerson=(text:string)=>person.length>0&&person.every(w=>new RegExp("(?:^|[^\\p{L}])"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?=$|[^\\p{L}])","iu").test(text));
+  const contact=/(?:[\w.+-]+@[\w.-]+\.[a-z]{2,}|mailto:|\b(?:\+?1[ .-]?)?\(?\d{3}\)?[ .-]\d{3}[ .-]\d{4}\b)/i;
+  const residentText=a.residentialPrivacy?title:[title,a.description,a.address,a.name,d.recordLinks?.dataLabel??"",...attachments.map(a=>a.title)].join(" ");
+  if(hasPerson(residentText)||contact.test(residentText)){privacyStatus="fail";privacyReason="LAW resident text exposes an individual applicant name or staff contact.";}
+  if(!decision?.proposal?.hideDocuments)for(const attachment of attachments){
+   const kind=attachmentKind(attachment.title,attachment.url),county=officialDocument(d,attachment.url)&&d.documents.countyAuthoredKinds?.includes(kind);
+   if(a.residentialPrivacy||person.length&&!county&&["application","narrative","letter","public_comment","other"].includes(kind)){
+    privacyStatus="fail";privacyReason=a.residentialPrivacy?"Residential documents are withheld; review or hide the record.":"An individual applicant's submitted or unclassified document is withheld pending review.";privacySource=attachment.url;
+   }
   }
-  add("link-resolves-to-case",linkStatus,linkReason,linkSource);
+  for(const url of links){
+   let u:URL;try{u=new URL(url);}catch{rejectLink("fail","Invalid resident URL.",url);continue;}
+   if([...u.searchParams.values()].some(value=>hasPerson(value)||contact.test(value))){privacyStatus="fail";privacyReason="LAW link query exposes a personal name or staff contact.";privacySource=url;}
+   const proof=await evidence(url);
+   if(proof.status!==200){rejectLink(proof.status===0?"uncertain":"fail",proof.reason??"Case link has not returned HTTP 200.",url,proof.status===0);continue;}
+   if(url===verify){if(!restrictedRecordData(d,url,proof.text,sourceRecordId(d,a)))rejectLink("fail",recordDataIssue(proof.text,sourceRecordId(d,a)),url);continue;}
+   if(url===primary&&verify){
+    if(url!==applicationRecordUrl(d,sourceRecordId(d,a),a.projectNumber))rejectLink("fail","JavaScript application URL does not match its configured full-record template.",url);
+    continue;
+   }
+   if(/^(?:p?json)$/i.test(u.searchParams.get("f")??"")||/^\s*[\[{]/.test(proof.text)){rejectLink("fail","Resident raw-data link is not a configured restricted record query.",url);continue;}
+   if(proof.readable===false){rejectLink("uncertain",proof.reason??"Could not read this document; retry on the next refresh. No owner action required.",url,true);continue;}
+   const shared=ownItems.filter(({m,i})=>i.itemUrl===url||m.meetingPageUrl===url||i.attachments.some(f=>f.url===url)).flatMap(({i})=>i.caseNumbers.map(id=>projectNumber(d,id)??id));
+   const identities=[...new Set([a.projectNumber??a.recordId,...shared])];
+   if(!identities.some(id=>proof.text.includes(id))&&!filenameIdentifies(d,url,identities)&&!(a.residentialPrivacy&&url===d.participation.hearingsUrl))rejectLink("fail","Read source does not identify this project or either project on its shared agenda item.",url);
+  }
+  add("link-resolves-to-case",linkStatus,linkReason,linkSource);if(linkRetry)checks.at(-1)!.retry=true;
   const coverage=collectionCoverage(d,snapshot);
   add("location-in-boundary",!a.geometry?"pass":!coverage?"uncertain":coverageEligible(a,coverage)?"pass":"fail",!a.geometry?"Location not published; no map location is invented.":coverage?"Location checked against the jurisdiction coverage using the point/majority rule.":"Coverage boundary is unavailable.");
-  const identityValid=!a.projectNumber||[a.recordId,...a.relatedCaseNumbers].every(id=>projectNumber(d,id)===a.projectNumber);
+  const legacyVerified=!projectNumber(d,a.recordId)&&a.sourceRowCount===1&&String(a.sourceFields[(d.applications.params.fields as Record<string,string>)?.id])===a.recordId&&a.relatedCaseNumbers.every(id=>id===a.recordId||id.startsWith(a.recordId+"-"));
+  const primaryProject=projectNumber(d,a.recordId);
+  const identityValid=d.applications.params.projectKey?(primaryProject?[a.recordId,...a.relatedCaseNumbers].every(id=>projectNumber(d,id)===(a.projectNumber??primaryProject)):legacyVerified):!a.projectNumber||[a.recordId,...a.relatedCaseNumbers].every(id=>projectNumber(d,id)===a.projectNumber);
   const identityConflict=!!a.projectNumber&&[a.recordId,...a.relatedCaseNumbers].some(id=>projectNumber(d,id)&&projectNumber(d,id)!==a.projectNumber);
-  add("case-identity",identityValid?"pass":identityConflict?"fail":"uncertain",identityValid?"All case IDs belong to this project.":identityConflict?"A case number belongs to another project.":"A legacy case number needs source-backed project identity verification.");
+  add("case-identity",identityValid?"pass":identityConflict?"fail":"uncertain",identityValid?"Source APPFILE and case IDs identify this project.":identityConflict?"A case number belongs to another project.":"Legacy identity is not verified by a single exact APPFILE source row; review related case numbers.");
   add("privacy",decision?.action==="approve"&&privacyStatus==="uncertain"?"pass":privacyStatus,decision?.action==="approve"&&privacyStatus==="uncertain"?"Document privacy checked by the authenticated reviewer.":privacyReason,privacySource);
   const ai=(snapshot.aiSamples??[]).filter(s=>s.caseId===a.recordId);
   add("ai-labeled",ai.every(s=>!!s.sourceUrl&&Array.isArray(s.fields)&&(s.fields as {status?:string}[]).every(f=>["auto_published","approved","rejected"].includes(f.status??"")))?"pass":"uncertain",ai.length?"AI fields require citations and a recorded evidence status; resident components label AI summaries.":"No AI-generated text in this record.");
@@ -81,7 +106,7 @@ export async function selfCheck(d:JurisdictionDefinition,snapshot:StagingSnapsho
  for(const id of d.selfCheck?.mustInclude??[])if(!snapshot.applications.some(a=>a.projectNumber===id||a.recordId===id))coverage.push({check:"must-include",status:"fail",reason:`Required project ${id} is absent.`,sourceUrl:String(d.applications.params.url??"")});
  const passRate=records.length?records.filter(r=>r.publish).length/records.length:0,goLive=passRate>=(d.selfCheck?.minPassRate??.95)&&coverage.every(c=>c.status==="pass"),counts:SelfCheckReport["counts"]={};
  for(const c of [...records.flatMap(r=>r.checks),...coverage]){counts[c.check]??={pass:0,fail:0,uncertain:0};counts[c.check][c.status]++;}
- const queue=records.filter(r=>!r.hidden).flatMap(r=>r.checks.filter(c=>c.status!=="pass"&&!(r.publish&&r.reviewer)).map(check=>({recordId:r.recordId,sourceHash:r.sourceHash,check,proposal:r.proposal})));
+ const queue=records.filter(r=>!r.hidden).flatMap(r=>r.checks.filter(c=>c.status!=="pass"&&!c.retry&&!(r.publish&&r.reviewer)).map(check=>({recordId:r.recordId,sourceHash:r.sourceHash,check,proposal:r.proposal})));
  const total=snapshot.meetings.filter(m=>!m.tentative).flatMap(m=>m.items).filter(i=>i.caseNumbers.length).length;
  return {areaId:d.id,createdAt,snapshotHash:snapshotHash(snapshot),passRate,records,counts,coverage,agendaItems:{accounted:total-unmatched.length,total},unmatched,exclusions:snapshot.exclusions??{},queue,aiCostUsd:0,goLive:!!d.enabled&&goLive,decision:!d.enabled?"Disabled registry sample; report only.":goLive?"Automatic publication approved; Git preview remains preview until merge.":"Remain in review; no new records published."};
 }

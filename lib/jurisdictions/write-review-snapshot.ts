@@ -1,3 +1,4 @@
+import {verificationUrl,sourceRecordId} from "./record-links";
 import {mkdir,writeFile} from "node:fs/promises";
 import {applicationScope,individualApplicant} from "./application-scope";
 import {privateProject} from "./preview";
@@ -11,14 +12,14 @@ import type {ReviewSnapshot} from "./review-snapshot";
 const contact=/(?:mailto:|[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b(?:\+?1[ .-]?)?\(?\d{3}\)?[ .-]\d{3}[ .-]\d{4}\b)/i;
 const escape=(value:string)=>value.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 /** Drop an entire uncertain field; never rewrite a person's identity into a claim. */
-export function scrubReview<T>(value:T,names:string[]=[]):T{
- const common=new Set(["and","the","for","not","use","land","game","power","fish","idaho","united","states","department","planning","zoning","commission","county","city","state","unknown","none","assigned"]);
- const tokens=names.flatMap(name=>[name,...name.split(/[^\p{L}]+/u)]).filter(word=>word.length>2&&!common.has(word.toLowerCase())),person=tokens.length?new RegExp("(?:^|[^\\p{L}\\p{N}])(?:"+tokens.map(escape).join("|")+")(?=$|[^\\p{L}\\p{N}])","iu"):undefined;
+export function scrubReview<T>(value:T,names:string[]=[],dataUrls:string[]=[]):T{
+ const identities=names.map(name=>{const all=name.split(/[^\p{L}]+/u).filter(Boolean),main=all.filter(word=>word.length>=2);return main.length>=2?main:main.length?all:[];}).filter(parts=>parts.length>=2);
+ const hasPerson=(text:string)=>identities.some(parts=>parts.every(word=>new RegExp("(?:^|[^\\p{L}\\p{N}])"+escape(word)+"(?=$|[^\\p{L}\\p{N}])","iu").test(text)));
  const walk=(item:unknown):unknown=>{
   if(typeof item==="string"){
    let decoded=item;try{decoded=decodeURIComponent(item);}catch{}
-   if(contact.test(decoded)||person?.test(decoded))return undefined;
-   if(/^https?:/i.test(item)){try{const u=new URL(item);if(u.protocol!=="https:"||u.username||u.password||/^(?:p?json)$/i.test(u.searchParams.get("f")??""))return undefined;}catch{return undefined;}}
+   if(contact.test(decoded)||hasPerson(decoded))return undefined;
+   if(/^https?:/i.test(item)){try{const u=new URL(item);if(u.protocol!=="https:"||u.username||u.password||/^(?:p?json)$/i.test(u.searchParams.get("f")??"")&&!dataUrls.includes(item))return undefined;}catch{return undefined;}}
    return item;
   }
   if(Array.isArray(item))return item.map(walk).filter(v=>v!==undefined);
@@ -31,6 +32,7 @@ export async function writeReviewSnapshot(d:JurisdictionDefinition,snapshot:Stag
  const names=snapshot.applications.flatMap(a=>Object.entries(a.sourceFields).filter(([key,value])=>/applicant|owner|contact|planner|staff|assigned/i.test(key)&&individualApplicant(value)).map(([,value])=>String(value)));
  const apps=applicationScope(d,snapshot.applications,snapshot.meetings).map(a=>{const r=report.records.find(r=>r.recordId===a.recordId);return {...a,selfCheckTitle:r?.title,hiddenDocuments:a.hiddenDocuments||r?.checks.some(c=>c.check==="privacy"&&c.status!=="pass")};});
  const input={...snapshot,applications:apps,visuals:undefined,aiSamples:[]},records:ReviewSnapshot["records"]=[];
+ const dataUrls=apps.filter(a=>report.records.find(r=>r.recordId===a.recordId)?.checks.find(c=>c.check==="link-resolves-to-case")?.status==="pass").flatMap(a=>verificationUrl(d,sourceRecordId(d,a))??[]);
  const base=`/${d.area.country}/${d.state}/${d.id}`;
  for(const app of apps){
   const result=report.records.find(r=>r.recordId===app.recordId);if(result?.hidden)continue;
@@ -42,7 +44,7 @@ export async function writeReviewSnapshot(d:JurisdictionDefinition,snapshot:Stag
    project.officialRecords=[];project.item.sourceUrl=undefined;project.summarySource=undefined;project.documents=[];project.history=project.history.map(h=>({...h,source:undefined}));
   }
   if(result?.checks.some(c=>c.check==="location-in-boundary"&&c.status!=="pass")){project.item.geometry=null;project.item.centroid=null;project.item.bounds=undefined;project.where="Location not published; verification pending.";}
-  const clean=scrubReview(project,names);clean.item.title??="Planning application";clean.item.summary??="Description withheld pending privacy review.";
+  const clean=scrubReview(project,names,dataUrls);clean.item.title??="Planning application";clean.item.summary??="Description withheld pending privacy review.";
   if(clean.item.popup){clean.item.popup.projectName??=clean.item.title;clean.item.popup.explanation??=clean.item.summary;}
   clean.history=clean.history.filter(h=>h.label);clean.documents=clean.documents?.filter(doc=>doc.label&&doc.url);clean.officialRecords=clean.officialRecords?.filter(link=>link.url&&link.label);
   records.push({caseId:app.recordId,aliases:app.relatedCaseNumbers,eligible:result?.publish??false,project:clean});

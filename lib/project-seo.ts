@@ -17,9 +17,10 @@ export function projectCanonical(data: PaneData) {
   );
 }
 export function projectMetadata(data: PaneData): Metadata {
-  const headline = data.item.popup?.headline ?? data.item.title;
-  const specific = headline.toLowerCase().replace(/[^a-z]/g, "") === data.item.typeLabel?.toLowerCase().replace(/[^a-z]/g, "") && data.where
-    ? headline + " near " + data.where : headline;
+  const popupHeadline=data.item.popup?.headline;
+  const generic=popupHeadline?.toLowerCase().replace(/[^a-z]/g,"")===data.item.typeLabel?.toLowerCase().replace(/[^a-z]/g,"");
+  const headline = generic ? data.item.title : popupHeadline ?? data.item.title;
+  const specific = headline;
   const title =
     specific +
     " · " +

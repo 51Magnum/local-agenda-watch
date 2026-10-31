@@ -13,7 +13,7 @@ import {reportMarkdown} from "./report";
 it("records automatic approval atomically, removes failing records, blocks new records below threshold, and pauses",async()=>{
  h.db=new PGlite();try{
   await h.db.exec(readFileSync("migrations/20261027_jurisdiction_onboarding.up.sql","utf8"));await h.db.exec(readFileSync("migrations/20261031_self_check.up.sql","utf8"));
-  const d={...jurisdiction("ada-county"),selfCheck:{minPassRate:.95}},description="Conditional Use for a contractor yard";
+  const d={...jurisdiction("ada-county"),recordLinks:undefined,selfCheck:{minPassRate:.95}},description="Conditional Use for a contractor yard";
   const a={recordId:"202600934-S",relatedCaseNumbers:[],projectNumber:"202600934",type:"Conditional Use",description,name:description,address:"",status:"Active",parcel:[],recordUrl:"https://official.test/202600934",sourceUrl:"https://official.test/202600934",sourceFields:{AppApplicDesc:description}};
   const s:StagingSnapshot={areaId:d.id,launchStatus:"admin_only",applications:[a],meetings:[],checkedAt:"2026-10-31",range:{start:"2026-08-01",end:"2026-11-01"},complete:true,health:[],skipped:[]};
   await h.db.query("INSERT INTO law_jurisdiction_snapshots VALUES($1,$2,$3,now())",[d.id,"admin_only",JSON.stringify(s)]);

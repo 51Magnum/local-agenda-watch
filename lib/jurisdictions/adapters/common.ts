@@ -4,11 +4,20 @@ import type {Attachment} from "./types";
 export const clean=(s:unknown)=>String(s??"").replace(/\s+/g," ").trim();
 export function caseNumbers(config:JurisdictionDefinition,text:string){return [...new Set(config.caseNumberPatterns.flatMap(p=>[...text.toUpperCase().matchAll(new RegExp(p,"gi"))].map(m=>m[0])))];}
 export function attachmentKind(title:string,url=""):Attachment["kind"]{
+ const filename=(()=>{try{const u=new URL(url);return u.searchParams.get("doc")??u.pathname;}catch{return url;}})();
+ title=title+" "+filename;
+ if(/public[ _-]*comment/i.test(title))return "public_comment";
+ if(/narrative/i.test(title))return "narrative";
+ if(/letter/i.test(title))return "letter";
+ if(/application(?:[ _-]*(?:form|items))?/i.test(title))return "application";
  if(/staff[ _-]*report|project[ _-]*report|\bACHD\b|agency[ _-]*report|traffic[ _-]*(?:study|report)/i.test(title))return "staff_report";
  if(/packet|full.?package|agenda.?package|Type=1(?:&|$)/i.test(title+" "+url))return "packet";
  if(/minutes|postminutes/i.test(title))return "minutes";
  if(/findings/i.test(title))return "findings";
+ if(/tabling[ _-]*memo/i.test(title))return "tabling_memo";
  if(/memo/i.test(title))return "memo";
+ if(/(?:^|[_\s-])report(?:[_.\s-]|$)/i.test(title))return "report";
+ if(/notice/i.test(title))return "notice";
  if(/agenda/i.test(title))return "agenda";
  return "other";
 }

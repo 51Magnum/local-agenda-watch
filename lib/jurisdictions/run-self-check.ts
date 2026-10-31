@@ -1,5 +1,5 @@
 import {mkdir,writeFile} from "node:fs/promises";
-import {createHash} from "node:crypto";
+import {linkReader} from "./link-evidence";
 import {selfCheck,redactSelfCheck,selfCheckMarkdown,type LinkEvidence} from "./self-check";
 import {exceptionDecisions,persistSelfCheck} from "./self-check-store";
 import {jurisdiction} from "./registry";
@@ -14,17 +14,8 @@ import {writeReviewSnapshot} from "./write-review-snapshot";
 export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapshot?:StagingSnapshot;previous?:StagingSnapshot;links?:(url:string)=>Promise<LinkEvidence>;reports?:boolean}={}){
  const d=jurisdiction(areaId),snapshot=options.snapshot??await readStaging(areaId);if(!d||!snapshot)throw Error("Collect a staging snapshot before checking");
  const http=sourceHttp(areaId),deadline=Date.now()+180000;
- const links=options.links??(async(url:string)=>{
-  if(Date.now()>deadline)throw Error("Source verification deferred to next refresh");
-  const data=await http.request(url);let text=new TextDecoder().decode(data.bytes),documentHash:string|undefined;
-  if(text.startsWith("%PDF")){
-   documentHash=createHash("sha256").update(data.bytes).digest("hex");
-   const {extractText,definePDFJSModule}=await import("unpdf");await definePDFJSModule(()=>import("pdfjs-dist/legacy/build/pdf.mjs"));
-   const result=await extractText(data.bytes,{mergePages:true});text=result.text;
-  }
-  return {status:data.health.status===304?200:data.health.status??0,text,documentHash};
- });
- const cached=new Map<string,Promise<LinkEvidence>>(),proof=(url:string)=>{if(!cached.has(url))cached.set(url,links(url).catch(e=>({status:e instanceof SourceFailure?e.health.status??0:0,text:"",reason:e instanceof SourceFailure&&e.health.state==="blocked"?"Official source access is blocked; no access challenge was bypassed.":Date.now()>deadline?"Source verification deferred: this run's time limit was reached.":"Official source could not be verified; retry on the next refresh."})));return cached.get(url)!;};
+ const links=options.links??linkReader(d,snapshot,http,deadline);
+ const cached=new Map<string,Promise<LinkEvidence>>(),proof=(url:string)=>{if(!cached.has(url))cached.set(url,links(url).catch(e=>({status:e instanceof SourceFailure&&e.health.state!=="skipped"?e.health.status??0:0,text:"",reason:e instanceof SourceFailure&&e.health.state==="blocked"?"Official source access is blocked; no access challenge was bypassed.":Date.now()>deadline?"Source verification deferred: this run's time limit was reached.":"Official source could not be verified; retry on the next refresh."})));return cached.get(url)!;};
  const decisions=options.dryRun?[]:await exceptionDecisions(areaId);
  let report=await selfCheck(d,snapshot,{links:proof,previous:options.previous,decisions});
  // Development and dry runs never invoke a paid model. Production uses the existing
@@ -48,7 +39,7 @@ export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapsh
    const published=await(await import("./self-check-store")).readPublished(areaId);
    if(published)await(await import("../maps/store")).saveMapSnapshot((await import("./resident-records")).stagedMapSnapshot(d,published));
   }
-  if(!report.goLive&&process.env.VERCEL_ENV==="production"){
+  if(!report.goLive&&(report.queue.length>0||report.coverage.some(c=>c.status!=="pass"))&&process.env.VERCEL_ENV==="production"){
    try{await(await import("../email/jobs")).queueCorrectionReceived({id:"self-check-"+areaId+"-"+report.snapshotHash,project:areaId,message:`Jurisdiction self-check needs attention: ${(report.passRate*100).toFixed(2)}% pass; ${report.queue.length} exceptions. No new records are being published. Review /admin/review.`,email:null});}catch{console.error("[self-check] Internal alert queue unavailable; exceptions remain in /admin/review");}
   }
  }

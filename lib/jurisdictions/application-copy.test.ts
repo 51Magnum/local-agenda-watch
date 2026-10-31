@@ -18,7 +18,7 @@ it("keeps five recorded official descriptions verbatim and titles short",()=>{
  }
  expect(examples.map(e=>applicationTitle(e.type,e.description))).toMatchSnapshot();
  const disagreement=examples.find(e=>e.id==="202501845-S")!;
- expect(applicationTitle(disagreement.type,disagreement.description)).toMatch(/^Preliminary Plat: Final Plat/);
+ expect(applicationTitle(disagreement.type,disagreement.description)).toBe("Preliminary Plat: Ned Ventoso Sub");
  expect(disagreement.description).toContain("Final Plat");
 });
 it("removes repeated procedure words so the recorded hearing subject remains in the title",()=>{

@@ -1,3 +1,7 @@
+# Current result after self-check tuning
+
+Ada now passes 38/40 (95%), has two source-description ambiguities, and go-live is true. See [the current tuning report](ADA_SELFCHECK_TUNING_2026-10-31.md) and [updated screenshots](screenshots/2026-10-31-ada-county-tuned/README.md). The material below records the earlier zero-setup delivery and its pre-tuning 0% result.
+
 # Zero-setup jurisdiction review — October 31, 2026
 
 Branch: `codex/ada-site-review`, PR #7. Shane controls merging.

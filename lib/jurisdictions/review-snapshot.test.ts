@@ -19,6 +19,11 @@ it("allows a few changed records but refuses material drift, missing baselines a
 it("drops individual identities, encoded staff contacts and unsafe links",()=>{
  const clean=scrubReview({title:"Yard for Example Person",safe:"Contractor yard",email:"staff%40agency.gov",url:"http://example.test",raw:"https://official.test/query?f=pjson"},["Example Person"]);
  expect(clean).toEqual({safe:"Contractor yard"});
+ expect(scrubReview({text:"J. Smith applies"},["Smith, J"])).toEqual({});
+ expect(scrubReview({text:"Jane Li applies"},["Li, Jane"])).toEqual({});
+ expect(scrubReview({text:"Li Wu applies"},["Wu, Li"])).toEqual({});
+ expect(scrubReview("A gravel pit",["Gravel, Bob"])).toBe("A gravel pit");
+ expect(scrubReview({text:"Bob Gravel applies"},["Gravel, Bob"])).toEqual({});
  expect(scrubReview("A warehouse and storage yard",["Idaho Fish and Game"])).toBe("A warehouse and storage yard");
 });
 it("committed review artifacts have resident records and no contacts or raw source fields",()=>{

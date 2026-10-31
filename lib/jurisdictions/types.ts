@@ -10,11 +10,12 @@ export type JurisdictionDefinition = {
  boundary:LayerSource;impactArea?:LayerSource;clipRule?:{operation:"subtractCityLimits";layer:LayerSource};
  agenda:AgendaSource[];
  applications:{adapter:"arcgisFeatureLayer"|"accelaAca"|"none";params:Record<string,unknown>;recordUrlTemplate?:string};
+ recordLinks?:{kind:"jsApp";verifyUrlTemplate:string;idField:string;dataFields:string[];dataLabel:string};
  gis:Partial<Record<"parcels"|"zoning"|"futureLandUse"|"cityLimits"|"impactAreas"|"countyBoundary",string>>;
  hearingBodies:HearingBody[];caseNumberPatterns:string[];
  participation:{hearingsUrl?:string;legalNoticesUrl?:string;testimonySignupUrl?:string;signupUrlRule?:string;signupEventsUrl?:string;writtenCommentEmails?:Record<string,string[]>;deadlineRules:DeadlineRule[]};
  costCaps:{backfillUsd:number;monthlyUsd:number;perDocMaxTokens:number};
- documents:{maxNativeBytes?:number;maxBytes:number;maxPages:number;allowPackets:false};
+ documents:{maxNativeBytes?:number;maxBytes:number;maxPages:number;allowPackets:false;countyAuthoredKinds?:string[];officialPaths?:{host:string;pathname:string;query?:Record<string,string>}[]};
  enabled:boolean;launchStatus:LaunchStatus;sourcesVerifiedAt:string|null;notes:string[];
  legacyPublic?:boolean;publication?:{approvalId:string;qaHash:string};
  selfCheck?:{minPassRate?:number;mustInclude?:string[];typeOrder?:string[];fixtures?:{calendar:string;meeting:string;start:string;end:string;boundary?:string}};

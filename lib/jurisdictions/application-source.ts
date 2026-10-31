@@ -8,7 +8,7 @@ export function applicationRecordUrl(d:JurisdictionDefinition,recordId:string,pr
  if(/\/(?:MapServer|FeatureServer)\/\d+\/?$/i.test(source)){
   const field=(d.applications.params.fields as Record<string,string>)?.id;
   if(!field||!/^\w+$/.test(field))throw Error("Case-specific source field is required");
-  return source.replace(/\/$/,"")+"/query?"+new URLSearchParams({where:field+"='"+recordId.replace(/'/g,"''")+"'",outFields:"*",f:"html"});
+  return source.replace(/\/$/,"")+"/query?"+new URLSearchParams({where:field+"='"+recordId.replace(/'/g,"''")+"'",outFields:field,returnGeometry:"false",f:"json"});
  }
  return source;
 }

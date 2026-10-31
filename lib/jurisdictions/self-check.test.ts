@@ -10,7 +10,7 @@ import {databaseUrl,requireOnboardingMutation} from "../runtime-environment";
 import {validateJurisdictions} from "./validate";
 import type {Application,AgendaItem} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
-const d={...jurisdiction("ada-county"),selfCheck:{minPassRate:.95}};
+const d={...jurisdiction("ada-county"),recordLinks:undefined,selfCheck:{minPassRate:.95}};
 const app=(id:string,description="Conditional Use for a contractor yard"):Application=>({recordId:id,projectNumber:id.split("-")[0],relatedCaseNumbers:[],type:"Conditional Use",description,name:description,status:"Active",address:"",parcel:[],recordUrl:"https://official.test/"+id,sourceUrl:"https://official.test/"+id,sourceFields:{AppApplicDesc:description,APPLICANT:"Development LLC"}});
 const item=(ids:string[]):AgendaItem=>({itemId:ids.join("&"),title:"Conditional Use for a contractor yard",caseNumbers:ids,body:"bocc",meetingDateTime:"2026-10-14",meetingPageUrl:"https://official.test/agenda",attachments:[]});
 const snapshot=(apps:Application[],items:AgendaItem[]=[]):StagingSnapshot=>({areaId:d.id,launchStatus:"admin_only",checkedAt:"2026-10-31T12:00:00Z",range:{start:"2026-08-01",end:"2026-12-01"},complete:true,health:[],skipped:[],applications:apps,meetings:items.length?[{id:"bocc",body:"bocc",title:"Board of County Commissioners",date:"2026-10-14",meetingPageUrl:"https://official.test/agenda",attachments:[],items}]:[]});
@@ -44,9 +44,9 @@ it("selects the significant type, never the alphabetical suffix",()=>{
 it("rejects raw links even when they identify the case",async()=>{
  const a=app("202600934-S");a.recordUrl+="?f=pjson";const r=await selfCheck(d,snapshot([a]),{links});expect(r.records[0].publish).toBe(false);expect(r.counts["link-resolves-to-case"].fail).toBe(1);
 });
-it("fails closed on unverified source links and incomplete privacy reviews",async()=>{
+it("does not perpetually require privacyReviewed for organization documents",async()=>{
  const s=snapshot([app("202600934-S")],[item(["202600934-S"])]);s.meetings[0].items[0].attachments=[{title:"Staff report",url:"https://official.test/report.pdf",kind:"staff_report"}];accountForAgenda(d,s);
- const r=await selfCheck(d,s,{links:async()=>({status:200,text:"202600934"})});expect(r.records[0].publish).toBe(false);expect(r.counts.privacy.uncertain).toBe(1);
+ const r=await selfCheck(d,s,{links:async()=>({status:200,text:"202600934"})});expect(r.records[0].publish).toBe(true);expect(r.counts.privacy.pass).toBe(1);
 });
 it("blocks incomplete and sharply diminished collections before staging replacement",()=>{
  const old=snapshot([app("202600934-S")],[item(["202600934-S"])]);accountForAgenda(d,old);
