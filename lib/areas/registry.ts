@@ -1,12 +1,14 @@
 import "server-only";
 import {officialGisLink} from "../jurisdictions/official-gis-link";
-import {routeJurisdictions,publicJurisdictions} from "../jurisdictions/registry";
+import {routeJurisdictions,publicJurisdictions,JURISDICTION_REGISTRY} from "../jurisdictions/registry";
 import {registryBoundaries} from "../jurisdictions/generated";
 import {readReviewSnapshot} from "../jurisdictions/review-snapshot";
 import {isPreview} from "../runtime-environment";
+import {snapshotHash} from "../jurisdictions/snapshot-hash";
 import { recordPageOnHosts, type RecordPageContext } from "./record-links";
 import type { MultiPolygon, Polygon } from "geojson";
 export type AreaDefinition = {
+  boundaryRevision?:string;
   color?:string; id:string; slug:string; country:string; countryName:string; state:string; stateName:string; stateAbbreviation:string;
   name:string; type:"city"|"county"; status:"live"|"coming soon"; timezone:string;
   center:[number,number]; boundary:Polygon|MultiPolygon; boundaryLabel:string; boundarySources:string[]; coverageBoundary?:Polygon|MultiPolygon; coverageNote?:string;
@@ -35,15 +37,19 @@ const ROUTE_AREAS:Record<string,AreaDefinition>=Object.fromEntries(routeJurisdic
 export const AREAS:Record<string,AreaDefinition>=Object.fromEntries(publicJurisdictions().map(d=>[d.id,ROUTE_AREAS[d.id]]));
 export const FEATURED_AREA_ID="nampa";
 export async function visibleAreas(){
- if(isPreview())return publicJurisdictions().flatMap(d=>{const area=readReviewSnapshot(d.id)?.area;if(!area)return [];ROUTE_AREAS[d.id]=area;AREAS[d.id]=area;return [area];});
+ if(isPreview())return publicJurisdictions().flatMap(d=>{const review=readReviewSnapshot(d.id);if(!review)return [];const area={...review.area,boundaryRevision:review.sourceSnapshotHash};ROUTE_AREAS[d.id]=area;AREAS[d.id]=area;return [area];});
  return (await Promise.all(routeJurisdictions().map(async d=>{
   if(d.legacyPublic)return ROUTE_AREAS[d.id];
   try{const snapshot=await(await import("../jurisdictions/self-check-store")).readPublished(d.id);if(!snapshot?.boundary){delete AREAS[d.id];return;}
-   const area:AreaDefinition={...d.area,id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.timezone,color:d.color,boundary:snapshot.boundary,coverageBoundary:snapshot.coverageBoundary};
+   const area:AreaDefinition={...d.area,id:d.id,slug:d.id,name:d.name,type:d.type,state:d.state,status:"live",timezone:d.timezone,color:d.color,boundary:snapshot.boundary,coverageBoundary:snapshot.coverageBoundary,boundaryRevision:snapshot.selfCheck?.snapshotHash??snapshotHash(snapshot)};
    ROUTE_AREAS[d.id]=area;AREAS[d.id]=area;return area;
   }catch{return;}
  }))).filter((a):a is AreaDefinition=>!!a);
 }
+/** Approved legacy geometry is also the safe static fallback; never include review configs here. */
+export function legacyCoverageAreas():AreaDefinition[]{return Object.values(JURISDICTION_REGISTRY).filter(d=>d.enabled&&d.legacyPublic&&d.launchStatus==="public").map(d=>({...d.area,id:d.id,slug:d.id,name:d.name,type:d.type as AreaDefinition["type"],state:d.state,status:"live" as const,timezone:d.timezone,color:d.color,boundary:registryBoundaries[d.id+":boundary"] as AreaDefinition["boundary"],coverageBoundary:registryBoundaries[d.id+":coverageBoundary"] as AreaDefinition["boundary"]|undefined}));}
+/** Coverage-only metadata does not enable legacy record/database access in Preview. */
+export async function visibleCoverageAreas(){const visible=await visibleAreas();return isPreview()?[...new Map([...legacyCoverageAreas(),...visible].map(a=>[a.id,a])).values()]:visible;}
 export function getArea(id:string){return Object.hasOwn(ROUTE_AREAS,id)?ROUTE_AREAS[id]:undefined;}
 export function findArea(country:string,state:string,slug:string){return Object.values(ROUTE_AREAS).find(a=>a.country===country&&a.state===state&&a.slug===slug);}
 export function areaPath(area:Pick<AreaDefinition,"country"|"state"|"slug">|string){const a=typeof area==="string"?getArea(area):area;return a?`/${a.country}/${a.state}/${a.slug}`:"/"+area;}

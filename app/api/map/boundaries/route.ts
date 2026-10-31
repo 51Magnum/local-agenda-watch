@@ -1,58 +1,15 @@
-import { AREAS } from "@/lib/areas/registry";
-import {
-  bbox,
-  simplify,
-  feature,
-  difference,
-  featureCollection,
-  bboxClip,
-  truncate,
-} from "@turf/turf";
-import { parseMapBounds, boundsPolygon } from "@/lib/maps/radius";
-export async function GET(request: Request) {
-  const b = parseMapBounds(new URL(request.url).searchParams.get("bbox"));
-  if (!b) return Response.json({ error: "Invalid bounds" }, { status: 400 });
-  const areas = Object.values(AREAS).filter((a) => {
-    const x = bbox(a.boundary);
-    return x[0] <= b[2] && x[2] >= b[0] && x[1] <= b[3] && x[3] >= b[1];
-  });
-  let uncovered: unknown = { type: "FeatureCollection", features: [] };
-  try {
-    const shape = difference(
-      featureCollection([
-        boundsPolygon(b),
-        ...areas
-          .filter((a) => a.status === "live")
-          .map((a) =>
-            simplify(feature(a.coverageBoundary ?? a.boundary), {
-              tolerance: Math.max(0.0001, Math.min(0.01, (b[2] - b[0]) / 2500)),
-            }),
-          ),
-      ]),
-    );
-    if (shape) uncovered = { type: "FeatureCollection", features: [truncate(bboxClip(shape, b), { precision: 5 })] };
-  } catch {
-    /* Malformed coverage geometry must not shade a tracked project. */
-  }
-  return Response.json(
-    {
-      uncovered,
-      polygons: {
-        type: "FeatureCollection",
-        features: areas.map((a) => ({
-          ...truncate(bboxClip(simplify(feature(a.boundary), { tolerance: 0.0003 }), b), { precision: 5 }),
-          properties: { id: a.id, name: a.name },
-        })),
-      },
-      labels: {
-        type: "FeatureCollection",
-        features: areas.map((a) => ({
-          type: "Feature",
-          geometry: { type: "Point", coordinates: a.center },
-          properties: { name: a.name },
-        })),
-      },
-    },
-    { headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" } },
-  );
+import {gzipSync} from "node:zlib";
+import {visibleCoverageAreas} from "@/lib/areas/registry";
+import {boundaryVersion,buildAreaBoundaries} from "@/lib/maps/area-boundaries";
+export const runtime="nodejs";
+export const dynamic="force-dynamic";
+const cache=new Map<string,{json:Uint8Array;gzip:Uint8Array}>();
+export async function GET(request:Request){
+ const areas=await visibleCoverageAreas(),version=boundaryVersion(areas),etag=`W/"${version}"`;
+ const headers={"Cache-Control":"public, no-cache, must-revalidate","Vary":"Accept-Encoding","ETag":etag,"X-LAW-Boundary-Version":version};
+ if(request.headers.get("if-none-match")?.split(",").map(v=>v.trim()).includes(etag))return new Response(null,{status:304,headers});
+ let encoded=cache.get(version);
+ if(!encoded){const json=new TextEncoder().encode(JSON.stringify(buildAreaBoundaries(areas)));encoded={json,gzip:new Uint8Array(gzipSync(json))};cache.set(version,encoded);if(cache.size>4)cache.delete(cache.keys().next().value!);}
+ const gzip=/(?:^|[,\s])gzip(?:[,\s;]|$)/i.test(request.headers.get("accept-encoding")??"")&&!/gzip\s*;\s*q=0(?:\.0+)?(?:\s*,|\s*$)/i.test(request.headers.get("accept-encoding")??"");
+ return new Response(new Uint8Array(gzip?encoded.gzip:encoded.json),{headers:{...headers,"Content-Type":"application/json; charset=utf-8",...gzip?{"Content-Encoding":"gzip"}:{}}});
 }

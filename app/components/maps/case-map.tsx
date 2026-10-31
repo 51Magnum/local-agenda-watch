@@ -1,4 +1,5 @@
 "use client";
+import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import {opensCasePage} from "@/lib/maps/case-interaction";
 import {placeProjectCard} from "@/lib/maps/popup-position";
 import { movingToPopup, type ScreenPoint } from "@/lib/maps/popup-hover";
@@ -167,7 +168,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.on("load", () => {
         if (!instance) return;
         instance.addSource("flum", { type: "geojson", data: empty }); instance.addLayer({ id: "flum-fill", type: "fill", source: "flum", paint: { "fill-color": "#94a3b8", "fill-opacity": 0.35 } });
-        instance.addSource("boundaries",{type:"geojson",data:data.boundaries??empty});instance.addLayer({id:"city-limits",type:"line",source:"boundaries",paint:{"line-color":"#475569","line-width":1.5,"line-opacity":.5,"line-dasharray":[4,3]}});
+        instance.addSource("boundaries",{type:"geojson",data:empty});instance.addLayer({id:"city-limits",type:"line",source:"boundaries",paint:{"line-color":"#475569","line-width":1.5,"line-opacity":.5,"line-dasharray":[4,3]}});
+        void loadAreaBoundaries().then(boundaries=>{if(!disposed&&instance)(instance.getSource("boundaries") as GeoJSONSource)?.setData(boundaries.polygons);}).catch(()=>{});
         instance.addSource("cases", { type: "geojson", data: empty });
         instance.addLayer({ id: "case-fill", type: "fill", source: "cases", paint: { "fill-color": ["get", "color"], "fill-opacity": 0.2 } });
         instance.addLayer({ id: "case-halo", type: "line", source: "cases", filter: ["==", ["get", "approximate"], false], paint: { "line-color": "#ffffff", "line-width": 7 } });
@@ -330,7 +332,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       </div>
       <p className={searching ? "sr-only" : "law-live-message"} role="status">{searching ? "Searching..." : searchMessage}</p>
       {results.length > 1 && <div className="law-address-results">{results.map((r, i) => <button key={i} type="button" onClick={() => choose(r)}>{r.label}</button>)}</div>}
-      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover to preview, click to open a project. On touchscreens, tap to preview."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : flumLoading ? "Loading future land use…" : compact ? "Click a boundary for details" : "Hover to preview · Click to open · Tap to preview"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{combined?" · Dashed gray: city limits":""}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
+      <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover to preview, click to open a project. On touchscreens, tap to preview."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : flumLoading ? "Loading future land use…" : compact ? "Click a boundary for details" : "Hover to preview · Click to open · Tap to preview"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{" · Dashed gray: jurisdiction coverage"}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
       {!compact && <div className="law-map-bottom"><span>{mapped.length} projects shown</span>{!fullPage && <a href={areaPath(jurisdiction)+"#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
         {mapInfo}
       </div>}
