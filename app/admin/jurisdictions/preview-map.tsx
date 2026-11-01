@@ -1,4 +1,5 @@
 "use client";
+import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {useEffect,useMemo,useRef,useState} from "react";
 import type {FeatureCollection} from "geojson";
 import type {Map as LibreMap} from "maplibre-gl";
@@ -29,17 +30,20 @@ export default function PreviewMap({boundaries,cases}:{boundaries:FeatureCollect
      m.addSource("qa-boundaries",{type:"geojson",data:boundaries});
      m.addLayer({id:"qa-boundaries",type:"fill",source:"qa-boundaries",paint:{"fill-color":["get","color"],"fill-opacity":.12}});
      m.addLayer({id:"qa-outlines",type:"line",source:"qa-boundaries",paint:{"line-color":["get","color"],"line-width":2}});
-     m.addSource("qa-cases",{type:"geojson",data:cases});
+     m.addSource("qa-cases",{type:"geojson",data:data.polygons});
      m.addLayer({id:"qa-cases",type:"fill",source:"qa-cases",paint:{"fill-color":["get","color"],"fill-opacity":.5}});
      m.addLayer({id:"qa-case-outlines",type:"line",source:"qa-cases",paint:{"line-color":["get","color"],"line-width":2}});
      m.addSource("qa-project-markers",{type:"geojson",data:data.markers});
      m.addLayer({id:"qa-project-markers",type:"circle",source:"qa-project-markers",paint:{"circle-radius":7,"circle-color":["get","color"],"circle-stroke-color":"#ffffff","circle-stroke-width":2}});
      if(data.bounds)m.fitBounds(data.bounds,{padding:55,maxZoom:13,duration:0});
      setLoaded(true);
-     m.on("mouseenter","qa-project-markers",()=>{m.getCanvas().style.cursor="pointer";});
-     m.on("mouseleave","qa-project-markers",()=>{m.getCanvas().style.cursor="";});
+     const key=(p:Record<string,unknown>|null|undefined)=>p?.areaId+":"+p?.caseId;
+     const known=new Map(data.polygons.features.map(f=>[key(f.properties),f]));
+     const resolve=(event:{point:import("maplibre-gl").Point})=>resolveProjectHit(m.queryRenderedFeatures(event.point,{layers:["qa-project-markers","qa-cases","qa-case-outlines"]}),id=>known.get(id),f=>f.geometry,hit=>key(hit.properties));
+     m.on("mousemove",event=>{m.getCanvas().style.cursor=resolve(event)?"pointer":"";});
+     m.getCanvas().addEventListener("mouseleave",()=>{m.getCanvas().style.cursor="";});
      m.on("click",async event=>{
-      const p=m.queryRenderedFeatures(event.point,{layers:["qa-project-markers","qa-cases"]})[0]?.properties;if(!p)return;
+      const p=resolve(event)?.item.properties;if(!p)return;
       try{const r=await fetch("/admin/jurisdictions/"+encodeURIComponent(p.areaId)+"/project?case="+encodeURIComponent(p.caseId),{cache:"no-store"});if(!r.ok)throw Error("Project unavailable");const project=await r.json();if(active){setSelected(project);setError("");}}
       catch{if(active)setError("Private project preview could not be loaded. Open the record in the project list below.");}
      });

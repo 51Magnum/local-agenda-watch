@@ -1,3 +1,4 @@
+import {normalizeProjectGeometry} from "./project-geometry";
 import {jurisdiction} from "../jurisdictions/registry";
 import {visibleAreas} from "@/lib/areas/registry";
 import {databaseUrl} from "../runtime-environment";
@@ -172,6 +173,7 @@ function publicFeature(c: MapCase, areaId: string, zoom: number): MapCase {
         highQuality: false,
       }).geometry;
     } catch {}
+  if(geometry)geometry=normalizeProjectGeometry(geometry);
   return {
     id: c.id.includes(":") ? c.id : areaId + ":" + c.id,
     areaId,
@@ -255,7 +257,7 @@ async function loadViewport(
     bounds: b,
   };
 }
-export async function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);const result=await unstable_cache(loadViewport,["viewport-cases-v8-private-names",...reviewCacheKeys],{revalidate:86400,tags:[...tags,MAP_INDEX_TAG,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);const visible=new Set((await visibleAreas()).map(a=>a.id));return {...result,cases:result.cases.filter(c=>visible.has(c.areaId!)&&(!c.members||c.members.every(m=>visible.has(m.areaId)))),summaries:result.summaries.filter(s=>visible.has(s.id))};}
+export async function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);const result=await unstable_cache(loadViewport,["viewport-cases-v9-dissolved-geometry",...reviewCacheKeys],{revalidate:86400,tags:[...tags,MAP_INDEX_TAG,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);const visible=new Set((await visibleAreas()).map(a=>a.id));return {...result,cases:result.cases.filter(c=>visible.has(c.areaId!)&&(!c.members||c.members.every(m=>visible.has(m.areaId)))),summaries:result.summaries.filter(s=>visible.has(s.id))};}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";

@@ -1,0 +1,197 @@
+[
+  {
+    "area": "ada-county",
+    "id": "201601258-CPA",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.28568262253229,
+      43.74079636037802
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "201601258-CPA",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.28568262253229,
+      43.74079636037802
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202300565-CU",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.43808593207271,
+      43.562809093692564
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202300565-CU",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.43808593207271,
+      43.562809093692564
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202600638-ZC",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.31302938369953,
+      43.483802304116786
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202600638-ZC",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.31302938369953,
+      43.483802304116786
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202600819-ZC",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.3475127200871,
+      43.53452590836549
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202600819-ZC",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.3475127200871,
+      43.53452590836549
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202601987-CU",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.04298864553537,
+      43.44822546240533
+    ],
+    "geometry": "MultiPolygon",
+    "parts": 5,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202601987-CU",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.04298864553537,
+      43.44822546240533
+    ],
+    "geometry": "MultiPolygon",
+    "parts": 5,
+    "pass": true
+  },
+  {
+    "area": "nampa",
+    "id": "ANN-00326-2025",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.5290321902435,
+      43.64744511166118
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "nampa",
+    "id": "ANN-00326-2025",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.5290321902435,
+      43.64744511166118
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "nampa",
+    "id": "ANN-00333-2025",
+    "zoom": 13,
+    "mobile": false,
+    "centroid": [
+      -116.53821119654764,
+      43.639601584517045
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "nampa",
+    "id": "ANN-00333-2025",
+    "zoom": 15,
+    "mobile": false,
+    "centroid": [
+      -116.53821119654764,
+      43.639601584517045
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  },
+  {
+    "area": "ada-county",
+    "id": "202600638-ZC",
+    "zoom": 15,
+    "mobile": true,
+    "centroid": [
+      -116.31302938369953,
+      43.483802304116786
+    ],
+    "geometry": "Polygon",
+    "parts": 1,
+    "pass": true
+  }
+]

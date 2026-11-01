@@ -1,3 +1,4 @@
+import {normalizeProjectGeometry} from "../maps/project-geometry";
 import {area,feature,featureCollection,intersect,pointOnFeature,booleanPointInPolygon,circle,bbox} from "@turf/turf";
 import {combinePolygons,polygonGeometry} from "../maps/gis";
 import {geometryCentroid} from "../maps/spatial";
@@ -51,6 +52,6 @@ export function coverageEligible(app:Application,coverage:CaseGeometry){
 /** Address points get an explicitly approximate marker, never a claimed parcel boundary. */
 export function applicationMapLocation(app:Application){
  const point=app.geometry?.type==="Point"?app.geometry.coordinates.slice(0,2) as [number,number]:undefined;
- const geometry=point?circle(point,.025,{units:"kilometers",steps:24}).geometry:app.geometry&&polygonGeometry(app.geometry)?app.geometry as CaseGeometry:null;
+ const geometry=point?circle(point,.025,{units:"kilometers",steps:24}).geometry:app.geometry&&polygonGeometry(app.geometry)?normalizeProjectGeometry(app.geometry as CaseGeometry):null;
  return {geometry,centroid:point??(geometry?geometryCentroid(geometry):null),bounds:geometry?bbox(geometry).slice(0,4) as [number,number,number,number]:undefined,confidence:point||!geometry?"approximate" as const:"exact" as const,source:point||!geometry?"none" as const:"polygon" as const,...point?{statusNote:"Approximate (address point)"}:!geometry?{statusNote:"Location unverified"}:{}};
 }

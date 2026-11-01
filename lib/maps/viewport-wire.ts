@@ -6,11 +6,11 @@ export type PackedViewport = Omit<ViewportData, "cases"> & { format: 1; cases: P
 
 /** Map transport carries drawing/interaction data, never repeated record links or parcel metadata. */
 export function packViewport(data: ViewportData): PackedViewport {
-  return { ...data, format: 1, cases: data.cases.map((c) => {const packed:PackedCase=[c.id, c.areaId!, c.title, c.stage, c.centroid, c.geometry, c.confidence, c.uses ?? null, c.nextHearing ?? null, c.decisionDate ?? null, c.popup ?? null, c.jurisdictionLabel ?? null, c.timezone ?? null];if(c.aiTitle!==undefined)packed.push(c.aiTitle);return packed;}) };
+  return { ...data, format: 1, cases: data.cases.map((c) => {const packed:PackedCase=[String(c.id), c.areaId!, c.title, c.stage, c.centroid, c.geometry, c.confidence, c.uses ?? null, c.nextHearing ?? null, c.decisionDate ?? null, c.popup ?? null, c.jurisdictionLabel ?? null, c.timezone ?? null];if(c.aiTitle!==undefined)packed.push(c.aiTitle);return packed;}) };
 }
 export function unpackViewport(data: PackedViewport): ViewportData {
   return { ...data, cases: data.cases.map(([id, areaId, title, stage, centroid, geometry, confidence, uses, nextHearing, decisionDate, popup, jurisdictionLabel, timezone,aiTitle]) => ({
-    id, areaId, title, stage, centroid, geometry, confidence,
+    id:String(id), areaId, title, stage, centroid, geometry, confidence,
     uses: uses ?? undefined, nextHearing: nextHearing ?? undefined, decisionDate: decisionDate ?? undefined,
     popup: popup ?? undefined, jurisdictionLabel: jurisdictionLabel ?? undefined, timezone: timezone ?? undefined,aiTitle:aiTitle??undefined,
     type: "", typeLabel: "", summary: "", href: "", source: geometry ? "polygon" : "none", citywide: false, flumCategories: [],

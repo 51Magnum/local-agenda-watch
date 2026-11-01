@@ -1,3 +1,4 @@
+import {normalizeProjectGeometry} from "./project-geometry";
 import {residentialCase} from "@/lib/residential-privacy";
 import {jurisdiction,isPublicJurisdiction} from "../jurisdictions/registry";
 import {indexedDecisionDate} from "./case-index";
@@ -107,6 +108,7 @@ export async function buildMapSnapshot(config: JurisdictionConfig, previous?: Ma
     if (next && stage !== "Decided" && stage !== "Recorded") stage = /council|board/i.test(next.body) ? "Council/Board" : "P&Z";
     const summary = presentation?.summary ?? hearing.appScope ?? hearing.appTypeLabel;
     const oneLine = summary.split(/(?<=\.)\s+/).find((s) => /propos|annexation|plat|permit|rezone|amendment/i.test(s)) ?? summary;
+    if(geometry)geometry=normalizeProjectGeometry(geometry);
     cases.push({ residentialPrivacy:residentialCase(config.id,hearing.appId,hearing),recordStatus:hearing.appStatus,caseDate:hearing.meetings.filter(m=>m.date<=now.toISOString().slice(0,10)).map(m=>m.date).sort().at(-1),decisionDate:stage==="Decided"?indexedDecisionDate(hearing):undefined,stageBody:meeting?.bodyLabel??[...hearing.meetings].filter(m=>stage!=="Council/Board"||m.body===config.area?.bodies.decision.id).sort((a,b)=>b.date.localeCompare(a.date))[0]?.bodyLabel,bounds:geometry?bbox(geometry).slice(0,4) as [number,number,number,number]:undefined,parcelIds,parcelNamespace:config.caseGeometry.parcelFallback.layerUrl?new URL(config.caseGeometry.parcelFallback.layerUrl).hostname:undefined,id: hearing.appId, title: presentation?.title ?? hearing.appTypeLabel + " — " + hearing.appId, summary: oneLine, type: hearing.appType, typeLabel: config.caseTypes[hearing.appType] ?? hearing.appTypeLabel, stage, ...(isStatusUnclear(hearing) ? { statusNote: "Status unclear, no recent city record" } : {}), href: presentation?.href ?? "/" + config.id + "/plan/" + encodeURIComponent(hearing.appId), ...((stage !== "Decided" && stage !== "Recorded" && next) ? { nextHearing: next } : {}), geometry, centroid: geometry ? geometryCentroid(geometry) : null, source, confidence, sourceUrl, geometryUpdatedAt, visual, visualCheckedAt, citywide, flumCategories: geometry && flum ? flumAtGeometry(geometry, flum.geojson, config.flum.categoryField) : [] });
   }));
   return { version: 1, jurisdiction: config.id, updatedAt: now.toISOString(), cases: cases.sort((a, b) => a.id.localeCompare(b.id)), flum, warnings: [...new Set(warnings)] };
@@ -126,5 +128,5 @@ export async function refreshConfiguredMaps(deadline = Date.now() + 50000) {
 
 export function publicMapData(config: JurisdictionConfig, snapshot: MapSnapshot): PublicMapData {
   const { id, name, center, zoom, bounds, state, addressPoints } = config;
-  return { jurisdiction: { id, name, center, zoom, bounds, state, addressPoints }, updatedAt: snapshot.updatedAt, cases: snapshot.cases.map((c) => ({ ...c, href: canonicalAreaHref(config.id,c.href), visual: undefined })), warnings: snapshot.warnings, flum: { ...config.flum, updatedAt: snapshot.flum?.updatedAt, legend: snapshot.flum?.legend ?? [] } };
+  return { jurisdiction: { id, name, center, zoom, bounds, state, addressPoints }, updatedAt: snapshot.updatedAt, cases: snapshot.cases.map((c) => ({ ...c, geometry:c.geometry?normalizeProjectGeometry(c.geometry):null, href: canonicalAreaHref(config.id,c.href), visual: undefined })), warnings: snapshot.warnings, flum: { ...config.flum, updatedAt: snapshot.flum?.updatedAt, legend: snapshot.flum?.legend ?? [] } };
 }

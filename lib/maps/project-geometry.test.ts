@@ -1,0 +1,8 @@
+import {expect,it} from "vitest";
+import {area,booleanPointInPolygon,kinks,point,polygon} from "@turf/turf";
+import {combinePolygons} from "./gis";
+import {normalizeProjectGeometry} from "./project-geometry";
+const box=polygon([[[0,0],[2,0],[2,2],[0,2],[0,0]]]);
+it("dissolves duplicate source parcel rows instead of publishing cancelling multipolygon parts",()=>{const cleaned=normalizeProjectGeometry(combinePolygons(Array(4).fill(box))!)!;expect(cleaned.type).toBe("Polygon");expect(area(cleaned)).toBeCloseTo(area(box));expect(booleanPointInPolygon(point([1,1]),cleaned)).toBe(true);expect(normalizeProjectGeometry(cleaned)).toEqual(cleaned);});
+it("dissolves partial overlap but preserves holes and disconnected parcels",()=>{const hole=polygon([[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[1,2],[2,2],[2,1],[1,1]]]);const cleaned=normalizeProjectGeometry(combinePolygons([hole,polygon([[[3,0],[5,0],[5,4],[3,4],[3,0]]]),polygon([[[6,0],[7,0],[7,1],[6,1],[6,0]]])])!)!;expect(cleaned.type).toBe("MultiPolygon");expect(booleanPointInPolygon(point([1.5,1.5]),cleaned)).toBe(false);expect(booleanPointInPolygon(point([3.5,2]),cleaned)).toBe(true);expect(booleanPointInPolygon(point([6.5,.5]),cleaned)).toBe(true);});
+it("repairs self intersections and drops degenerate parts",()=>{const cleaned=normalizeProjectGeometry(combinePolygons([polygon([[[0,0],[2,2],[0,2],[2,0],[0,0]]]),polygon([[[3,0],[4,0],[5,0],[3,0]]])])!)!;expect(area(cleaned)).toBeGreaterThan(0);for(const coordinates of cleaned.type==="Polygon"?[cleaned.coordinates]:cleaned.coordinates)expect(kinks(polygon(coordinates)).features).toHaveLength(0);expect(booleanPointInPolygon(point([4,0]),cleaned)).toBe(false);});
