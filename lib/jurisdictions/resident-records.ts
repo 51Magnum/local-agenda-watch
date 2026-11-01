@@ -1,3 +1,5 @@
+import {collectedTitleReview} from "../resident-content-policy";
+import {hearingDateTime} from "../areas/format";
 import {collectionCoverage} from "./boundary-source";
 import {coverageEligible} from "./application-geolocation";
 import {applicationMapLocation} from "./application-geolocation";
@@ -38,7 +40,7 @@ export function stagedMapSnapshot(d:JurisdictionDefinition,snapshot:StagingSnaps
  return{version:1,jurisdiction:d.id,updatedAt:snapshot.checkedAt,warnings:[],cases:feed.active.map(h=>{
   const a=applications.find(a=>a.recordId===h.appId)!,location=applicationMapLocation(a);
   const next=h.meetings.filter(m=>m.date>=today).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  return protectMapCase(d.id,{id:h.appId,aiTitle:a.aiTitle,privacyPolicy:a.privacyPolicy,residentialPrivacy:a.residentialPrivacy,areaId:d.id,title:h.displayTitle??h.appId,summary:h.description??"",type:h.appType,typeLabel:h.appTypeLabel,recordStatus:h.appStatus,stage:next?/board|council/i.test(next.body)?"Council/Board":"P&Z":"In review",href:`/${d.area.country}/${d.state}/${d.id}/plan/${encodeURIComponent(h.appId)}`,...location,sourceUrl:a.residentialPrivacy?(d.participation.hearingsUrl??""):a.geometrySourceUrl??applicationRecordUrl(d,a.recordId,a.projectNumber),citywide:false,flumCategories:[],parcelIds:a.parcel,...next?{nextHearing:{date:next.date,body:next.body,label:next.body+" · "+next.date}}:{}});
+  return protectMapCase(d.id,{id:h.appId,aiTitle:a.aiTitle,privacyPolicy:a.privacyPolicy,residentialPrivacy:a.residentialPrivacy,areaId:d.id,title:h.displayTitle??h.appId,titleReview:collectedTitleReview(h.displayTitle??h.appId),summary:h.description??"",type:h.appType,typeLabel:h.appTypeLabel,recordStatus:h.appStatus,stage:next?/board|council/i.test(next.body)?"Council/Board":"P&Z":"In review",href:`/${d.area.country}/${d.state}/${d.id}/plan/${encodeURIComponent(h.appId)}`,...location,sourceUrl:a.residentialPrivacy?(d.participation.hearingsUrl??""):a.geometrySourceUrl??applicationRecordUrl(d,a.recordId,a.projectNumber),citywide:false,flumCategories:[],parcelIds:a.parcel,...next?{nextHearing:{date:next.date,body:next.body,label:next.body+" · "+hearingDateTime(next.date,d.timezone)}}:{}});
  })};
 }
 export function configuredRecord(h:Hearing):PublicCaseRecord{return(h as ConfiguredHearing).record??{sourceUrl:h.externalUrl??undefined,address:"",sourceStatus:h.appStatus,approvalStatus:"",events:[],documents:[]};}

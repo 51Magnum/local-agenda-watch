@@ -44,3 +44,11 @@ it("retains source records as deferred when a geometry endpoint fails",async()=>
  const [found]=await geolocateApplications(d,[app("PLN26-00100")],{query:vi.fn().mockRejectedValue(new Error("Unavailable"))} as unknown as GisAdapter);
  expect(found.recordId).toBe("PLN26-00100");expect(found.geolocationDeferred).toBe(true);expect(found.locationVerification).toBe("unverified");
 });
+it("batches civic addresses while keeping exact per-record matches and provenance",async()=>{
+ const fallback=d.applications.params.addressPointFallback as {url:string;fields:{number:string;street:string;direction:string;suffix:string}},f=fallback.fields;
+ const points:FeatureCollection={type:"FeatureCollection",features:Array.from({length:26},(_,i)=>({type:"Feature",geometry:{type:"Point",coordinates:[-116.2,43.6]},properties:{[f.number]:150+i,[f.street]:"CAPITOL",[f.direction]:"N",[f.suffix]:"BLVD"}}))};
+ const query=vi.fn(async(url:string)=>url===fallback.url?points:{type:"FeatureCollection",features:[]} as FeatureCollection);
+ const located=await geolocateApplications(d,Array.from({length:26},(_,i)=>app("PLN26-"+String(i).padStart(5,"0"),(150+i)+" N Capitol Boulevard")),{query} as unknown as GisAdapter);
+ expect(query.mock.calls.filter(([url])=>url===fallback.url)).toHaveLength(2);expect(located.every(a=>a.locationVerification==="approximate")).toBe(true);
+ expect(new URL(located[0].geometrySourceUrl!).searchParams.get("where")).toBe("AddNum=150 AND UPPER(StName)='CAPITOL'");
+});

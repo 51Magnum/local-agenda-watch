@@ -1,3 +1,5 @@
+import {residentMapCase} from "../resident-content-policy";
+import {latestSuccessfulCheck} from "./record-freshness";
 import {jurisdiction} from "../jurisdictions/registry";
 import {residentProject} from "../jurisdictions/resident-project";
 import {readProjectContent} from "@/lib/project-content-store";
@@ -182,7 +184,7 @@ async function detail(
     officialRecords,
     summarySource:agenda?residentPaneHref(area,agenda.sourceUrl):content?.source?residentPaneHref(area,content.source.url+"#page="+content.source.page):undefined,
     documents:[...new Map([...(record?.documents??[]),...(record?.events??[]).flatMap(e=>e.documents),...(hearing?.meetings??[]).flatMap(m=>m.staffReports??[]),...(project?.sourceDocuments??[]),...(areaId==="nampa"&&CASE_EVIDENCE[caseId]?.reportUrl?[{label:CASE_EVIDENCE[caseId].documentNames[0],url:CASE_EVIDENCE[caseId].reportUrl!}]:[])].filter(d=>(!sensitive||!privateResidentialDocument(d.label))&&residentPaneHref(area,d.url)).map(d=>[d.url,{label:d.label,url:residentPaneHref(area,d.url)!}])).values()],
-    parcels:sensitive?undefined:item.parcelIds,
+    
     relatedCases: await Promise.all((item.members??[]).map(async m=>{
       const h=m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId):undefined;
       const relatedRecord=h?await config.recordForCase?.(h):undefined;
@@ -238,11 +240,19 @@ async function detail(
         .map((d) => d.checkedAt)
         .sort()
         .at(-1) ?? snapshot!.updatedAt,
-    lastCheckedAt: (await readSchedule()).sweeps?.[areaId]?.lastSuccessAt,
+    lastCheckedAt: latestSuccessfulCheck({areaId,caseIds:ids,state,schedule:await readSchedule(),feed:hearing?feed:undefined,hearing:next}),
   };
+  result.item=residentMapCase(result.item);
   result.documents=result.documents?.map(d=>({...d,hash:Object.values(state.documents).find(doc=>doc.url?.split("#")[0]===d.url.split("#")[0])?.hash}));
   if(areaId==="nampa"&&caseId==="DAMO-00068-2026")result.history=result.history.map(h=>/Result not yet posted by P&Z for Jul 14/.test(h.label)?{label:"P&Z recommended approval — July 2026",source:CASE_EVIDENCE[caseId].reportUrl+"#page=1"}:h);
   if(sensitive){result.item=protectMapCase(areaId,{...result.item,residentialPrivacy:true},await privacyOverrides());result.relatedCases=result.relatedCases?.map(c=>({...c,title:result.item.title}));result.where=result.where?redactResidence(result.where)+" · Approximate area shown to protect a residential location.":"Approximate residential area; exact address withheld.";return redactResidence(result);}
   return result;
 }
-export function projectDetail(areaId:string,caseId:string){if(jurisdiction(areaId)&&!jurisdiction(areaId).legacyPublic)return detail(areaId,caseId);return unstable_cache(detail,["map-project-questions-v16-hearing-links"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);}
+export async function projectDetail(areaId:string,caseId:string){
+ if(jurisdiction(areaId)&&!jurisdiction(areaId).legacyPublic)return detail(areaId,caseId);
+ const data=await unstable_cache(detail,["map-project-questions-v17-record-freshness-policy"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);if(!data)return null;
+ // Fresh check metadata and agenda publication are independent of the long-lived project copy cache.
+ const next=data.next?{...await resolveHearingMeeting(areaId,caseId,data.next),role:data.next.role}:undefined;
+ const latest=latestSuccessfulCheck({areaId,caseIds:data.caseIds,state:await readTimelineState(data.caseIds,areaId),schedule:await readSchedule(),hearing:next});
+ return {...data,next,lastCheckedAt:[data.lastCheckedAt,latest].filter((v):v is string=>!!v).sort((a,b)=>Date.parse(a)-Date.parse(b)).at(-1)};
+}

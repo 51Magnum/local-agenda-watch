@@ -1,0 +1,436 @@
+{
+  "date": "2026-11-01",
+  "branch": "codex/freshness-policy",
+  "refreshFailures": {
+    "runs": [
+      41266409117,
+      41253061856,
+      41222671026
+    ],
+    "evidence": "Ada completed; Boise timed out on each of four 290-second attempts. Inventory geolocation preceded retention, address fallback used one request per address, and collection plus self-check shared one server request.",
+    "fixes": [
+      "Retain recent/hearing-linked inventory before geolocation",
+      "Batch up to 25 exact civic-address queries; keep strict matching and per-record provenance",
+      "Enforce a shared source request deadline, including queued and retried work",
+      "Run collection and self-check in separate bounded requests",
+      "Continue other jurisdictions after an area fails; retain the existing publication gates"
+    ]
+  },
+  "boiseReadOnlyDryRun": {
+    "complete": true,
+    "elapsedMs": 102336,
+    "applications": 298,
+    "meetings": 48,
+    "sourceChecks": 141,
+    "allSourceChecksSuccessful": true,
+    "writes": false,
+    "aiCostUsd": 0
+  },
+  "agendaAudit": {
+    "capturedAt": "2026-11-01T12:58:24.009Z",
+    "basis": "Unique project/hearing records with an upcoming hearing in the public eight-area map inventory; aliases deduplicated",
+    "total": 39,
+    "before": 4,
+    "after": 19,
+    "beforeAgendaDocuments": 4,
+    "afterAgendaDocuments": 6
+  },
+  "agendaRecords": [
+    {
+      "area": "canyon-county",
+      "caseId": "OR2023-0003",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-20T01:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=460",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CR2024-0010",
+      "body": "Board of County Commissioners",
+      "startsAt": "2026-12-15T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=464",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00371-2026",
+      "body": "City Council",
+      "startsAt": "2026-11-02T18:00:00-07:00",
+      "beforeUrl": "https://nampa.primegov.com/public/portal",
+      "afterUrl": "https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=10112&compileOutputType=1",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": true
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00373-2026",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-11T01:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/public/portal",
+      "afterUrl": "https://nampa.primegov.com/public/portal",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "SD2026-0003",
+      "body": "Board of County Commissioners",
+      "startsAt": "2026-11-03T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=447",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0036",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CR2025-0013",
+      "body": "Board of County Commissioners",
+      "startsAt": "2027-01-12T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=439",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00368-2026",
+      "body": "City Council",
+      "startsAt": "2026-11-03T00:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112#AgendaItem_35725",
+      "afterUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112#AgendaItem_35725",
+      "beforeAgendaDocument": true,
+      "afterAgendaDocument": true
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2025-0007",
+      "body": "City Council",
+      "startsAt": "2026-12-01",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "nampa",
+      "caseId": "VAR-00229-2026",
+      "body": "City Council",
+      "startsAt": "2026-11-03T00:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112#AgendaItem_35726",
+      "afterUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112#AgendaItem_35726",
+      "beforeAgendaDocument": true,
+      "afterAgendaDocument": true
+    },
+    {
+      "area": "meridian",
+      "caseId": "SHP-2026-0011",
+      "body": "City Council",
+      "startsAt": "2026-11-17",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0013",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0009",
+      "body": "City Council",
+      "startsAt": "2026-11-10",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0028",
+      "body": "City Council",
+      "startsAt": "2027-01-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0062",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0044",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-19",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00363-2026",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-11T01:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/public/portal",
+      "afterUrl": "https://nampa.primegov.com/public/portal",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00369-2026",
+      "body": "City Council",
+      "startsAt": "2026-11-03T01:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/public/portal",
+      "afterUrl": "https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=10112&compileOutputType=1",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": true
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00333-2025",
+      "body": "City Council",
+      "startsAt": "2026-11-17T01:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/public/portal",
+      "afterUrl": "https://nampa.primegov.com/public/portal",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0057",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-19",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2025-0042",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-19",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "nampa",
+      "caseId": "ANN-00365-2026",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-11T01:00:00.000Z",
+      "beforeUrl": "https://nampa.primegov.com/public/portal",
+      "afterUrl": "https://nampa.primegov.com/public/portal",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0046",
+      "body": "City Council",
+      "startsAt": "2026-11-10",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0063",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0047",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-19",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0049",
+      "body": "City Council",
+      "startsAt": "2026-11-10",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0050",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "meridian",
+      "caseId": "H-2026-0010",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-05",
+      "beforeUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "afterUrl": "https://apps.meridiancity.org/CLERKSCONTENT/meridian_agenda_minutes.aspx",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "RZ2025-0004",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-06T01:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=363",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "eagle",
+      "caseId": "A-2026-04",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-03T01:00:00.000Z",
+      "beforeUrl": "https://eagle-id.granicus.com/AgendaViewer.php?view_id=1&event_id=3833",
+      "afterUrl": "https://eagle-id.granicus.com/AgendaViewer.php?view_id=1&event_id=3833",
+      "beforeAgendaDocument": true,
+      "afterAgendaDocument": true
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CU2026-0013",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-20T01:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=463",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CR2026-0005",
+      "body": "Board of County Commissioners",
+      "startsAt": "2027-01-06T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=466",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CR2026-0008",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-20T01:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=457",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CU2026-0027",
+      "body": "Hearing Examiner",
+      "startsAt": "2026-12-10T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=458",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "eagle",
+      "caseId": "A-2026-03",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-11-03T01:00:00.000Z",
+      "beforeUrl": "https://eagle-id.granicus.com/AgendaViewer.php?view_id=1&event_id=3833",
+      "afterUrl": "https://eagle-id.granicus.com/AgendaViewer.php?view_id=1&event_id=3833",
+      "beforeAgendaDocument": true,
+      "afterAgendaDocument": true
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CU2026-0028",
+      "body": "Hearing Examiner",
+      "startsAt": "2026-11-12T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=459",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CU2026-0005",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-12-18T01:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=465",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CR2025-0018",
+      "body": "Board of County Commissioners",
+      "startsAt": "2026-11-05T20:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=445",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    },
+    {
+      "area": "canyon-county",
+      "caseId": "CU2025-0031",
+      "body": "Planning & Zoning Commission",
+      "startsAt": "2026-12-04T01:30:00.000Z",
+      "beforeUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing",
+      "afterUrl": "https://landhearingsagenda.canyoncounty.id.gov/Landing?eventId=467",
+      "beforeAgendaDocument": false,
+      "afterAgendaDocument": false
+    }
+  ],
+  "safety": {
+    "productionWrites": false,
+    "paidAi": false,
+    "merged": false,
+    "screenshots": false
+  }
+}

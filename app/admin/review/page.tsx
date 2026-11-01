@@ -15,7 +15,7 @@ import {isPreview} from "@/lib/runtime-environment";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Review case evidence", robots: { index: false, follow: false } };
 export default async function ReviewPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  if(isPreview())return <main className="mx-auto max-w-6xl space-y-6 px-6 py-10"><h1 className="text-3xl font-semibold">Review snapshot exceptions</h1><p>Read-only committed evidence. Decisions and other database operations are not available in preview.</p><JurisdictionExceptions/></main>;
+  if(isPreview())return <main className="mx-auto max-w-6xl space-y-6 px-6 py-10"><Link href="/admin/content" className="underline">Review project titles that may contain person or business names</Link><h1 className="text-3xl font-semibold">Review snapshot exceptions</h1><p>Read-only committed evidence. Decisions and other database operations are not available in preview.</p><JurisdictionExceptions/></main>;
   if (!authorizedReviewer((await headers()).get("authorization"))) return <main className="p-8">Review access requires the configured admin password.</main>;
   const params=await searchParams;
   const store=getEvidenceStore();
@@ -37,7 +37,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
   const fields = Object.values(state.fields).filter(f=>state.documents[f.documentId]?.hash===f.documentHash&&state.documents[f.documentId]?.state==="complete").map(f=>({...f,documentTitle:state.documents[f.documentId].title,meetingDate:state.documents[f.documentId].meeting?.date}));
   const stats=accuracyStats(state);
   return <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-10">
-    <h1 className="text-3xl font-semibold">Review case evidence</h1>
+    <h1 className="text-3xl font-semibold">Review case evidence</h1><Link href="/admin/content" className="underline">Review project titles that may contain person or business names</Link>
     <JurisdictionExceptions/>
     <HearingLinksReview areaId={params.hearing_area} caseId={params.hearing_case}/>
     <p>Final decisions and vote tallies always need approval. Verified speaker counts and conditions can publish automatically. Review means confirming our summary, not approving a development.</p>

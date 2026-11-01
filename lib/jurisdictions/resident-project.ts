@@ -1,3 +1,4 @@
+import {residentPaneData} from "../resident-content-policy";
 import {getArea,areaPath,visibleAreas} from "../areas/registry";
 import {privateProject} from "./preview";
 import {residentialCase,protectMapCase,redactResidence,privateResidentialDocument} from "../residential-privacy";
@@ -8,12 +9,12 @@ import {isPreview} from "../runtime-environment";
 import {readReviewSnapshot} from "./review-snapshot";
 /** Resident projection shares the sourced six-question record without admin links. */
 export async function residentProject(areaId:string,caseId:string){
- if(isPreview())return readReviewSnapshot(areaId)?.records.find(r=>r.caseId===caseId||r.aliases.includes(caseId))?.project??null;
+ if(isPreview()){const data=readReviewSnapshot(areaId)?.records.find(r=>r.caseId===caseId||r.aliases.includes(caseId))?.project;return data?residentPaneData(data):null;}
  await visibleAreas();
  const area=getArea(areaId);if(!area)return null;
  const snapshot=await readPublished(areaId);if(!snapshot)return null;
  if(!snapshot.applications.some(a=>a.recordId===caseId||a.relatedCaseNumbers.includes(caseId)))return null;
- const data=await privateProject(areaId,caseId,snapshot);if(!data)return null;
+ const raw=await privateProject(areaId,caseId,snapshot),data=raw?residentPaneData(raw):null;if(!data)return null;
  data.item.href=areaPath(area)+"/plan/"+encodeURIComponent(data.item.id);data.item.areaId=areaId;
  data.relatedCases=data.relatedCases?.map(c=>({...c,href:areaPath(area)+"/plan/"+encodeURIComponent(c.caseId)}));
  data.item.stage=data.next?/board|council/i.test(data.next.body)?"Council/Board":"P&Z":"In review";

@@ -5,7 +5,7 @@ import {jurisdiction} from "./registry";
 import {SourceHttp,SourceFailure} from "./http";
 import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
 import {agendaAdapter} from "./adapters";
-import {coverageEligible} from "./application-geolocation";
+import {geolocateApplications,coverageEligible} from "./application-geolocation";
 import {nativeSampleAllowed} from "./native-sample";
 import {allowedAttachment} from "./adapters/common";
 import type {CaseGeometry} from "../maps/types";
@@ -17,13 +17,13 @@ import {groupApplications} from "./application-groups";
 import {matchApplications} from "./matching";
 import {discoverStagingLibraries} from "./libraries";
 import {accountForAgenda,assertCollectionComplete,projectNumber} from "./agenda-projects";
-export function sourceHttp(areaId:string){const d=jurisdiction(areaId);if(!d)throw Error("Unknown jurisdiction");const urls=[d.boundary.url,...[d.recordLinks?.verifyUrlTemplate,d.applications.recordUrlTemplate].filter(Boolean) as string[],...Object.values(d.gis),...d.agenda.map(a=>String(a.params.baseUrl)),String(d.applications.params.url??""),...(d.area.timeline?.hosts??[]).map(h=>"https://"+h),d.participation.testimonySignupUrl??"",d.clipRule?.layer.url??"",...([d.applications.params.geometryJoin,d.applications.params.addressPointFallback].filter(Boolean) as {url:string}[]).map(s=>s.url)];return new SourceHttp({allowedHosts:[...new Set(urls.filter(Boolean).map(u=>new URL(u!).hostname))],maxBytes:d.documents.maxBytes});}
-export async function collectJurisdiction(areaId:string,options:{days?:number;write?:boolean;budgetMs?:number;http?:SourceHttp;now?:Date}={}){
+export function sourceHttp(areaId:string,deadline?:number){const d=jurisdiction(areaId);if(!d)throw Error("Unknown jurisdiction");const urls=[d.boundary.url,...[d.recordLinks?.verifyUrlTemplate,d.applications.recordUrlTemplate].filter(Boolean) as string[],...Object.values(d.gis),...d.agenda.map(a=>String(a.params.baseUrl)),String(d.applications.params.url??""),...(d.area.timeline?.hosts??[]).map(h=>"https://"+h),d.participation.testimonySignupUrl??"",d.clipRule?.layer.url??"",...([d.applications.params.geometryJoin,d.applications.params.addressPointFallback].filter(Boolean) as {url:string}[]).map(s=>s.url)];return new SourceHttp({deadline,allowedHosts:[...new Set(urls.filter(Boolean).map(u=>new URL(u!).hostname))],maxBytes:d.documents.maxBytes});}
+export async function collectJurisdiction(areaId:string,options:{days?:number;write?:boolean;selfCheck?:boolean;budgetMs?:number;http?:SourceHttp;now?:Date}={}){
  const d=jurisdiction(areaId);if(!d||!d.enabled)throw Error("Jurisdiction is disabled or unknown");
  const now=options.now??new Date(),days=options.days??90;if(!Number.isInteger(days)||days<1||days>90)throw Error("Backfill window must be between 1 and 90 days");
- const range={start:new Date(now.getTime()-days*86400000).toISOString().slice(0,10),end:new Date(now.getTime()+45*86400000).toISOString().slice(0,10)},http=options.http??sourceHttp(areaId),deadline=Date.now()+(options.budgetMs??220000),old=await readStaging(areaId);
+ const range={start:new Date(now.getTime()-days*86400000).toISOString().slice(0,10),end:new Date(now.getTime()+45*86400000).toISOString().slice(0,10)},deadline=Date.now()+(options.budgetMs??140000),http=options.http??sourceHttp(areaId,deadline),old=await readStaging(areaId);
  const snapshot:StagingSnapshot={areaId,launchStatus:d.launchStatus,checkedAt:now.toISOString(),range,applications:[],meetings:(old?.meetings??[]).filter(m=>m.date>=range.start&&m.date<=range.end),pendingMeetings:[],health:http.checks,skipped:[],complete:true,aiSamples:old?.aiSamples??[],visuals:old?.visuals,runtime:old?.runtime};
- try{snapshot.applications=await applicationAdapter(d,http).listApplications();}catch(e){snapshot.complete=false;snapshot.applications=old?.applications??[];if(!(e instanceof SourceFailure))snapshot.skipped.push({url:String(d.applications.params.url),reason:String(e)});}
+ try{snapshot.applications=await applicationAdapter(d,http,{geolocate:false}).listApplications();}catch(e){snapshot.complete=false;snapshot.applications=old?.applications??[];if(!(e instanceof SourceFailure))snapshot.skipped.push({url:String(d.applications.params.url),reason:String(e)});}
  if(snapshot.applications.some(a=>a.geolocationDeferred))snapshot.complete=false;
  const sources=[...d.agenda].sort((a,b)=>Number((old?.pendingMeetings??[]).some(u=>u.startsWith(String(b.params.baseUrl))))-Number((old?.pendingMeetings??[]).some(u=>u.startsWith(String(a.params.baseUrl)))));
  for(const source of sources){if(Date.now()>deadline-25000){snapshot.complete=false;snapshot.pendingMeetings!.push(...(old?.pendingMeetings??[]));break;}const adapter=agendaAdapter(d,source,http);
@@ -49,6 +49,8 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  for(const meeting of snapshot.meetings)for(const item of meeting.items)for(const match of item.matchedApplications??[]){const app=snapshot.applications.find(a=>a.recordId===match.recordId);if(app)app.relatedCaseNumbers=[...new Set([...app.relatedCaseNumbers,...item.caseNumbers.filter(id=>projectNumber(d,id)&&projectNumber(d,id)===app.projectNumber)])];}
  const linked=new Set(snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.matchedApplications?.map(a=>a.recordId)??[])));
  if(!d.legacyPublic)snapshot.applications=retainRecentOrHeard(snapshot.applications,linked,range.start);
+ snapshot.applications=await geolocateApplications(d,snapshot.applications,arcgisAdapter(http));
+ if(snapshot.applications.some(a=>a.geolocationDeferred))snapshot.complete=false;
  // Geometry intersection is bounded to the retained inventory, not all historic filings.
  const coverage=collectionCoverage(d,snapshot);
  if(d.clipRule&&coverage)snapshot.applications=snapshot.applications.flatMap(a=>{const eligible=coverageEligible(a,coverage);return eligible?[eligible]:[];});
@@ -60,5 +62,5 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  const allCases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.caseNumbers=item.caseNumbers.filter(id=>allCases.has(id)||d.caseNumberPatterns.some(p=>new RegExp(p,"i").test(id)));
  if(!d.legacyPublic)accountForAgenda(d,snapshot);
- if(options.write){assertCollectionComplete(snapshot,old);await saveStaging(snapshot);if(!d.legacyPublic)await(await import("./run-self-check")).runSelfCheck(areaId,{snapshot,previous:old,reports:false});}return snapshot;
+ if(options.write){assertCollectionComplete(snapshot,old);await saveStaging(snapshot);if(!d.legacyPublic&&options.selfCheck!==false)await(await import("./run-self-check")).runSelfCheck(areaId,{snapshot,previous:old,reports:false});}return snapshot;
 }

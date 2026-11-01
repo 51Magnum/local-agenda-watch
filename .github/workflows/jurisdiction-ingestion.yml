@@ -37,8 +37,20 @@ jobs:
           set -euo pipefail
           BASE=https://www.localagendawatch.com/api/cron/jurisdictions
           AREAS=$(curl --fail-with-body --silent --show-error --max-time 30 --header "Authorization: Bearer $CRON_SECRET" "$BASE?scope=configured" | jq -r '.areas[]')
+          failed=0
           for area in $AREAS; do
-            curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 290 --retry 3 --retry-delay 60 --retry-all-errors \
-              --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=backfill&area=$area&days=90" > result.json
-            jq '{areaId,complete,applications:(.applications|length),meetings:(.meetings|length),blocked:[.health[]|select(.state=="blocked")],skipped:(.skipped|length)}' result.json
+            echo "Refreshing $area"
+            # Collection and self-check each have a separate server budget below 300s.
+            # Continue to other areas when one official source is unavailable.
+            for command in collect check; do
+              if ! curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 270 \
+                --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=$command&area=$area&days=90" > result.json; then
+                echo "::error::$area $command failed; previous published data retained"
+                cat result.json
+                failed=1
+                break
+              fi
+              jq '{areaId,complete,passRate,goLive,applications:(.applications // []|length),queue:(.queue // []|length)}' result.json
+            done
           done
+          exit "$failed"

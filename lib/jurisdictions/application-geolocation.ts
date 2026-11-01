@@ -31,12 +31,18 @@ export async function geolocateApplications(d:JurisdictionDefinition,apps:Applic
    const geometry=combinePolygons(matching);if(geometry){app.geometry=geometry;app.locationVerification="verified";app.geometrySource="polygon";app.geometrySourceUrl=publicQuery(join.url,field(join.caseField)+" IN ("+matching.map(f=>quote(String(f.properties?.[join.caseField]))).join(",")+")");}
   }
  }
- if(fallback)for(const app of result){
-  if(app.geometry)continue;const parts=addressParts(app.address);if(!parts)continue;
-  const f=fallback.fields,where=field(f.number)+"="+parts.number+" AND UPPER("+field(f.street)+")="+quote(parts.street);
-  let features;try{features=(await gis.query(fallback.url,where)).features;}catch{app.geolocationDeferred=true;continue;}
-  const matching=features.filter(r=>r.geometry?.type==="Point"&&Number(r.properties?.[f.number])===parts.number&&normalize(r.properties?.[f.direction])===parts.direction&&normalize(r.properties?.[f.street])===parts.street&&(!f.suffix||(suffixes[normalize(r.properties?.[f.suffix])]??normalize(r.properties?.[f.suffix]))===parts.suffix));
-  if(matching.length===1){app.geometry=matching[0].geometry!;app.locationVerification="approximate";app.geometrySource="address-point";app.geometrySourceUrl=publicQuery(fallback.url,where);}
+ if(fallback){
+  const f=fallback.fields,candidates=result.flatMap(app=>{const parts=!app.geometry?addressParts(app.address):undefined;return parts?[{app,parts,where:field(f.number)+"="+parts.number+" AND UPPER("+field(f.street)+")="+quote(parts.street)}]:[];});
+  const queries=[...new Set(candidates.map(c=>c.where))];
+  // Match exact addresses after a bounded batch query; never turn an ambiguous match into a location.
+  for(let i=0;i<queries.length;i+=25){
+   const batch=queries.slice(i,i+25),members=candidates.filter(c=>batch.includes(c.where));
+   let features;try{features=(await gis.query(fallback.url,batch.length===1?batch[0]:batch.map(q=>"("+q+")").join(" OR "))).features;}catch{for(const c of members)c.app.geolocationDeferred=true;continue;}
+   for(const {app,parts,where}of members){
+    const matching=features.filter(r=>r.geometry?.type==="Point"&&Number(r.properties?.[f.number])===parts.number&&normalize(r.properties?.[f.direction])===parts.direction&&normalize(r.properties?.[f.street])===parts.street&&(!f.suffix||(suffixes[normalize(r.properties?.[f.suffix])]??normalize(r.properties?.[f.suffix]))===parts.suffix));
+    if(matching.length===1){app.geometry=matching[0].geometry!;app.locationVerification="approximate";app.geometrySource="address-point";app.geometrySourceUrl=publicQuery(fallback.url,where);}
+   }
+  }
  }
  return result.map(a=>({...a,locationVerification:a.locationVerification??(a.geometry?"verified":"unverified")}));
 }

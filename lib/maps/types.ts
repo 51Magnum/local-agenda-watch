@@ -30,6 +30,7 @@ export type JurisdictionConfig = {
   presentation?: (hearing: Hearing, plan: Parameters<typeof caseSummary>[1]) => { title: string; summary: string; href: string; hearing?: { startsAt: string; body: string } };
 };
 export type MapCase = {
+  titleReview?:{status:"pending";reason:string};
   aiTitle?:boolean;
   privacyPolicy?:"staff-individual";
   recordStatus?: string; caseDate?: string; residentialPrivacy?: boolean;
