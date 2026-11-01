@@ -9,5 +9,10 @@ export function hearingDateTime(value:string,timezone="America/Denver"){
  const day=new Intl.DateTimeFormat("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",timeZone:dateOnly?"UTC":timezone}).format(d);
  if(dateOnly)return day;
  const time=new Intl.DateTimeFormat("en-US",{hour:"numeric",minute:"2-digit",timeZone:timezone}).format(d).replace(":00","");
- return day+" · "+time+" "+(timezone==="America/Denver"?"Mountain Time":timezone);
+ return day+" · "+time+" "+(new Intl.DateTimeFormat("en-US",{timeZone:timezone,timeZoneName:"longGeneric"}).formatToParts(d).find(p=>p.type==="timeZoneName")?.value??"local time");
+}
+
+/** Format dates embedded in source timeline prose without exposing storage syntax. */
+export function residentDateText(value:string,timezone="America/Denver"){
+ return value.replace(/\b\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2}))?\b/g,date=>Number.isNaN(Date.parse(date))?date:hearingDateTime(date,timezone)).replace(/America\/[A-Za-z_]+/g,zone=>new Intl.DateTimeFormat("en-US",{timeZone:zone,timeZoneName:"longGeneric"}).formatToParts(new Date()).find(p=>p.type==="timeZoneName")?.value??"local time").replace(/ agenda · /g," meeting agenda · ").replace(/; outcome not established/g,". A decision has not been verified in the available record.");
 }

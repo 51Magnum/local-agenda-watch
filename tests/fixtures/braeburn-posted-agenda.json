@@ -1,0 +1,43 @@
+{
+  "target": {
+    "areaId": "nampa",
+    "caseId": "ANN-00371-2026",
+    "caseIds": [
+      "ANN-00371-2026",
+      "PUD-00261-2026",
+      "SUB-00231-2026"
+    ],
+    "body": "City Council",
+    "startsAt": "2026-11-02T18:00:00-07:00",
+    "timezone": "America/Denver"
+  },
+  "meetings": [
+    {
+      "id": "1774",
+      "body": "City Council",
+      "bodyLabel": "City Council",
+      "title": "City Council - Regular Meeting",
+      "date": "2026-11-02",
+      "dateLabel": "November 2, 2026",
+      "localStartTime": "17:00",
+      "timeLabel": "05:00 PM",
+      "location": "",
+      "sourceUrl": "https://nampa.primegov.com/public/portal",
+      "meetingUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112",
+      "compiledAgendaUrl": "https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=10112&compileOutputType=1",
+      "agendaUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112",
+      "htmlAgendaUrl": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112",
+      "packetUrl": "https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=10114&compileOutputType=1",
+      "items": []
+    }
+  ],
+  "result": {
+    "meeting_url": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112",
+    "meeting_datetime": "2026-11-02T18:00:00-07:00",
+    "match_status": "published",
+    "agenda_url": "https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=10112&compileOutputType=1",
+    "packet_url": "https://nampa.primegov.com/Public/CompiledDocument?meetingTemplateId=10114&compileOutputType=1",
+    "meeting_kind": "regular",
+    "speak_signup_url": "https://nampa.primegov.com/Portal/Meeting?meetingTemplateId=10112"
+  }
+}

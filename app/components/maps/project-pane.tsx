@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import {residentDateText} from "@/lib/areas/format";
 /* eslint-disable @next/next/no-img-element -- approved private-source images use our existing cached visual endpoint. */
 import {hearingDateTime} from "@/lib/areas/format";
 import { useEffect, useId, useRef, useState } from "react";
@@ -107,6 +109,7 @@ export default function ProjectPane({
         ×
       </button>
       <div className="law-pane-content">
+        <p className="text-xs text-zinc-500">Independent summaries may contain errors; <Link href="/disclaimer">verify details with official records</Link>.</p>
         <h1>{item.popup?.projectName ?? item.title}</h1>
         {item.aiTitle&&<p className="text-xs text-zinc-500">AI-generated title; check the linked official source.</p>}
         <section aria-labelledby="question-what">
@@ -129,7 +132,7 @@ export default function ProjectPane({
             {item.popup?.explanation && <p>{item.popup.explanation}</p>}
             {data.summarySource && <a href={data.summarySource} target="_blank" rel="noreferrer">Summary source</a>}
             {data.aiSummaryPending && <p className="text-xs text-zinc-500">AI summary pending. Official application facts are shown below.</p>}
-            {(page || preview) && item.popup?.aiGenerated && <p className="text-xs text-zinc-500">AI-generated summary; check the linked official records.</p>}
+            {item.popup?.aiGenerated && <p className="text-xs text-zinc-500">AI-generated summary; check the linked official records.</p>}
             {item.visual && (
               <figure>
                 <button
@@ -170,7 +173,7 @@ export default function ProjectPane({
             <ol className="law-pane-timeline">
               {data.history.map((row, i) => (
                 <li key={i}>
-                  {row.label}
+                  {residentDateText(row.label,data.area.timezone)}
                   {row.source && (
                     <a href={row.source} target="_blank" rel="noreferrer">
                       {" "}
@@ -187,7 +190,7 @@ export default function ProjectPane({
               <HearingNext next={data.next} timezone={data.area.timezone}/>
             ) : (
               <p>
-                {data.noHearing?.message ?? (item.stage === "Decided"
+                {(data.noHearing?.message?residentDateText(data.noHearing.message,data.area.timezone):undefined) ?? (item.stage === "Decided"
                   ? (item.popup?.progress.find((p) => p.state === "current")
                       ?.label ??
                     "Decision recorded; outcome not specified in the available record")
@@ -244,7 +247,7 @@ export default function ProjectPane({
             )}
             {data.participationClosed && <p>This case is closed. See the official record for the outcome and any published appeal information.</p>}
             {data.expiredDeadlineMessage && <p>{data.expiredDeadlineMessage}</p>}
-            {!data.participationClosed && data.commentInstructions && <p>{data.commentInstructions}</p>}
+            {!data.participationClosed && data.commentInstructions && <p>{data.commentInstructions&&residentDateText(data.commentInstructions,data.area.timezone)}</p>}
             <div className="law-pane-actions">
               {!data.participationClosed && data.commentUrl && (
                 <a href={data.commentUrl} target="_blank" rel="noreferrer">
@@ -336,7 +339,6 @@ export default function ProjectPane({
               Report an error
             </a>
             {!!data.documents?.length && <section><h2>Source documents</h2><ul>{data.documents.map(d=><li key={d.url}><a href={d.url} target="_blank" rel="noreferrer">{d.label}</a></li>)}</ul></section>}
-            {!!data.parcels?.length && <details><summary>Parcel details</summary><p>{data.parcels.join(", ")}</p></details>}
             {!!data.relatedCases?.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).length && <section aria-label="Also on this site">
               <h2>Also on this site</h2>
               <ul>{data.relatedCases.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).map(c => <li key={c.areaId+"/"+c.caseId}>

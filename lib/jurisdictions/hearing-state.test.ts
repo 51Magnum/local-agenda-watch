@@ -11,6 +11,6 @@ it("uses confirmed agenda time, signup and deadlines",()=>{
 it("gives a dated message and official discovery links without signup or deadlines when none is confirmed",()=>{
  const state=projectHearingState(d,[{...meeting,tentative:true},{...meeting,date:"2026-10-15"}],"2026-10-28T12:00:00Z","2026-10-28");
  expect(state.next).toBeUndefined();expect(state.commentUrl).toBeUndefined();expect(state.deadlines).toEqual([]);
- expect(state.noHearing?.message).toBe("No hearing scheduled in official agendas as of 2026-10-28.");
+ expect(state.noHearing?.message).toBe("No hearing scheduled in official agendas as of Wednesday, October 28, 2026.");
  expect(state.noHearing?.sources).toEqual([{label:"Official hearings and agendas",url:d.participation.hearingsUrl},{label:"Legal notices",url:d.participation.legalNoticesUrl}]);
 });

@@ -1,3 +1,4 @@
+import {residentMapCase} from "../resident-content-policy";
 import {verificationUrl,sourceRecordId} from "./record-links";
 import {mkdir,writeFile} from "node:fs/promises";
 import {applicationScope,individualApplicant} from "./application-scope";
@@ -44,6 +45,7 @@ export async function writeReviewSnapshot(d:JurisdictionDefinition,snapshot:Stag
    project.officialRecords=[];project.item.sourceUrl=undefined;project.summarySource=undefined;project.documents=[];project.history=project.history.map(h=>({...h,source:undefined}));
   }
   if(result?.checks.some(c=>c.check==="location-in-boundary"&&c.status!=="pass")){project.item.geometry=null;project.item.centroid=null;project.item.bounds=undefined;project.where="Location not published; verification pending.";}
+  project.item=residentMapCase(project.item);delete project.parcels;
   const clean=scrubReview(project,names,dataUrls);clean.item.title??="Planning application";clean.item.summary??="Description withheld pending privacy review.";
   if(clean.item.popup){clean.item.popup.projectName??=clean.item.title;clean.item.popup.explanation??=clean.item.summary;}
   clean.history=clean.history.filter(h=>h.label);clean.documents=clean.documents?.filter(doc=>doc.label&&doc.url);clean.officialRecords=clean.officialRecords?.filter(link=>link.url&&link.label);

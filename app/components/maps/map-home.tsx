@@ -1,4 +1,5 @@
 "use client";
+import {residentDateText} from "@/lib/areas/format";
 import {projectPolygonFeature} from "@/lib/maps/project-feature";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
@@ -536,7 +537,7 @@ export default function MapHome() {
           const c = resolved?.item,
             text = c
               ? (c.popup?.headline ?? c.title) +
-                (c.nextHearing ? " · " + c.nextHearing.label : "")
+                (c.nextHearing ? " · " + residentDateText(c.nextHearing.label,c.timezone) : "")
               : hit.layer.id === "law-summary-dots"
                 ? hit.properties?.name +
                   " · " +
@@ -743,7 +744,7 @@ export default function MapHome() {
                     bbox: cell.join(","),
                     zoom: String(z),
                     compact: "1",
-                    v:"dissolved-geometry-v1",
+                    v:"resident-policy-v1",
                   }),
               )
                 .then(async (r) => {
@@ -1231,7 +1232,7 @@ export default function MapHome() {
                 <small>
                   {c.miles.toFixed(1)} mi ·{" "}
                   {c.areaId ? areas.find((a) => a.id === c.areaId)?.name : ""}
-                  {c.nextHearing ? " · " + c.nextHearing.label : ""}
+                  {c.nextHearing ? " · " + residentDateText(c.nextHearing.label,c.timezone) : ""}
                 </small>
               </button>
             ))}

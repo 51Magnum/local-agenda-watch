@@ -13,7 +13,7 @@ import {getEvidenceStore} from "../timeline/store";
 import {writeReviewSnapshot} from "./write-review-snapshot";
 export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapshot?:StagingSnapshot;previous?:StagingSnapshot;links?:(url:string)=>Promise<LinkEvidence>;reports?:boolean}={}){
  const d=jurisdiction(areaId),snapshot=options.snapshot??await readStaging(areaId);if(!d||!snapshot)throw Error("Collect a staging snapshot before checking");
- const http=sourceHttp(areaId),deadline=Date.now()+180000;
+ const deadline=Date.now()+180000,http=sourceHttp(areaId,deadline);
  const links=options.links??linkReader(d,snapshot,http,deadline);
  const cached=new Map<string,Promise<LinkEvidence>>(),proof=(url:string)=>{if(!cached.has(url))cached.set(url,links(url).catch(e=>({status:e instanceof SourceFailure&&e.health.state!=="skipped"?e.health.status??0:0,text:"",reason:e instanceof SourceFailure&&e.health.state==="blocked"?"Official source access is blocked; no access challenge was bypassed.":Date.now()>deadline?"Source verification deferred: this run's time limit was reached.":"Official source could not be verified; retry on the next refresh."})));return cached.get(url)!;};
  const decisions=options.dryRun?[]:await exceptionDecisions(areaId);

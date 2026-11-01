@@ -9,7 +9,7 @@ type Cache={etag?:string;lastModified?:string;headers:Record<string,string>;data
 const queues=new Map<string,Promise<unknown>>();
 export class SourceHttp {
  readonly checks:SourceHealth[]=[];
- constructor(private options:{fetch?:typeof fetch;cacheDir?:string;maxBytes?:number;delayMs?:number;timeoutMs?:number;allowedHosts?:string[]}={}){}
+ constructor(private options:{fetch?:typeof fetch;cacheDir?:string;maxBytes?:number;delayMs?:number;timeoutMs?:number;deadline?:number;allowedHosts?:string[]}={}){}
  private async work(url:string,init:RequestInit={},maxBytes=this.options.maxBytes??45000000):Promise<HttpData>{
   const start=Date.now(),now=new Date().toISOString(),u=new URL(url);
   if(u.protocol!=="https:"||u.username||u.password||/^(localhost|127\.|10\.|192\.168\.|169\.254\.|\[)/i.test(u.hostname)||this.options.allowedHosts&&!this.options.allowedHosts.includes(u.hostname))throw Error("Source URL is outside the configured official hosts");
@@ -19,8 +19,9 @@ export class SourceHttp {
   if(cached?.etag)headers.set("If-None-Match",cached.etag);if(cached?.lastModified)headers.set("If-Modified-Since",cached.lastModified);
   const finish=(state:SourceHealth["state"],status?:number,bytes?:number,reason?:string)=>{const health:SourceHealth={url,state,status,latencyMs:Date.now()-start,bytes,reason,checkedAt:now};this.checks.push(health);return health;};
   for(let attempt=0;attempt<3;attempt++){
+   const remaining=(this.options.deadline??Infinity)-Date.now();if(remaining<=0)throw new SourceFailure(finish("unavailable",undefined,undefined,"Collection time budget exhausted; retry on the next refresh"));
    try{
-    const r=await(this.options.fetch??fetch)(url,{...init,headers,redirect:"manual",signal:AbortSignal.timeout(this.options.timeoutMs??20000)});
+    const r=await(this.options.fetch??fetch)(url,{...init,headers,redirect:"manual",signal:AbortSignal.timeout(Math.max(1,Math.min(this.options.timeoutMs??20000,remaining)))});
     if(r.status===304&&cached){const bytes=new Uint8Array(Buffer.from(cached.data,"base64"));if(bytes.length>maxBytes)throw new SourceFailure(finish("skipped",304,bytes.length,"Cached attachment exceeds byte cap"));return{bytes,health:finish("ok",304,bytes.length),headers:cached.headers};}
     if(r.status>=300&&r.status<400)throw new SourceFailure(finish("unavailable",r.status,0,"Redirect requires verification of the destination: "+(r.headers.get("location")??"")));
     if(Number(r.headers.get("content-length"))>maxBytes){await r.body?.cancel();throw new SourceFailure(finish("skipped",r.status,0,"Attachment exceeds byte cap"));}
@@ -30,11 +31,11 @@ export class SourceHttp {
     if(/cf-chl-|cf-mitigated|challenge-platform|<title>\s*Just a moment|Attention Required.*Cloudflare|<title>[^<]*verify you are human/i.test(sample)||r.headers.get("cf-mitigated")==="challenge")throw new SourceFailure(finish("blocked",r.status,length,"Access challenge; no automated bypass or retry"));
     if(!r.ok){if([429,500,502,503,504].includes(r.status)&&attempt<2){await new Promise(resolve=>setTimeout(resolve,500*2**attempt));continue;}throw new SourceFailure(finish(r.status===403?"blocked":"unavailable",r.status,length,"HTTP "+r.status));}
     const resultHeaders=Object.fromEntries(r.headers);const entry:Cache={etag:r.headers.get("etag")??undefined,lastModified:r.headers.get("last-modified")??undefined,headers:resultHeaders,data:bytes.toString("base64"),at:now};await mkdir(cacheDir,{recursive:true});await writeFile(file,JSON.stringify(entry));return{bytes:new Uint8Array(bytes),health:finish("ok",r.status,length),headers:resultHeaders};
-   }catch(e){if(e instanceof SourceFailure)throw e;if(attempt<2){await new Promise(resolve=>setTimeout(resolve,500*2**attempt));continue;}throw new SourceFailure(finish("unavailable",undefined,undefined,e instanceof Error?e.message:"Request failed"));}
+   }catch(e){if(e instanceof SourceFailure)throw e;if(attempt<2&&Date.now()<(this.options.deadline??Infinity)){await new Promise(resolve=>setTimeout(resolve,500*2**attempt));continue;}throw new SourceFailure(finish("unavailable",undefined,undefined,e instanceof Error?e.message:"Request failed"));}
   }
   throw Error("Source retry exhausted");
  }
- async request(url:string,init:RequestInit={},maxBytes?:number){const host=new URL(url).hostname,previous=queues.get(host)??Promise.resolve();const task=previous.catch(()=>{}).then(()=>this.work(url,init,maxBytes));queues.set(host,task.finally(()=>new Promise(resolve=>setTimeout(resolve,this.options.delayMs??250))).catch(()=>{}));return task;}
+ async request(url:string,init:RequestInit={},maxBytes?:number){if(Date.now()>=(this.options.deadline??Infinity)){const health:SourceHealth={url,state:"unavailable",latencyMs:0,reason:"Collection time budget exhausted; retry on the next refresh",checkedAt:new Date().toISOString()};this.checks.push(health);throw new SourceFailure(health);}const host=new URL(url).hostname,previous=queues.get(host)??Promise.resolve();const task=previous.catch(()=>{}).then(()=>this.work(url,init,maxBytes));queues.set(host,task.finally(()=>new Promise(resolve=>setTimeout(resolve,this.options.delayMs??250))).catch(()=>{}));return task;}
  async text(url:string,init:RequestInit={},maxBytes?:number){return new TextDecoder().decode((await this.request(url,init,maxBytes)).bytes);}
  async json<T=Record<string,unknown>>(url:string,init:RequestInit={}){return JSON.parse(await this.text(url,init)) as T;}
 }

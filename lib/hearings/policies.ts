@@ -39,7 +39,7 @@ export function nampaHearingPolicy(next: ProjectHearing): HearingMeetingFields {
 export function enrichHearing(areaId: string, next: ProjectHearing, stored?: HearingMeetingFields): ProjectHearing {
   const merged={...next,...stored};
   const policy=areaId==="nampa"?nampaHearingPolicy(merged):{};
-  const result: ProjectHearing={...next,...policy,...stored};
+  const result: ProjectHearing={...policy,...next,...stored};
   // Old records remain readable, but an unsourced deadline never becomes public.
   result.comment_deadline=stored?.comment_deadline??(next.commentSourceUrl?next.commentDeadline:undefined)??policy.comment_deadline;
   result.comment_deadline_source_url=stored?.comment_deadline_source_url??next.commentSourceUrl??policy.comment_deadline_source_url;

@@ -3,7 +3,7 @@ import type {HearingFeed} from "@/lib/localities/types";
 import type {EvidenceState} from "./types";
 
 export type MeetingWatch={id:string;areaId:string;body:string;date:string;caseIds:string[];resolvedCaseIds:string[];lastChecked?:string};
-export type ScheduleState={version:1;meetings:MeetingWatch[];slots:Record<string,string>;updatedAt?:string;sweeps?:Record<string,{lastAttemptAt:string;lastSuccessAt?:string;cases:number;documents:number;warning?:string}>};
+export type ScheduleState={recordChecks?:Record<string,Record<string,string>>;version:1;meetings:MeetingWatch[];slots:Record<string,string>;updatedAt?:string;sweeps?:Record<string,{lastAttemptAt:string;lastSuccessAt?:string;cases:number;documents:number;warning?:string}>};
 export type SchedulePlan={slot:string;modes:string[];meetingIds:string[];caseIdsByArea?:Record<string,string[]>;recheckCaseIdsByArea:Record<string,string[]>;fullSweep:boolean};
 export const emptySchedule=():ScheduleState=>({version:1,meetings:[],slots:{}});
 export function localClock(now:Date,timezone="America/Denver"){
@@ -68,10 +68,12 @@ export function finishSchedule(state:ScheduleState,plan:SchedulePlan,feeds:Recor
   const checked=m.caseIds.filter(id=>!m.resolvedCaseIds.includes(id)).every(id=>checkedCases[m.areaId]?.includes(id));
   if(checked)m.lastChecked=localClock(now,areas[m.areaId].timezone).date;
  }
+ const recordChecks=structuredClone(state.recordChecks??{});
+ for(const [areaId,ids]of Object.entries(checkedCases))for(const id of ids)(recordChecks[areaId]??={})[id]=now.toISOString();
  const sweeps={...state.sweeps};
  if(plan.fullSweep)for(const area of Object.values(areas).filter(a=>a.status==="live"&&a.timeline)){
   const feed=feeds[area.id],success=Boolean(feed&&!feed.dataUnavailable&&!feed.scheduleUnavailable);
   sweeps[area.id]={lastAttemptAt:now.toISOString(),lastSuccessAt:success?now.toISOString():sweeps[area.id]?.lastSuccessAt,cases:feed?new Set([...feed.active,...feed.completed,...(feed.upcomingOnly??[])].map(h=>h.appId)).size:0,documents:Object.values(evidence.documents).filter(d=>(d.areaId??"nampa")===area.id).length,...(!success?{warning:"Source sweep was incomplete or a source was unavailable; last success retained."}:{})};
  }
- return {version:1 as const,sweeps,meetings,slots:Object.fromEntries(Object.entries({...state.slots,[plan.slot]:now.toISOString()}).slice(-40)),updatedAt:now.toISOString()};
+ return {version:1 as const,recordChecks,sweeps,meetings,slots:Object.fromEntries(Object.entries({...state.slots,[plan.slot]:now.toISOString()}).slice(-40)),updatedAt:now.toISOString()};
 }
