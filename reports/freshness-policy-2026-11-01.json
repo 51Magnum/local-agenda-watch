@@ -432,5 +432,17 @@
     "paidAi": false,
     "merged": false,
     "screenshots": false
+  },
+  "validation": {
+    "node": "24.18.0",
+    "unitTestsPassed": 770,
+    "unitTestsFailed": 0,
+    "testFilesPassed": 156,
+    "typeErrors": 0,
+    "lintErrors": 0,
+    "existingLintWarnings": 4,
+    "normalBuild": "pass",
+    "databaseFreePreviewBuild": "pass",
+    "localPageChecksPassed": 3
   }
 }

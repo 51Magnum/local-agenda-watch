@@ -184,7 +184,7 @@ async function detail(
     officialRecords,
     summarySource:agenda?residentPaneHref(area,agenda.sourceUrl):content?.source?residentPaneHref(area,content.source.url+"#page="+content.source.page):undefined,
     documents:[...new Map([...(record?.documents??[]),...(record?.events??[]).flatMap(e=>e.documents),...(hearing?.meetings??[]).flatMap(m=>m.staffReports??[]),...(project?.sourceDocuments??[]),...(areaId==="nampa"&&CASE_EVIDENCE[caseId]?.reportUrl?[{label:CASE_EVIDENCE[caseId].documentNames[0],url:CASE_EVIDENCE[caseId].reportUrl!}]:[])].filter(d=>(!sensitive||!privateResidentialDocument(d.label))&&residentPaneHref(area,d.url)).map(d=>[d.url,{label:d.label,url:residentPaneHref(area,d.url)!}])).values()],
-    
+
     relatedCases: await Promise.all((item.members??[]).map(async m=>{
       const h=m.areaId===areaId?caseCatalog(feed).find(h=>h.appId===m.caseId):undefined;
       const relatedRecord=h?await config.recordForCase?.(h):undefined;
