@@ -1,0 +1,11 @@
+import {expect,it} from "vitest";
+import {polygon} from "@turf/turf";
+import {resolveProjectHit,type ProjectHit} from "./project-hit";
+const big={id:"big",geometry:polygon([[[0,0],[4,0],[4,4],[0,4],[0,0]]]).geometry};
+const small={id:"small",geometry:polygon([[[1,1],[2,1],[2,2],[1,2],[1,1]]]).geometry};
+const items=new Map([big,small].map(c=>[c.id,c]));
+const hit=(id:string):ProjectHit=>({properties:{id},layer:{id:"fill"}});
+const resolve=(hits:ProjectHit[])=>resolveProjectHit(hits,id=>items.get(id),c=>c.geometry);
+it("skips an unknown first hit and opens the later known project",()=>{expect(resolve([hit("unknown"),hit("big")])?.item).toBe(big);});
+it("prefers the smaller nested project regardless of layer or tile order",()=>{expect(resolve([hit("big"),hit("small"),hit("big")])?.item).toBe(small);expect(resolve([hit("small"),hit("big")])?.item).toBe(small);});
+it("does not offer a pointer or project when every ID is unknown or missing",()=>{expect(resolve([hit("unknown"),{properties:{},layer:{id:"fill"}}])).toBeUndefined();});

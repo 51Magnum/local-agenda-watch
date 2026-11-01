@@ -45,6 +45,6 @@ describe("Canyon County sources",()=>{
   vi.stubGlobal("fetch",vi.fn(async()=>Response.json({type:"FeatureCollection",features})));
   const config={...JURISDICTIONS["canyon-county"],loadCases:async()=>feed};
   const snapshot=await buildMapSnapshot(config,{version:1,jurisdiction:config.id,updatedAt:now.toISOString(),cases:[],warnings:[],flum:{updatedAt:new Date().toISOString(),geojson:{type:"FeatureCollection",features:[]},legend:[]}});
-  expect(snapshot.cases).toHaveLength(1);expect(snapshot.cases[0]).toMatchObject({id:"SD2025-0002",geometry:{type:"MultiPolygon"},href:"/us/id/canyon-county/plan/SD2025-0002",source:"polygon"});
+  expect(snapshot.cases).toHaveLength(1);expect(snapshot.cases[0]).toMatchObject({id:"SD2025-0002",geometry:{type:"Polygon"},href:"/us/id/canyon-county/plan/SD2025-0002",source:"polygon"});
  });
 });

@@ -1,4 +1,6 @@
 "use client";
+import {projectPolygonFeature} from "@/lib/maps/project-feature";
+import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import {opensCasePage} from "@/lib/maps/case-interaction";
 import {placeProjectCard} from "@/lib/maps/popup-position";
@@ -21,7 +23,7 @@ import MapImageViewer from "./map-image-viewer";
 import { popupContent, popupDisposers } from "./popup-card";
 const empty: FeatureCollection = { type: "FeatureCollection", features: [] };
 function caseFeatures(cases: MapCase[]): FeatureCollection {
-  return { type: "FeatureCollection", features: cases.filter((c) => c.geometry && !c.citywide).map((c) => ({ type: "Feature", geometry: c.geometry!, properties: { id: c.id, color: c.statusNote ? "#64748b" : STAGE_COLORS[c.stage], approximate: c.confidence === "approximate" } })) };
+  return { type: "FeatureCollection", features: cases.filter((c) => c.geometry && !c.citywide).map(c=>projectPolygonFeature(c.id,c.geometry!,{color:c.statusNote?"#64748b":STAGE_COLORS[c.stage],approximate:c.confidence==="approximate"})) };
 }
 export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPage = false, matchHeightTo, showNearbyList = false, combined }: { combined?:{country:string;state:string}; jurisdiction: string; caseIds?: readonly string[]; compact?: boolean; fullPage?: boolean; matchHeightTo?: string; showNearbyList?: boolean }) {
   const area = getArea(jurisdiction);
@@ -188,14 +190,15 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.on("mousemove", (event) => {
         if (!instance?.getLayer("case-fill")) return;
         if (pinMode.current) { instance.getCanvas().style.cursor = "crosshair"; return; }
-        const hit = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "case-halo", "case-approx-halo"] })[0];
+        const resolved=resolveProjectHit(instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "case-halo", "case-approx-halo"] }),id=>data.cases.find(c=>c.id===id),c=>c.geometry);
+        const hit=resolved?.hit;
         instance.getCanvas().style.cursor = hit ? "pointer" : "";
         if (compact || pinned) return;
         const pointer = { x: event.originalEvent.clientX, y: event.originalEvent.clientY };
         // Keep the selected card reachable even when another outline lies in
         // the pointer corridor between this project and its card.
         const activeCard=popup.current?.getElement();
-        if(hit&&String(hit.properties.id)!==hovered&&activeCard&&hoverOrigin&&previousPointer&&movingToPopup(hoverOrigin,previousPointer,pointer,activeCard.getBoundingClientRect())){previousPointer=pointer;return;}
+        if(hit&&resolved?.id!==hovered&&activeCard&&hoverOrigin&&previousPointer&&movingToPopup(hoverOrigin,previousPointer,pointer,activeCard.getBoundingClientRect())){previousPointer=pointer;return;}
         if (!hit) {
           const card = popup.current?.getElement();
           const crossing = card && hoverOrigin && previousPointer && movingToPopup(hoverOrigin, previousPointer, pointer, card.getBoundingClientRect());
@@ -204,7 +207,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
           return;
         }
         hoverOrigin = pointer; previousPointer = pointer;
-        const id = String(hit.properties.id); if (hovered === id && popup.current) return;
+        const id = resolved!.id; if (hovered === id && popup.current) return;
         const item = data.cases.find((c) => c.id === id); if (!item) return;
         showProject(item); hovered = id;
       });
@@ -217,7 +220,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         if (!instance?.getLayer("case-fill")) return;
         if (pinMode.current) { applyMapPin.current?.([event.lngLat.lng, event.lngLat.lat]); return; }
         const hits = instance.queryRenderedFeatures(event.point, { layers: ["case-fill", "case-line", "case-approx", "case-halo", "case-approx-halo", "flum-fill"] });
-        const hit = hits.find((f) => f.properties?.id); const item = hit && data.cases.find((c) => c.id === String(hit.properties.id));
+        const item = resolveProjectHit(hits.filter(f=>f.layer.id!=="flum-fill"),id=>data.cases.find(c=>c.id===id),c=>c.geometry)?.item;
         const input = event.originalEvent as MouseEvent & {sourceCapabilities?:{firesTouchEvents?:boolean}};
         const touchGenerated = "touches" in input || input.sourceCapabilities?.firesTouchEvents === true;
         if (item && opensCasePage(compact, lastPointerType, touchGenerated)) {

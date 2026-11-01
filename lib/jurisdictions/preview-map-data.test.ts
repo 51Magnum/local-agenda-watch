@@ -10,5 +10,5 @@ it("frames verified projects and preserves their click identity",()=>{
 });
 it("does not invent marker locations for unlocated cases",()=>{
  const cases:FeatureCollection<Geometry|null>={type:"FeatureCollection",features:[{type:"Feature",properties:{areaId:"boise",caseId:"unmapped"},geometry:null}]};
- expect(previewMapData(empty,cases)).toEqual({markers:empty,bounds:undefined});
+ expect(previewMapData(empty,cases)).toEqual({markers:empty,bounds:undefined,polygons:empty});
 });

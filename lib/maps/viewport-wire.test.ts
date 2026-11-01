@@ -12,3 +12,12 @@ it("preserves map drawing, filters and project selection while omitting record a
 });
 
 it("rounds nested geometry, bounds and centroids to six decimals without changing identifiers",()=>{expect(roundMapPayload({id:"123.12345678",coordinates:[[1.123456789,-116.567891234]],bounds:[43.123456789]})).toEqual({id:"123.12345678",coordinates:[[1.123457,-116.567891]],bounds:[43.123457]});});
+import {projectPolygonFeature} from "./project-feature";
+import type {MapCase} from "./types";
+it("keeps one stable string ID on every part through packing and numeric rounding",()=>{
+ const geometry={type:"MultiPolygon" as const,coordinates:Array.from({length:12},(_,i)=>[[[i,0],[i+.2,0],[i+.2,.2],[i,.2],[i,0]]])};
+ const source={id:"ada-county:many-parts",areaId:"ada-county",geometry,centroid:[0,0],stage:"In review",confidence:"exact"} as MapCase;
+ const data={cases:[source],summaries:[],truncated:false,updatedAt:"",bounds:[-180,-85,180,85]} as ViewportData;
+ const decoded=unpackViewport(roundMapPayload(packViewport(data))).cases[0];expect(decoded.id).toBe(source.id);expect(decoded.geometry).toEqual(geometry);
+ const rendered=projectPolygonFeature(decoded.id,decoded.geometry!,{});expect(rendered.id).toBe(source.id);expect(rendered.properties?.id).toBe(source.id);expect(rendered.geometry).toMatchObject({type:"MultiPolygon",coordinates:geometry.coordinates});
+});

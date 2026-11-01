@@ -1,4 +1,6 @@
 "use client";
+import {projectPolygonFeature} from "@/lib/maps/project-feature";
+import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import { PROJECT_FILL_OPACITY, PROJECT_POLYGON_LAYERS } from "@/lib/maps/project-style";
 import FLUM_TILES from "@/public/flum/manifest.json";
@@ -515,7 +517,7 @@ export default function MapHome() {
             hideTip();
             return;
           }
-          const hit = m.queryRenderedFeatures(e.point, {
+          const hits = m.queryRenderedFeatures(e.point, {
             layers: [
               "law-fill",
               "law-outline",
@@ -523,13 +525,15 @@ export default function MapHome() {
               "law-summary-dots",
               "law-clusters",
             ],
-          })[0];
+          });
+          const resolved=resolveProjectHit(hits,id=>features.current.get(id),c=>c.geometry);
+          const hit=resolved?.hit??hits.find(h=>["law-clusters","law-summary-dots"].includes(h.layer.id));
           if (!hit) {
             hideTip();
             return;
           }
           m.getCanvas().style.cursor = "pointer";
-          const c = features.current.get(String(hit.properties?.id)),
+          const c = resolved?.item,
             text = c
               ? (c.popup?.headline ?? c.title) +
                 (c.nextHearing ? " · " + c.nextHearing.label : "")
@@ -567,7 +571,7 @@ export default function MapHome() {
           }
           if (!m.getLayer("law-dots")) return;
           hideTip();
-          const hit = m.queryRenderedFeatures(e.point, {
+          const hits = m.queryRenderedFeatures(e.point, {
             layers: [
               "law-dots",
               "law-clusters",
@@ -575,7 +579,9 @@ export default function MapHome() {
               "law-outline",
               "law-summary-dots",
             ],
-          })[0];
+          });
+          const resolved=resolveProjectHit(hits,id=>features.current.get(id),c=>c.geometry);
+          const hit=resolved?.hit??hits.find(h=>["law-clusters","law-summary-dots"].includes(h.layer.id));
           if (hit) {
             if (hit.layer.id === "law-clusters") {
               const z = await (
@@ -609,7 +615,7 @@ export default function MapHome() {
                 m.fitBounds(bounds as Bounds, { padding: 65, maxZoom: 12 });
               return;
             }
-            const c = features.current.get(String(hit.properties?.id));
+            const c = resolved?.item;
             if (c) {
               openRef.current(c);
               return;
@@ -737,6 +743,7 @@ export default function MapHome() {
                     bbox: cell.join(","),
                     zoom: String(z),
                     compact: "1",
+                    v:"dissolved-geometry-v1",
                   }),
               )
                 .then(async (r) => {
@@ -769,14 +776,8 @@ export default function MapHome() {
           type: "FeatureCollection",
           features: shown
             .filter((c) => c.geometry)
-            .map((c) => ({
-              type: "Feature",
-              geometry: c.geometry!,
-              properties: {
-                id: c.id,
-                color: STAGE_COLORS[c.stage],
-                approximate: c.confidence === "approximate",
-              },
+            .map(c=>projectPolygonFeature(c.id,c.geometry!,{
+              color:STAGE_COLORS[c.stage],approximate:c.confidence==="approximate"
             })),
         });
         (m.getSource("law-points") as GeoJSONSource).setData({
@@ -790,7 +791,7 @@ export default function MapHome() {
                   .map((c) => ({
                     type: "Feature",
                     geometry: { type: "Point", coordinates: c.centroid! },
-                    properties: { id: c.id, color: STAGE_COLORS[c.stage] },
+                    properties: { id: String(c.id), color: STAGE_COLORS[c.stage] },
                   }))
               : [],
         });
