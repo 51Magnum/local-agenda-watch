@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS law_alert_deliveries(id text PRIMARY KEY,scope text N
 CREATE INDEX IF NOT EXISTS law_alert_delivery_due ON law_alert_deliveries(scope,status,next_attempt);
 CREATE TABLE IF NOT EXISTS law_alert_recipient_checks(scope text NOT NULL,email text NOT NULL,last_checked timestamptz NOT NULL,PRIMARY KEY(scope,email));`,
     )
+    .then(async () => {const {applyResidentSchema}=await import("./resident-schema");await applyResidentSchema(pool);})
     .catch((e) => {
       ready = undefined;
       throw e;
@@ -164,6 +165,10 @@ export async function subscribeAlert(
   const db = await alertsDb(),
     now = new Date();
   email = email.trim().toLowerCase();
+  if(target.kind==="place"){
+    const profile=(await db.query("SELECT plan FROM law_resident_profiles WHERE scope=$1 AND email=$2",[alertScope(),email])).rows[0];
+    if(profile?.plan!=="paid")target={...target,radiusMiles:1};
+  }
   for (const [key, window, limit] of [
     ["ip:" + hash(ip), now.toISOString().slice(0, 13) + ":00:00Z", 5],
     ["email:" + hash(email), now.toISOString().slice(0, 10) + "T00:00:00Z", 3],
@@ -174,6 +179,7 @@ export async function subscribeAlert(
     );
     if (!row.rows.length) return { limited: true };
   }
+  if(target.kind==="place"&&(await db.query("SELECT p.id FROM law_resident_pins p JOIN law_alert_subscriptions s ON s.id=p.subscription_id WHERE p.scope=$1 AND p.email=$2 AND NOT p.archived AND p.label=$3 AND p.longitude=$4 AND p.latitude=$5 AND p.radius_miles=$6 AND s.confirmed_at IS NOT NULL AND s.unsubscribed_at IS NULL",[alertScope(),email,target.label,...target.coordinates,target.radiusMiles])).rows.length)return {limited:false};
   const token = randomBytes(32).toString("base64url"),
     unsubscribe = randomBytes(32).toString("base64url");
   const row = await db.query(

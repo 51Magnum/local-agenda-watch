@@ -8,7 +8,7 @@ import {authHash,consumeSignIn,normalizeResidentEmail,requestSignIn,residentDb,r
 import {residentPins,residentWatches,saveResidentPin,removeResidentPin,saveResidentName} from "./resident-account";
 const now=new Date("2026-11-03T12:00:00Z");
 beforeAll(async()=>{h.db=new PGlite();await h.db.waitReady;vi.stubEnv("DATABASE_URL","test");vi.stubEnv("VERCEL_ENV","production");vi.stubEnv("RESEND_API_KEY","fixture");vi.stubEnv("ALERTS_MAILING_ADDRESS","Example mailing address");vi.stubEnv("ALERTS_DELIVERY_ENABLED","false");vi.stubGlobal("fetch",h.send);await residentDb();},30000);
-beforeEach(async()=>{h.send.mockReset().mockImplementation(async()=>Response.json({id:"fixture-email"}));await h.db.exec("TRUNCATE law_resident_profiles CASCADE;TRUNCATE law_resident_login_links,law_alert_limits,law_alert_subscriptions");});
+beforeEach(async()=>{h.send.mockReset().mockImplementation(async()=>Response.json({id:"fixture-email"}));await h.db.exec("TRUNCATE law_resident_profiles CASCADE;TRUNCATE law_resident_login_links,law_alert_limits,law_alert_subscriptions CASCADE");});
 afterAll(async()=>{vi.unstubAllGlobals();vi.unstubAllEnvs();await h.db.close();});
 async function link(email="owner@example.test",ip="one"){
  await requestSignIn(email,ip,"/pins?lng=-116.4&lat=43.6",now);
@@ -36,7 +36,7 @@ it("creates a 30-day hashed session, expires it, rotates it, and revokes sign-ou
 it("automatically links confirmed subscribers and pins without confirming or restarting other watches",async()=>{
  const db=await alertsDb();for(const [email,confirmed,stopped,label]of [["Owner@Example.Test",true,false,"Home"],["owner@example.test",false,false,"Pending"],["owner@example.test",true,true,"Stopped"],["other@example.test",true,false,"Not mine"]] as const)await db.query("INSERT INTO law_alert_subscriptions(id,scope,email,target,confirm_hash,confirm_expires,unsubscribe_token,confirmed_at,unsubscribed_at) VALUES($1,'production',$2,$3,'hash',now()+interval '1 day',$4,$5,$6)",[randomUUID(),email,JSON.stringify({kind:"place",label,coordinates:[-116.4,43.6],radiusMiles:1}),randomUUID(),confirmed?now:null,stopped?now:null]);
  const signed=await consumeSignIn((await link()).token,undefined,now),resident=(await residentForSession(signed!.token,now))!;
- expect(await residentPins(resident)).toMatchObject([{label:"Home",source:"alert"}]);expect(await residentWatches(resident)).toHaveLength(3);
+ expect(await residentPins(resident)).toMatchObject([{label:"Home",source:"saved"}]);expect(await residentWatches(resident)).toHaveLength(3);
  expect((await db.query("SELECT confirmed_at FROM law_alert_subscriptions WHERE target->>'label'='Pending'")).rows[0].confirmed_at).toBeNull();expect((await db.query("SELECT unsubscribed_at FROM law_alert_subscriptions WHERE target->>'label'='Stopped'")).rows[0].unsubscribed_at).not.toBeNull();
 });
 it("owns profile edits and saved pins by verified email; saving a pin never opts in to mail",async()=>{
@@ -47,7 +47,7 @@ it("owns profile edits and saved pins by verified email; saving a pin never opts
 });
 it("requires pin ownership even when editing an existing alert watch",async()=>{
  const id=randomUUID();await(await alertsDb()).query("INSERT INTO law_alert_subscriptions(id,scope,email,target,confirm_hash,confirm_expires,unsubscribe_token,confirmed_at) VALUES($1,'production','owner@example.test',$2,'hash',now()+interval '1 day','token',now())",[id,JSON.stringify({kind:"place",label:"Home",coordinates:[-116.4,43.6],radiusMiles:1})]);
- const target={kind:"place",label:"Work",coordinates:[-116.3,43.7],radiusMiles:2};expect(await saveResidentPin({email:"other@example.test",displayName:""},target,id,"alert")).toBe(false);expect(await saveResidentPin({email:"owner@example.test",displayName:""},target,id,"alert")).toBe(true);
+ const target={kind:"place",label:"Work",coordinates:[-116.3,43.7],radiusMiles:1};expect(await saveResidentPin({email:"other@example.test",displayName:""},target,id,"alert")).toBe(false);expect(await saveResidentPin({email:"owner@example.test",displayName:""},target,id,"alert")).toBe(true);
  await removeResidentPin({email:"owner@example.test",displayName:""},id,"alert");expect(await saveResidentPin({email:"owner@example.test",displayName:""},target,id,"alert")).toBe(false);
 });
 it("rate-limits normalized email across IPs and IP across different email addresses",async()=>{

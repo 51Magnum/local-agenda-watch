@@ -46,6 +46,7 @@ export default function AlertForm({
             target.label +
             "."}
       </p>
+      {target.kind==="place"&&<p className="text-sm">Free accounts include one alert pin at a fixed 1 mile radius. Paid accounts can use their chosen radius. Sign in to your profile to manage pins and view your plan; your confirmation email states the radius that will apply.</p>}
       <label className="block">
         Email (required)
         <input

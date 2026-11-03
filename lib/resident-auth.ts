@@ -1,7 +1,6 @@
 import "server-only";
 import {createHash,randomBytes} from "node:crypto";
-import {readFile} from "node:fs/promises";
-import path from "node:path";
+import type {ResidentPlan} from "./plan-policy";
 import {alertsDb,alertScope,alertReadiness,sendAlertMail} from "./alerts";
 import {isPreview,requireProductionMutation} from "./runtime-environment";
 import {SITE_ORIGIN} from "./site-config";
@@ -18,12 +17,9 @@ export function safeReturnTo(value:unknown){
  try{const url=new URL(value,SITE_ORIGIN);if(url.origin===SITE_ORIGIN&&["/profile","/pins"].includes(url.pathname))return url.pathname+url.search;}catch{}
  return "/profile";
 }
-let ready:Promise<void>|undefined;
 /** Reuses the alert pool and normalized email identity. Schema applies idempotently on first use. */
 export async function residentDb(){
- const db=await alertsDb();
- ready??=(async()=>{const sql=await readFile(path.join(process.cwd(),"migrations/20261103_resident_login.up.sql"),"utf8"),client=await db.connect();try{await client.query("BEGIN");await client.query("SELECT pg_advisory_xact_lock(hashtext('law:resident-login:schema'))");await client.query(sql);await client.query("COMMIT");}catch(e){await client.query("ROLLBACK");throw e;}finally{client.release();}})().catch(e=>{ready=undefined;throw e;});
- await ready;return db;
+ return alertsDb();
 }
 export function signInAvailable(){return !isPreview()&&process.env.VERCEL_ENV==="production"&&alertReadiness().ready;}
 export function signInEmail(url:string){
@@ -66,10 +62,10 @@ export async function consumeSignIn(token:string,oldSession?:string,now=new Date
  if(!row.rows[0])return null;
  return {token:session,expires,email:String(row.rows[0].email),returnTo:safeReturnTo(row.rows[0].return_to)};
 }
-export type Resident={email:string;displayName:string};
+export type Resident={email:string;displayName:string;plan?:ResidentPlan};
 export async function residentForSession(token?:string,now=new Date()):Promise<Resident|null>{
  if(process.env.VERCEL_ENV!=="production"||!token||!validToken(token))return null;
- const db=await residentDb(),row=await db.query("SELECT p.email,p.display_name FROM law_resident_sessions s JOIN law_resident_profiles p USING(scope,email) WHERE s.token_hash=$1 AND s.scope=$2 AND s.expires_at>$3",[authHash(token),alertScope(),now]);
- return row.rows[0]?{email:String(row.rows[0].email),displayName:String(row.rows[0].display_name)}:null;
+ const db=await residentDb(),row=await db.query("SELECT p.email,p.display_name,p.plan FROM law_resident_sessions s JOIN law_resident_profiles p USING(scope,email) WHERE s.token_hash=$1 AND s.scope=$2 AND s.expires_at>$3",[authHash(token),alertScope(),now]);
+ return row.rows[0]?{email:String(row.rows[0].email),displayName:String(row.rows[0].display_name),plan:row.rows[0].plan as ResidentPlan}:null;
 }
 export async function revokeResidentSession(token?:string){requireProductionMutation();if(token&&validToken(token))await(await residentDb()).query("DELETE FROM law_resident_sessions WHERE token_hash=$1 AND scope=$2",[authHash(token),alertScope()]);}

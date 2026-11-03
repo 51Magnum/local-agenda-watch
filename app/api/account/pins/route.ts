@@ -11,8 +11,8 @@ export async function POST(request:Request){
  if(id&&!/^[a-f0-9-]{36}$/i.test(id))return new Response("Pin not found.",{status:404});
  try{
   if(data.get("action")!=="remove"&&["longitude","latitude","radiusMiles"].some(key=>typeof data.get(key)!=="string"||!String(data.get(key)).trim()))return new Response("Choose a pin location and radius.",{status:400});
-  const ok=data.get("action")==="remove"?!!id&&await removeResidentPin(resident,id,source):await saveResidentPin(resident,{kind:"place",label:data.get("label"),coordinates:[Number(data.get("longitude")),Number(data.get("latitude"))],radiusMiles:Number(data.get("radiusMiles"))},id||undefined,source);
+  const ok=data.get("action")==="remove"?!!id&&await removeResidentPin(resident,id,source):await saveResidentPin(resident,{kind:"place",label:data.get("label"),coordinates:[Number(data.get("longitude")),Number(data.get("latitude"))],radiusMiles:Number(data.get("radiusMiles"))},id||undefined,source,data.get("alertsEnabled")==="on");
   if(!ok)return new Response("Pin not found.",{status:404});
- }catch{return new Response("Pin could not be saved. Check its name, coordinates and radius.",{status:400});}
- return new Response(null,{status:303,headers:{Location:"/pins?saved=1","Cache-Control":"no-store"}});
+ }catch{return new Response("Pin could not be saved. Check your plan’s pin allowance, radius and location. Free allows one pin at 1 mile.",{status:400});}
+ return new Response(null,{status:303,headers:{Location:(data.get("returnTo")==="/profile"?"/profile":"/pins")+"?saved=1","Cache-Control":"no-store"}});
 }

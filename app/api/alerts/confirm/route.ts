@@ -19,7 +19,12 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   const token = String((await request.formData()).get("token") ?? "");
-  const ok = await confirmAlert(token);
+  let ok:Awaited<ReturnType<typeof confirmAlert>>;
+  try {ok = await confirmAlert(token);}
+  catch(error){
+    if((error as {code?:string}).code!=="23514")throw error;
+    return new Response("This place watch exceeds your plan’s pin allowance or radius. Sign in at /profile to manage your pins, then request a new confirmation.",{status:400,headers:{"Cache-Control":"no-store"}});
+  }
   return new Response(
     ok
       ? ok.kind === "pending"

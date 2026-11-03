@@ -5,7 +5,7 @@ const h=vi.hoisted(()=>({session:vi.fn()}));
 vi.mock("./resident-auth",async original=>({...await original<typeof import("./resident-auth")>(),residentForSession:h.session}));
 vi.mock("next/headers",()=>({cookies:async()=>({get:()=>undefined})}));
 vi.mock("next/navigation",()=>({redirect:(path:string)=>{throw Error("REDIRECT "+path);}}));
-vi.mock("./resident-account",()=>({residentWatches:async()=>[],residentPins:async()=>[]}));
+vi.mock("./resident-account",()=>({residentWatches:async()=>[],residentPins:async()=>[],residentPlan:async()=>"free"}));
 import Profile from "../app/profile/page";
 import Pins from "../app/pins/page";
 import {proxy} from "../proxy";
