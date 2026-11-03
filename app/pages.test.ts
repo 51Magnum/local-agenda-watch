@@ -333,6 +333,7 @@ describe("case parity, hub cleanup and SEO", () => {
     expect(urls).not.toContain("https://www.localagendawatch.com/us/id/nampa/plan/SPP-00184-2026");
     expect((await sitemap()).every(e=>!e.lastModified)).toBe(true);
     expect(new Set(urls).size).toBe(urls.length);
+    expect(urls.some(url=>/^\/(?:admin|profile|pins)(?:\/|$)/.test(new URL(url).pathname))).toBe(false);
     expect(robots().sitemap).toBe("https://www.localagendawatch.com/sitemap.xml");
   });
 
