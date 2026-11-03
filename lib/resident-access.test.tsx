@@ -1,0 +1,16 @@
+import {afterEach,beforeEach,expect,it,vi} from "vitest";
+import {renderToStaticMarkup} from "react-dom/server";
+import {NextRequest} from "next/server";
+const h=vi.hoisted(()=>({session:vi.fn()}));
+vi.mock("./resident-auth",async original=>({...await original<typeof import("./resident-auth")>(),residentForSession:h.session}));
+vi.mock("next/headers",()=>({cookies:async()=>({get:()=>undefined})}));
+vi.mock("next/navigation",()=>({redirect:(path:string)=>{throw Error("REDIRECT "+path);}}));
+vi.mock("./resident-account",()=>({residentWatches:async()=>[],residentPins:async()=>[]}));
+import Profile from "../app/profile/page";
+import Pins from "../app/pins/page";
+import {proxy} from "../proxy";
+beforeEach(()=>h.session.mockReset().mockResolvedValue(null));
+afterEach(()=>vi.unstubAllEnvs());
+it("protects profile and pins while preserving the chosen map pin through sign-in",async()=>{await expect(Profile({searchParams:Promise.resolve({})})).rejects.toThrow("REDIRECT /sign-in?next=%2Fprofile");await expect(Pins({searchParams:Promise.resolve({lng:"-116.4",lat:"43.6"})})).rejects.toThrow("REDIRECT /sign-in?next=%2Fpins%3Flng%3D-116.4%26lat%3D43.6");});
+it("renders only the authenticated profile and makes sign-out available",async()=>{h.session.mockResolvedValue({email:"owner@example.test",displayName:"Shane"});const html=renderToStaticMarkup(await Profile({searchParams:Promise.resolve({})}));expect(html).toContain("owner@example.test");expect(html).toContain("Sign out");expect(html).toContain('action="/api/auth/sign-out"');});
+it("keeps public pages public and prevents private account pages from being cached",()=>{vi.stubEnv("VERCEL_ENV","production");for(const path of ["/","/about","/disclaimer","/us/id/nampa/plan/ANN-00371-2026"])expect(proxy(new NextRequest("https://www.localagendawatch.com"+path))).toBeUndefined();for(const path of ["/profile","/pins","/sign-in","/auth/verify","/api/account/pins"]){const response=proxy(new NextRequest("https://www.localagendawatch.com"+path));expect(response?.headers.get("cache-control")).toContain("no-store");expect(response?.headers.get("referrer-policy")).toBe(path==="/auth/verify"?"no-referrer":"same-origin");}});

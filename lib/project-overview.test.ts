@@ -2,7 +2,7 @@ import { ProjectFacts } from "@/app/components/project-overview";
 import { northsideOverview } from "./northside-project";
 import { shortDate, hearingDay } from "./project-timeline";
 import { createElement } from "react";
-import { expect, it } from "vitest";
+import { beforeEach,afterEach,expect,it,vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ProjectProposal, ProjectTimeline } from "@/app/components/project-overview";
 import { braeburnOverview, projectOverview, projectDensity, projectDocumentList } from "./project-overview";
@@ -70,3 +70,6 @@ it("separates portal filenames from actual downloadable key documents",()=>{
  ]}], true);
  expect(documents.key.map(d=>d.url)).toEqual([report]);expect(documents.portal).toHaveLength(1);expect(documents.other).toEqual([]);
 });
+
+beforeEach(()=>{vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(new Date("2026-10-26T18:00:00Z"));});
+afterEach(()=>vi.useRealTimers());

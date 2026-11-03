@@ -1,6 +1,6 @@
 vi.mock("@/lib/localities/municipal",()=>({MUNICIPAL_LOCALITIES:Object.fromEntries(["kuna","star","middleton","eagle"].map(id=>[id,{slug:id,tracked:[],getHearings:async()=>({active:[],completed:[]})}])),MUNICIPAL_FEEDS:Object.fromEntries(["kuna","star","middleton","eagle"].map(id=>[id,async()=>({active:[],completed:[]})]))}));
 import * as mapStore from "@/lib/maps/store";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import type { HearingFeed } from "@/lib/localities/types";
@@ -469,3 +469,7 @@ it("keeps stage links anchored and offers working meeting packets when the city 
   const html=renderToStaticMarkup(await PlanPage({params:Promise.resolve({planNumber:hearing.appId})}));
   expect(html).toContain('id="case-status"');expect(html).toContain("Browse meeting packets and staff reports instead");expect(html).toContain('href="/us/id/nampa/meetings?case=SPP-00183-2026"');expect(html).toContain('href="https://nampa.primegov.com/report.pdf#page=4"');
 });
+
+// Keep fixture hearings upcoming regardless of the real calendar date.
+beforeEach(()=>{vi.useFakeTimers({toFake:["Date"]});vi.setSystemTime(new Date("2026-10-26T18:00:00Z"));});
+afterEach(()=>vi.useRealTimers());
