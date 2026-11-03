@@ -6,7 +6,7 @@ import { AREAS, areaPath } from "../areas/registry";
 import { booleanIntersects, circle, feature } from "@turf/turf";
 import { SITE_ORIGIN } from "../site-config";
 import { dedupeProjects, emailProject, isReminderDue, localDay, snapshotFingerprint, type EmailProject, type WatchState, type ProjectSnapshot } from "./project";
-import { announcementTemplate, correctionTemplate, digestTemplates, type EmailLinks, type RenderedEmail } from "./templates";
+import { announcementTemplate, correctionTemplate, recipientDigest, type EmailLinks, type RenderedEmail } from "./templates";
 
 const hash=(value:string)=>createHash("sha256").update(value).digest("hex");
 type States=Record<string,WatchState>;
@@ -14,8 +14,8 @@ export type Delivery={id:string;email:string;kind:string;payload:{messages:Rende
 export function subscriptionLinks(token:string):EmailLinks{return {mailingAddress:process.env.ALERTS_MAILING_ADDRESS!,unsubscribe:SITE_ORIGIN+"/api/alerts/unsubscribe?token="+token,manage:SITE_ORIGIN+"/api/alerts/manage?token="+token};}
 async function queue(id:string,email:string,kind:string,messages:RenderedEmail[],unsubscribe:string,states:States|null,projects:EmailProject[]=[]){
  const db=await alertsDb();
- id+="/"+hash(JSON.stringify(messages)).slice(0,16);
- const result=await db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload,states) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO NOTHING RETURNING *",[id,alertScope(),email,kind,JSON.stringify({messages,unsubscribe,projects:projects.map(p=>p.snapshot),renderedAt:new Date().toISOString()}),states?JSON.stringify(states):null]);
+ if(kind!=="digest")id+="/"+hash(JSON.stringify(messages)).slice(0,16);
+ const result=await db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload,states) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,states=excluded.states,status='pending',attempts=0,next_attempt=now(),last_error=NULL WHERE law_alert_deliveries.status='cancelled' AND law_alert_deliveries.sent_parts=0 RETURNING *",[id,alertScope(),email,kind,JSON.stringify({messages,unsubscribe,projects:projects.map(p=>p.snapshot),renderedAt:new Date().toISOString()}),states?JSON.stringify(states):null]);
  return (result.rows[0]??(await db.query("SELECT * FROM law_alert_deliveries WHERE id=$1",[id])).rows[0]) as Delivery;
 }
 /** Persist stable payload and per-part progress before retrying a recipient. */
@@ -82,9 +82,9 @@ export async function sendScheduledAlerts(now=new Date()){
  const load:typeof projectDetail=(area,id)=>{const key=area+":"+id;if(!cache.has(key))cache.set(key,projectDetail(area,id));return cache.get(key)!;};
  let sent=0;
  const report=await processRecipients(recipients,async({email})=>{
-  const subs=(await db.query(`SELECT id,email,target,state,unsubscribe_token,last_sent FROM law_alert_subscriptions WHERE scope=$1 AND lower(email)=$2 AND confirmed_at IS NOT NULL AND target->>'kind'<>'pending' AND unsubscribed_at IS NULL ORDER BY id`,[scope,email])).rows as (Subscription&{last_sent:string|Date|null})[];
+  const subs=(await db.query(`SELECT s.id,s.email,CASE WHEN s.target->>'kind'='place' THEN jsonb_build_object('kind','place','label',p.label,'coordinates',jsonb_build_array(p.longitude,p.latitude),'radiusMiles',p.radius_miles) ELSE s.target END AS target,s.state,s.unsubscribe_token,s.last_sent FROM law_alert_subscriptions s LEFT JOIN law_resident_pins p ON p.subscription_id=s.id AND NOT p.archived WHERE s.scope=$1 AND lower(s.email)=$2 AND s.confirmed_at IS NOT NULL AND s.target->>'kind'<>'pending' AND s.unsubscribed_at IS NULL AND (s.target->>'kind'<>'place' OR p.id IS NOT NULL) ORDER BY s.id`,[scope,email])).rows as (Subscription&{last_sent:string|Date|null})[];
   if(!subs.length)return;
-  const alreadyToday=subs.every(s=>s.last_sent&&(s.last_sent instanceof Date?localDay(s.last_sent):s.last_sent.slice(0,10))===day);
+  const alreadyToday=subs.every(s=>s.last_sent&&(s.last_sent instanceof Date?localDay(s.last_sent):s.last_sent.slice(0,10))===day)||!!(await db.query("SELECT id FROM law_alert_deliveries WHERE scope=$1 AND email=$2 AND kind='digest' AND status='sent' AND (sent_at AT TIME ZONE 'America/Denver')::date=$3::date LIMIT 1",[scope,email,day])).rows.length;
   // Retry a stable queued message before advancing this person's snapshots.
   const pending=(await db.query("SELECT * FROM law_alert_deliveries WHERE scope=$1 AND email=$2 AND kind='digest' AND status='pending' ORDER BY created_at LIMIT 1",[scope,email])).rows[0] as Delivery|undefined;
   if(pending){
@@ -93,17 +93,14 @@ export async function sendScheduledAlerts(now=new Date()){
   }
   const all:EmailProject[]=[],changed:EmailProject[]=[],states:States={};
   for(const sub of subs){const projects=await loadWatchProjects(sub,rows,load,now);all.push(...projects);changed.push(...projects.filter(p=>p.changes.length));states[sub.id]={version:2,projects:Object.fromEntries(projects.map(p=>[p.snapshot.key,p.snapshot]))};}
-  const unique=dedupeProjects(changed),links=subscriptionLinks(subs[0].unsubscribe_token),labels=[...new Set(subs.flatMap(s=>s.target.kind==="place"?[s.target.label]:[]))],label=labels.length===1?labels[0]:undefined;
+  const reminders=dedupeProjects(all).filter(p=>isReminderDue(p,now)).map(p=>({...p,changes:[...p.changes,"A verified hearing for this watched project is two calendar days away."]}));
+  const unique=dedupeProjects([...changed,...reminders]),links=subscriptionLinks(subs[0].unsubscribe_token),labels=[...new Set(subs.flatMap(s=>s.target.kind==="place"?[s.target.label]:[]))],label=labels.length===1?labels[0]:undefined;
   if(unique.length&&!alreadyToday){
-   const queued=await queue("digest/"+hash(scope+email+day),email,"digest",digestTemplates(unique,links,label,false,now),links.unsubscribe,states,unique);
+   const queued=await queue("digest/"+hash(scope+email+day),email,"digest",recipientDigest(unique,links,label,now),links.unsubscribe,states,unique);
    if(await deliverQueued(queued,now))sent+=queued.payload.messages.length;
   }else if(!alreadyToday){
    // First-run or legacy hashes establish a structured baseline, without claiming a change.
    for(const [id,state]of Object.entries(states))await db.query("UPDATE law_alert_subscriptions SET state=$2,last_sent=$3 WHERE id=$1 AND scope=$4 AND unsubscribed_at IS NULL",[id,JSON.stringify(state),day,scope]);
-  }
-  for(const project of dedupeProjects(all).filter(p=>isReminderDue(p,now))){
-   const queued=await queue("reminder/"+hash(scope+email+project.snapshot.key+project.snapshot.next!.startsAt),email,"reminder",digestTemplates([{...project,changes:["A verified hearing for this watched project is two calendar days away."]}],links,label,true,now),links.unsubscribe,null,[project]);
-   if(await deliverQueued(queued,now))sent++;
   }
   await db.query("UPDATE law_alert_deliveries SET status='cancelled',last_error='Reminder window elapsed' WHERE scope=$1 AND email=$2 AND kind='reminder' AND status='pending' AND (created_at AT TIME ZONE 'America/Denver')::date<$3::date",[scope,email,day]);
  },async({email})=>{await db.query("INSERT INTO law_alert_recipient_checks(scope,email,last_checked) VALUES($1,$2,now()) ON CONFLICT(scope,email) DO UPDATE SET last_checked=now()",[scope,email]);});

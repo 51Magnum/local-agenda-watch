@@ -67,6 +67,16 @@ export function digestTemplates(input:EmailProject[],links:EmailLinks,placeLabel
  if(group.length)groups.push(group);
  return groups.map((g,i)=>{const message=build(g);return groups.length>1?{...message,subject:`${message.subject} (part ${i+1} of ${groups.length})`}:message;});
 }
+/** A recipient gets one combined message even when several pins match many projects. */
+export function recipientDigest(input:EmailProject[],links:EmailLinks,placeLabel?:string,now=new Date()):RenderedEmail[] {
+ const projects=dedupeProjects(input),full=digestTemplates(projects,links,placeLabel,false,now);
+ if(full.length<=1)return full;
+ // Keep large recipient digests below the transport limit, without sending extra parts.
+ const listed=projects.slice(0,50),more=projects.length-listed.length;
+ const lines=listed.map(p=>({name:p.snapshot.name.slice(0,150),url:p.snapshot.key}));
+ const suffix=more?`${more} additional projects have updates. Explore your watched areas on the public map.`:"Open each project for its verified changes, hearing information and official sources.";
+ return [renderDocument(`${projects.length} projects you follow have updates`,"Combined updates across all your alert pins.",`<h1>Updates to the projects you follow</h1><p>${projects.length} projects have updates or hearing reminders. Each project appears once across your pins.</p><ul>${lines.map(p=>`<li>${link(p.name,p.url)}</li>`).join("")}</ul><p>${e(suffix)}</p>${link("Open the public map",SITE_ORIGIN)}`,lines.map(p=>p.name+"\n"+p.url).join("\n\n")+"\n\n"+suffix,"You opted in to project updates for your watches or saved pins.",links)];
+}
 export function announcementTemplate(area:{name:string;url:string},links:EmailLinks,projects:EmailProject[]=[]){
  const blocks=dedupeProjects(projects).map(p=>projectBlock(p));
  return renderDocument(`Now tracking public projects in ${area.name}`,`Explore current public records and projects in ${area.name}.`,`<h1 style="font-size:28px;line-height:1.25">Now following projects in ${e(area.name)}</h1><p>Local Agenda Watch now tracks public planning records in ${e(area.name)}. Coverage can be incomplete; official records control. Review your saved place and radius to choose what you follow.</p>${button("Explore "+area.name,area.url)}${blocks.map(b=>b.html).join("")}`,`Now tracking public projects in ${area.name}.\nCoverage can be incomplete; official records control.\nExplore: ${area.url}\n\n`+blocks.map(b=>b.text).join("\n\n"),"You opted in to coverage announcements for a watched place in this area.",links);

@@ -1,0 +1,13 @@
+# Profile plans and alert pins
+
+Free profiles have one active pin at a fixed 1 mile radius. Paid profiles have up to `PAID_PIN_LIMIT` pins (initially 5), each with a 0.25–10 mile radius. The single allowance constant is in `lib/plan-policy.ts`; the existing alert pool synchronizes it into the private DB policy before account or alert work. API transactions lock the owner and read the current plan, and database triggers enforce the same rules for all pin and legacy alert writers.
+
+Plans default to `free`. Only a trusted administrator with existing database access changes `law_resident_profiles.plan` to `paid` or `free`, selecting the exact private `(scope,email)` identity. There is no resident plan-change endpoint or payment flow. No new environment variables, roles, databases, or services are needed.
+
+`20261103_profile_plan_tiers.up.sql` runs once, transactionally under the existing schema lock, on first account/alert use or scheduled delivery. Its checksum is recorded in `law_schema_migrations`. It reuses the existing pin table, adds the plan, linked subscription and inactive status, and imports confirmed active place watches. All existing pins become Free at 1 mile. If an account has several old pins, its oldest confirmed alert pin takes priority, then its oldest saved pin; extra locations are retained privately as inactive, and their email watches are stopped. Pending/stopped watches are never confirmed or restarted. Old queued messages are cancelled so they cannot use a previous radius. Downgrades similarly retain one active pin, set radii to 1 mile, and retain extras inactive.
+
+Saving a pin alone does not opt in to mail. A verified resident can explicitly enable alerts in the pin form; their confirmed email identity supplies confirmation. Existing email consent carries over. Deleting a pin stops its linked watch. All active opted-in pins match using their own radii. Overlapping projects and hearing reminders are grouped into one recipient digest per Mountain Time day; large digests use a compact single message with project links (first 50 plus an explicit remaining count).
+
+The down migration removes the policy/schema additions and preserves pin locations. It intentionally does not restart stopped subscriptions or recreate cancelled emails. Operational rollback must also remove the corresponding `law_schema_migrations` row in the same trusted migration transaction before reapplying. No migration or plan change is run against production from a development shell.
+
+Account pages remain authenticated, private and uncached. Public responses never query or include profile identities or saved pin locations. API failures and persisted delivery errors use generic messages, without personal details.
