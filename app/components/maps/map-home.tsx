@@ -1157,6 +1157,8 @@ export default function MapHome() {
               }
               setMenu(false);
             }} />
+            <Link href="/profile">Your profile</Link>
+            <Link href="/pins">Your saved pins</Link>
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
             <Link href="/privacy">Privacy</Link>
@@ -1224,6 +1226,7 @@ export default function MapHome() {
                 {[...new Set([0.25,0.5,1,2,3,5,10,place.radius])].sort((a,b)=>a-b).map(r=><option key={r} value={r}>{r} {r===1?"mile":"miles"}</option>)}
               </select>
             </label>
+            <Link href={"/pins?"+new URLSearchParams({lng:String(place.coordinates[0]),lat:String(place.coordinates[1]),label:place.label,radius:String(place.radius)})}>Save this pin to your account</Link>
             <button onClick={()=>setDialog("watch")}>Watch this area</button>
             <p>{nearby.length} projects in this map view within this radius.</p>
             {nearby.map((c) => (

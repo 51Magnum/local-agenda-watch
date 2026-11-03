@@ -44,7 +44,7 @@ export default function RootLayout({
             <Link href="/" className="font-semibold tracking-tight">
               Local Agenda Watch
             </Link>
-            <ThemeSelector/>
+            <nav aria-label="Your account" className="flex items-center gap-4 text-sm"><Link href="/profile">Profile</Link><Link href="/pins">Saved pins</Link><ThemeSelector/></nav>
           </div>
         </header>
         {children}

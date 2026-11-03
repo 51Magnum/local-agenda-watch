@@ -113,9 +113,10 @@ export async function sendAlertMail({
   html?: string;
   key: string;
   unsubscribe: string;
-  mode?: "live" | "test" | "internal";
+  mode?: "live" | "test" | "internal" | "signin";
 }) {
-  if(mode!=="test"&&!alertReadiness().deliveryEnabled)throw Error("Live email delivery is paused pending owner approval");
+  if(mode==="signin"&&process.env.VERCEL_ENV!=="production")throw Error("Sign-in delivery is disabled outside production");
+  if(mode!=="test"&&mode!=="signin"&&!alertReadiness().deliveryEnabled)throw Error("Live email delivery is paused pending owner approval");
   if(mode==="internal"&&to!=="corrections@localagendawatch.com")throw Error("Internal corrections mail has a fixed recipient");
   if(to.length>254||!/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(to))throw Error("Enter one valid recipient address");
   if (!alertReadiness().ready)
@@ -139,7 +140,7 @@ export async function sendAlertMail({
       subject: (mode==="test"?"[TEST] ":"")+subject,
       html:htmlPart,
       text:textPart,
-      headers: {
+      headers: mode==="signin"?undefined:{
         "List-Unsubscribe": "<" + unsubscribe + ">",
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },

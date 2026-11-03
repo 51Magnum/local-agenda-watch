@@ -43,5 +43,12 @@ function routeProxy(request: NextRequest) {
     }
   }
 }
-export function proxy(request:NextRequest){const response=routeProxy(request);if(process.env.VERCEL_ENV==="production")return response;const result=response??NextResponse.next();result.headers.set("X-Robots-Tag","noindex, nofollow");return result;}
+export function proxy(request:NextRequest){
+ const response=routeProxy(request),path=request.nextUrl.pathname;
+ const privatePath=/^\/(?:profile|pins|sign-in|auth)(?:\/|$)/.test(path)||/^\/api\/(?:auth|account)(?:\/|$)/.test(path);
+ if(process.env.VERCEL_ENV==="production"&&!privatePath)return response;
+ const result=response??NextResponse.next();
+ if(privatePath){result.headers.set("Cache-Control","private, no-store, max-age=0");result.headers.set("Referrer-Policy",path==="/auth/verify"?"no-referrer":"same-origin");result.headers.set("X-Robots-Tag","noindex, nofollow");}
+ if(process.env.VERCEL_ENV!=="production")result.headers.set("X-Robots-Tag","noindex, nofollow");return result;
+}
 export const config={matcher:["/((?!_next/static|favicon.ico).*)"]};
