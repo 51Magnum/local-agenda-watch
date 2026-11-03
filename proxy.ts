@@ -45,7 +45,7 @@ function routeProxy(request: NextRequest) {
 }
 export function proxy(request:NextRequest){
  const response=routeProxy(request),path=request.nextUrl.pathname;
- const privatePath=/^\/(?:profile|pins|sign-in|auth)(?:\/|$)/.test(path)||/^\/api\/(?:auth|account)(?:\/|$)/.test(path);
+ const privatePath=/^\/(?:profile|pins|sign-in|auth)(?:\/|$)/.test(path)||/^\/api\/(?:auth|account)(?:\/|$)/.test(path)||/^\/admin\/residents(?:\/|$)/.test(path);
  if(process.env.VERCEL_ENV==="production"&&!privatePath)return response;
  const result=response??NextResponse.next();
  if(privatePath){result.headers.set("Cache-Control","private, no-store, max-age=0");result.headers.set("Referrer-Policy",path==="/auth/verify"?"no-referrer":"same-origin");result.headers.set("X-Robots-Tag","noindex, nofollow");}

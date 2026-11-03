@@ -52,8 +52,8 @@ export async function consumeSignIn(token:string,oldSession?:string,now=new Date
  const row=await db.query(`WITH link AS (
  DELETE FROM law_resident_login_links WHERE token_hash=$1 AND scope=$2 AND expires_at>$3 RETURNING email,return_to
  ), profile AS (
- INSERT INTO law_resident_profiles(scope,email,email_verified_at) SELECT $2,email,$3 FROM link
- ON CONFLICT(scope,email) DO UPDATE SET email_verified_at=excluded.email_verified_at RETURNING email
+ INSERT INTO law_resident_profiles(scope,email,email_verified_at,last_sign_in_at) SELECT $2,email,$3,$3 FROM link
+ ON CONFLICT(scope,email) DO UPDATE SET email_verified_at=excluded.email_verified_at,last_sign_in_at=excluded.last_sign_in_at RETURNING email
  ), session AS (
  INSERT INTO law_resident_sessions(token_hash,scope,email,expires_at) SELECT $4,$2,email,$5 FROM profile RETURNING email
  ), old_session AS (
