@@ -21,3 +21,10 @@ it("caches a derived preview and keeps the full exhibit byte-for-byte unchanged"
  vi.mocked(readVisualAsset).mockResolvedValue(saved);await GET(new Request('https://local.test/image?preview=main-v1'),params);expect(saveVisualAsset).toHaveBeenCalledTimes(1);
  const full=await GET(new Request('https://local.test/image'),params);expect(Buffer.from(await full.arrayBuffer()).equals(bytes)).toBe(true);
 });
+it("never serves a manually cropped preview without its own passing privacy check",async()=>{
+ const bytes=await sharp({create:{width:80,height:80,channels:3,background:"blue"}}).webp().toBuffer(),hash=createHash("sha256").update(bytes).digest("hex"),approval={version:"privacy-allowlist-v1",pageHash:hash,type:"site plan",contains_personal_info:false,confidence:.95,checkedAt:""};
+ const preview={version:"main-v1",parentHash:hash,hash,image:bytes.toString("base64"),crop:{left:0,top:0,width:80,height:80},manual:true};
+ vi.mocked(imageAssetIsActive).mockResolvedValue(true);vi.mocked(readVisualAsset).mockResolvedValue({image:preview.image,approval,preview});
+ expect((await GET(new Request("https://local.test/image?preview=main-v1"),params)).status).toBe(410);expect(saveVisualAsset).not.toHaveBeenCalled();
+ vi.mocked(readVisualAsset).mockResolvedValue({image:preview.image,approval,preview:{...preview,approval}});expect((await GET(new Request("https://local.test/image?preview=main-v1"),params)).status).toBe(200);
+});

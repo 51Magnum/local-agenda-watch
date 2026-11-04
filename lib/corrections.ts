@@ -21,3 +21,4 @@ export async function saveCorrection(input:{project:string;message:string;email:
 }
 export async function readCorrections(){return(await(await db()).query("SELECT id,project,message,email,created_at,status FROM law_corrections ORDER BY created_at DESC LIMIT 100")).rows;}
 export async function updateCorrection(id:string,status:string){await(await db()).query("UPDATE law_corrections SET status=$2 WHERE id=$1",[id,status]);}
+export async function pendingCorrectionCount(){return Number((await(await db()).query("SELECT count(*) AS count FROM law_corrections WHERE status='new'")).rows[0].count);}

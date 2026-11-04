@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FIELD_LABELS, evidenceSourceHref, type EvidenceField } from "@/lib/timeline/types";
 import { fieldLabel, passing, queueReasons, riskScore } from "@/lib/timeline/verification";
+import {adminActionHelp} from "@/lib/admin-navigation";
 export type QueueField=EvidenceField & {documentTitle:string;meetingDate?:string};
 export function ReviewQueue({initialFields}:{initialFields:QueueField[]}){
  const [page,setPage]=useState(0);
@@ -18,7 +19,7 @@ export function ReviewQueue({initialFields}:{initialFields:QueueField[]}){
  function focusCard(id:string,scroll=false){setFocused(id);cards.current.get(id)?.focus({preventScroll:true});if(scroll)cards.current.get(id)?.scrollIntoView({block:"nearest"});}
  function toggle(id:string){setSelected(prev=>{const next=new Set(prev);if(next.has(id))next.delete(id);else next.add(id);return next;});}
  async function submit(ids:string[],action:"approve"|"reject",onlyPassing=false){
-  if(busy||!ids.length)return;setBusy(true);setError("");
+  if(busy||!ids.length)return;if(!window.confirm(adminActionHelp(action==="approve"?"Approve selected":"Reject selected").description+"\n\nContinue?"))return;setBusy(true);setError("");
   const scroll={x:window.scrollX,y:window.scrollY};
   const index=ordered.findIndex(f=>ids.includes(f.id));const next=ordered.slice(index+1).find(f=>!ids.includes(f.id))??ordered.find(f=>!ids.includes(f.id));
   try{
@@ -31,14 +32,14 @@ export function ReviewQueue({initialFields}:{initialFields:QueueField[]}){
    requestAnimationFrame(()=>{window.scrollTo({left:scroll.x,top:scroll.y,behavior:"instant"});if(next)focusCard(next.id);});
   }catch(e){setError(e instanceof Error?e.message:"Review failed");}finally{setBusy(false);}
  }
- async function undo(id:string){if(busy)return;setBusy(true);setError("");try{const r=await fetch("/admin/review/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"undo",batchId:id})});const data=await r.json();if(!r.ok)throw new Error(data.error);setFields(prev=>prev.map(f=>({...f,...data.fields.find((v:EvidenceField)=>v.id===f.id)})));setToasts(prev=>prev.filter(t=>t.id!==id));}catch(e){setError(e instanceof Error?e.message:"Undo failed");}finally{setBusy(false);}}
+ async function undo(id:string){if(busy||!window.confirm(adminActionHelp("Undo").description+"\n\nContinue?"))return;setBusy(true);setError("");try{const r=await fetch("/admin/review/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"undo",batchId:id})});const data=await r.json();if(!r.ok)throw new Error(data.error);setFields(prev=>prev.map(f=>({...f,...data.fields.find((v:EvidenceField)=>v.id===f.id)})));setToasts(prev=>prev.filter(t=>t.id!==id));}catch(e){setError(e instanceof Error?e.message:"Undo failed");}finally{setBusy(false);}}
  useEffect(()=>{if(!toasts.length)return;const timer=setTimeout(()=>setToasts(prev=>prev.filter(t=>t.expires>Date.now())),Math.max(1,Math.min(...toasts.map(t=>t.expires))-Date.now()));return()=>clearTimeout(timer);},[toasts]);
  useEffect(()=>{function key(e:KeyboardEvent){if(e.altKey||e.ctrlKey||e.metaKey||e.target instanceof HTMLElement&&e.target.closest("input,textarea,select,button,a,[contenteditable=true]"))return;const index=ordered.findIndex(f=>f.id===focused),f=ordered[index];switch(e.key.toLowerCase()){case "j":e.preventDefault();if(ordered.length)focusCard(ordered[Math.min(ordered.length-1,index+1)].id,true);break;case "k":e.preventDefault();if(ordered.length)focusCard(ordered[Math.max(0,index-1)].id,true);break;case "x":if(f){e.preventDefault();toggle(f.id);}break;case "a":if(f&&tab==="pending"){e.preventDefault();void submit([f.id],"approve");}break;case "r":if(f&&tab==="pending"){e.preventDefault();void submit([f.id],"reject");}}}window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);});
  const counts={pending:fields.filter(f=>f.status==="pending").length,approved:fields.filter(f=>["approved","auto_published"].includes(f.status)).length,rejected:fields.filter(f=>f.status==="rejected").length};
  const passingIds=visible.filter(f=>passing(f)&&(drafts[f.id]??f.value)===f.value).map(f=>f.id);
  const selectedIds=visible.filter(f=>selected.has(f.id)).map(f=>f.id);
  const button="rounded border px-3 py-2 text-sm disabled:opacity-40";
- return <section aria-label="Evidence review queue" style={{overflowAnchor:"none"}}>
+ return <section aria-label="Evidence review queue" data-admin-confirm-managed style={{overflowAnchor:"none"}}>
   <div className="sticky top-0 z-30 space-y-3 rounded-xl border bg-[var(--background)] p-4 shadow-lg" style={{background:"var(--background, #fff)"}}>
    <div className="flex flex-wrap items-center gap-3"><button className={button} aria-pressed={tab==="pending"} onClick={()=>{setTab("pending");setPage(0);setSelected(new Set());}}>Pending ({counts.pending})</button><button className={button} aria-pressed={tab==="done"} onClick={()=>{setTab("done");setPage(0);setSelected(new Set());}}>Done · Approved {counts.approved} · Rejected {counts.rejected}</button><input aria-label="Filter queue" placeholder="Filter by case or body" value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}} className="min-w-0 rounded border p-2"/><span className="text-xs">A approve · R reject · J/K move · X select</span></div>
    {tab==="pending"&&<div className="flex flex-wrap items-center gap-3"><label className="text-sm"><input type="checkbox" checked={visible.length>0&&visible.every(f=>selected.has(f.id))} onChange={e=>setSelected(e.target.checked?new Set(visible.map(f=>f.id)):new Set())}/> Select all on page</label><button className={button} onClick={()=>setSelected(new Set(passingIds))}>Select all passing checks</button><button className={button} disabled={busy||!passingIds.length} onClick={()=>void submit(passingIds,"approve",true)}>Approve all passing ({passingIds.length})</button><strong className="text-sm" aria-live="polite">{selectedIds.length} selected</strong><button className={button} disabled={busy||!selectedIds.length} onClick={()=>void submit(selectedIds,"approve")}>Approve selected</button><button className={button} disabled={busy||!selectedIds.length} onClick={()=>void submit(selectedIds,"reject")}>Reject selected</button><button className={button} onClick={()=>setSelected(new Set())}>Clear</button></div>}
