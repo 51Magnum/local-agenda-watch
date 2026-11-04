@@ -1,7 +1,16 @@
 import {currentResident} from "@/lib/resident-session";
-import {removeResidentPin,saveResidentPin} from "@/lib/resident-account";
+import {removeResidentPin,saveResidentPin,residentPins} from "@/lib/resident-account";
 import {sameOrigin} from "@/lib/timeline/auth";
 import {previewMutationResponse} from "@/lib/runtime-environment";
+const privateHeaders={"Cache-Control":"private, no-store, max-age=0","Vary":"Cookie","X-Robots-Tag":"noindex, nofollow"};
+export async function GET(){
+ const disabled=previewMutationResponse();if(disabled)return disabled;
+ try{
+  const resident=await currentResident();if(!resident)return Response.json({error:"Sign in to see your saved pins."},{status:401,headers:privateHeaders});
+  const pins=(await residentPins(resident)).filter(p=>!p.archived).map(p=>({id:p.id,label:p.label,coordinates:p.coordinates,radiusMiles:p.radiusMiles,alertsEnabled:!!p.alertsEnabled}));
+  return Response.json({pins},{headers:privateHeaders});
+ }catch{return Response.json({error:"Your saved pins could not load. Please try again."},{status:503,headers:privateHeaders});}
+}
 export async function POST(request:Request){
  const disabled=previewMutationResponse();if(disabled)return disabled;
  if(!sameOrigin(request))return new Response("Submit from this site.",{status:403});

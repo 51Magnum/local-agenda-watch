@@ -1,0 +1,9 @@
+# Saved pins on the map
+
+Open the home map’s **Layers → Your saved pins** section. Resident email sign-in loads that account’s active pins (one for Free, up to the configured paid allowance). Each pin has a numbered map marker and a button showing its label, saved radius, and alert status. Select a button or tap a marker to center the map and show that pin’s radius. Closing Layers keeps the markers visible; unchecking **Show saved pins** hides them and clears the selected saved-pin circle. **Manage saved pins** opens the existing private pin editor. Viewing pins never changes saved locations, radii, plans, or email consent.
+
+An anonymous visitor sees a sign-in link. Successful email sign-in returns to the map with Layers open. The existing admin login does not substitute for resident email sign-in. Inactive archived pins are managed from the profile, not drawn as active map pins.
+
+The public map remains public and cacheable. Only the authenticated `GET /api/account/pins` response contains account pins; it is private, uncached, varies by cookie, omits profile names/emails and inactive pins, and remains disabled in Preview. No account pins enter public HTML, share URLs, or browser storage. The private layer refreshes on focus/visibility, while open, and periodically when enabled; an ended session or failed reload clears its markers and selection. A refreshed selected pin also adopts the current server radius and alert state. No migration, environment variable, service, or production write is needed for this change.
+
+Validation includes endpoint authorization/ownership/privacy tests, safe map return paths and payload validation, plus local desktop (1440×900) and mobile (390×844) browser checks with five fixture pins at 0.25, 0.5, 1, 5 and 10 miles. The browser checks use a built Preview server with no database variables and mocked private responses; they send no email and access no production accounts.
