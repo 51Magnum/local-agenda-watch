@@ -14,7 +14,7 @@ export const authHash=(value:string)=>createHash("sha256").update(value).digest(
 export function normalizeResidentEmail(value:unknown){if(typeof value!=="string")return;const email=value.trim().toLowerCase();return email.length<=254&&/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(email)?email:undefined;}
 export function safeReturnTo(value:unknown){
  if(typeof value!=="string"||value.length>1600||!value.startsWith("/")||/[\\\u0000-\u0020]/.test(value))return "/profile";
- try{const url=new URL(value,SITE_ORIGIN);if(url.origin===SITE_ORIGIN&&["/profile","/pins"].includes(url.pathname))return url.pathname+url.search;}catch{}
+ try{const url=new URL(value,SITE_ORIGIN);if(url.origin===SITE_ORIGIN){if(url.pathname==="/"&&url.searchParams.get("savedPins")==="1")return "/?savedPins=1";if(["/profile","/pins"].includes(url.pathname))return url.pathname+url.search;}}catch{}
  return "/profile";
 }
 /** Reuses the alert pool and normalized email identity. Schema applies idempotently on first use. */

@@ -6,7 +6,7 @@ import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import { PROJECT_FILL_OPACITY, PROJECT_POLYGON_LAYERS } from "@/lib/maps/project-style";
 import FLUM_TILES from "@/public/flum/manifest.json";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map as LibreMap, GeoJSONSource } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import { bbox, circle, distance } from "@turf/turf";
@@ -34,6 +34,8 @@ import type { PaneData } from "@/lib/maps/project-questions";
 import { unpackViewport } from "@/lib/maps/viewport-wire";
 import ThemeSelector from "../theme-selector";
 import ProjectFinder from "./project-finder";
+import SavedPinsLayer from "./saved-pins-layer";
+import type {SavedMapPin} from "@/lib/maps/saved-pins";
 const AlertForm = dynamic(()=>import("../alert-form"));
 const InterestForm = dynamic(() => import("../locations/interest-form"));
 const ProjectPane = dynamic(() => import("./project-pane"));
@@ -45,9 +47,10 @@ const empty: FeatureCollection = { type: "FeatureCollection", features: [] };
 const VIEW_KEY = "law:map-view:v1",
   PLACE_KEY = "law:saved-place:v1";
 
-type Place = { label: string; coordinates: [number, number]; radius: number };
+type Place = { label: string; coordinates: [number, number]; radius: number; residentPinId?:string; alertsEnabled?:boolean };
 function updatePlaceUrl(p: Place) {
   const u = new URL(window.location.href);
+  if(p.residentPinId){for(const key of ["lng","lat","q","r"])u.searchParams.delete(key);window.history.replaceState(window.history.state,"",u);return;}
   u.searchParams.set("lng", String(p.coordinates[0]));
   u.searchParams.set("lat", String(p.coordinates[1]));
   u.searchParams.set("q", p.label);
@@ -83,6 +86,7 @@ export default function MapHome() {
     openRef = useRef<(c: MapCase) => void>(() => {}),
     choosePlaceRef = useRef<(p: Place) => void>(() => {}),
     dropPinRef = useRef(false),
+    privatePlaceRef = useRef(false),
     cache = useRef(new Map<string, ViewportData>()),
     inflight = useRef(new Map<string, Promise<ViewportData>>()),
     revision = useRef("initial"),
@@ -115,6 +119,8 @@ export default function MapHome() {
     [zoom, setZoom] = useState(10),
     [layers, setLayers] = useState(false),
     [legend, setLegend] = useState(false);
+  const getMap=useCallback(()=>map.current,[]);
+  useEffect(()=>{if(new URLSearchParams(window.location.search).get("savedPins")==="1"){queueMicrotask(()=>setLayers(true));}},[]);
   const filterRef = useRef(filter),
     flumRef = useRef(flumOn);
   useEffect(() => {
@@ -655,10 +661,11 @@ export default function MapHome() {
           }
         });
         m.on("moveend", () => {
+          const privateView=privatePlaceRef.current;
           if (timer) clearTimeout(timer);
           timer = setTimeout(() => {
             try {
-              localStorage.setItem(
+              if(!privateView&&!privatePlaceRef.current)localStorage.setItem(
                 VIEW_KEY,
                 JSON.stringify({
                   center: m.getCenter().toArray(),
@@ -862,7 +869,7 @@ export default function MapHome() {
     const m = map.current;
     let marker: import("maplibre-gl").Marker | undefined,
       cancelled = false;
-    import("maplibre-gl").then((lib) => {
+    if(!place.residentPinId)import("maplibre-gl").then((lib) => {
       if (destroyed.current || cancelled) return;
       marker = new lib.Marker({ color: "#0f766e", draggable: true })
         .setLngLat(place.coordinates)
@@ -888,6 +895,7 @@ export default function MapHome() {
     if (map.current) map.current.getCanvas().style.cursor = droppingPin ? "crosshair" : "";
   }, [droppingPin, ready]);
   function choosePlace(p: Place) {
+    privatePlaceRef.current=!!p.residentPinId;
     setPlace(p);
     setAddress(p.label);
     setResults([]);
@@ -909,7 +917,16 @@ export default function MapHome() {
       })
       .catch(() => {});
   }
+  function chooseSavedPin(pin:SavedMapPin){
+    if(selected)closePane();
+    choosePlace({label:pin.label,coordinates:pin.coordinates,radius:pin.radiusMiles,residentPinId:pin.id,alertsEnabled:pin.alertsEnabled});
+  }
+  function refreshSelectedSavedPin(pin:SavedMapPin){
+    setPlace(current=>current?.residentPinId===pin.id&&(current.label!==pin.label||current.radius!==pin.radiusMiles||current.coordinates.some((n,i)=>n!==pin.coordinates[i])||current.alertsEnabled!==pin.alertsEnabled)?{label:pin.label,coordinates:pin.coordinates,radius:pin.radiusMiles,residentPinId:pin.id,alertsEnabled:pin.alertsEnabled}:current);
+  }
+  function hideSavedPinSelection(){if(privatePlaceRef.current)clearPlace();}
   function clearPlace() {
+    map.current?.stop();privatePlaceRef.current=false;
     setPlace(undefined);
     setSavedPlace(undefined);
     setAddress("");
@@ -1109,8 +1126,7 @@ export default function MapHome() {
             )}
           </section>
         )}
-        {layers && (
-          <section id="map-layer-options" className="law-layer-panel" aria-label="Map layers">
+        <section id="map-layer-options" className="law-layer-panel" aria-label="Map layers" hidden={!layers} style={{display:layers?undefined:"none"}}>
             <label>
               <input
                 type="checkbox"
@@ -1134,8 +1150,8 @@ export default function MapHome() {
                   : "Published plan coverage; county plan elsewhere."}
               </small>
             )}
+            <SavedPinsLayer open={layers} ready={ready} getMap={getMap} selectedId={place?.residentPinId} onSelect={chooseSavedPin} onRefreshSelected={refreshSelectedSavedPin} onHide={hideSavedPinSelection}/>
           </section>
-        )}
         {results.length > 0 && (
           <div className="law-search-results">
             {results.map((r, i) => (
@@ -1220,6 +1236,7 @@ export default function MapHome() {
                 Clear pin &amp; circle
               </button>
             </summary>
+            {place.residentPinId?<><p>Saved pin · {place.radius} {place.radius===1?"mile":"miles"} · Alerts {place.alertsEnabled?"on":"off"}</p><Link href="/pins">Manage this saved pin</Link></>:<>
             <p>The pin and circle show your selected area, not email subscription status. Only the latest place is remembered in this browser. The unsubscribe link in your email stops all alerts for that email address.</p>
             <label>Radius
               <select value={place.radius} onChange={e => choosePlace({...place,radius:Number(e.target.value)})}>
@@ -1227,7 +1244,7 @@ export default function MapHome() {
               </select>
             </label>
             <Link href={"/pins?"+new URLSearchParams({lng:String(place.coordinates[0]),lat:String(place.coordinates[1]),label:place.label,radius:String(place.radius)})}>Save this pin to your account</Link>
-            <button onClick={()=>setDialog("watch")}>Watch this area</button>
+            <button onClick={()=>setDialog("watch")}>Watch this area</button></>}
             <p>{nearby.length} projects in this map view within this radius.</p>
             {nearby.map((c) => (
               <button key={c.id} onClick={() => openRef.current(c)}>
@@ -1323,7 +1340,7 @@ export default function MapHome() {
               setSavedPlace(watchPlace);
               setPlace(watchPlace);
               updatePlaceUrl(watchPlace);
-              try{localStorage.setItem(PLACE_KEY,JSON.stringify(watchPlace));}catch{}
+              try{if(!watchPlace.residentPinId)localStorage.setItem(PLACE_KEY,JSON.stringify(watchPlace));}catch{}
               setDialog(undefined);
               setMessage("Check your email to confirm. Alerts start only after confirmation.");
               map.current?.getCanvas().focus();
@@ -1339,7 +1356,7 @@ export default function MapHome() {
               onSaved={() => {
                 if (dialog === "watch" && watchPlace) {
                   try {
-                    localStorage.setItem(PLACE_KEY, JSON.stringify(watchPlace));
+                    if(!watchPlace.residentPinId)localStorage.setItem(PLACE_KEY, JSON.stringify(watchPlace));
                     setSavedPlace(watchPlace);
                   } catch {
                     setMessage(
