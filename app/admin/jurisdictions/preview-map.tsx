@@ -1,4 +1,7 @@
 "use client";
+import MapNotice from "@/app/components/maps/map-notice";
+import {addMapAttribution} from "@/lib/maps/attribution";
+import "@/app/components/maps/attribution.css";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {useEffect,useMemo,useRef,useState} from "react";
 import type {FeatureCollection} from "geojson";
@@ -21,8 +24,8 @@ export default function PreviewMap({boundaries,cases}:{boundaries:FeatureCollect
    // Use the same build-prepared worker as the public maps.
    lib.setWorkerUrl("/maplibre/worker.mjs");
    if(window.innerWidth<700)lib.setWorkerCount(1);
-   const m=new lib.Map({container:container.current,style:"https://tiles.openfreemap.org/styles/liberty",center:[-116.24,43.55],zoom:10});
-   map.current=m;m.addControl(new lib.NavigationControl({showCompass:false}),"bottom-right");
+   const m=new lib.Map({container:container.current,style:"https://tiles.openfreemap.org/styles/liberty",center:[-116.24,43.55],zoom:10,attributionControl:false});
+   map.current=m;m.addControl(new lib.NavigationControl({showCompass:false}),"top-right");addMapAttribution(m,lib);
    m.on("error",event=>{if(active)setError("Map renderer: "+(event.error?.message??"A map resource could not load").slice(0,180)+". Project records are available in the list below.");});
    m.once("style.load",()=>{
     if(!active)return;
@@ -57,9 +60,9 @@ export default function PreviewMap({boundaries,cases}:{boundaries:FeatureCollect
   <div className="relative h-[65vh] min-h-[440px] overflow-hidden rounded-xl border">
    <div ref={container} className="h-full w-full"/>
    {selected&&<ProjectPane key={selected.area.id+selected.item.id} data={selected} preview onClose={()=>setSelected(undefined)} onWatch={()=>{}} onImage={v=>window.open(v.fullSizeUrl,"_blank","noopener,noreferrer")}/>}
-   <p className="pointer-events-none absolute right-3 top-3 rounded bg-white p-2 text-sm text-slate-900">Admin preview · Not public</p>
+   <p className="pointer-events-none absolute left-3 top-3 rounded bg-white p-2 text-sm text-slate-900">Admin preview · Not public</p>
    {data.bounds&&<button type="button" className="absolute bottom-8 left-3 min-h-11 rounded border bg-white px-3 text-sm text-slate-900 shadow" onClick={()=>map.current?.fitBounds(data.bounds!,{padding:55,maxZoom:13,duration:0})}>Show all mapped projects</button>}
-   {error&&<p role="alert" className="absolute bottom-24 left-3 right-3 rounded bg-white p-3 text-sm text-slate-900">{error}</p>}
+   {error&&<MapNotice message={error} kind="error" onDismiss={()=>setError("")} className="law-map-notice-overlay"/>}
   </div>
  </section>;
 }

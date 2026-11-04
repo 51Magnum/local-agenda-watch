@@ -1,4 +1,5 @@
 "use client";
+import MapNotice, {useMapNotice} from "./map-notice";
 import Link from "next/link";
 import {residentDateText} from "@/lib/areas/format";
 /* eslint-disable @next/next/no-img-element -- approved private-source images use our existing cached visual endpoint. */
@@ -29,9 +30,8 @@ export default function ProjectPane({
   const ref = useRef<HTMLElement>(null),
     start = useRef<number | null>(null);
   const [size, setSize] = useState<"peek" | "half" | "full">("half"),
-    [watchStep, setWatchStep] = useState<"closed" | "choose" | "project">(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("watchProject")==="1" ? "project" : "closed"),
-    [copied, setCopied] = useState(false),
-    [error, setError] = useState("");
+    [watchStep, setWatchStep] = useState<"closed" | "choose" | "project">(()=>typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("watchProject")==="1" ? "project" : "closed");
+  const {notice,showNotice,dismissNotice}=useMapNotice();
   const item = data.item;
   const Container = page ? "article" : "aside";
   const watchOptionsId = useId();
@@ -317,14 +317,13 @@ export default function ProjectPane({
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(window.location.href);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
+                    showNotice("Link copied");
                   } catch {
-                    setError("Copy the URL from your address bar.");
+                    showNotice("Copy the URL from your address bar.","error");
                   }
                 }}
               >
-                {copied ? "Link copied" : "Share"}
+                Share
               </button>
             </div>
             <p>
@@ -354,7 +353,7 @@ export default function ProjectPane({
                     .join("; ")
                 : data.caseIds.join(" · ")}
             </p>
-            {error && <p role="status">{error}</p>}
+            {notice && <MapNotice key={notice.id} {...notice} onDismiss={dismissNotice}/>}
           </footer>
         </div>
       </div>

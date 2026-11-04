@@ -1,0 +1,8 @@
+Map attribution and notices
+==========================
+
+The four home-map information icons were one control: a touch-target rule enlarged its 24px SVG background to a 44px square, and the background repeated. MapLibre 6 also starts compact attribution expanded. All four map constructors now disable automatic attribution and use one idempotent shared control, initially collapsed. A 24px, non-repeating icon expands the linked OpenFreeMap, OpenMapTiles and OpenStreetMap credits. Controls stack in the upper-right corner above mobile project sheets; the admin preview badge uses the opposite corner.
+
+Home, project/area, coverage and admin preview maps, project search, and saved-pin errors use MapNotice. Informational notices dismiss after four seconds of unpaused time; hover and keyboard focus pause independently. The close button dismisses early. Errors remain until dismissed. Routine text uses a status live region; errors use an alert live region. Loading indicators, legends and permanent empty-state guidance remain in place.
+
+Run `npm test`, `npx tsc --noEmit`, `npx eslint .`, and `npm run build` on Node 24. After building, `node scripts/check-map-ui.mjs` mounts the actual map components with committed public fixtures in a local browser harness, blocks external requests, and checks desktop and mobile attribution, all five saved pins, open-pane placement, notice expiry, hover/focus pause, early close, and persistent errors. Playwright must be installed or supplied through the existing `LAW_PLAYWRIGHT_MODULE` test convention; `LAW_PLAYWRIGHT_CHANNEL` optionally selects an installed browser. The harness uses no database, authentication secret, email or AI. It writes its results under ignored `output/` and takes no screenshots.
