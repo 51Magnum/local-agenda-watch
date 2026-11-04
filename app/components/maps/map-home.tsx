@@ -1178,6 +1178,24 @@ export default function MapHome() {
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
             <Link href="/privacy">Privacy</Link>
+            <Link href="/disclaimer">Disclaimer</Link>
+          <button
+            onClick={() => {
+              setMenu(false);
+              setDialog("coverage");
+              if (!place && map.current)
+                setPlace({
+                  label: "Selected map area",
+                  coordinates: map.current.getCenter().toArray() as [
+                    number,
+                    number,
+                  ],
+                  radius: 1,
+                });
+            }}
+          >
+            Request coverage
+          </button>
             <ThemeSelector />
           </nav>
         )}
@@ -1216,7 +1234,7 @@ export default function MapHome() {
             }}
           />
         )}
-        {!selected && (
+        {!selected && !place && (
           <div className="law-map-help">
             {zoom < 9
               ? "Choose an area to explore projects"
@@ -1276,25 +1294,7 @@ export default function MapHome() {
             </button>
           </div>
         )}
-        <footer className="law-map-footer">
-          <span>Independent summary; official records control.</span>
-          <button
-            onClick={() => {
-              setDialog("coverage");
-              if (!place && map.current)
-                setPlace({
-                  label: "Selected map area",
-                  coordinates: map.current.getCenter().toArray() as [
-                    number,
-                    number,
-                  ],
-                  radius: 1,
-                });
-            }}
-          >
-            Not covered yet? Request it
-          </button>
-        </footer>
+
       </div>
       {image && (
         <MapImageViewer visual={image} onClose={() => setImage(undefined)} />
