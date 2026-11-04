@@ -3,7 +3,7 @@ import {expect,it,vi} from "vitest";
 import {PGlite} from "@electric-sql/pglite";
 import {createHash} from "node:crypto";
 const harness=vi.hoisted(()=>({db:null as unknown}));vi.mock("pg",()=>({Pool:class{async query(sql:string,params?:unknown[]){const db=harness.db as PGlite;const r=params?.length?await db.query(sql,params):(await db.exec(sql)).at(-1)!;return {...r,rowCount:r.affectedRows??r.rows.length};}}}));
-import {publicImageReviews,imageAssetIsActive,saveImageReview,selectImage,hideImage,unhideImage,imageReviews,displayedImageReviews,saveImageCheck,reserveImageCheck} from "./image-review-store";
+import {publicImageReviews,imageAssetIsActive,saveImageReview,selectImage,hideImage,unhideImage,imageReviews,displayedImageReviews,saveImageCheck,reserveImageCheck,updateImageCrop} from "./image-review-store";
 import {IMAGE_CHECK_VERSION} from "./image-policy";
 it("preserves manual picks in SQL, enforces privacy before Select, and only reclaims transient stale checks",async()=>{
  const db=new PGlite();harness.db=db;vi.stubEnv("DATABASE_URL","postgres://test");try{
@@ -13,5 +13,11 @@ it("preserves manual picks in SQL, enforces privacy before Select, and only recl
  await hideImage("one");expect(await imageAssetIsActive("nampa","src")).toBe(false);expect(await publicImageReviews("nampa",["A"])).toEqual([]);expect(displayedImageReviews(await imageReviews())).toEqual([]);await unhideImage("one");expect(displayedImageReviews(await imageReviews())).toHaveLength(1);
  await saveImageReview({...row,id:"bad",visual:{...row.visual,approval:{...approval,contains_personal_info:true}}});await expect(selectImage("bad")).rejects.toThrow("privacy");
  await saveImageCheck("old",{...approval,type:"classification unavailable",checkedAt:new Date(Date.now()-86400001).toISOString()});expect(await reserveImageCheck("old",{...approval,type:"unchecked"})).toBe(true);expect(await reserveImageCheck("old",{...approval,type:"unchecked"})).toBe(false);
+ const cropped={...row.visual,src:"cropped",fullSizeUrl:"cropped",previewApproval:{...approval,type:"vicinity/aerial exhibit",is_context_map:true}};
+ await updateImageCrop("one","src",cropped,"a".repeat(64),{box:{left:0,top:0,width:80,height:80},sourceAssetId:"a".repeat(64),sourcePageHash:approval.pageHash,previewHash:"b".repeat(64),actor:"admin",at:"now"},approval);
+ expect((await imageReviews()).find(r=>r.id==="one")).toMatchObject({selected:true,manual:true,manualCrop:{actor:"admin"},visual:{src:"cropped"}});
+ expect(displayedImageReviews(await imageReviews()).find(r=>r.id==="one")?.visual?.label).toBe("Vicinity/aerial exhibit");
+ await expect(updateImageCrop("one","src",row.visual,"a".repeat(64),undefined,approval)).rejects.toThrow("changed");
+ await updateImageCrop("one","cropped",row.visual,"a".repeat(64),undefined,approval);expect((await imageReviews()).find(r=>r.id==="one")?.manualCrop).toBeUndefined();
  }finally{vi.unstubAllEnvs();await db.close();}
 });

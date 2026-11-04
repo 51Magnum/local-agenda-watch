@@ -2,7 +2,16 @@ import sharp from "sharp";
 import {createHash} from "node:crypto";
 export const PREVIEW_VERSION="main-v1";
 export type PreviewCrop={left:number;top:number;width:number;height:number};
-export type VisualPreview={version:string;parentHash:string;hash:string;image:string;crop:PreviewCrop};
+export type VisualPreview={version:string;parentHash:string;hash:string;image:string;crop:PreviewCrop;manual?:boolean;approval?:import("./image-policy").ImageCheck};
+export function validateCrop(box:PreviewCrop,width:number,height:number){
+ if(!box||![box.left,box.top,box.width,box.height].every(Number.isSafeInteger)||box.left<0||box.top<0||box.width<16||box.height<16||box.left+box.width>width||box.top+box.height>height)throw Error("Choose a crop of at least 16 pixels inside the source page.");
+ return {left:box.left,top:box.top,width:box.width,height:box.height};
+}
+export async function manualPreview(image:Uint8Array,box:PreviewCrop,parentHash:string):Promise<VisualPreview>{
+ const meta=await sharp(image,{limitInputPixels:25000000}).metadata();const crop=validateCrop(box,meta.width??0,meta.height??0);
+ const result=await sharp(image,{limitInputPixels:25000000}).extract(crop).flatten({background:"white"}).resize({width:768,height:1000,fit:"inside",withoutEnlargement:true}).webp({quality:85}).toBuffer();
+ return {version:PREVIEW_VERSION,parentHash,hash:createHash("sha256").update(result).digest("hex"),image:result.toString("base64"),crop,manual:true};
+}
 function bands(values:number[],threshold:number,gap:number,min:number){
  const result:{start:number;end:number}[]=[];let start=-1,last=-1;
  for(let i=0;i<values.length;i++)if(values[i]>=threshold){if(start<0)start=i;else if(i-last>gap){if(last-start+1>=min)result.push({start,end:last+1});start=i;}last=i;}
