@@ -1,4 +1,7 @@
 "use client";
+import MapNotice, {useMapNotice} from "./map-notice";
+import {addMapAttribution} from "@/lib/maps/attribution";
+import "@/app/components/maps/attribution.css";
 import {projectPolygonFeature} from "@/lib/maps/project-feature";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
@@ -28,9 +31,7 @@ function caseFeatures(cases: MapCase[]): FeatureCollection {
 export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPage = false, matchHeightTo, showNearbyList = false, combined }: { combined?:{country:string;state:string}; jurisdiction: string; caseIds?: readonly string[]; compact?: boolean; fullPage?: boolean; matchHeightTo?: string; showNearbyList?: boolean }) {
   const area = getArea(jurisdiction);
   const [expandedImage, setExpandedImage] = useState<MapVisual>();
-  const [linkCopied, setLinkCopied] = useState(false);
-  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
+  const {notice,showNotice,dismissNotice}=useMapNotice();
   const [data, setData] = useState<PublicMapData>(); const [error, setError] = useState("");
   const [hiddenStages, setHiddenStages] = useState<string[]>([]);
   const [hiddenTypes, setHiddenTypes] = useState<string[]>([]);
@@ -45,7 +46,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   const flumRequestKey=useRef("");
   const [loadedFlumKey,setLoadedFlumKey]=useState("");
   const [flumOn, setFlumOn] = useState(false); const [flum, setFlum] = useState<FlumCache>();
-  const [address, setAddress] = useState(""); const [searching, setSearching] = useState(false); const [searchMessage, setSearchMessage] = useState(""); const [results, setResults] = useState<AddressResult[]>([]); const [location, setLocation] = useState<AddressResult>();
+  const [address, setAddress] = useState(""); const [searching, setSearching] = useState(false); const [results, setResults] = useState<AddressResult[]>([]); const [location, setLocation] = useState<AddressResult>();
   useEffect(()=>{if(!combined||!location)return;void liveAreaAtPoint(location.coordinates).then(selected=>{if(selected)try{localStorage.setItem("law:last-area",selected.id);}catch{}});},[combined,location]);
   const openProject = useRef<((id: string) => void) | null>(null);
   const container = useRef<HTMLDivElement>(null); const map = useRef<LibreMap | null>(null); const popup = useRef<Popup | null>(null); const [ready, setReady] = useState(false);
@@ -86,7 +87,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       if(!combined&&!compact){const destination=await locationMapUrl(coordinates,pin.label);if(destination){window.location.assign(destination+"&pin=1");return;}}
       searchGeneration.current += 1;
       if(combined)setWithinMile(true);
-      setSearching(false); setLocation(pin); setAddress(""); setResults([]); setSearchMessage("");
+      setSearching(false); setLocation(pin); setAddress(""); setResults([]); showNotice("");
       pinMode.current = false; setPlacingPin(false);
       if (map.current) map.current.getCanvas().style.cursor = "";
       popup.current?.remove();
@@ -95,7 +96,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   });
   function togglePinMode() {
     const active = !pinMode.current; pinMode.current = active; setPlacingPin(active);
-    popup.current?.remove(); setResults([]); setSearchMessage("");
+    popup.current?.remove(); setResults([]); showNotice("");
     if (map.current) map.current.getCanvas().style.cursor = active ? "crosshair" : "";
   }
   const filtered = useMemo(() => data?.cases.filter((c) => (!idsKey || idsKey.split(",").includes(c.id)) && !hiddenStages.includes(c.stage) && !hiddenTypes.includes(c.type) && (!combined || c.members?.some(m=>!hiddenAreas.includes(m.areaId)))) ?? [], [data, idsKey, hiddenStages, hiddenTypes,hiddenAreas,combined]);
@@ -116,7 +117,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.scrollZoom.setWheelZoomRate(1 / 900);
       instance.scrollZoom.setZoomRate(1 / 200);
       instance.addControl(new lib.NavigationControl(), "top-right");
-      instance.addControl(new lib.AttributionControl({ compact: true, customAttribution: "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" }));
+      addMapAttribution(instance, lib);
       function sizePopup() {
         if (!instance || !popup.current?.getElement().classList.contains("law-case-popup")) return;
         const element = popup.current.getElement(), viewport = instance.getContainer();
@@ -258,9 +259,9 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     if (!flumOn || !data || (combined?!viewport:Boolean(flum))) return;
     const key=combined?viewport!:jurisdiction;if(flumRequestKey.current===key&&flum)return;
     const abort = new AbortController();
-    fetch(combined?"/api/maps/nearby?"+new URLSearchParams({bbox:viewport!,layer:"flum",country:combined.country,state:combined.state}):"/api/maps/" + encodeURIComponent(jurisdiction) + "?layer=flum", { signal: abort.signal }).then(async (r) => { if (!r.ok) throw new Error(); const layer=await r.json();if(!abort.signal.aborted){flumRequestKey.current=key;setLoadedFlumKey(key);setFlum(layer);} }).catch(() => { if (!abort.signal.aborted){setLoadedFlumKey(key);setSearchMessage("Future land use is temporarily unavailable.");} });
+    fetch(combined?"/api/maps/nearby?"+new URLSearchParams({bbox:viewport!,layer:"flum",country:combined.country,state:combined.state}):"/api/maps/" + encodeURIComponent(jurisdiction) + "?layer=flum", { signal: abort.signal }).then(async (r) => { if (!r.ok) throw new Error(); const layer=await r.json();if(!abort.signal.aborted){flumRequestKey.current=key;setLoadedFlumKey(key);setFlum(layer);} }).catch(() => { if (!abort.signal.aborted){setLoadedFlumKey(key);showNotice("Future land use is temporarily unavailable.","error");} });
     return () => abort.abort();
-  }, [flumOn, flum, jurisdiction,viewport,data,combined]);
+  }, [flumOn, flum, jurisdiction,viewport,data,combined,showNotice]);
   useEffect(() => {
     if (!ready || !map.current || !data) return;
     // Keep the transparent fill layer for hit testing across the whole project.
@@ -281,7 +282,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
   }, [ready, location,radius]);
   function mapBaseUrl(){const q=new URLSearchParams(window.location.search);for(const key of ["lat","lng","r","nearby","pin","address","q"])q.delete(key);return window.location.pathname+(q.size?"?"+q:"");}
   function locationUrl(result: AddressResult, nearby = withinMile) { if(combined){const url=new URL(mapBaseUrl(),window.location.origin);url.searchParams.set("lat",result.coordinates[1].toFixed(6));url.searchParams.set("lng",result.coordinates[0].toFixed(6));url.searchParams.set("r",String(radius));url.searchParams.set("q",result.label);if(result.source==="map")url.searchParams.set("pin","1");return url.pathname+url.search;} return mapBaseUrl() + searchHash(result) + (nearby ? "&nearby=1" : ""); }
-  async function choose(result: AddressResult) { if(!combined&&!compact){const destination=await locationMapUrl(result.coordinates,result.label);if(destination){window.location.assign(destination);return;}} if(combined)setWithinMile(true);setLocation(result); setResults([]); setSearchMessage(""); window.history.replaceState(null, "", locationUrl(result)); }
+  async function choose(result: AddressResult) { if(!combined&&!compact){const destination=await locationMapUrl(result.coordinates,result.label);if(destination){window.location.assign(destination);return;}} if(combined)setWithinMile(true);setLocation(result); setResults([]); showNotice(""); window.history.replaceState(null, "", locationUrl(result)); }
   function toggleNearby(checked: boolean) {
     setWithinMile(checked);
     if (!location) return;
@@ -295,12 +296,12 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     event.preventDefault(); if (!data || address.trim().length < 3) return;
     const generation = ++searchGeneration.current;
     if (pinMode.current) togglePinMode();
-    setSearching(true); setSearchMessage("");
-    try { const matches = combined?await (async()=>{const key="law:combined-search:"+address.trim().toUpperCase();try{const cached=JSON.parse(sessionStorage.getItem(key)??"null");if(cached?.expires>Date.now())return cached.results as AddressResult[];}catch{}const r=await fetch("/api/locations/search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:address.trim(),country:combined.country})});const j=await r.json();if(!r.ok)throw new Error();const results=(j.results??[]).map((m:AddressResult)=>({...m,source:m.source??"Census"}));try{sessionStorage.setItem(key,JSON.stringify({expires:Date.now()+86400000,results}));}catch{}return results;})():await searchAddress(data.jurisdiction, address.trim()); if (generation !== searchGeneration.current) return; setResults(matches); if (matches.length === 1) choose(matches[0]); else setSearchMessage(matches.length ? "Choose an address." : "No address found. Try adding the city."); }
-    catch { if (generation === searchGeneration.current) setSearchMessage("Address search is temporarily unavailable."); } finally { if (generation === searchGeneration.current) setSearching(false); }
+    setSearching(true); showNotice("");
+    try { const matches = combined?await (async()=>{const key="law:combined-search:"+address.trim().toUpperCase();try{const cached=JSON.parse(sessionStorage.getItem(key)??"null");if(cached?.expires>Date.now())return cached.results as AddressResult[];}catch{}const r=await fetch("/api/locations/search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query:address.trim(),country:combined.country})});const j=await r.json();if(!r.ok)throw new Error();const results=(j.results??[]).map((m:AddressResult)=>({...m,source:m.source??"Census"}));try{sessionStorage.setItem(key,JSON.stringify({expires:Date.now()+86400000,results}));}catch{}return results;})():await searchAddress(data.jurisdiction, address.trim()); if (generation !== searchGeneration.current) return; setResults(matches); if (matches.length === 1) choose(matches[0]); else showNotice(matches.length ? "Choose an address." : "No address found. Try adding the city."); }
+    catch { if (generation === searchGeneration.current) showNotice("Address search is temporarily unavailable.","error"); } finally { if (generation === searchGeneration.current) setSearching(false); }
   }
-  async function share() { try { const path = location ? locationUrl(location) : window.location.pathname + window.location.search; await navigator.clipboard.writeText(window.location.origin + path); setSearchMessage(""); setLinkCopied(true); if (copyTimer.current) clearTimeout(copyTimer.current); copyTimer.current = setTimeout(() => setLinkCopied(false), 2000); } catch { setSearchMessage("Copy this page’s URL to share."); } }
-  function clearLocation() { searchGeneration.current += 1; setSearching(false); if (pinMode.current) togglePinMode(); setLocation(undefined); setAddress(""); setWithinMile(false);if(combined)setRadius(1); setSearchMessage(""); window.history.replaceState(null, "", mapBaseUrl()); }
+  async function share() { try { const path = location ? locationUrl(location) : window.location.pathname + window.location.search; await navigator.clipboard.writeText(window.location.origin + path); showNotice(""); showNotice("Link copied"); } catch { showNotice("Copy this page’s URL to share."); } }
+  function clearLocation() { searchGeneration.current += 1; setSearching(false); if (pinMode.current) togglePinMode(); setLocation(undefined); setAddress(""); setWithinMile(false);if(combined)setRadius(1); showNotice(""); window.history.replaceState(null, "", mapBaseUrl()); }
   const mapInfo = data && (<details className={compact ? "law-map-stage-key law-project-map-key" : "law-map-info"}><summary>Map key & sources</summary><div className="law-map-info-content">
           {compact && <div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary</span></div>}
           {flumOn && !combined && <div className="law-map-legend" aria-label="Future land use legend">{(flum?.legend??data.flum.legend).map((c) => <span key={c.value}><i style={{ background: c.color }}/>{c.label}</span>)}</div>}
@@ -310,7 +311,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         </div></details>);
   return <section id={compact ? "case-location-map" : "case-map"} className={"law-map" + (compact ? " law-map-compact" : "") + (fullPage ? " law-map-full" : "") + (matchHeightTo ? " law-map-match-card" : "")} aria-label="Development map" onKeyDown={(e) => { if (e.key === "Escape" && pinMode.current) { e.preventDefault(); togglePinMode(); } }}>
     {!fullPage && <div className="law-map-heading"><h2>{compact ? "Project map" : "Development map"}</h2>{!compact && <a href={areaPath(jurisdiction)+"/map"}>Open map →</a>}</div>}
-    {error && <p role="status">{error}</p>}{!data && !error && <p role="status">Loading map…</p>}
+    {error && <MapNotice message={error} kind="error" onDismiss={()=>setError("")}/>}{!data && !error && <p role="status">Loading map…</p>}
     {data && <>
       <div className="law-map-toolbar">
         {!compact && <form className="law-search" onSubmit={submit} aria-busy={searching}><label className="sr-only" htmlFor={"map-address-" + jurisdiction}>Find an address in {data.jurisdiction.name}</label><input id={"map-address-" + jurisdiction} value={address} onChange={(e) => setAddress(e.target.value)} placeholder={location?.source === "map" ? location.label : "Search an address"} maxLength={200} minLength={3} required autoComplete="street-address"/><button disabled={searching} type="submit">{searching && <span className="law-search-spinner" aria-hidden="true"/>}{searching ? "Searching..." : "Search"}</button><button type="button" className="law-pin-control" disabled={!ready && location?.source !== "map"} aria-pressed={location?.source === "map" && !placingPin ? undefined : placingPin} onClick={location?.source === "map" && !placingPin ? clearLocation : togglePinMode}>{placingPin ? "Cancel pin" : location?.source === "map" ? "Clear pin" : "Drop pin"}</button><button type="button" onClick={share}>Copy link</button>{location && location.source !== "map" && <button type="button" onClick={clearLocation} title="Remove the address and one-mile filter">Clear address</button>}</form>}
@@ -333,7 +334,8 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
           </div></details>}
         </div>
       </div>
-      <p className={searching ? "sr-only" : "law-live-message"} role="status">{searching ? "Searching..." : searchMessage}</p>
+      {searching && <p className="sr-only" role="status">Searching...</p>}
+      {notice && <MapNotice key={notice.id} {...notice} onDismiss={dismissNotice}/>}
       {results.length > 1 && <div className="law-address-results">{results.map((r, i) => <button key={i} type="button" onClick={() => choose(r)}>{r.label}</button>)}</div>}
       <div className="law-map-surface"><div ref={container} className="law-map-canvas" role="region" aria-label={compact ? "Interactive project map. Click or tap an outline for details." : "Interactive project map. Hover to preview, click to open a project. On touchscreens, tap to preview."}/><span className="law-map-hint" role={placingPin ? "status" : undefined}>{placingPin ? "Click map to place pin · Esc to cancel" : flumLoading ? "Loading future land use…" : compact ? "Click a boundary for details" : "Hover to preview · Click to open · Tap to preview"}</span>{!compact && <details className="law-map-stage-key" open><summary>Stages</summary><div className="law-map-legend" aria-label="Case stage legend">{MAP_STAGES.map((s) => <span key={s}><i style={{ background: STAGE_COLORS[s] }}/>{displayStage(s)}</span>)}<span>┄ Approximate boundary{" · Dashed gray: jurisdiction coverage"}</span>{combined&&flumOn&&(flum?.legend??[]).map(c=><span key={c.value}><i style={{background:c.color}}/>{c.label}</span>)}</div></details>}{compact && mapInfo}</div>
       {!compact && <div className="law-map-bottom"><span>{mapped.length} projects shown</span>{!fullPage && <a href={areaPath(jurisdiction)+"#all-cases"} onClick={() => { const list = document.getElementById("all-cases"); if (list instanceof HTMLDetailsElement) list.open = true; }}>All cases</a>}
@@ -346,7 +348,6 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
     </>}
     {showNearbyList&&withinMile&&location&&<section aria-label="Nearby projects" className="rounded-xl border border-zinc-300 p-5 dark:border-zinc-800"><h2 className="font-semibold">Within {radius} {radius===1?"mile":"miles"} · all nearby jurisdictions</h2>{combined&&<div className="law-jurisdiction-chips" aria-label="Filter jurisdictions">{data?.areas?.map(a=><button type="button" key={a.id} aria-pressed={!hiddenAreas.includes(a.id)} onClick={()=>setHiddenAreas(current=>current.includes(a.id)?current.filter(id=>id!==a.id):[...current,a.id])}>{a.name}</button>)}</div>}<ul className="mt-3 divide-y divide-zinc-200 dark:divide-zinc-800">{nearbyCases(filtered,location.coordinates,radius).map(c=><li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><div><button className="text-left font-medium underline underline-offset-4" onClick={()=>{container.current?.scrollIntoView({behavior:"smooth",block:"center"});openProject.current?.(c.id);}}>{c.title}</button>{combined&&<p className="mt-1 text-xs text-zinc-500">{[...new Set(c.members?.map(m=>getArea(m.areaId)?.name))].join(" · ")} · {c.caseIds?.join(", ")}</p>}</div><span>{c.distance.toFixed(1)} mi{c.nextHearing?" · "+c.nextHearing.label:""}</span></li>)}</ul></section>}
     {combined&&location&&<section className="rounded-xl bg-zinc-100 p-5 dark:bg-zinc-900"><h2 className="font-semibold">Follow this place</h2><p className="mt-2 text-sm text-zinc-500">Includes every tracked jurisdiction within {radius} {radius===1?"mile":"miles"}. Email alerts are coming soon.</p><InterestForm key={location.coordinates.join(",")+radius} kind="follow" areaName={location.label} coordinates={location.coordinates} radiusMiles={radius} place/></section>}
-    {linkCopied && <div className="law-copy-toast" role="status"><span aria-hidden="true">✓</span> Link copied</div>}
     {expandedImage && <MapImageViewer visual={expandedImage} onClose={() => setExpandedImage(undefined)} />}
   </section>;
 }

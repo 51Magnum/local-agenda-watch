@@ -1,4 +1,7 @@
 "use client";
+import MapNotice from "@/app/components/maps/map-notice";
+import {addMapAttribution} from "@/lib/maps/attribution";
+import "@/app/components/maps/attribution.css";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import type {BoundaryArea} from "@/lib/maps/boundary-types";
 import {useEffect,useRef,useState} from "react";
@@ -15,7 +18,8 @@ export default function CoverageMap({areas}:{areas:AreaDefinition[]}){
    if(disposed||!ref.current)return;
    const published=payload.polygons.features.map(f=>f.properties);setCovered(published);
    lib.setWorkerUrl("/maplibre/worker.mjs");
-   map=new lib.Map({container:ref.current,style:"https://tiles.openfreemap.org/styles/liberty",center:areas[0]?.center??[-98,39],zoom:6,scrollZoom:false,attributionControl:{compact:true}});
+   map=new lib.Map({container:ref.current,style:"https://tiles.openfreemap.org/styles/liberty",center:areas[0]?.center??[-98,39],zoom:6,scrollZoom:false,attributionControl:false});
+   addMapAttribution(map,lib);
    resize=new ResizeObserver(()=>map?.resize());resize.observe(ref.current);
    map.addControl(new lib.NavigationControl({showCompass:false}),"top-right");
    map.on("load",()=>{
@@ -46,7 +50,7 @@ export default function CoverageMap({areas}:{areas:AreaDefinition[]}){
  },[areas]);
  return <div className="flex min-h-0 flex-col lg:max-h-[70vh]">
   <div ref={ref} role="region" aria-label="Coverage map: cities have colored fills, county coverage has a bold outline, coming-soon areas have dashed gray boundaries" className="h-[300px] shrink-0 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100 lg:h-auto lg:min-h-0 lg:flex-1 dark:border-zinc-800"/>
-  {failed&&<p className="mt-2 text-sm text-zinc-500">Map unavailable. Choose an area from the list.</p>}
+  {failed&&<MapNotice message="Map unavailable. Choose an area from the list." kind="error" onDismiss={()=>setFailed(false)}/>}
   <div aria-label="Coverage legend" className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-zinc-600 dark:text-zinc-400">
    {covered.map(area=><a key={area.id} href={area.href+"/map"} className="inline-flex items-center gap-1.5 hover:underline"><span aria-hidden="true" className={"inline-block h-3 w-3 rounded-sm "+(area.type==="county"?"border-[3px]":"border")} style={{borderColor:area.color,backgroundColor:area.type==="county"?"transparent":area.color+"66"}}/>{coverageLabel(area)}</a>)}
    <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="inline-block h-3 w-4 border-2 border-dashed border-slate-500"/>Coming soon</span>

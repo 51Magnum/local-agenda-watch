@@ -1,0 +1,6 @@
+.maplibregl-map .law-map-attribution.maplibregl-compact{min-height:24px;padding:0 24px 0 0;margin:6px 10px;max-width:min(290px,calc(100vw - 32px));box-sizing:border-box;color:#172326;background:#fffffff2}
+.maplibregl-map .law-map-attribution.maplibregl-compact-show{padding:4px 30px 4px 8px}
+.maplibregl-map .law-map-attribution .maplibregl-ctrl-attrib-button{width:24px;height:24px;min-width:24px;min-height:24px;background-repeat:no-repeat;background-position:center;background-size:24px 24px}
+.maplibregl-map .law-map-attribution .maplibregl-ctrl-attrib-inner{font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.maplibregl-map .law-map-attribution .maplibregl-ctrl-attrib-inner a{display:inline;min-height:0}
+.maplibregl-map .law-map-attribution .maplibregl-ctrl-attrib-button:focus-visible{outline:2px solid #0284c7;outline-offset:2px}

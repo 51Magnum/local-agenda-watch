@@ -1,4 +1,7 @@
 "use client";
+import MapNotice, {useMapNotice} from "./map-notice";
+import {addMapAttribution} from "@/lib/maps/attribution";
+import "@/app/components/maps/attribution.css";
 import {residentDateText} from "@/lib/areas/format";
 import {projectPolygonFeature} from "@/lib/maps/project-feature";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
@@ -103,7 +106,6 @@ export default function MapHome() {
     [paneError, setPaneError] = useState(""),
     [loading, setLoading] = useState(true),
     [flumLoading, setFlumLoading] = useState(false),
-    [message, setMessage] = useState(""),
     [flumOn, setFlumOn] = useState(false),
     [boundariesOn, setBoundariesOn] = useState(true),
     [menu, setMenu] = useState(false),
@@ -119,6 +121,7 @@ export default function MapHome() {
     [zoom, setZoom] = useState(10),
     [layers, setLayers] = useState(false),
     [legend, setLegend] = useState(false);
+  const {notice,showNotice,dismissNotice}=useMapNotice();
   const getMap=useCallback(()=>map.current,[]);
   useEffect(()=>{if(new URLSearchParams(window.location.search).get("savedPins")==="1"){queueMicrotask(()=>setLayers(true));}},[]);
   const filterRef = useRef(filter),
@@ -350,10 +353,7 @@ export default function MapHome() {
           new lib.NavigationControl({ showCompass: false }),
           "top-right",
         );
-        m.addControl(
-          new lib.AttributionControl({ compact: true }),
-          "bottom-right",
-        );
+        addMapAttribution(m, lib);
         m.once("style.load", () => {
           if (disposed) return;
           m.addSource("law-boundaries", {
@@ -409,8 +409,8 @@ export default function MapHome() {
           m.on("error", (e) => {
             if ("sourceId" in e && e.sourceId === "law-flum") {
               setFlumLoading(false);
-              setMessage(
-                "Future land use tiles could not load. Try reloading the map.",
+              showNotice(
+                "Future land use tiles could not load. Try reloading the map.", "error",
               );
             }
           });
@@ -633,7 +633,7 @@ export default function MapHome() {
               layers: ["law-flum"],
             })[0];
             if (f) {
-              setMessage(
+              showNotice(
                 String(f.properties?.jurisdiction) +
                   " · " +
                   String(f.properties?.category),
@@ -697,7 +697,7 @@ export default function MapHome() {
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [showNotice]);
   useEffect(() => {
     openRef.current = (c) => {
       const member = c.members?.[0],
@@ -826,14 +826,14 @@ export default function MapHome() {
               : [],
         });
       } catch (e) {
-        if (current === generation.current) setMessage((e as Error).message);
+        if (current === generation.current) showNotice((e as Error).message,"error");
       } finally {
         if (current === generation.current) {
           setLoading(false);
         }
       }
     };
-  }, []);
+  }, [showNotice]);
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
@@ -848,7 +848,7 @@ export default function MapHome() {
         m.addSource("law-flum", { type: "vector", url: "pmtiles://" + new URL(FLUM_TILES.url, window.location.origin).href });
         m.addLayer({ id: "law-flum", type: "fill", source: "law-flum", "source-layer": FLUM_TILES.sourceLayer, minzoom: FLUM_TILES.minZoom,
           paint: { "fill-color": ["get", "color"], "fill-opacity": 0.35 } }, "law-ring");
-      }).catch(() => { if (!cancelled) { setFlumLoading(false); setMessage("Future land use could not load. Try again."); } });
+      }).catch(() => { if (!cancelled) { setFlumLoading(false); showNotice("Future land use could not load. Try again.","error"); } });
     } else if (m.getLayer("law-flum")) {
       m.setLayoutProperty("law-flum", "visibility", showFlum ? "visible" : "none");
     }
@@ -863,7 +863,7 @@ export default function MapHome() {
     for (const id of ["law-boundaries", "law-area-labels"])
       m.setLayoutProperty(id, "visibility", boundariesOn ? "visible" : "none");
     return () => { cancelled = true; };
-  }, [ready, flumOn, boundariesOn, zoom]);
+  }, [ready, flumOn, boundariesOn, zoom, showNotice]);
   useEffect(() => {
     if (!place || !ready || !map.current) return;
     const m = map.current;
@@ -899,7 +899,7 @@ export default function MapHome() {
     setPlace(p);
     setAddress(p.label);
     setResults([]);
-    setMessage("");
+    showNotice("");
     updatePlaceUrl(p);
     map.current?.fitBounds(
       bbox(circle(p.coordinates, p.radius, { units: "miles" })) as Bounds,
@@ -938,16 +938,16 @@ export default function MapHome() {
     window.history.replaceState(window.history.state, "", u);
     try {
       localStorage.removeItem(PLACE_KEY);
-      setMessage("Pin and circle cleared. Your email watches are unchanged.");
+      showNotice("Pin and circle cleared. Your email watches are unchanged.");
     } catch {
-      setMessage("Pin and circle cleared for this visit. This browser could not remove its saved place. Your email watches are unchanged.");
+      showNotice("Pin and circle cleared for this visit. This browser could not remove its saved place. Your email watches are unchanged.","error");
     }
     map.current?.getCanvas().focus();
   }
   async function search() {
     if (address.trim().length < 2) return;
     setSearching(true);
-    setMessage("");
+    showNotice("");
     try {
       const key = "law:home-search:" + address.trim().toLowerCase(),
         cached = sessionStorage.getItem(key);
@@ -966,16 +966,16 @@ export default function MapHome() {
       }
       if (matches.length === 1) choosePlace({ ...matches[0], radius: 1 });
       else if (matches.length) setResults(matches);
-      else setMessage("No matching address found. Try a city and state.");
+      else showNotice("No matching address found. Try a city and state.");
     } catch (e) {
-      setMessage((e as Error).message);
+      showNotice((e as Error).message,"error");
     } finally {
       setSearching(false);
     }
   }
   function locate() {
     if (!navigator.geolocation) {
-      setMessage("Location is unavailable in this browser.");
+      showNotice("Location is unavailable in this browser.","error");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -986,8 +986,8 @@ export default function MapHome() {
           radius: 1,
         }),
       () =>
-        setMessage(
-          "Location was not shared. You can search an address instead.",
+        showNotice(
+          "Location was not shared. You can search an address instead.", "error",
         ),
       { timeout: 10000, maximumAge: 300000 },
     );
@@ -1047,7 +1047,7 @@ export default function MapHome() {
           onClick={() =>
             watchPlace
               ? setDialog("watch")
-              : setMessage(
+              : showNotice(
                   "Search an address or open a project to choose a place to watch.",
                 )
           }
@@ -1091,7 +1091,7 @@ export default function MapHome() {
           <button aria-pressed={droppingPin} onClick={() => {
             dropPinRef.current = !droppingPin;
             setDroppingPin(!droppingPin);
-            setMessage(droppingPin ? "" : "Click or tap the map to place a pin, then choose a radius and watch this area.");
+            showNotice(droppingPin ? "" : "Click or tap the map to place a pin, then choose a radius and watch this area.");
           }}>{droppingPin ? "Cancel pin" : "Drop a pin"}</button>
           <button aria-expanded={legend} aria-controls="map-progress-legend" onClick={() => { setLegend(!legend); setLayers(false); }}>
             Legend
@@ -1199,9 +1199,10 @@ export default function MapHome() {
             <ThemeSelector />
           </nav>
         )}
-        {selected && !visiblePane && (
+        {selected && !visiblePane && paneError && <MapNotice message={paneError} kind="error" onDismiss={closePane} className="law-map-notice-overlay"/>}
+        {selected && !visiblePane && !paneError && (
           <section className="law-pane-loading" role="status">
-            {paneError || "Loading project…"}
+            Loading project…
             <button onClick={closePane}>Close</button>
           </section>
         )}
@@ -1224,7 +1225,7 @@ export default function MapHome() {
             }
             onWatch={() => {
               if (!visiblePane.item.centroid) {
-                setMessage("This project has no verified map location. Search an address or drop a pin to choose an area.");
+                showNotice("This project has no verified map location. Search an address or drop a pin to choose an area.");
                 return;
               }
               const p = {label:visiblePane.item.popup?.projectName ?? visiblePane.item.title,coordinates:visiblePane.item.centroid,radius:1};
@@ -1286,14 +1287,7 @@ export default function MapHome() {
             Zoom in to see all projects; this view is limited to 1,000.
           </p>
         )}
-        {message && (
-          <div className="law-map-message" role="status">
-            {message}
-            <button aria-label="Dismiss message" onClick={() => setMessage("")}>
-              ×
-            </button>
-          </div>
-        )}
+        {notice && <MapNotice key={notice.id} {...notice} onDismiss={dismissNotice} className="law-map-notice-overlay"/>}
 
       </div>
       {image && (
@@ -1342,7 +1336,7 @@ export default function MapHome() {
               updatePlaceUrl(watchPlace);
               try{if(!watchPlace.residentPinId)localStorage.setItem(PLACE_KEY,JSON.stringify(watchPlace));}catch{}
               setDialog(undefined);
-              setMessage("Check your email to confirm. Alerts start only after confirmation.");
+              showNotice("Check your email to confirm. Alerts start only after confirmation.");
               map.current?.getCanvas().focus();
             }}/>:<InterestForm
               key={dialog + (watchPlace?.label ?? "")}
@@ -1359,8 +1353,8 @@ export default function MapHome() {
                     if(!watchPlace.residentPinId)localStorage.setItem(PLACE_KEY, JSON.stringify(watchPlace));
                     setSavedPlace(watchPlace);
                   } catch {
-                    setMessage(
-                      "Your signup was saved, but this browser could not remember the place.",
+                    showNotice(
+                      "Your signup was saved, but this browser could not remember the place.", "error",
                     );
                   }
                 }
