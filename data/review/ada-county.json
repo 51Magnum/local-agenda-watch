@@ -2,8 +2,8 @@
   "version": 1,
   "status": "review",
   "areaId": "ada-county",
-  "collectedAt": "2026-10-31T15:28:07.777Z",
-  "sourceSnapshotHash": "6558127dbc008f25af83a4e38246eca2cd10d4584c26deef750455db1e0744ff",
+  "collectedAt": "2026-11-05T13:18:07.773Z",
+  "sourceSnapshotHash": "20f9e42d6a1c1a5ba545c5e732e412bf466b76e07e4bd77f38c458dc660b1ba8",
   "area": {
     "country": "us",
     "countryName": "United States",
@@ -29910,13 +29910,13 @@
   },
   "selfCheck": {
     "areaId": "ada-county",
-    "createdAt": "2026-10-31T15:28:18.769Z",
-    "snapshotHash": "6558127dbc008f25af83a4e38246eca2cd10d4584c26deef750455db1e0744ff",
+    "createdAt": "2026-11-05T13:19:48.066Z",
+    "snapshotHash": "20f9e42d6a1c1a5ba545c5e732e412bf466b76e07e4bd77f38c458dc660b1ba8",
     "passRate": 0.95,
     "records": [
       {
         "recordId": "201601258-CPA",
-        "sourceHash": "142d37bc9262273838c764739cdd44264cf35233696b2785f10de8ab575a3ccf",
+        "sourceHash": "8bff111be95209cfec7d95842274bfad58ffca97883cbde47aa4e781cf36f475",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -29973,7 +29973,7 @@
       },
       {
         "recordId": "202103209-S",
-        "sourceHash": "f4e75ff2cbb02c9a4cbe7c745c23a3e83c8848e049c6c58105feea7faa6d0baa",
+        "sourceHash": "a651a7b50ec6c08ea6ebe46fb58435c8effafeed98c4f01afddf95fbb537cbd2",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30030,7 +30030,7 @@
       },
       {
         "recordId": "202300565-CU",
-        "sourceHash": "8ec5a3a5314cc3bc405f44772525fd453d1a74969730ad4521bca68b17638ae0",
+        "sourceHash": "f5504ac3785244705fdba09739dcfe44764ca286dee90a5ccffcc2c560e96c3c",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30087,7 +30087,7 @@
       },
       {
         "recordId": "202300644-S",
-        "sourceHash": "010e6ded46bfdc19c076234a3a4f6124fdb84a84c5098fff15017b15c81ca5a1",
+        "sourceHash": "1d65074136ad57115390e3f74216cf35138f7bd0158a6cd112af14eba642e5c9",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30144,7 +30144,7 @@
       },
       {
         "recordId": "202400171-CPA",
-        "sourceHash": "6433a5529e02380080507d3469eac648062764e5e888827cca629cf2afd200a3",
+        "sourceHash": "4254e9f1aa638feac6178e92f2ce247a314265d4fb5a745e8618615cec31d71f",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30201,7 +30201,7 @@
       },
       {
         "recordId": "202502399-PR",
-        "sourceHash": "b1547e92bf2412a49a04281a611060854faa570cfc73563cf4d3eb3520692521",
+        "sourceHash": "12d66f0fb75b14ab773d06833ebaea7928570415733b33c063e2d828ce370af0",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30258,7 +30258,7 @@
       },
       {
         "recordId": "202502461-CU",
-        "sourceHash": "c38bd323604b12d506968680179d412abd071017f256d1ecc8baf38e7eae0870",
+        "sourceHash": "dcd23370cacf5aa8f4fab3d1f397e73204d2e79edbfe2a25063a80881d116961",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30315,7 +30315,7 @@
       },
       {
         "recordId": "202502508-ZC",
-        "sourceHash": "a8093bbdf4bf4e123dfd8ef164177c5cb9bcbafbe6ae3d15332117d43ab8fbd0",
+        "sourceHash": "e1e439b12b3d0632cfa991e487472961051c8ce6b274286ffae4bf5d0a0f1368",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30372,7 +30372,7 @@
       },
       {
         "recordId": "202600273-ZC",
-        "sourceHash": "d0d523c28efd2488028d21cbb0774e4d2e00beac2191076fd71d379ca9a2660d",
+        "sourceHash": "e4b8704d78edc187604afa85d3c30133928c7f5e1af589aa7026eb8324e66a8b",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30429,7 +30429,7 @@
       },
       {
         "recordId": "202600638-ZC",
-        "sourceHash": "edd99a8c54f02c76d3b750f21b2d65368a7a9f43e9bfe4c5be57f06d7fe3774b",
+        "sourceHash": "c20d7d3bf24a45585a54d6f4d3957944da989eaa3c4cd2abc9b5f8548073583b",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30486,7 +30486,7 @@
       },
       {
         "recordId": "202600819-ZC",
-        "sourceHash": "202e0e337c985cc04764e108b50a0d01c5223d27bff1921ba42bbaac99e37eb3",
+        "sourceHash": "f4284aa9675816fe921f7af6038925960afcddf1070f9f43deb478b969ce9adc",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30543,7 +30543,7 @@
       },
       {
         "recordId": "202600881-CU",
-        "sourceHash": "678b8c87e466daa0283c18ca4044e279a8c5afaac626d6e73240a87c03d16e2d",
+        "sourceHash": "d9e965de79ef839f8a5c9dc12eb9b30f9f27e17874de7fb51ada34ee59bd1bf2",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30600,7 +30600,7 @@
       },
       {
         "recordId": "202600934-S",
-        "sourceHash": "a215b3cb2c22307488861f1448e8ec7ed2203eceafeffce6830aa4cefe3dee8b",
+        "sourceHash": "0ef8fd2f873bf13d82bc592be933dbc40ef3264567b55cdc1bb2eabfca77189e",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30657,7 +30657,7 @@
       },
       {
         "recordId": "202600965-V",
-        "sourceHash": "f22448971941a84d4db2572c510d416744cabb2a8e1d3585f6450d8d1761cb0f",
+        "sourceHash": "1ac05dad3396d3c01f4548c8f387ab517e3ff8481dba80a018c2126b3fdacb7a",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30714,7 +30714,7 @@
       },
       {
         "recordId": "202601088-ZC",
-        "sourceHash": "e59011e4217d7cbe2380b412590b3d6cdb8f2ca588ff7223d765259cc1fccdb9",
+        "sourceHash": "e819062bca782e80d0d526670d07632df921cda25a766127d6c48712fdc457c9",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30771,7 +30771,7 @@
       },
       {
         "recordId": "202601149-CU",
-        "sourceHash": "8a767868bfe6b89e3505672780cef18ab07e6b258ad888f3ab1cd28848b9f4b1",
+        "sourceHash": "6a8bdbaf81e8d286667da3cfbea78bd278566a76f2ddd5fe88762ba831ecdf23",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30828,7 +30828,7 @@
       },
       {
         "recordId": "202601161-V",
-        "sourceHash": "ab1d595afe92f5bb5a0a6f46b1119687123262f21d9b2e0b944bbcc7ad445fbb",
+        "sourceHash": "c4e6ca394e6278c6d3c3de41dd6ae64f3353c5dbbd0a2f6be069cd07551de54d",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30885,7 +30885,7 @@
       },
       {
         "recordId": "202601163-CU",
-        "sourceHash": "64f2eee54d8bd1f00e3c77380213ff29105e573e1896318f8daf254ad8a29baa",
+        "sourceHash": "b8f448b55dd26cad33c7e4dc474cefc7033709fa2a844fdf3a9eef73de178279",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30942,7 +30942,7 @@
       },
       {
         "recordId": "202601193-CU",
-        "sourceHash": "0326d2984cfd936f2ba545ee2e7a1ac76a73bd7acedcf853f79ecb517c6688a3",
+        "sourceHash": "80ffdbe8289ada86aa68f53d039d44dc45da2d5a1fad9edc22c8e6695ede9bd2",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -30999,7 +30999,7 @@
       },
       {
         "recordId": "202601250-CU",
-        "sourceHash": "17e14fd096a7309040d75ed24fa964ff73c606e27f33199b0743c62f88492d1d",
+        "sourceHash": "cad24facddf7bf0db0515a8ef2a907e8d2645cfb7537f6e6c40ae59079ac0513",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31056,7 +31056,7 @@
       },
       {
         "recordId": "202601317-CU",
-        "sourceHash": "ad968066502b292ee4dfb03be3ed5eabf52968fcd2cd546be1773e6f580ffda7",
+        "sourceHash": "709947f3ab16d6c62aa02ac84462a5c29b42c36024152a96a862203d1e5a3828",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31113,7 +31113,7 @@
       },
       {
         "recordId": "202601395-CU",
-        "sourceHash": "af8b270b2f50d51343d71dd6b91814f9a1357f750ed83d73740cf6d3551c62c8",
+        "sourceHash": "d0964a2cdddc30562b3e9a627550431ff1bb05e5b0c6dbe17351f502ba3cb909",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31170,7 +31170,7 @@
       },
       {
         "recordId": "202601398-CU",
-        "sourceHash": "cfb07357e5d67fda39daa43adf548b2091c91c2b2fdc8fb7f4c1809ef82a83c1",
+        "sourceHash": "730eee529ccf5b92cdf08190e56300fdcbfedf20f0a5a43b9d40166b6a6bd534",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31227,7 +31227,7 @@
       },
       {
         "recordId": "03006-CU",
-        "sourceHash": "5bc03f6cac5e18b5bfdd5c51e4a9b37b0895381d8a6b348d0ed76806028d6fb1",
+        "sourceHash": "2048f1c3da17807dede8a0db334cd9cb243b5b19ad196a45c005c3ed481162b5",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31284,7 +31284,7 @@
       },
       {
         "recordId": "202601614-VAC",
-        "sourceHash": "03f78e5e0a3ce25296ca7fc5d808f7937415d2ab8ba90278b532f4e96c8e44c2",
+        "sourceHash": "5d5a558e150fd20e13d5aa88b63beff09ea44be6d227ff1234f8119e864d16bd",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31341,7 +31341,7 @@
       },
       {
         "recordId": "202601703-CU",
-        "sourceHash": "ffd66a7629d0618d4c467207ba8e0906662ad00dceca6236fbcc7d9adb84a480",
+        "sourceHash": "60e2b1220f60ecb92a20140099ae7a48282c362d01d5a1f575c96707d80e8be4",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31398,7 +31398,7 @@
       },
       {
         "recordId": "202601712-COM",
-        "sourceHash": "c3980b8514dd8dd2205777271d7f97047e649a9d07829b6a663226384f3bed15",
+        "sourceHash": "4499da33c98f3e41f1052940a661fb53fdac6ee093eb369f2578216805f03981",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31455,7 +31455,7 @@
       },
       {
         "recordId": "202601739-VAC",
-        "sourceHash": "9a79ef5e24859c577c017fc4d5d4c472be6462d48e0687ebd684c1dbb9a7af23",
+        "sourceHash": "83a70b74d8a3528c2698f24904ec6decc13393081098b66ba473d622615147e5",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31512,7 +31512,7 @@
       },
       {
         "recordId": "202601753-CU",
-        "sourceHash": "cb20104a0e8b1ba5c672f43f3010a0177bb40a2c21b885f4571bec4ddacbbad7",
+        "sourceHash": "271d07aa675c4da3c5ae922ce4493d76b41ede2c3a66668c73c951c446d75f2c",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31569,7 +31569,7 @@
       },
       {
         "recordId": "202601786-PUD",
-        "sourceHash": "5adc907209f4882e9b0b6e5d7ab45969591f0b4d8e159c400d7984a65771aed5",
+        "sourceHash": "84f2443c5cb2392386533d0c842e4522e9b42196805e6bec19e5942db2f28555",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31626,7 +31626,7 @@
       },
       {
         "recordId": "202102022-MSP",
-        "sourceHash": "0007f2346644b352bb1e3299d3a4600fed254fec0999a5217acacdcebede397c",
+        "sourceHash": "470eb48fc4376874ea446fdde697525b1e74777b299c10687716e6421ab76e51",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31683,7 +31683,7 @@
       },
       {
         "recordId": "202601837-CU",
-        "sourceHash": "6e32f32b9e1dca16914dd4f87da341d57374b7c1aa0e2e15e9013631333d742d",
+        "sourceHash": "7269cbeda86c4cc74d6454240af2b33b1e2b0c40e54146b30a0021d3c0cc0f22",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31740,7 +31740,7 @@
       },
       {
         "recordId": "202601864-V",
-        "sourceHash": "a49bb666c5f524f3d2ade89e1349a0216f0fdf3fdd2f7e3818645d1622b41f04",
+        "sourceHash": "20a472d789e8f7bfae779ed29420bde8fc671e923eca792bec73804569bd27b9",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31797,7 +31797,7 @@
       },
       {
         "recordId": "202601913-CU",
-        "sourceHash": "08c114f110010da5bf3041f8a308c8b213e31bcafa1298894bc6053b1bd886d3",
+        "sourceHash": "6b4e610bfa092570a865bc6d6b8ba3b558bd2b35432cf2770129e7213c668cf2",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31854,7 +31854,7 @@
       },
       {
         "recordId": "202601939-CU",
-        "sourceHash": "485931fa4dfadde1e916fe0ded1a2bd5734dfdee5d902961705cf3076748da1c",
+        "sourceHash": "4809f0f70cf7ab282aa3be68de56da5f9503b7923cd5b25fe8dd04510e0daf6f",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31911,7 +31911,7 @@
       },
       {
         "recordId": "202601987-CU",
-        "sourceHash": "cf72bfc10c05aa0f18363db2fc3846e3b2b3e62e454a5df787e8f13aeb655865",
+        "sourceHash": "f8ec4ab9b8846f0507757695acfffb02f98bc6e06680eb7049013b1623742852",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -31968,7 +31968,7 @@
       },
       {
         "recordId": "202601988-VAC",
-        "sourceHash": "160ac85cfb16d3f79501456562390593db7bedbefe5d37b781ee188a62a8ecc5",
+        "sourceHash": "8ffbc00967e331ab2cc9bacf14a5eba95e201e9840d75a698c229b8ad59b8f0b",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -32025,7 +32025,7 @@
       },
       {
         "recordId": "202602012-CU",
-        "sourceHash": "e3faf04c26a8c438036e5a1134a619d051b42ad98c4b3d75c1ad92582008fe66",
+        "sourceHash": "94c7bcbe6c4ed62652a5dd66aacab7b0b198248ab53f5f4c07d2819cfb511b65",
         "title": "[Resident title withheld]",
         "checks": [
           {
@@ -32278,15 +32278,15 @@
     },
     "unmatched": [],
     "exclusions": {
-      "Individual staff permit: ACCESSORY USE": 18,
       "Outside hearing/development scope: ACCESSORY USE": 15,
       "Outside hearing/development scope: FLOODPLAIN APPLICATION": 2,
       "Individual staff permit: ALTERNATIVE COMPLIANCE": 2,
       "Individual staff permit: TEMPORARY USE": 4,
       "Individual staff permit: FLOODPLAIN APPLICATION": 2,
+      "Individual staff permit: ACCESSORY USE": 16,
       "Outside hearing/development scope: HILLSIDE DEVELOPMENT": 1,
       "Individual staff permit: PROPERTY BOUNDARY ADJUSTMENT": 2,
-      "Outside hearing/development scope: TEMPORARY USE": 1,
+      "Outside hearing/development scope: TEMPORARY USE": 2,
       "Outside hearing/development scope: ONE-TIME DIVISION": 1,
       "Outside hearing/development scope: ALTERNATIVE COMPLIANCE": 1,
       "Individual staff permit: PARCEL CONSOLIDATION": 1
@@ -32294,7 +32294,7 @@
     "queue": [
       {
         "recordId": "202103209-S",
-        "sourceHash": "f4e75ff2cbb02c9a4cbe7c745c23a3e83c8848e049c6c58105feea7faa6d0baa",
+        "sourceHash": "a651a7b50ec6c08ea6ebe46fb58435c8effafeed98c4f01afddf95fbb537cbd2",
         "check": {
           "check": "link-resolves-to-case",
           "status": "fail",
@@ -32304,7 +32304,7 @@
       },
       {
         "recordId": "202300644-S",
-        "sourceHash": "010e6ded46bfdc19c076234a3a4f6124fdb84a84c5098fff15017b15c81ca5a1",
+        "sourceHash": "1d65074136ad57115390e3f74216cf35138f7bd0158a6cd112af14eba642e5c9",
         "check": {
           "check": "link-resolves-to-case",
           "status": "fail",
@@ -32336,7 +32336,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -32542,8 +32542,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27201601258-CPA%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -32556,7 +32556,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -32932,8 +32932,8 @@
         "commentInstructions": "",
         "documents": [],
         "officialRecords": [],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -32947,7 +32947,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -33103,8 +33103,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202300565-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -33119,7 +33119,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -33424,8 +33424,8 @@
         "commentInstructions": "",
         "documents": [],
         "officialRecords": [],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -33450,7 +33450,7 @@
           }
         ],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -33706,8 +33706,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202400171-CPA%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -33719,7 +33719,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -34125,8 +34125,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202502399-PR%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -34139,7 +34139,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -34337,8 +34337,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202502461-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -34352,7 +34352,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -34488,8 +34488,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202502508-ZC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -34514,7 +34514,7 @@
           }
         ],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -34854,8 +34854,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202600273-ZC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -34871,7 +34871,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -35025,8 +35025,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202600638-ZC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -35041,7 +35041,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -35068,7 +35068,7 @@
           "title": "Rezone: Lineage Estates Subdivision",
           "type": "rezone",
           "typeLabel": "rezone",
-          "summary": "An application for approval of a zoning ordinance map amendment, a development agreement, a preliminary plat for the Voluntarist Ridge Subdivision, and a private road to rezone the property from the Rural Urban Transition (RUT) District to the Estate Residential (R1) District and subdivide the property into three (3) lots with the expansion of an existing private road (S. Wots Lane). The property is 4.993 acres within the Lineage Estates Subdivision at 7800 S. Wots Lane, Meridian, ID 83642; Section 4, T.2N., R.1E.",
+          "summary": "",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202600819-ZC",
           "geometry": {
@@ -35116,14 +35116,14 @@
           "popup": {
             "projectName": "Rezone: Lineage Estates Subdivision",
             "headline": "rezone",
-            "explanation": "An application for approval of a zoning ordinance map amendment, a development agreement, a preliminary plat for the Voluntarist Ridge Subdivision, and a private road to rezone the property from the Rural Urban Transition (RUT) District to the Estate Residential (R1) District and subdivide the property into three (3) lots with the expansion of an existing private road (S. Wots Lane). The property is 4.993 acres within the Lineage Estates Subdivision at 7800 S. Wots Lane, Meridian, ID 83642; Section 4, T.2N., R.1E.",
             "aiGenerated": false,
             "progress": [
               {
                 "label": "Active",
                 "state": "current"
               }
-            ]
+            ],
+            "explanation": ""
           },
           "areaId": "ada-county"
         },
@@ -35190,8 +35190,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202600819-ZC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -35204,7 +35204,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -35375,8 +35375,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202600881-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -35392,7 +35392,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -35582,8 +35582,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202600934-S%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -35596,7 +35596,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -35623,7 +35623,7 @@
           "title": "Variance: combine two parcels",
           "type": "VARIANCE",
           "typeLabel": "VARIANCE",
-          "summary": "Application for approval of a Parcel Consolidation to combine two parcels of section ground to meet 5 acre minimum in an RUT zone with a Variance application to allow for these parcels to use the same easement the neighbors are using to forgo the requirement of a Private Road application.",
+          "summary": "",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202600965-V",
           "geometry": {
@@ -35683,14 +35683,14 @@
           "popup": {
             "projectName": "Variance: combine two parcels",
             "headline": "VARIANCE",
-            "explanation": "Application for approval of a Parcel Consolidation to combine two parcels of section ground to meet 5 acre minimum in an RUT zone with a Variance application to allow for these parcels to use the same easement the neighbors are using to forgo the requirement of a Private Road application.",
             "aiGenerated": false,
             "progress": [
               {
                 "label": "Active",
                 "state": "current"
               }
-            ]
+            ],
+            "explanation": ""
           },
           "areaId": "ada-county"
         },
@@ -35739,8 +35739,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202600965-V%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -35755,7 +35755,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -35924,8 +35924,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601088-ZC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -35938,7 +35938,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -36153,8 +36153,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601149-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -36166,7 +36166,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -36362,8 +36362,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601161-V%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -36377,7 +36377,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -36977,8 +36977,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601163-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -36991,7 +36991,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -37018,7 +37018,7 @@
           "title": "Conditional Use: construct a new elementary school",
           "type": "CONDITIONAL USE",
           "typeLabel": "CONDITIONAL USE",
-          "summary": "Conditional Use and Master Site Plan to construct a new elementary school, demolition of existing school, and construction of a new parking lot and associated site improvements. The total square footage of the new elementary school is 66,560 square feet. The property contains 9.564 acres in the Low Density Residential (R2) District and is located at 11711 W Lake Hazel Rd; Section 3, T.2N, R.1E. ",
+          "summary": "",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202601193-CU",
           "geometry": {
@@ -37106,14 +37106,14 @@
           "popup": {
             "projectName": "Conditional Use: construct a new elementary school",
             "headline": "CONDITIONAL USE",
-            "explanation": "Conditional Use and Master Site Plan to construct a new elementary school, demolition of existing school, and construction of a new parking lot and associated site improvements. The total square footage of the new elementary school is 66,560 square feet. The property contains 9.564 acres in the Low Density Residential (R2) District and is located at 11711 W Lake Hazel Rd; Section 3, T.2N, R.1E. ",
             "aiGenerated": false,
             "progress": [
               {
                 "label": "Active",
                 "state": "current"
               }
-            ]
+            ],
+            "explanation": ""
           },
           "areaId": "ada-county"
         },
@@ -37162,8 +37162,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601193-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -37176,7 +37176,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -37203,7 +37203,7 @@
           "title": "Conditional Use: animal feeding operation",
           "type": "CONDITIONAL USE",
           "typeLabel": "CONDITIONAL USE",
-          "summary": "A Conditional Use and partial Master Site Plan Application for approval of a two-phase, animal feeding operation (AFO - dairy facility) with approximately 16,440 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
+          "summary": "A Conditional Use and partial Master Site Plan Application for approval of a livestock confinement facility/animal feeding operation (AFO - dairy facility) with approximately 7,428 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202601250-CU",
           "geometry": {
@@ -37283,7 +37283,7 @@
           "popup": {
             "projectName": "Conditional Use: animal feeding operation",
             "headline": "CONDITIONAL USE",
-            "explanation": "A Conditional Use and partial Master Site Plan Application for approval of a two-phase, animal feeding operation (AFO - dairy facility) with approximately 16,440 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
+            "explanation": "A Conditional Use and partial Master Site Plan Application for approval of a livestock confinement facility/animal feeding operation (AFO - dairy facility) with approximately 7,428 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
             "aiGenerated": false,
             "progress": [
               {
@@ -37330,8 +37330,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601250-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -37345,7 +37345,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -37476,8 +37476,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601317-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -37491,7 +37491,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -37518,7 +37518,7 @@
           "title": "Conditional Use: continue operation of an existing contractor's yard",
           "type": "CONDITIONAL USE",
           "typeLabel": "CONDITIONAL USE",
-          "summary": "Conditional Use and Master Site Plan to continue operation of an existing contractor's yard, with an Alternative Compliance request to maintain the existing landscaping. The property is located at 7085 S Eagle Rd and contains approximately 9.271 acres in the Rural Urban Transition (RUT) District; Section 5, T.2N, R.1E. ",
+          "summary": "",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202601395-CU",
           "geometry": {
@@ -37610,14 +37610,14 @@
           "popup": {
             "projectName": "Conditional Use: continue operation of an existing contractor's yard",
             "headline": "CONDITIONAL USE",
-            "explanation": "Conditional Use and Master Site Plan to continue operation of an existing contractor's yard, with an Alternative Compliance request to maintain the existing landscaping. The property is located at 7085 S Eagle Rd and contains approximately 9.271 acres in the Rural Urban Transition (RUT) District; Section 5, T.2N, R.1E. ",
             "aiGenerated": false,
             "progress": [
               {
                 "label": "Active",
                 "state": "current"
               }
-            ]
+            ],
+            "explanation": ""
           },
           "areaId": "ada-county"
         },
@@ -37667,8 +37667,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601395-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -37681,7 +37681,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -37896,8 +37896,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601398-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -37907,7 +37907,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -38018,8 +38018,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%2703006-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -38032,7 +38032,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -38239,8 +38239,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601614-VAC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -38250,7 +38250,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -38394,8 +38394,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601703-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -38407,7 +38407,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -38434,7 +38434,7 @@
           "title": "Subdivision: Hazel Center Sub",
           "type": "subdivision",
           "typeLabel": "subdivision",
-          "summary": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
+          "summary": "",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202601712-COM",
           "geometry": {
@@ -38570,14 +38570,14 @@
           "popup": {
             "projectName": "Subdivision: Hazel Center Sub",
             "headline": "subdivision",
-            "explanation": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
             "aiGenerated": false,
             "progress": [
               {
                 "label": "Active",
                 "state": "current"
               }
-            ]
+            ],
+            "explanation": ""
           },
           "areaId": "ada-county"
         },
@@ -38612,8 +38612,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601712-COM%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -38625,7 +38625,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -38802,8 +38802,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601739-VAC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -38816,7 +38816,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -39390,8 +39390,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601753-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -39404,7 +39404,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -39558,8 +39558,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601786-PUD%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -39569,7 +39569,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -39697,8 +39697,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202102022-MSP%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -39710,7 +39710,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -39834,8 +39834,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601837-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -39848,7 +39848,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -39970,8 +39970,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601864-V%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -39983,7 +39983,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -40614,8 +40614,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601913-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -40627,7 +40627,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -40760,8 +40760,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601939-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -40773,7 +40773,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -42012,8 +42012,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601987-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -42023,7 +42023,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -42168,8 +42168,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202601988-VAC%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -42181,7 +42181,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -42208,7 +42208,7 @@
           "title": "Conditional Use: Sky View Ranchettes Subdivision",
           "type": "CONDITIONAL USE",
           "typeLabel": "CONDITIONAL USE",
-          "summary": "A Conditional Use and Master Site Plan application for the renewal of an existing Contractor's Yard for the storage of flatbed trailers and construction equipment. The property is located at 898 N McDermitt Rd in the Sky View Ranchettes Subdivision No. 2 and contains 4.71 acres within the Rural Urban Transition (RUT) District. Township: 3N, Range: 1W, Section: 9.",
+          "summary": "",
           "stage": "In review",
           "href": "/us/id/ada-county/plan/202602012-CU",
           "geometry": {
@@ -42268,14 +42268,14 @@
           "popup": {
             "projectName": "Conditional Use: Sky View Ranchettes Subdivision",
             "headline": "CONDITIONAL USE",
-            "explanation": "A Conditional Use and Master Site Plan application for the renewal of an existing Contractor's Yard for the storage of flatbed trailers and construction equipment. The property is located at 898 N McDermitt Rd in the Sky View Ranchettes Subdivision No. 2 and contains 4.71 acres within the Rural Urban Transition (RUT) District. Township: 3N, Range: 1W, Section: 9.",
             "aiGenerated": false,
             "progress": [
               {
                 "label": "Active",
                 "state": "current"
               }
-            ]
+            ],
+            "explanation": ""
           },
           "areaId": "ada-county"
         },
@@ -42310,8 +42310,8 @@
             "url": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/DevelopmentServices/Planning_and_Building/MapServer/14/query?where=APPFILE%3D%27202602012-CU%27&outFields=APPFILE,APPFileNum,PRJProjectNum,APTDescription,AppApplicDesc,STATUS&returnGeometry=false&f=json&returnDistinctValues=true"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -42321,7 +42321,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -42403,8 +42403,8 @@
             "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C09-September%5CBOCC%5C9.9.2026-BOCC_AGENDA.pdf&papp=DS_Agendas#page=2"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     },
     {
@@ -42414,7 +42414,7 @@
       "project": {
         "relatedCases": [],
         "noHearing": {
-          "message": "No hearing scheduled in official agendas as of 2026-10-31.",
+          "message": "No hearing scheduled in official agendas as of Thursday, November 5, 2026.",
           "sources": [
             {
               "label": "Official hearings and agendas",
@@ -42496,8 +42496,8 @@
             "url": "https://apps.adacounty.id.gov/AdaFileBrowse/Home/OpenDocument?doc=%5C2026%5C08+-+August%5CPZC%5C8.13.2026_PZC_Agenda.pdf&papp=DS_Agendas#page=2"
           }
         ],
-        "updatedAt": "2026-10-31T15:28:07.777Z",
-        "lastCheckedAt": "2026-10-31T15:28:07.777Z"
+        "updatedAt": "2026-11-05T13:18:07.773Z",
+        "lastCheckedAt": "2026-11-05T13:18:07.773Z"
       }
     }
   ],
@@ -44122,8 +44122,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "An application for approval of a zoning ordinance map amendment, a development agreement, a preliminary plat for the Voluntarist Ridge Subdivision, and a private road to rezone the property from the Rural Urban Transition (RUT) District to the Estate Residential (R1) District and subdivide the property into three (3) lots with the expansion of an existing private road (S. Wots Lane). The property is 4.993 acres within the Lineage Estates Subdivision at 7800 S. Wots Lane, Meridian, ID 83642; Section 4, T.2N., R.1E.",
-        "description": "An application for approval of a zoning ordinance map amendment, a development agreement, a preliminary plat for the Voluntarist Ridge Subdivision, and a private road to rezone the property from the Rural Urban Transition (RUT) District to the Estate Residential (R1) District and subdivide the property into three (3) lots with the expansion of an existing private road (S. Wots Lane). The property is 4.993 acres within the Lineage Estates Subdivision at 7800 S. Wots Lane, Meridian, ID 83642; Section 4, T.2N., R.1E.",
+        "appScope": "",
+        "description": "",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600819-ZC",
         "energovPlanId": null,
@@ -44671,8 +44671,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "Application for approval of a Parcel Consolidation to combine two parcels of section ground to meet 5 acre minimum in an RUT zone with a Variance application to allow for these parcels to use the same easement the neighbors are using to forgo the requirement of a Private Road application.",
-        "description": "Application for approval of a Parcel Consolidation to combine two parcels of section ground to meet 5 acre minimum in an RUT zone with a Variance application to allow for these parcels to use the same easement the neighbors are using to forgo the requirement of a Private Road application.",
+        "appScope": "",
+        "description": "",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202600965-V",
         "energovPlanId": null,
@@ -45222,8 +45222,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "Conditional Use and Master Site Plan to construct a new elementary school, demolition of existing school, and construction of a new parking lot and associated site improvements. The total square footage of the new elementary school is 66,560 square feet. The property contains 9.564 acres in the Low Density Residential (R2) District and is located at 11711 W Lake Hazel Rd; Section 3, T.2N, R.1E. ",
-        "description": "Conditional Use and Master Site Plan to construct a new elementary school, demolition of existing school, and construction of a new parking lot and associated site improvements. The total square footage of the new elementary school is 66,560 square feet. The property contains 9.564 acres in the Low Density Residential (R2) District and is located at 11711 W Lake Hazel Rd; Section 3, T.2N, R.1E. ",
+        "appScope": "",
+        "description": "",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601193-CU",
         "energovPlanId": null,
@@ -45311,8 +45311,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "A Conditional Use and partial Master Site Plan Application for approval of a two-phase, animal feeding operation (AFO - dairy facility) with approximately 16,440 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
-        "description": "A Conditional Use and partial Master Site Plan Application for approval of a two-phase, animal feeding operation (AFO - dairy facility) with approximately 16,440 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
+        "appScope": "A Conditional Use and partial Master Site Plan Application for approval of a livestock confinement facility/animal feeding operation (AFO - dairy facility) with approximately 7,428 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
+        "description": "A Conditional Use and partial Master Site Plan Application for approval of a livestock confinement facility/animal feeding operation (AFO - dairy facility) with approximately 7,428 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601250-CU",
         "energovPlanId": null,
@@ -45473,8 +45473,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "Conditional Use and Master Site Plan to continue operation of an existing contractor's yard, with an Alternative Compliance request to maintain the existing landscaping. The property is located at 7085 S Eagle Rd and contains approximately 9.271 acres in the Rural Urban Transition (RUT) District; Section 5, T.2N, R.1E. ",
-        "description": "Conditional Use and Master Site Plan to continue operation of an existing contractor's yard, with an Alternative Compliance request to maintain the existing landscaping. The property is located at 7085 S Eagle Rd and contains approximately 9.271 acres in the Rural Urban Transition (RUT) District; Section 5, T.2N, R.1E. ",
+        "appScope": "",
+        "description": "",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601395-CU",
         "energovPlanId": null,
@@ -45808,8 +45808,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
-        "description": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
+        "appScope": "",
+        "description": "",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202601712-COM",
         "energovPlanId": null,
@@ -46173,8 +46173,8 @@
         "appStatus": "Active",
         "appPhase": "Review",
         "appPhaseRaw": "Review",
-        "appScope": "A Conditional Use and Master Site Plan application for the renewal of an existing Contractor's Yard for the storage of flatbed trailers and construction equipment. The property is located at 898 N McDermitt Rd in the Sky View Ranchettes Subdivision No. 2 and contains 4.71 acres within the Rural Urban Transition (RUT) District. Township: 3N, Range: 1W, Section: 9.",
-        "description": "A Conditional Use and Master Site Plan application for the renewal of an existing Contractor's Yard for the storage of flatbed trailers and construction equipment. The property is located at 898 N McDermitt Rd in the Sky View Ranchettes Subdivision No. 2 and contains 4.71 acres within the Rural Urban Transition (RUT) District. Township: 3N, Range: 1W, Section: 9.",
+        "appScope": "",
+        "description": "",
         "appAcres": null,
         "externalUrl": "https://gisprod.adacounty.id.gov/apps/application_tracker/?find=202602012-CU",
         "energovPlanId": null,
@@ -46367,8 +46367,8 @@
       }
     ],
     "completed": [],
-    "refreshedAt": "2026-10-31T15:28:07.777Z",
-    "scheduleRefreshedAt": "2026-10-31T15:28:07.777Z",
+    "refreshedAt": "2026-11-05T13:18:07.773Z",
+    "scheduleRefreshedAt": "2026-11-05T13:18:07.773Z",
     "scheduleUnavailable": false,
     "agendaMeetings": [
       {
@@ -46820,7 +46820,7 @@
   "map": {
     "version": 1,
     "jurisdiction": "ada-county",
-    "updatedAt": "2026-10-31T15:28:07.777Z",
+    "updatedAt": "2026-11-05T13:18:07.773Z",
     "warnings": [],
     "cases": [
       {
@@ -48656,7 +48656,7 @@
         "title": "Rezone: Lineage Estates Subdivision",
         "type": "rezone",
         "typeLabel": "rezone",
-        "summary": "An application for approval of a zoning ordinance map amendment, a development agreement, a preliminary plat for the Voluntarist Ridge Subdivision, and a private road to rezone the property from the Rural Urban Transition (RUT) District to the Estate Residential (R1) District and subdivide the property into three (3) lots with the expansion of an existing private road (S. Wots Lane). The property is 4.993 acres within the Lineage Estates Subdivision at 7800 S. Wots Lane, Meridian, ID 83642; Section 4, T.2N., R.1E.",
+        "summary": "",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202600819-ZC",
         "geometry": {
@@ -48704,14 +48704,14 @@
         "popup": {
           "projectName": "Rezone: Lineage Estates Subdivision",
           "headline": "rezone",
-          "explanation": "An application for approval of a zoning ordinance map amendment, a development agreement, a preliminary plat for the Voluntarist Ridge Subdivision, and a private road to rezone the property from the Rural Urban Transition (RUT) District to the Estate Residential (R1) District and subdivide the property into three (3) lots with the expansion of an existing private road (S. Wots Lane). The property is 4.993 acres within the Lineage Estates Subdivision at 7800 S. Wots Lane, Meridian, ID 83642; Section 4, T.2N., R.1E.",
           "aiGenerated": false,
           "progress": [
             {
               "label": "Active",
               "state": "current"
             }
-          ]
+          ],
+          "explanation": ""
         },
         "areaId": "ada-county"
       },
@@ -48930,7 +48930,7 @@
         "title": "Variance: combine two parcels",
         "type": "VARIANCE",
         "typeLabel": "VARIANCE",
-        "summary": "Application for approval of a Parcel Consolidation to combine two parcels of section ground to meet 5 acre minimum in an RUT zone with a Variance application to allow for these parcels to use the same easement the neighbors are using to forgo the requirement of a Private Road application.",
+        "summary": "",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202600965-V",
         "geometry": {
@@ -48990,14 +48990,14 @@
         "popup": {
           "projectName": "Variance: combine two parcels",
           "headline": "VARIANCE",
-          "explanation": "Application for approval of a Parcel Consolidation to combine two parcels of section ground to meet 5 acre minimum in an RUT zone with a Variance application to allow for these parcels to use the same easement the neighbors are using to forgo the requirement of a Private Road application.",
           "aiGenerated": false,
           "progress": [
             {
               "label": "Active",
               "state": "current"
             }
-          ]
+          ],
+          "explanation": ""
         },
         "areaId": "ada-county"
       },
@@ -49916,7 +49916,7 @@
         "title": "Conditional Use: construct a new elementary school",
         "type": "CONDITIONAL USE",
         "typeLabel": "CONDITIONAL USE",
-        "summary": "Conditional Use and Master Site Plan to construct a new elementary school, demolition of existing school, and construction of a new parking lot and associated site improvements. The total square footage of the new elementary school is 66,560 square feet. The property contains 9.564 acres in the Low Density Residential (R2) District and is located at 11711 W Lake Hazel Rd; Section 3, T.2N, R.1E. ",
+        "summary": "",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202601193-CU",
         "geometry": {
@@ -50004,14 +50004,14 @@
         "popup": {
           "projectName": "Conditional Use: construct a new elementary school",
           "headline": "CONDITIONAL USE",
-          "explanation": "Conditional Use and Master Site Plan to construct a new elementary school, demolition of existing school, and construction of a new parking lot and associated site improvements. The total square footage of the new elementary school is 66,560 square feet. The property contains 9.564 acres in the Low Density Residential (R2) District and is located at 11711 W Lake Hazel Rd; Section 3, T.2N, R.1E. ",
           "aiGenerated": false,
           "progress": [
             {
               "label": "Active",
               "state": "current"
             }
-          ]
+          ],
+          "explanation": ""
         },
         "areaId": "ada-county"
       },
@@ -50022,7 +50022,7 @@
         "title": "Conditional Use: animal feeding operation",
         "type": "CONDITIONAL USE",
         "typeLabel": "CONDITIONAL USE",
-        "summary": "A Conditional Use and partial Master Site Plan Application for approval of a two-phase, animal feeding operation (AFO - dairy facility) with approximately 16,440 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
+        "summary": "A Conditional Use and partial Master Site Plan Application for approval of a livestock confinement facility/animal feeding operation (AFO - dairy facility) with approximately 7,428 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202601250-CU",
         "geometry": {
@@ -50102,7 +50102,7 @@
         "popup": {
           "projectName": "Conditional Use: animal feeding operation",
           "headline": "CONDITIONAL USE",
-          "explanation": "A Conditional Use and partial Master Site Plan Application for approval of a two-phase, animal feeding operation (AFO - dairy facility) with approximately 16,440 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
+          "explanation": "A Conditional Use and partial Master Site Plan Application for approval of a livestock confinement facility/animal feeding operation (AFO - dairy facility) with approximately 7,428 animal units. The property is located south of the intersection of S. Robinson Boulevard and  W. Halverson Road and contains approximately 240 acres within the Rural Preservation (RP) District. Sections 29, 30, and 31; T.1S., R.1W. ",
           "aiGenerated": false,
           "progress": [
             {
@@ -50190,7 +50190,7 @@
         "title": "Conditional Use: continue operation of an existing contractor's yard",
         "type": "CONDITIONAL USE",
         "typeLabel": "CONDITIONAL USE",
-        "summary": "Conditional Use and Master Site Plan to continue operation of an existing contractor's yard, with an Alternative Compliance request to maintain the existing landscaping. The property is located at 7085 S Eagle Rd and contains approximately 9.271 acres in the Rural Urban Transition (RUT) District; Section 5, T.2N, R.1E. ",
+        "summary": "",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202601395-CU",
         "geometry": {
@@ -50282,14 +50282,14 @@
         "popup": {
           "projectName": "Conditional Use: continue operation of an existing contractor's yard",
           "headline": "CONDITIONAL USE",
-          "explanation": "Conditional Use and Master Site Plan to continue operation of an existing contractor's yard, with an Alternative Compliance request to maintain the existing landscaping. The property is located at 7085 S Eagle Rd and contains approximately 9.271 acres in the Rural Urban Transition (RUT) District; Section 5, T.2N, R.1E. ",
           "aiGenerated": false,
           "progress": [
             {
               "label": "Active",
               "state": "current"
             }
-          ]
+          ],
+          "explanation": ""
         },
         "areaId": "ada-county"
       },
@@ -50748,7 +50748,7 @@
         "title": "Subdivision: Hazel Center Sub",
         "type": "subdivision",
         "typeLabel": "subdivision",
-        "summary": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
+        "summary": "",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202601712-COM",
         "geometry": {
@@ -50884,14 +50884,14 @@
         "popup": {
           "projectName": "Subdivision: Hazel Center Sub",
           "headline": "subdivision",
-          "explanation": "An application for a Combined Preliminary/Final Plat for an eight (8) lot subdivision (Hazel Center Sub No. 3), a Master Site Plan application for a commercial development with retail, office, and dining establishments, and a Development Agreement Modification (Project #201900512 DA-DM).  The property is located at 10803 W Lake Hazel Road with 7.42 acres in the Neighborhood Commercial (C1) District; T.2N, R. 1E. Section 3",
           "aiGenerated": false,
           "progress": [
             {
               "label": "Active",
               "state": "current"
             }
-          ]
+          ],
+          "explanation": ""
         },
         "areaId": "ada-county"
       },
@@ -53812,7 +53812,7 @@
         "title": "Conditional Use: Sky View Ranchettes Subdivision",
         "type": "CONDITIONAL USE",
         "typeLabel": "CONDITIONAL USE",
-        "summary": "A Conditional Use and Master Site Plan application for the renewal of an existing Contractor's Yard for the storage of flatbed trailers and construction equipment. The property is located at 898 N McDermitt Rd in the Sky View Ranchettes Subdivision No. 2 and contains 4.71 acres within the Rural Urban Transition (RUT) District. Township: 3N, Range: 1W, Section: 9.",
+        "summary": "",
         "stage": "In review",
         "href": "/us/id/ada-county/plan/202602012-CU",
         "geometry": {
@@ -53872,14 +53872,14 @@
         "popup": {
           "projectName": "Conditional Use: Sky View Ranchettes Subdivision",
           "headline": "CONDITIONAL USE",
-          "explanation": "A Conditional Use and Master Site Plan application for the renewal of an existing Contractor's Yard for the storage of flatbed trailers and construction equipment. The property is located at 898 N McDermitt Rd in the Sky View Ranchettes Subdivision No. 2 and contains 4.71 acres within the Rural Urban Transition (RUT) District. Township: 3N, Range: 1W, Section: 9.",
           "aiGenerated": false,
           "progress": [
             {
               "label": "Active",
               "state": "current"
             }
-          ]
+          ],
+          "explanation": ""
         },
         "areaId": "ada-county"
       },
