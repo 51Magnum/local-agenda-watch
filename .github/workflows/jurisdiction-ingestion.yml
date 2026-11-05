@@ -56,15 +56,34 @@ jobs:
             # Collection and self-check each have a separate server budget below 300s.
             # Continue to other areas when one official source is unavailable.
             for command in collect check; do
-              if ! curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 270 \
-                --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=$command&area=$area&days=90" > result.json; then
-                echo "::error::$area $command failed; previous published data retained"
-                cat result.json
+              attempts=1
+              if [ "$command" = collect ]; then attempts=4; fi
+              phase_ok=0
+              for attempt in $(seq 1 "$attempts"); do
+                if ! curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 270 \
+                  --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=$command&area=$area&days=90" > result.json; then
+                  echo "::error::$area $command failed; previous published data retained"
+                  cat result.json
+                  break
+                fi
+                jq '{areaId,complete,passRate,goLive,applications:(.applications // []|length),queue:(.queue // []|length),collectionProgress}' result.json
+                if [ "$command" = collect ] && [ "$(jq -r '.complete' result.json)" != true ]; then
+                  if jq -e 'any(.health[]?; .state == "blocked")' result.json >/dev/null; then
+                    echo "::warning::$area official source is blocked; no immediate retry or bypass"
+                    break
+                  fi
+                  echo "$area collection is unfinished; private progress retained (pass $attempt/$attempts)"
+                  continue
+                fi
+                phase_ok=1
+                break
+              done
+              if [ "$phase_ok" -ne 1 ]; then
+                echo "::error::$area $command did not finish; publication checks were not advanced"
                 failed=1
                 area_ok=0
                 break
               fi
-              jq '{areaId,complete,passRate,goLive,applications:(.applications // []|length),queue:(.queue // []|length)}' result.json
             done
             # Report publication state separately: passing QA does not clear a durable pause.
             if ! curl --fail-with-body --silent --show-error --max-time 30 --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=status&area=$area" > status.json; then

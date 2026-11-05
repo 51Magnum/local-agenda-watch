@@ -1,0 +1,23 @@
+import {afterEach,expect,it,vi} from "vitest";
+import type {AgendaProgress} from "./agenda-progress";
+const h=vi.hoisted(()=>({progress:undefined as AgendaProgress|undefined,save:vi.fn(),clear:vi.fn(),check:vi.fn(),get:vi.fn(),time:0}));
+vi.mock("./store",()=>({readStaging:async()=>undefined,saveStaging:h.save,jurisdictionDb:vi.fn(),jurisdictionTransaction:vi.fn()}));
+vi.mock("./collection-progress-store",()=>({claimCollectionProgress:async()=>({previous:h.progress,save:async(p:AgendaProgress)=>{h.progress=structuredClone(p);},clear:async()=>{h.clear();h.progress=undefined;},release:async()=>{}})}));
+vi.mock("./run-self-check",()=>({runSelfCheck:h.check}));
+vi.mock("./libraries",()=>({discoverStagingLibraries:async()=>{}}));
+vi.mock("./adapters/arcgis",()=>({applicationAdapter:()=>({listApplications:async()=>[]}),arcgisAdapter:()=>({query:async()=>({type:"FeatureCollection",features:[{type:"Feature",properties:{CITY:"BOISE"},geometry:{type:"Polygon",coordinates:[[[-117,43],[-115,43],[-115,44],[-117,44],[-117,43]]]}}]})})}));
+const meeting=(id:string)=>({id,title:"Official hearing",body:"pz",date:"2026-11-02",meetingPageUrl:"https://official.test/"+id,attachments:[],items:[]});
+vi.mock("./adapters",()=>({agendaAdapter:(_d:unknown,s:{adapter:string})=>({listMeetings:async()=>s.adapter==="escribe"?[meeting("A"),meeting("B")]:[meeting("C")],getMeeting:h.get})}));
+import {collectJurisdiction} from "./collect";
+import {SourceHttp} from "./http";
+afterEach(()=>{vi.restoreAllMocks();vi.clearAllMocks();});
+it("keeps partial work out of staging and QA, then saves a complete snapshot after the resumed pass",async()=>{
+ vi.spyOn(Date,"now").mockImplementation(()=>h.time);h.get.mockImplementation(async(id:string)=>{h.time+=6000;return meeting(id);});
+ const http=new SourceHttp();vi.spyOn(http,"json").mockResolvedValue({Events:[]});
+ const first=await collectJurisdiction("boise",{write:true,selfCheck:false,http,budgetMs:30000,now:new Date("2026-11-05T16:00:00Z")});
+ expect(first.complete).toBe(false);expect(first.collectionProgress).toMatchObject({completedMeetings:1,resumed:false});expect(h.save).not.toHaveBeenCalled();expect(h.clear).not.toHaveBeenCalled();expect(h.check).not.toHaveBeenCalled();expect(h.progress).toBeDefined();
+ h.time=0;h.get.mockClear();
+ const second=await collectJurisdiction("boise",{write:true,selfCheck:false,http,budgetMs:140000,now:new Date("2026-11-05T16:01:00Z")});
+ expect(second.complete).toBe(true);expect(second.collectionProgress?.resumed).toBe(true);expect(second.checkedAt).toBe("2026-11-05T16:00:00.000Z");expect(second.meetings.map(m=>m.id).sort()).toEqual(["A","B","C"]);
+ expect(h.get.mock.calls.map(c=>c[0]).sort()).toEqual(["B","C"]);expect(h.save).toHaveBeenCalledExactlyOnceWith(second);expect(h.clear).toHaveBeenCalledOnce();expect(h.check).not.toHaveBeenCalled();
+});

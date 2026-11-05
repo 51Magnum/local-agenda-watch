@@ -4,7 +4,8 @@ import {difference,feature,featureCollection,simplify} from "@turf/turf";
 import {jurisdiction} from "./registry";
 import {SourceHttp,SourceFailure} from "./http";
 import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
-import {agendaAdapter} from "./adapters";
+import {agendaProgress,collectAgendas} from "./agenda-progress";
+import {claimCollectionProgress} from "./collection-progress-store";
 import {geolocateApplications,coverageEligible} from "./application-geolocation";
 import {nativeSampleAllowed} from "./native-sample";
 import {allowedAttachment} from "./adapters/common";
@@ -18,20 +19,27 @@ import {matchApplications} from "./matching";
 import {discoverStagingLibraries} from "./libraries";
 import {accountForAgenda,assertCollectionComplete,projectNumber} from "./agenda-projects";
 export function sourceHttp(areaId:string,deadline?:number){const d=jurisdiction(areaId);if(!d)throw Error("Unknown jurisdiction");const urls=[d.boundary.url,...[d.recordLinks?.verifyUrlTemplate,d.applications.recordUrlTemplate].filter(Boolean) as string[],...Object.values(d.gis),...d.agenda.map(a=>String(a.params.baseUrl)),String(d.applications.params.url??""),...(d.area.timeline?.hosts??[]).map(h=>"https://"+h),d.participation.testimonySignupUrl??"",d.clipRule?.layer.url??"",...([d.applications.params.geometryJoin,d.applications.params.addressPointFallback].filter(Boolean) as {url:string}[]).map(s=>s.url)];return new SourceHttp({deadline,allowedHosts:[...new Set(urls.filter(Boolean).map(u=>new URL(u!).hostname))],maxBytes:d.documents.maxBytes});}
-export async function collectJurisdiction(areaId:string,options:{days?:number;write?:boolean;selfCheck?:boolean;budgetMs?:number;http?:SourceHttp;now?:Date}={}){
+type CollectOptions={days?:number;write?:boolean;selfCheck?:boolean;budgetMs?:number;http?:SourceHttp;now?:Date};
+export async function collectJurisdiction(areaId:string,options:CollectOptions={}){
+ if(!jurisdiction(areaId)?.enabled)throw Error("Jurisdiction is disabled or unknown");
+ const lease=options.write?await claimCollectionProgress(areaId):undefined;
+ try{return await collectWithProgress(areaId,options,lease);}finally{await lease?.release();}
+}
+async function collectWithProgress(areaId:string,options:CollectOptions,lease?:Awaited<ReturnType<typeof claimCollectionProgress>>){
  const d=jurisdiction(areaId);if(!d||!d.enabled)throw Error("Jurisdiction is disabled or unknown");
  const now=options.now??new Date(),days=options.days??90;if(!Number.isInteger(days)||days<1||days>90)throw Error("Backfill window must be between 1 and 90 days");
  const range={start:new Date(now.getTime()-days*86400000).toISOString().slice(0,10),end:new Date(now.getTime()+45*86400000).toISOString().slice(0,10)},deadline=Date.now()+(options.budgetMs??140000),http=options.http??sourceHttp(areaId,deadline),old=await readStaging(areaId);
  const snapshot:StagingSnapshot={areaId,launchStatus:d.launchStatus,checkedAt:now.toISOString(),range,applications:[],meetings:(old?.meetings??[]).filter(m=>m.date>=range.start&&m.date<=range.end),pendingMeetings:[],health:http.checks,skipped:[],complete:true,aiSamples:old?.aiSamples??[],visuals:old?.visuals,runtime:old?.runtime};
  try{snapshot.applications=await applicationAdapter(d,http,{geolocate:false}).listApplications();}catch(e){snapshot.complete=false;snapshot.applications=old?.applications??[];if(!(e instanceof SourceFailure))snapshot.skipped.push({url:String(d.applications.params.url),reason:String(e)});}
  if(snapshot.applications.some(a=>a.geolocationDeferred))snapshot.complete=false;
- const sources=[...d.agenda].sort((a,b)=>Number((old?.pendingMeetings??[]).some(u=>u.startsWith(String(b.params.baseUrl))))-Number((old?.pendingMeetings??[]).some(u=>u.startsWith(String(a.params.baseUrl)))));
- for(const source of sources){if(Date.now()>deadline-25000){snapshot.complete=false;snapshot.pendingMeetings!.push(...(old?.pendingMeetings??[]));break;}const adapter=agendaAdapter(d,source,http);
-  try{const meetings=await adapter.listMeetings(range);const ordered=meetings.sort((a,b)=>Number((old?.pendingMeetings??[]).includes(b.meetingPageUrl))-Number((old?.pendingMeetings??[]).includes(a.meetingPageUrl))||b.date.localeCompare(a.date));for(const [index,m]of ordered.entries()){if(Date.now()>deadline-25000){snapshot.complete=false;snapshot.pendingMeetings!.push(...ordered.slice(index).map(m=>m.meetingPageUrl));break;}
-   try{snapshot.meetings.push(await adapter.getMeeting(m.id));}catch(e){snapshot.complete=false;snapshot.pendingMeetings!.push(m.meetingPageUrl);snapshot.meetings.push(old?.meetings.find(o=>o.id===m.id&&o.meetingPageUrl===m.meetingPageUrl)??m);if(!(e instanceof SourceFailure))snapshot.skipped.push({url:m.meetingPageUrl,reason:String(e)});}
-  }}catch(e){snapshot.complete=false;if(!(e instanceof SourceFailure))snapshot.skipped.push({url:String(source.params.baseUrl),reason:String(e)});}
- }
- snapshot.pendingMeetings=[...new Set(snapshot.pendingMeetings)];
+ const progress=agendaProgress(d,range,now,lease?.previous),resumed=progress===lease?.previous;
+ const agendas=await collectAgendas(d,range,http,deadline,progress,lease?.save);
+ snapshot.checkedAt=progress.startedAt;
+ snapshot.collectionProgress={resumed,completedMeetings:agendas.completedMeetings,pendingMeetings:agendas.pendingMeetings.length,phase:agendas.complete?"finalize":"agendas"};
+ snapshot.pendingMeetings=agendas.pendingMeetings;snapshot.skipped.push(...agendas.skipped);
+ snapshot.meetings.push(...agendas.meetings);
+ // No staging/publication mutation and no expensive GIS work for a partial agenda cycle.
+ if(!agendas.complete){snapshot.complete=false;return snapshot;}
  snapshot.meetings=[...new Map(snapshot.meetings.map(m=>[m.body+":"+m.date+":"+m.meetingPageUrl,m])).values()];
  if(d.participation.signupUrlRule==="umbracoEvents"&&d.participation.signupEventsUrl){try{const url=d.participation.signupEventsUrl.replace("{start}",range.start).replace("{end}",range.end),events=await http.json<{Events:{title:string;start:string;url:string}[]}>(url);snapshot.meetings=matchSignupEvents(d,snapshot.meetings,events.Events??[],url);}catch{snapshot.complete=false;}}
  for(const source of d.agenda)if(source.params.hearingsUrl&&source.params.scheduleYear&&source.params.scheduleTables){try{const url=String(source.params.hearingsUrl);snapshot.calendarHints=parseTentativeTable(await http.text(url),url,Number(source.params.scheduleYear),source.params.scheduleTables as {index:number;body:string}[]);}catch{snapshot.complete=false;}}
@@ -62,5 +70,5 @@ export async function collectJurisdiction(areaId:string,options:{days?:number;wr
  const allCases=new Set(snapshot.applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));
  for(const meeting of snapshot.meetings)for(const item of meeting.items)item.caseNumbers=item.caseNumbers.filter(id=>allCases.has(id)||d.caseNumberPatterns.some(p=>new RegExp(p,"i").test(id)));
  if(!d.legacyPublic)accountForAgenda(d,snapshot);
- if(options.write){assertCollectionComplete(snapshot,old);await saveStaging(snapshot);if(!d.legacyPublic&&options.selfCheck!==false)await(await import("./run-self-check")).runSelfCheck(areaId,{snapshot,previous:old,reports:false});}return snapshot;
+ if(options.write){if(!snapshot.complete)return snapshot;assertCollectionComplete(snapshot,old);await saveStaging(snapshot);await lease?.clear();if(!d.legacyPublic&&options.selfCheck!==false)await(await import("./run-self-check")).runSelfCheck(areaId,{snapshot,previous:old,reports:false});}return snapshot;
 }
