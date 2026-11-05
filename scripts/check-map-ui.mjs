@@ -7,6 +7,7 @@ import http from "node:http";
 import assert from "node:assert/strict";
 import {createRequire} from "node:module";
 import {build} from "esbuild";
+import sharp from "sharp";
 import {packViewport} from "../lib/maps/viewport-wire.ts";
 const require = createRequire(import.meta.url);
 const {chromium} = require(process.env.LAW_PLAYWRIGHT_MODULE ?? "playwright");
@@ -15,8 +16,11 @@ fs.mkdirSync(out,{recursive:true});
 const records = JSON.parse(fs.readFileSync("tests/fixtures/nampa-map-clicks.json","utf8"));
 const boundaries = JSON.parse(fs.readFileSync("public/map-data/boundaries.json","utf8"));
 const item = records[0].map, project = records[0].project;
+const satelliteCheck=process.argv.includes("--satellite"),satelliteLayer="law-satellite-basemap";
+const imageryTile=await sharp({create:{width:256,height:256,channels:3,background:{r:75,g:100,b:65}}}).png().toBuffer();
 const area = {id:"nampa",name:"Nampa",stateAbbreviation:"ID",href:"/us/id/nampa",center:item.centroid,bounds:[-117,43,-116,44],status:"live"};
-const mapData = {jurisdiction:{...area,zoom:13},cases:records.map(r=>r.map),updatedAt:"2026-11-04T12:00:00Z",warnings:[],flum:{legend:[],categoryField:"category"}};
+const landUse={jurisdiction:"nampa",geojson:{type:"FeatureCollection",features:[{type:"Feature",geometry:item.geometry,properties:{category:"Residential"}}]},legend:[{value:"Residential",label:"Residential",color:"#edb875"}],categoryField:"category",updatedAt:"2026-11-04T12:00:00Z"};
+const mapData = {jurisdiction:{...area,zoom:13},cases:records.map(r=>r.map),updatedAt:"2026-11-04T12:00:00Z",warnings:[],flum:{legend:landUse.legend,categoryField:"category",layerUrl:"https://official.test/land-use"}};
 await build({stdin:{contents:`
 import React from 'react'; import {createRoot} from 'react-dom/client';
 import Home from './app/components/maps/map-home';
@@ -29,7 +33,11 @@ const fixture=${JSON.stringify({item,boundaries})};
 function NoticeDemo(){const {notice,showNotice,dismissNotice}=useMapNotice();return <><button onClick={()=>showNotice('Saved.')}>Show notice</button><button onClick={()=>showNotice('Unavailable.','error')}>Show error</button>{notice&&<Notice key={notice.id} {...notice} onDismiss={dismissNotice}/>}</>}
 const route=location.pathname;
 createRoot(document.getElementById('root')).render(route==='/home'?<Home/>:route==='/project'?<CaseMap jurisdiction="nampa" caseIds={[fixture.item.id]} compact/>:route==='/area'?<CaseMap jurisdiction="nampa"/>:route==='/coverage'?<div style={{display:"grid",height:600}}><Coverage areas={[getArea('nampa')]}/></div>:route==='/admin'?<Preview boundaries={fixture.boundaries.polygons} cases={{type:'FeatureCollection',features:[{type:'Feature',geometry:fixture.item.geometry,properties:{areaId:'nampa',caseId:fixture.item.id,color:'#0f766e'}}]}}/>:<NoticeDemo/>);
-`,resolveDir:root,loader:"tsx"},outfile:path.join(out,"app.js"),bundle:true,format:"esm",platform:"browser",jsx:"automatic",define:{"process.env.NODE_ENV":'"production"',"process.env":"{}"},alias:{"@":root},logLevel:"silent"});
+`,resolveDir:root,loader:"tsx"},outfile:path.join(out,"app.js"),bundle:true,format:"esm",platform:"browser",jsx:"automatic",define:{"process.env.NODE_ENV":'"production"',"process.env":"{}"},alias:{"@":root},logLevel:"silent",plugins:[{name:"local-map-observer",setup(builder){
+ const real=JSON.stringify(path.join(root,"node_modules/maplibre-gl/dist/maplibre-gl.mjs").replaceAll("\\","/"));
+ builder.onResolve({filter:/^maplibre-gl$/},()=>({path:"test-map",namespace:"test-map"}));
+ builder.onLoad({filter:/.*/,namespace:"test-map"},()=>({contents:`export * from ${real};import {Map as Original} from ${real};export class Map extends Original{constructor(options){super(options);window.__lawTestMap=this;}}`,loader:"js",resolveDir:root}));
+}}]});
 const styles = fs.readdirSync(".next/static/chunks").filter(f=>f.endsWith(".css")).map(f=>fs.readFileSync(".next/static/chunks/"+f,"utf8")).join("\n");
 const server = http.createServer((req,res)=>{
   const pathname=new URL(req.url,"http://localhost").pathname;
@@ -44,12 +52,13 @@ const browser=await chromium.launch({headless:true,...(process.env.LAW_PLAYWRIGH
 try{
  for(const mobile of [false,true]){
   const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:900},hasTouch:mobile,isMobile:mobile}),page=await context.newPage(),errors=[];
-  page.on("pageerror",e=>{errors.push(e.message);console.error("Browser:",e.message);});
+  page.on("pageerror",e=>{errors.push(e.message);console.error("Browser:",e.message);});let rasterRequests=0;
   await page.route("**/*",route=>{
    const u=new URL(route.request().url()),url=u.pathname;
-   if(u.hostname==="tiles.openfreemap.org")return route.fulfill({json:{version:8,sources:{},layers:[{id:"background",type:"background",paint:{"background-color":"#e2e8f0"}}]}});
+   if(u.hostname==="tiles.openfreemap.org")return route.fulfill({json:{version:8,sources:{base:{type:"geojson",data:{type:"FeatureCollection",features:[]}}},layers:[{id:"background",type:"background",paint:{"background-color":"#e2e8f0"}},{id:"base-roads",type:"line",source:"base"},{id:"base-road-labels",type:"symbol",source:"base"},{id:"base-places",type:"symbol",source:"base"}]}});
+   if(u.hostname==="basemap.nationalmap.gov"){rasterRequests++;return route.fulfill({contentType:"image/png",headers:{"access-control-allow-origin":"*"},body:imageryTile});}
    if(u.origin!==origin)return route.abort();
-   const json=url==="/api/map/meta"?{revision:"fixture",areas:[area]}:url==="/api/map/cases"?packViewport({cases:records.map(r=>({...r.map,id:"nampa:"+r.id,areaId:"nampa"})),summaries:[],truncated:false,updatedAt:mapData.updatedAt,bounds:area.bounds}):url==="/api/map/coverage"?{areas:["Nampa"]}:url==="/api/map/project"?project:url==="/api/map/boundaries"?boundaries:url==="/api/maps/nampa"?mapData:url==="/api/account/pins"?{pins:Array.from({length:5},(_,i)=>({id:"fixture-"+i,label:"Test pin "+(i+1),coordinates:[item.centroid[0]+i*.002,item.centroid[1]],radiusMiles:1,alertsEnabled:false}))}:url.startsWith("/admin/jurisdictions/")?project:undefined;
+   const json=url==="/api/map/meta"?{revision:"fixture",areas:[area]}:url==="/api/map/cases"?packViewport({cases:records.map(r=>({...r.map,id:"nampa:"+r.id,areaId:"nampa"})),summaries:[],truncated:false,updatedAt:mapData.updatedAt,bounds:area.bounds}):url==="/api/map/coverage"?{areas:["Nampa"]}:url==="/api/map/project"?project:url==="/api/map/boundaries"?boundaries:url==="/api/maps/nampa"?(u.searchParams.get("layer")==="flum"?landUse:mapData):url==="/api/account/pins"?{pins:Array.from({length:5},(_,i)=>({id:"fixture-"+i,label:"Test pin "+(i+1),coordinates:[item.centroid[0]+i*.002,item.centroid[1]],radiusMiles:1,alertsEnabled:false}))}:url.startsWith("/admin/jurisdictions/")?project:undefined;
    if(json)return route.fulfill({json});
    if(url.startsWith("/api/"))return route.fulfill({json:{projects:[],areas:[]}});
    return route.continue();
@@ -67,14 +76,47 @@ try{
    for(const credit of ["OpenFreeMap","OpenMapTiles","OpenStreetMap"])await attribution.getByRole("link",{name:credit,exact:true}).waitFor();
    if(mobile)await toggle.tap();else await toggle.click();assert.equal(await attribution.getAttribute("open"),null);
    passed.push(prefix+": "+view+" has one collapsed attribution, one icon, and expandable provider links");
+   if(satelliteCheck){
+    await page.waitForFunction(()=>window.__lawTestMap?.getLayer("law-satellite-basemap")&&window.__lawTestMap.loaded()&&!window.__lawTestMap.isMoving());
+
+    const openLayers=async()=>{if(view==="home"){const button=page.getByRole("button",{name:"Layers",exact:true});if(await button.getAttribute("aria-expanded")!=="true")await button.click();}else await page.locator(".law-basemap-layers:not([open])>summary").click();};
+    await openLayers();
+    if(view==="area"||view==="project"){await page.getByRole("checkbox",{name:"Future land use",exact:true}).check();await page.waitForFunction(()=>window.__lawTestMap.getStyle().sources.flum.data.features.length>0);}
+    const before=await page.evaluate(()=>{const m=window.__lawTestMap;return {center:m.getCenter().toArray(),zoom:m.getZoom(),time:performance.timeOrigin,overlays:m.getStyle().layers.filter(l=>!l.id.startsWith("base-")&&l.id!=="background"&&l.id!=="law-satellite-basemap")};});
+    const satellite=page.getByRole("group",{name:"Basemap",exact:true}).getByRole("button",{name:"Satellite",exact:true});assert((await satellite.boundingBox()).height>=44);
+    if(mobile)await satellite.tap();else await satellite.click();await page.waitForFunction(()=>window.__lawTestMap.getLayoutProperty("law-satellite-basemap","visibility")==="visible");
+    assert.equal(await satellite.evaluate(e=>getComputedStyle(e).backgroundColor),"rgb(19, 78, 74)","Selected basemap is not visibly highlighted");
+    const after=await page.evaluate(()=>{const m=window.__lawTestMap,layers=m.getStyle().layers;return {center:m.getCenter().toArray(),zoom:m.getZoom(),time:performance.timeOrigin,overlays:layers.filter(l=>!l.id.startsWith("base-")&&l.id!=="background"&&l.id!=="law-satellite-basemap"),ids:layers.map(l=>l.id),roadLabels:m.getLayoutProperty("base-road-labels","visibility"),source:m.getStyle().sources["law-usgs-imagery"]};});
+    if(view==="area"||view==="project")assert((await page.evaluate(()=>window.__lawTestMap.getStyle().sources.flum.data.features.length))>0,"Future land use disappeared");
+    assert.deepEqual(after.center,before.center);assert.equal(after.zoom,before.zoom);assert.equal(after.time,before.time);assert.deepEqual(after.overlays,before.overlays);assert.notEqual(after.roadLabels,"none");assert(after.ids.indexOf(satelliteLayer)<after.ids.indexOf("base-road-labels"));assert.equal(after.source.maxzoom,16);
+    await toggle.click();await page.waitForFunction(()=>document.querySelector(".maplibregl-ctrl-attrib-inner")?.textContent.includes("USGS The National Map"));await toggle.click();assert.equal(await attribution.count(),1);
+    passed.push(prefix+": "+view+" satellite preserves viewport, labels, overlay layers, and one compact attribution with USGS credit");
+    await page.reload();await page.locator(".law-map-attribution").waitFor();await openLayers();await page.getByRole("button",{name:"Satellite",exact:true,pressed:true}).waitFor();
+    await page.getByRole("button",{name:"Map",exact:true}).click();await page.waitForFunction(()=>window.__lawTestMap.getLayoutProperty("law-satellite-basemap","visibility")==="none");
+    await page.waitForFunction(()=>!document.querySelector(".maplibregl-ctrl-attrib-inner")?.textContent.includes("USGS The National Map"));
+    if(view==="home")await page.getByRole("button",{name:"Layers",exact:true}).click();else await page.locator(".law-basemap-layers>summary").click();
+    passed.push(prefix+": "+view+" remembers Satellite after reload and restores Map credits");
+   }
    if(view==="home"){
     await page.getByRole("button",{name:"Layers",exact:true}).click();await page.getByRole("button",{name:/1\. Test pin 1/}).waitFor();
     for(let i=1;i<=5;i++)await page.getByRole("button",{name:new RegExp(i+"\\. Test pin "+i)}).click();
+    if(satelliteCheck){
+     const ring=await page.evaluate(()=>window.__lawTestMap.getStyle().sources["law-ring"].data);assert(ring.features.length>0);
+     await page.getByRole("button",{name:"Satellite",exact:true}).click();
+     assert.equal(await page.locator(".law-saved-pin-marker").count(),5);assert.deepEqual(await page.evaluate(()=>window.__lawTestMap.getStyle().sources["law-ring"].data),ring);
+     passed.push(prefix+": selected saved pin, five markers and radius circle survive Satellite switch");
+    }
     await page.getByRole("button",{name:"Layers",exact:true}).click();
     assert.equal(await page.locator(".maplibregl-ctrl-attrib").count(),1);passed.push(prefix+": all five saved pins selectable without duplicate attribution");
     await page.getByRole("button",{name:"Clear pin & circle",exact:true}).first().click();
     const notice=page.locator(".law-map-notice");await notice.filter({hasText:"Pin and circle cleared."}).waitFor();
     await page.mouse.move(0,0);await page.waitForTimeout(4200);assert.equal(await notice.count(),0);passed.push(prefix+": pin-cleared notice automatically dismisses");
+    if(satelliteCheck){
+     await page.evaluate(center=>window.__lawTestMap.jumpTo({center,zoom:15}),item.centroid);await page.waitForFunction(()=>window.__lawTestMap.loaded()&&!window.__lawTestMap.isMoving());
+     const point=await page.evaluate(center=>{const p=window.__lawTestMap.project(center);return {x:p.x,y:p.y};},item.centroid);
+     const canvas=page.locator(".maplibregl-canvas");if(mobile)await canvas.tap({position:point});else await canvas.click({position:point});
+     await page.locator(".law-resident-pane").waitFor();passed.push(prefix+": project polygon opens its pane from a center click/tap in Satellite mode");
+    }
     await page.goto(origin+"/home?project=nampa/"+item.id);await page.locator(".law-resident-pane").waitFor();
     const pane=await page.locator(".law-resident-pane").boundingBox(),control=await page.locator(".law-map-attribution").boundingBox();
     assert(control.x+control.width<=pane.x||control.x>=pane.x+pane.width||control.y+control.height<=pane.y||control.y>=pane.y+pane.height,"Attribution overlaps project pane");
@@ -92,7 +134,7 @@ try{
   await page.getByRole("button",{name:"Show notice",exact:true}).click();await notice.hover();await page.waitForTimeout(4200);assert.equal(await notice.count(),1);await close.click();assert.equal(await notice.count(),0);
   await page.getByRole("button",{name:"Show error",exact:true}).click();await page.mouse.move(0,0);await page.waitForTimeout(4200);assert.equal(await notice.getByRole("alert").count(),1);await close.click();assert.equal(await notice.count(),0);
   passed.push(prefix+": hover/focus pause, early close, and persistent announced errors");
-  assert.deepEqual(errors,[],"Browser errors");await context.close();
+  if(satelliteCheck)assert(rasterRequests>0,"No USGS imagery tiles requested");assert.deepEqual(errors,[],"Browser errors");await context.close();
  }
  console.log(JSON.stringify({passed:passed.length,failed:0,checks:passed},null,2));
  fs.writeFileSync("output/map-ui-browser-results.json",JSON.stringify({passed:passed.length,failed:0,checks:passed},null,2));

@@ -1,5 +1,7 @@
 "use client";
+import BasemapSwitch from "./basemap-switch";
 import MapNotice, {useMapNotice} from "./map-notice";
+import {installBasemap} from "@/lib/maps/basemap";
 import {addMapAttribution} from "@/lib/maps/attribution";
 import "@/app/components/maps/attribution.css";
 import {residentDateText} from "@/lib/areas/format";
@@ -353,7 +355,7 @@ export default function MapHome() {
           new lib.NavigationControl({ showCompass: false }),
           "top-right",
         );
-        addMapAttribution(m, lib);
+        addMapAttribution(m,lib);installBasemap(m);
         m.once("style.load", () => {
           if (disposed) return;
           m.addSource("law-boundaries", {
@@ -1127,6 +1129,7 @@ export default function MapHome() {
           </section>
         )}
         <section id="map-layer-options" className="law-layer-panel" aria-label="Map layers" hidden={!layers} style={{display:layers?undefined:"none"}}>
+            <BasemapSwitch/>
             <label>
               <input
                 type="checkbox"
