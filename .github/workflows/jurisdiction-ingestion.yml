@@ -4,6 +4,11 @@ on:
     # Two weekday refreshes; metadata collection does not take the live document lease.
     - cron: '45 13,21 * * 1-5'
   workflow_dispatch:
+    inputs:
+      resume_area:
+        description: 'Explicitly resume this paused area after current checks pass; leave blank for normal refresh'
+        type: string
+        default: ''
   push:
     branches: [main]
 permissions: {}
@@ -16,7 +21,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Wait for the merged Git deployment
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || inputs.resume_area != ''
         env:
           EXPECTED_SHA: ${{ github.sha }}
         shell: bash
@@ -32,14 +37,22 @@ jobs:
       - name: Refresh registry-enabled adapters and apply automatic self-check gates
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          RESUME_AREA: ${{ inputs.resume_area }}
         shell: bash
         run: |
           set -euo pipefail
           BASE=https://www.localagendawatch.com/api/cron/jurisdictions
           AREAS=$(curl --fail-with-body --silent --show-error --max-time 30 --header "Authorization: Bearer $CRON_SECRET" "$BASE?scope=configured" | jq -r '.areas[]')
+          if [ -n "$RESUME_AREA" ]; then
+            found=0
+            for area in $AREAS; do if [ "$area" = "$RESUME_AREA" ]; then found=1; fi; done
+            if [ "$found" -ne 1 ]; then echo '::error::Resume area must be registry-enabled'; exit 1; fi
+          fi
           failed=0
           for area in $AREAS; do
+            if [ -n "$RESUME_AREA" ] && [ "$area" != "$RESUME_AREA" ]; then continue; fi
             echo "Refreshing $area"
+            area_ok=1
             # Collection and self-check each have a separate server budget below 300s.
             # Continue to other areas when one official source is unavailable.
             for command in collect check; do
@@ -48,9 +61,22 @@ jobs:
                 echo "::error::$area $command failed; previous published data retained"
                 cat result.json
                 failed=1
+                area_ok=0
                 break
               fi
               jq '{areaId,complete,passRate,goLive,applications:(.applications // []|length),queue:(.queue // []|length)}' result.json
             done
+            # Report publication state separately: passing QA does not clear a durable pause.
+            if ! curl --fail-with-body --silent --show-error --max-time 30 --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=status&area=$area" > status.json; then
+              echo "::error::$area publication status unavailable"; failed=1; continue
+            fi
+            jq '{areaId,status,publiclyVisible,checksPassed,canResume,publishedRecords,reason}' status.json
+            if [ "$RESUME_AREA" = "$area" ]; then
+              if [ "$area_ok" -ne 1 ]; then echo "::error::$area fresh checks failed; resume was not attempted"; continue; fi
+              if ! curl --fail-with-body --silent --show-error --max-time 120 --header "Authorization: Bearer $CRON_SECRET" "$BASE?command=resume&area=$area" > resume.json; then
+                echo "::error::$area resume refused; publication gates were retained"; cat resume.json; failed=1; continue
+              fi
+              jq '{areaId,status,publiclyVisible,publishedRecords,reason}' resume.json
+            fi
           done
           exit "$failed"

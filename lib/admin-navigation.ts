@@ -70,6 +70,7 @@ export function adminActionHelp(label:string,post=false):{description:string;con
   [/rescan|scan next/,"Queue or scan source documents using existing limits and save image-review results.",true],
   [/approve|apply fix|reject/,"Record the review decision for the selected evidence or exception; public eligibility follows existing checks.",true],
   [/undo/,"Restore the previous values for that recorded review batch.",true],
+  [/resume.*publication/,"Resume public display only after the current self-check, recorded approval and reviewed snapshot match.",true],
   [/pause/,"Pause publication for this jurisdiction using the existing publication switch.",true],
   [/mark resolved|reopen/,"Update this correction report's follow-up status.",true],
   [/send|waitlist/,"Send the described email only through the existing delivery and owner-approval gates.",true],
