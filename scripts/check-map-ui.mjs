@@ -16,6 +16,8 @@ fs.mkdirSync(out,{recursive:true});
 const records = JSON.parse(fs.readFileSync("tests/fixtures/nampa-map-clicks.json","utf8"));
 const boundaries = JSON.parse(fs.readFileSync("public/map-data/boundaries.json","utf8"));
 const item = records[0].map, project = records[0].project;
+const publicationCheck=process.argv.includes("--publication-cache");
+const adaCases=JSON.parse(fs.readFileSync("data/review/ada-county.json","utf8")).map.cases;
 const satelliteCheck=process.argv.includes("--satellite"),satelliteLayer="law-satellite-basemap";
 const imageryTile=await sharp({create:{width:256,height:256,channels:3,background:{r:75,g:100,b:65}}}).png().toBuffer();
 const area = {id:"nampa",name:"Nampa",stateAbbreviation:"ID",href:"/us/id/nampa",center:item.centroid,bounds:[-117,43,-116,44],status:"live"};
@@ -52,19 +54,19 @@ const browser=await chromium.launch({headless:true,...(process.env.LAW_PLAYWRIGH
 try{
  for(const mobile of [false,true]){
   const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:900},hasTouch:mobile,isMobile:mobile}),page=await context.newPage(),errors=[];
-  page.on("pageerror",e=>{errors.push(e.message);console.error("Browser:",e.message);});let rasterRequests=0;
+  page.on("pageerror",e=>{errors.push(e.message);console.error("Browser:",e.message);});let rasterRequests=0,fixtureRevision="before-publication";
   await page.route("**/*",route=>{
    const u=new URL(route.request().url()),url=u.pathname;
    if(u.hostname==="tiles.openfreemap.org")return route.fulfill({json:{version:8,sources:{base:{type:"geojson",data:{type:"FeatureCollection",features:[]}}},layers:[{id:"background",type:"background",paint:{"background-color":"#e2e8f0"}},{id:"base-roads",type:"line",source:"base"},{id:"base-road-labels",type:"symbol",source:"base"},{id:"base-places",type:"symbol",source:"base"}]}});
    if(u.hostname==="basemap.nationalmap.gov"){rasterRequests++;return route.fulfill({contentType:"image/png",headers:{"access-control-allow-origin":"*"},body:imageryTile});}
    if(u.origin!==origin)return route.abort();
-   const json=url==="/api/map/meta"?{revision:"fixture",areas:[area]}:url==="/api/map/cases"?packViewport({cases:records.map(r=>({...r.map,id:"nampa:"+r.id,areaId:"nampa"})),summaries:[],truncated:false,updatedAt:mapData.updatedAt,bounds:area.bounds}):url==="/api/map/coverage"?{areas:["Nampa"]}:url==="/api/map/project"?project:url==="/api/map/boundaries"?boundaries:url==="/api/maps/nampa"?(u.searchParams.get("layer")==="flum"?landUse:mapData):url==="/api/account/pins"?{pins:Array.from({length:5},(_,i)=>({id:"fixture-"+i,label:"Test pin "+(i+1),coordinates:[item.centroid[0]+i*.002,item.centroid[1]],radiusMiles:1,alertsEnabled:false}))}:url.startsWith("/admin/jurisdictions/")?project:undefined;
+   const json=url==="/api/map/meta"?{revision:fixtureRevision,areas:[area]}:url==="/api/map/cases"?packViewport({cases:[...records.map(r=>({...r.map,id:"nampa:"+r.id,areaId:"nampa"})),...(publicationCheck&&fixtureRevision==="after-publication"&&u.searchParams.get("v")==="publication-v2:after-publication"?adaCases.map(c=>({...c,id:"ada-county:"+c.id,areaId:"ada-county",geometry:Number(u.searchParams.get("zoom"))<11?null:c.geometry})):[])],summaries:[],truncated:false,updatedAt:mapData.updatedAt,bounds:area.bounds}):url==="/api/map/coverage"?{areas:["Nampa"]}:url==="/api/map/project"?project:url==="/api/map/boundaries"?boundaries:url==="/api/maps/nampa"?(u.searchParams.get("layer")==="flum"?landUse:mapData):url==="/api/account/pins"?{pins:Array.from({length:5},(_,i)=>({id:"fixture-"+i,label:"Test pin "+(i+1),coordinates:[item.centroid[0]+i*.002,item.centroid[1]],radiusMiles:1,alertsEnabled:false}))}:url.startsWith("/admin/jurisdictions/")?project:undefined;
    if(json)return route.fulfill({json});
    if(url.startsWith("/api/"))return route.fulfill({json:{projects:[],areas:[]}});
    return route.continue();
   });
   const prefix=mobile?"mobile":"desktop";
-  for(const view of ["home","project","area","coverage","admin"]){
+  for(const view of (publicationCheck?["home"]:["home","project","area","coverage","admin"])){
    console.log(prefix+": checking "+view);
    await page.goto(origin+"/"+view);await page.locator(".law-map-attribution").waitFor();
    const attribution=page.locator(".maplibregl-ctrl-attrib"),toggle=attribution.locator("summary");
@@ -76,10 +78,33 @@ try{
    for(const credit of ["OpenFreeMap","OpenMapTiles","OpenStreetMap"])await attribution.getByRole("link",{name:credit,exact:true}).waitFor();
    if(mobile)await toggle.tap();else await toggle.click();assert.equal(await attribution.getAttribute("open"),null);
    passed.push(prefix+": "+view+" has one collapsed attribution, one icon, and expandable provider links");
+    if(publicationCheck){
+    await page.waitForFunction(()=>window.__lawTestMap?.getStyle().sources["law-points"]?.data.features.length>0);
+    assert(!(await page.evaluate(()=>window.__lawTestMap.getStyle().sources["law-points"].data.features.some(f=>f.properties.id.startsWith("ada-county:")))));
+    fixtureRevision="after-publication";
+    await page.reload();await page.locator(".law-map-attribution").waitFor();
+    const target=adaCases.find(c=>c.geometry&&c.centroid[0]>-116.2&&c.centroid[1]<43.6);
+    await page.evaluate(center=>window.__lawTestMap.jumpTo({center,zoom:10}),target.centroid);
+    await page.waitForFunction(()=>window.__lawTestMap.getStyle().sources["law-points"].data.features.some(f=>f.properties.id.startsWith("ada-county:")));
+    await page.waitForFunction(async()=>{
+     const m=window.__lawTestMap,p=m.project(m.getCenter());
+     const hits=m.queryRenderedFeatures([[p.x-60,p.y-60],[p.x+60,p.y+60]],{layers:["law-clusters","law-dots"]});
+     for(const hit of hits){
+      if(String(hit.properties.id).startsWith("ada-county:"))return true;
+      if(hit.properties.cluster_id!==undefined){const leaves=await m.getSource("law-points").getClusterLeaves(hit.properties.cluster_id,1000,0);if(leaves.some(f=>f.properties.id.startsWith("ada-county:")))return true;}
+     }
+     return false;
+    });
+    passed.push(prefix+": published Ada appears as overview markers/clusters despite old cell responses");
+    await page.evaluate(()=>window.__lawTestMap.jumpTo({zoom:12}));
+    await page.waitForFunction(()=>window.__lawTestMap.getStyle().sources["law-polygons"].data.features.some(f=>f.properties.id.startsWith("ada-county:")));
+    passed.push(prefix+": same published Ada records appear as polygons when zooming in");
+    continue;
+   }
    if(satelliteCheck){
     await page.waitForFunction(()=>window.__lawTestMap?.getLayer("law-satellite-basemap")&&window.__lawTestMap.loaded()&&!window.__lawTestMap.isMoving());
 
-    const openLayers=async()=>{if(view==="home"){const button=page.getByRole("button",{name:"Layers",exact:true});if(await button.getAttribute("aria-expanded")!=="true")await button.click();}else await page.locator(".law-basemap-layers:not([open])>summary").click();};
+   const openLayers=async()=>{if(view==="home"){const button=page.getByRole("button",{name:"Layers",exact:true});if(await button.getAttribute("aria-expanded")!=="true")await button.click();}else await page.locator(".law-basemap-layers:not([open])>summary").click();};
     await openLayers();
     if(view==="area"||view==="project"){await page.getByRole("checkbox",{name:"Future land use",exact:true}).check();await page.waitForFunction(()=>window.__lawTestMap.getStyle().sources.flum.data.features.length>0);}
     const before=await page.evaluate(()=>{const m=window.__lawTestMap;return {center:m.getCenter().toArray(),zoom:m.getZoom(),time:performance.timeOrigin,overlays:m.getStyle().layers.filter(l=>!l.id.startsWith("base-")&&l.id!=="background"&&l.id!=="law-satellite-basemap")};});
@@ -127,6 +152,7 @@ try{
     passed.push(prefix+": project-pane share uses the shared dismissible notice");
    }
   }
+  if(publicationCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
   await page.goto(origin+"/notices");await page.getByRole("button",{name:"Show notice",exact:true}).click();
   const notice=page.locator(".law-map-notice"),close=notice.getByRole("button",{name:"Dismiss message"});
   await close.focus();await page.waitForTimeout(4300);assert.equal(await notice.count(),1);

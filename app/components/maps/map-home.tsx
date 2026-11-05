@@ -26,6 +26,7 @@ import {
 } from "@/lib/maps/types";
 import {
   gridCells,
+  viewportRequest,
   zoomTier,
   CASE_OUTLINE_ZOOM,
   caseInFilter,
@@ -743,19 +744,11 @@ export default function MapHome() {
       try {
         const responses = await Promise.all(
           cells.map(async (cell) => {
-            const key = cell.join(",") + "@" + z;
+            const key = viewportRequest(cell,z,revision.current);
             if (cache.current.has(key)) return cache.current.get(key)!;
             let promise = inflight.current.get(key);
             if (!promise) {
-              promise = fetch(
-                "/api/map/cases?" +
-                  new URLSearchParams({
-                    bbox: cell.join(","),
-                    zoom: String(z),
-                    compact: "1",
-                    v:"resident-policy-v1",
-                  }),
-              )
+              promise = fetch(key)
                 .then(async (r) => {
                   if (!r.ok)
                     throw Error("Map data is temporarily unavailable.");
