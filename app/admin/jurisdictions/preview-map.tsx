@@ -1,5 +1,7 @@
 "use client";
+import {BasemapLayers} from "@/app/components/maps/basemap-switch";
 import MapNotice from "@/app/components/maps/map-notice";
+import {installBasemap} from "@/lib/maps/basemap";
 import {addMapAttribution} from "@/lib/maps/attribution";
 import "@/app/components/maps/attribution.css";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
@@ -25,7 +27,7 @@ export default function PreviewMap({boundaries,cases}:{boundaries:FeatureCollect
    lib.setWorkerUrl("/maplibre/worker.mjs");
    if(window.innerWidth<700)lib.setWorkerCount(1);
    const m=new lib.Map({container:container.current,style:"https://tiles.openfreemap.org/styles/liberty",center:[-116.24,43.55],zoom:10,attributionControl:false});
-   map.current=m;m.addControl(new lib.NavigationControl({showCompass:false}),"top-right");addMapAttribution(m,lib);
+   map.current=m;m.addControl(new lib.NavigationControl({showCompass:false}),"top-right");addMapAttribution(m,lib);installBasemap(m);
    m.on("error",event=>{if(active)setError("Map renderer: "+(event.error?.message??"A map resource could not load").slice(0,180)+". Project records are available in the list below.");});
    m.once("style.load",()=>{
     if(!active)return;
@@ -56,6 +58,7 @@ export default function PreviewMap({boundaries,cases}:{boundaries:FeatureCollect
   return()=>{active=false;map.current?.remove();map.current=null;};
  },[boundaries,cases,data]);
  return <section aria-label="Private project map" className="space-y-2">
+  <BasemapLayers/>
   <p role="status" className="text-sm">{error?"Map needs attention. ":!loaded?"Loading map… ":""}{data.markers.features.length} projects with verified mapped boundaries. {data.markers.features.length?"Select a colored marker to open a project.":"No project location is verified for this view."}</p>
   <div className="relative h-[65vh] min-h-[440px] overflow-hidden rounded-xl border">
    <div ref={container} className="h-full w-full"/>

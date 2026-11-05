@@ -1,5 +1,7 @@
 "use client";
+import {BasemapLayers} from "@/app/components/maps/basemap-switch";
 import MapNotice from "@/app/components/maps/map-notice";
+import {installBasemap} from "@/lib/maps/basemap";
 import {addMapAttribution} from "@/lib/maps/attribution";
 import "@/app/components/maps/attribution.css";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
@@ -19,7 +21,7 @@ export default function CoverageMap({areas}:{areas:AreaDefinition[]}){
    const published=payload.polygons.features.map(f=>f.properties);setCovered(published);
    lib.setWorkerUrl("/maplibre/worker.mjs");
    map=new lib.Map({container:ref.current,style:"https://tiles.openfreemap.org/styles/liberty",center:areas[0]?.center??[-98,39],zoom:6,scrollZoom:false,attributionControl:false});
-   addMapAttribution(map,lib);
+   addMapAttribution(map,lib);installBasemap(map);
    resize=new ResizeObserver(()=>map?.resize());resize.observe(ref.current);
    map.addControl(new lib.NavigationControl({showCompass:false}),"top-right");
    map.on("load",()=>{
@@ -49,6 +51,7 @@ export default function CoverageMap({areas}:{areas:AreaDefinition[]}){
   return()=>{disposed=true;popup?.remove();resize?.disconnect();map?.remove();};
  },[areas]);
  return <div className="flex min-h-0 flex-col lg:max-h-[70vh]">
+  <BasemapLayers/>
   <div ref={ref} role="region" aria-label="Coverage map: cities have colored fills, county coverage has a bold outline, coming-soon areas have dashed gray boundaries" className="h-[300px] shrink-0 overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100 lg:h-auto lg:min-h-0 lg:flex-1 dark:border-zinc-800"/>
   {failed&&<MapNotice message="Map unavailable. Choose an area from the list." kind="error" onDismiss={()=>setFailed(false)}/>}
   <div aria-label="Coverage legend" className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-zinc-600 dark:text-zinc-400">

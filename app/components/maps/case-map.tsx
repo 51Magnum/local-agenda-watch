@@ -1,5 +1,7 @@
 "use client";
+import {BasemapLayers} from "./basemap-switch";
 import MapNotice, {useMapNotice} from "./map-notice";
+import {installBasemap} from "@/lib/maps/basemap";
 import {addMapAttribution} from "@/lib/maps/attribution";
 import "@/app/components/maps/attribution.css";
 import {projectPolygonFeature} from "@/lib/maps/project-feature";
@@ -117,7 +119,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       instance.scrollZoom.setWheelZoomRate(1 / 900);
       instance.scrollZoom.setZoomRate(1 / 200);
       instance.addControl(new lib.NavigationControl(), "top-right");
-      addMapAttribution(instance, lib);
+      addMapAttribution(instance,lib);installBasemap(instance);
       function sizePopup() {
         if (!instance || !popup.current?.getElement().classList.contains("law-case-popup")) return;
         const element = popup.current.getElement(), viewport = instance.getContainer();
@@ -318,7 +320,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
         <div className="law-map-toggles">
           {combined&&<label>Radius <select aria-label="Search radius" value={radius} onChange={e=>{const miles=Number(e.target.value);setRadius(miles);const url=new URL(window.location.href);url.searchParams.set("r",String(miles));window.history.replaceState(null,"",url.pathname+url.search);}}>{[.25,.5,1,2,3,5,10].map(r=><option key={r} value={r}>{r} mi</option>)}</select></label>}
           {!compact && !combined && <label title={location ? "Show only projects within one mile of your selected location" : "Search an address or drop a pin first"}><input type="checkbox" checked={withinMile} disabled={!location} onChange={(e) => toggleNearby(e.target.checked)}/> Within 1 mile</label>}
-          {data.flum.layerUrl && <label><input type="checkbox" checked={flumOn} onChange={(e) => { setFlumOn(e.target.checked); const url=new URL(window.location.href); if(e.target.checked)url.searchParams.set("flum","1");else url.searchParams.delete("flum");window.history.replaceState(null,"",url.pathname+url.search+url.hash); }}/> Future land use</label>}
+          <BasemapLayers>{data.flum.layerUrl && <label><input type="checkbox" checked={flumOn} onChange={(e) => { setFlumOn(e.target.checked); const url=new URL(window.location.href); if(e.target.checked)url.searchParams.set("flum","1");else url.searchParams.delete("flum");window.history.replaceState(null,"",url.pathname+url.search+url.hash); }}/> Future land use</label>}</BasemapLayers>
           {!compact && <details className="law-filter-menu" onPointerEnter={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = true; }} onPointerLeave={(e) => { if (e.pointerType === "mouse") e.currentTarget.open = false; }} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }} onKeyDown={(e) => { if (e.key === "Escape") { e.currentTarget.open = false; e.currentTarget.querySelector("summary")?.focus(); } }}><summary className="law-filter-button"><span aria-hidden="true">☷</span> Filters{hiddenStages.length + hiddenTypes.length > 0 ? " •" : ""}</summary><div>
             <div className="law-filter-groups">
               <fieldset><legend>Stage</legend>
