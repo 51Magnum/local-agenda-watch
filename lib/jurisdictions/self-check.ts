@@ -5,7 +5,7 @@ import {createHash} from "node:crypto";
 import type {Application} from "./adapters/types";
 import type {JurisdictionDefinition} from "./types";
 import type {StagingSnapshot} from "./store";
-import {snapshotHash} from "./snapshot-hash";
+import {snapshotHash,contentHash} from "./snapshot-hash";
 import {applicationTitle,primaryType,procedureTitleLabel} from "./application-copy";
 import {coverageEligible} from "./application-geolocation";
 import {collectionCoverage} from "./boundary-source";
@@ -19,7 +19,7 @@ export type Proposal={title?:string;hideDocuments?:boolean;reason:string;aiGener
 export type ExceptionDecision={areaId:string;recordId:string;sourceHash:string;action:"approve"|"fix"|"hide";reviewer:string;proposal?:Proposal};
 export type RecordChecks={recordId:string;sourceHash:string;checks:Check[];publish:boolean;title:string;proposal?:Proposal;reviewer?:string;hidden?:boolean};
 export type SelfCheckReport={areaId:string;createdAt:string;snapshotHash:string;passRate:number;records:RecordChecks[];counts:Record<string,{pass:number;fail:number;uncertain:number}>;coverage:Check[];agendaItems:{accounted:number;total:number};unmatched:{caseIds:string[];sourceUrl:string;reason:string}[];exclusions:Record<string,number>;queue:{recordId:string;sourceHash:string;check:Check;proposal?:Proposal}[];aiCostUsd:number;goLive:boolean;decision:string};
-export const sourceHash=(a:Application)=>createHash("sha256").update(JSON.stringify([a.recordId,a.relatedCaseNumbers,a.type,a.description,a.sourceFields,a.recordUrl,a.geometry])).digest("hex");
+export const sourceHash=(a:Application)=>contentHash([a.recordId,a.relatedCaseNumbers,a.type,a.description,a.sourceFields,a.recordUrl,a.geometry]);
 const words=(text:string):string[]=>text.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)??[];
 export function titleFromSource(title:string,a:Application,order?:string[]){
  const source=new Set(words(a.type+" "+a.description));
