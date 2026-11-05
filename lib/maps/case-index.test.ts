@@ -1,4 +1,4 @@
-import { expect, it, vi } from "vitest";
+import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import { PGlite } from "@electric-sql/pglite";
 const h = vi.hoisted(() => ({ db: null as unknown as PGlite, calls: 0, sql:[] as string[] }));
 vi.mock("pg", () => ({
@@ -32,9 +32,10 @@ vi.mock("@/lib/project-content-store",()=>({readProjectContent:async()=>({})}));
 vi.mock("@/lib/residential-privacy-store",()=>({privacyOverrides:async()=>({})}));
 import {routeJurisdictions} from "../jurisdictions/registry";
 import { cachedViewport, exportMapFeatures, siteMembers, projectDirectory } from "./case-index";
+beforeAll(async()=>{h.db=new PGlite();await h.db.waitReady;});
+afterAll(async()=>{await h.db.close();});
 it("indexes old snapshots once, deduplicates across areas, returns only lightweight features and performs no SQL on repeated cached views", async () => {
-  const db = new PGlite();
-  h.db = db;
+  const db = h.db;
   vi.stubEnv("DATABASE_URL", "test");
   await db.exec(
     "CREATE TABLE law_map_cache(jurisdiction text PRIMARY KEY,snapshot jsonb);CREATE TABLE law_map_index_meta(id text PRIMARY KEY,updated_at timestamptz);INSERT INTO law_map_index_meta VALUES('dates-v1',now())",
@@ -126,6 +127,5 @@ it("indexes old snapshots once, deduplicates across areas, returns only lightwei
     expect(h.calls).toBe(directoryCalls);
   } finally {
     vi.unstubAllEnvs();
-    await db.close();
   }
 });
