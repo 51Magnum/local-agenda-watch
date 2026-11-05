@@ -10,12 +10,17 @@ it("automatically applies the deploy migrations twice without changing the schem
    await db.exec(sql);return {rows:[]};
   }} as unknown as Parameters<typeof applyOnboardingMigrations>[0];
   await applyOnboardingMigrations(client);await applyOnboardingMigrations(client);
-  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(3);
+  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(4);
   expect((await db.query("SELECT * FROM law_jurisdiction_exceptions")).rows).toHaveLength(0);
-  await db.exec(readFileSync("migrations/20261031_self_check.down.sql","utf8"));
-  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(2);
+  await db.exec(readFileSync("migrations/20261105_collection_progress.down.sql","utf8"));
+  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(3);
   await applyOnboardingMigrations(client);
-  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(3);
+  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(4);
   expect((await db.query("SELECT * FROM law_jurisdiction_exceptions")).rows).toHaveLength(0);
+  expect((await db.query("SELECT * FROM law_jurisdiction_collection_progress")).rows).toHaveLength(0);
+  await db.exec(readFileSync("migrations/20261031_self_check.down.sql","utf8"));
+  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(3);
+  await applyOnboardingMigrations(client);
+  expect((await db.query("SELECT id FROM law_schema_migrations")).rows).toHaveLength(4);
  }finally{await db.close();}
 });
