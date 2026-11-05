@@ -1,3 +1,4 @@
+import {mapPublicationRevision} from "./publication-revision";
 import {normalizeProjectGeometry} from "./project-geometry";
 import {jurisdiction} from "../jurisdictions/registry";
 import {visibleAreas} from "@/lib/areas/registry";
@@ -13,7 +14,7 @@ import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { Pool } from "../database-pool";
 import { bbox, simplify, feature } from "@turf/turf";
 import { unstable_cache, revalidateTag } from "next/cache";
-import { AREAS, getArea, canonicalAreaHref } from "@/lib/areas/registry";
+import { getArea, canonicalAreaHref } from "@/lib/areas/registry";
 import { readMapSnapshot } from "./store";
 import { combineRadiusCases } from "./radius";
 import {productionWritesAllowed,requireProductionMutation} from "../runtime-environment";
@@ -257,7 +258,12 @@ async function loadViewport(
     bounds: b,
   };
 }
-export async function cachedViewport(bounds:Bounds,zoom:number){const tags=Object.values(AREAS).filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);const result=await unstable_cache(loadViewport,["viewport-cases-v10-resident-policy",...reviewCacheKeys],{revalidate:86400,tags:[...tags,MAP_INDEX_TAG,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);const visible=new Set((await visibleAreas()).map(a=>a.id));return {...result,cases:result.cases.filter(c=>visible.has(c.areaId!)&&(!c.members||c.members.every(m=>visible.has(m.areaId)))),summaries:result.summaries.filter(s=>visible.has(s.id))};}
+export async function cachedViewport(bounds:Bounds,zoom:number){
+ const areas=await visibleAreas(),visible=new Set(areas.map(a=>a.id));
+ const tags=areas.filter(a=>{const b=bbox(a.boundary);return zoom<9||b[0]<=bounds[2]&&b[2]>=bounds[0]&&b[1]<=bounds[3]&&b[3]>=bounds[1];}).map(a=>"map-area:"+a.id);
+ const result=await unstable_cache(loadViewport,["viewport-cases-v11-publication",mapPublicationRevision("",areas),...reviewCacheKeys],{revalidate:86400,tags:[...tags,MAP_INDEX_TAG,PRIVACY_TAG,"case-timeline-v2"]})(bounds,zoom);
+ return {...result,cases:result.cases.filter(c=>visible.has(c.areaId!)&&(!c.members||c.members.every(m=>visible.has(m.areaId)))),summaries:result.summaries.filter(s=>visible.has(s.id))};
+}
 async function manifest() {
   let counts: { area_id: string; count: number; upcoming: number }[] = [],
     revision = "local";
@@ -320,7 +326,7 @@ const cachedManifest = unstable_cache(manifest, ["map-manifest-v1",...reviewCach
   tags: [MAP_INDEX_TAG, PRIVACY_TAG],
 });
 
-export async function mapManifest(){const result=await cachedManifest(),visible=new Set((await visibleAreas()).map(a=>a.id));return {...result,areas:result.areas.filter(a=>visible.has(a.id)),summaries:result.summaries.filter(a=>visible.has(a.id))};}
+export async function mapManifest(){const result=await cachedManifest(),areas=await visibleAreas(),visible=new Set(areas.map(a=>a.id));return {...result,revision:mapPublicationRevision(result.revision,areas),areas:result.areas.filter(a=>visible.has(a.id)),summaries:result.summaries.filter(a=>visible.has(a.id))};}
 
 /** Authenticated export is paged below the serverless response limit; only public map properties leave Neon. */
 export async function exportMapFeatures(cursor = "") {

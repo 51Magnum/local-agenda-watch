@@ -106,3 +106,8 @@ export type MapAreaInfo = {
 };
 export const commonStageLabel = (stage: string) =>
   stage === "P&Z" ? "Hearing" : stage;
+
+/** One revision for CDN URLs and the browser cell cache at every zoom level. */
+export function viewportRequest(bounds:Bounds,zoom:number,revision:string){
+ return "/api/map/cases?"+new URLSearchParams({bbox:bounds.join(","),zoom:String(zoom),compact:"1",v:"publication-v2:"+revision});
+}
