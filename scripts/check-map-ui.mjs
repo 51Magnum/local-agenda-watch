@@ -16,6 +16,7 @@ fs.mkdirSync(out,{recursive:true});
 const records = JSON.parse(fs.readFileSync("tests/fixtures/nampa-map-clicks.json","utf8"));
 const boundaries = JSON.parse(fs.readFileSync("public/map-data/boundaries.json","utf8"));
 const item = records[0].map, project = records[0].project;
+const markerCheck=process.argv.includes("--markers");
 const publicationCheck=process.argv.includes("--publication-cache");
 const adaCases=JSON.parse(fs.readFileSync("data/review/ada-county.json","utf8")).map.cases;
 const satelliteCheck=process.argv.includes("--satellite"),satelliteLayer="law-satellite-basemap";
@@ -60,13 +61,13 @@ try{
    if(u.hostname==="tiles.openfreemap.org")return route.fulfill({json:{version:8,sources:{base:{type:"geojson",data:{type:"FeatureCollection",features:[]}}},layers:[{id:"background",type:"background",paint:{"background-color":"#e2e8f0"}},{id:"base-roads",type:"line",source:"base"},{id:"base-road-labels",type:"symbol",source:"base"},{id:"base-places",type:"symbol",source:"base"}]}});
    if(u.hostname==="basemap.nationalmap.gov"){rasterRequests++;return route.fulfill({contentType:"image/png",headers:{"access-control-allow-origin":"*"},body:imageryTile});}
    if(u.origin!==origin)return route.abort();
-   const json=url==="/api/map/meta"?{revision:fixtureRevision,areas:[area]}:url==="/api/map/cases"?packViewport({cases:[...records.map(r=>({...r.map,id:"nampa:"+r.id,areaId:"nampa"})),...(publicationCheck&&fixtureRevision==="after-publication"&&u.searchParams.get("v")==="publication-v2:after-publication"?adaCases.map(c=>({...c,id:"ada-county:"+c.id,areaId:"ada-county",geometry:Number(u.searchParams.get("zoom"))<11?null:c.geometry})):[])],summaries:[],truncated:false,updatedAt:mapData.updatedAt,bounds:area.bounds}):url==="/api/map/coverage"?{areas:["Nampa"]}:url==="/api/map/project"?project:url==="/api/map/boundaries"?boundaries:url==="/api/maps/nampa"?(u.searchParams.get("layer")==="flum"?landUse:mapData):url==="/api/account/pins"?{pins:Array.from({length:5},(_,i)=>({id:"fixture-"+i,label:"Test pin "+(i+1),coordinates:[item.centroid[0]+i*.002,item.centroid[1]],radiusMiles:1,alertsEnabled:false}))}:url.startsWith("/admin/jurisdictions/")?project:undefined;
+   const json=url==="/api/map/meta"?{revision:fixtureRevision,areas:[area]}:url==="/api/map/cases"?packViewport({cases:[...(markerCheck?records.slice(0,1):records).map(r=>({...r.map,id:"nampa:"+r.id,areaId:"nampa"})),...(publicationCheck&&fixtureRevision==="after-publication"&&u.searchParams.get("v")==="publication-v2:after-publication"?adaCases.map(c=>({...c,id:"ada-county:"+c.id,areaId:"ada-county",geometry:Number(u.searchParams.get("zoom"))<11?null:c.geometry})):[])],summaries:[],truncated:false,updatedAt:mapData.updatedAt,bounds:area.bounds}):url==="/api/map/coverage"?{areas:["Nampa"]}:url==="/api/map/project"?project:url==="/api/map/boundaries"?boundaries:url==="/api/maps/nampa"?(u.searchParams.get("layer")==="flum"?landUse:mapData):url==="/api/account/pins"?{pins:Array.from({length:5},(_,i)=>({id:"fixture-"+i,label:"Test pin "+(i+1),coordinates:[item.centroid[0]+i*.002,item.centroid[1]],radiusMiles:1,alertsEnabled:false}))}:url.startsWith("/admin/jurisdictions/")?project:undefined;
    if(json)return route.fulfill({json});
    if(url.startsWith("/api/"))return route.fulfill({json:{projects:[],areas:[]}});
    return route.continue();
   });
   const prefix=mobile?"mobile":"desktop";
-  for(const view of (publicationCheck?["home"]:["home","project","area","coverage","admin"])){
+  for(const view of ((publicationCheck||markerCheck)?["home"]:["home","project","area","coverage","admin"])){
    console.log(prefix+": checking "+view);
    await page.goto(origin+"/"+view);await page.locator(".law-map-attribution").waitFor();
    const attribution=page.locator(".maplibregl-ctrl-attrib"),toggle=attribution.locator("summary");
@@ -78,6 +79,20 @@ try{
    for(const credit of ["OpenFreeMap","OpenMapTiles","OpenStreetMap"])await attribution.getByRole("link",{name:credit,exact:true}).waitFor();
    if(mobile)await toggle.tap();else await toggle.click();assert.equal(await attribution.getAttribute("open"),null);
    passed.push(prefix+": "+view+" has one collapsed attribution, one icon, and expandable provider links");
+   if(markerCheck){
+    await page.waitForFunction(()=>window.__lawTestMap?.getStyle().sources["law-points"]?.data.features.length===1);
+    await page.evaluate(center=>window.__lawTestMap.jumpTo({center,zoom:10}),item.centroid);
+    await page.waitForFunction(()=>window.__lawTestMap.queryRenderedFeatures({layers:["law-dots"]}).length>0);
+    const paint=await page.evaluate(()=>{const m=window.__lawTestMap;return {single:m.getPaintProperty("law-dots","circle-color"),cluster:m.getPaintProperty("law-clusters","circle-color"),singleRadius:m.getPaintProperty("law-dots","circle-radius"),clusterRadius:m.getPaintProperty("law-clusters","circle-radius"),count:m.getLayoutProperty("law-cluster-count","text-field"),filter:m.getFilter("law-cluster-count")};});
+    assert.equal(paint.single,paint.cluster);assert.equal(paint.singleRadius,paint.clusterRadius);assert.equal(paint.single,"#0f766e");
+    assert.deepEqual(paint.count,["to-string",["coalesce",["get","point_count_abbreviated"],1]]);assert(!paint.filter);
+    passed.push(prefix+": single project uses the same green circle size and count-label layer, displaying 1");
+    const position=await page.evaluate(center=>{const p=window.__lawTestMap.project(center);return {x:p.x,y:p.y};},item.centroid);
+    const canvas=page.locator(".maplibregl-canvas");if(mobile)await canvas.tap({position});else await canvas.click({position});
+    await page.locator(".law-resident-pane").waitFor();
+    passed.push(prefix+": clicking/tapping a single green circle opens its project pane");
+    continue;
+   }
     if(publicationCheck){
     await page.waitForFunction(()=>window.__lawTestMap?.getStyle().sources["law-points"]?.data.features.length>0);
     assert(!(await page.evaluate(()=>window.__lawTestMap.getStyle().sources["law-points"].data.features.some(f=>f.properties.id.startsWith("ada-county:")))));
@@ -152,7 +167,7 @@ try{
     passed.push(prefix+": project-pane share uses the shared dismissible notice");
    }
   }
-  if(publicationCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
+  if(publicationCheck||markerCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
   await page.goto(origin+"/notices");await page.getByRole("button",{name:"Show notice",exact:true}).click();
   const notice=page.locator(".law-map-notice"),close=notice.getByRole("button",{name:"Dismiss message"});
   await close.focus();await page.waitForTimeout(4300);assert.equal(await notice.count(),1);

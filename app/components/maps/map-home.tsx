@@ -452,20 +452,6 @@ export default function MapHome() {
             },
           });
           m.addLayer({
-            id: "law-cluster-count",
-            minzoom: 9,
-            maxzoom: 24,
-            type: "symbol",
-            source: "law-points",
-            filter: ["has", "point_count"],
-            layout: {
-              "text-field": ["get", "point_count_abbreviated"],
-              "text-size": 12,
-              "text-font": ["Noto Sans Regular"],
-            },
-            paint: { "text-color": "#ffffff" },
-          });
-          m.addLayer({
             id: "law-dots",
             minzoom: 9,
             maxzoom: 24,
@@ -473,11 +459,24 @@ export default function MapHome() {
             source: "law-points",
             filter: ["!", ["has", "point_count"]],
             paint: {
-              "circle-radius": 7,
-              "circle-color": ["get", "color"],
+              "circle-radius": 20,
+              "circle-color": "#0f766e",
               "circle-stroke-width": 2,
               "circle-stroke-color": "#ffffff",
             },
+          });
+          m.addLayer({
+            id: "law-cluster-count",
+            minzoom: 9,
+            maxzoom: 24,
+            type: "symbol",
+            source: "law-points",
+            layout: {
+              "text-field": ["to-string",["coalesce",["get","point_count_abbreviated"],1]],
+              "text-size": 12,
+              "text-font": ["Noto Sans Regular"],
+            },
+            paint: { "text-color": "#ffffff" },
           });
           m.addSource("law-summaries", {
             type: "geojson",
