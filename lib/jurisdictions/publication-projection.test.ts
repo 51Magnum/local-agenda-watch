@@ -5,13 +5,14 @@ vi.mock("../areas/registry",()=>({visibleAreas:h.visible}));
 vi.mock("../maps/store",()=>({saveMapSnapshot:h.save}));
 vi.mock("./self-check-store",()=>({readPublished:h.published}));
 vi.mock("./resident-records",()=>({stagedMapSnapshot:h.map}));
+vi.mock("./publication-state",()=>({publicationRecordIds:async()=>["approved","related-alias"]}));
 import {refreshPublicationProjection} from "./publication-projection";
 afterEach(()=>{vi.clearAllMocks();vi.unstubAllEnvs();});
 it("refreshes approved map data and invalidates stale routes, coverage and metadata",async()=>{
  h.published.mockResolvedValue({areaId:"ada-county",applications:[{recordId:"approved"}]});
  await refreshPublicationProjection("ada-county");expect(h.save).toHaveBeenCalledWith({areaId:"ada-county",cases:[{id:"approved"}]});
  expect(h.tag).toHaveBeenCalledWith("map-case-index-v1",{expire:0});expect(h.tag).toHaveBeenCalledWith("map-area:ada-county",{expire:0});
- expect(h.path).toHaveBeenCalledWith("/us/id/ada-county","layout");expect(h.path).toHaveBeenCalledWith("/api/map/meta");expect(h.path).toHaveBeenCalledWith("/api/map/boundaries");
+ expect(h.path).toHaveBeenCalledWith("/us/id/ada-county");expect(h.path).toHaveBeenCalledWith("/us/id/ada-county/map");expect(h.path).toHaveBeenCalledWith("/us/id/ada-county/plan/related-alias");expect(h.path).toHaveBeenCalledWith("/api/map/meta");expect(h.path).toHaveBeenCalledWith("/api/map/boundaries");
 });
 it("never creates public map data for paused/unpublished records",async()=>{
  h.published.mockResolvedValue(undefined);await refreshPublicationProjection("ada-county");

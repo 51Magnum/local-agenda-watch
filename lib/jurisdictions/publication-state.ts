@@ -23,6 +23,12 @@ export async function publicationState(areaId:string){
  const blocker=resumeBlocker(areaId,row);
  return {areaId,status:row.status,publiclyVisible,checksPassed:!!row.data.selfCheck?.goLive,canResume:row.status==="paused"&&!blocker,publishedRecords:row.data.applications.length,passRate:row.data.selfCheck?.passRate,checkedAt:row.data.checkedAt,reason:row.status==="paused"?(blocker??"Checks pass, but publication is paused. An explicit Resume publication action is required."):publiclyVisible?"Publication is enabled.":blocker??"Publication remains in review."};
 }
+/** IDs only, including previously public aliases, for expiring resident-page caches. */
+export async function publicationRecordIds(areaId:string):Promise<string[]>{
+ if(!databaseUrl())return [];
+ const result=await(await jurisdictionDb()).query("SELECT DISTINCT id.value AS id FROM law_jurisdiction_publications p CROSS JOIN LATERAL jsonb_array_elements(p.data->'applications') AS app(value) CROSS JOIN LATERAL jsonb_array_elements_text(jsonb_build_array(app.value->>'recordId') || coalesce(app.value->'relatedCaseNumbers','[]'::jsonb)) AS id(value) WHERE p.area_id=$1 AND id.value IS NOT NULL",[areaId]);
+ return result.rows.map(row=>row.id);
+}
 /** Only an explicit owner/admin action may clear a durable pause. Refresh never does. */
 export async function resumeJurisdiction(areaId:string,reviewer:string){
  requireOnboardingMutation();if(!reviewer.trim())throw Error("Authenticated reviewer required");

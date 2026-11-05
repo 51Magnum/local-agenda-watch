@@ -11,7 +11,7 @@ export async function POST(request:Request){
  const form=await request.formData(),areaId=String(form.get("areaId")??""),action=String(form.get("action")??"");
  if(!/^[a-z]+(?:-[a-z]+)*$/.test(areaId))return new Response("Invalid area",{status:400});
  try{
-  if(action==="pause")await pauseJurisdiction(areaId,reviewer);
+  if(action==="pause"){await pauseJurisdiction(areaId,reviewer);await refreshPublicationProjection(areaId);}
   else if(action==="resume"){await resumeJurisdiction(areaId,reviewer);await refreshPublicationProjection(areaId);}
   else if(["approve","fix","hide"].includes(action))await decideException({areaId,recordId:String(form.get("recordId")??""),sourceHash:String(form.get("sourceHash")??""),action:action as "approve"|"fix"|"hide",reviewer});
   else return new Response("Invalid action",{status:400});
