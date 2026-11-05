@@ -1,6 +1,8 @@
 import {previewMutationResponse} from "@/lib/runtime-environment";
 import {reviewerIdentity,sameOrigin} from "@/lib/timeline/auth";
 import {decideException,pauseJurisdiction} from "@/lib/jurisdictions/self-check-store";
+import {resumeJurisdiction} from "@/lib/jurisdictions/publication-state";
+import {refreshPublicationProjection} from "@/lib/jurisdictions/publication-projection";
 import {revalidatePath,revalidateTag} from "next/cache";
 export async function POST(request:Request){
  const disabled=previewMutationResponse();if(disabled)return disabled;
@@ -10,6 +12,7 @@ export async function POST(request:Request){
  if(!/^[a-z]+(?:-[a-z]+)*$/.test(areaId))return new Response("Invalid area",{status:400});
  try{
   if(action==="pause")await pauseJurisdiction(areaId,reviewer);
+  else if(action==="resume"){await resumeJurisdiction(areaId,reviewer);await refreshPublicationProjection(areaId);}
   else if(["approve","fix","hide"].includes(action))await decideException({areaId,recordId:String(form.get("recordId")??""),sourceHash:String(form.get("sourceHash")??""),action:action as "approve"|"fix"|"hide",reviewer});
   else return new Response("Invalid action",{status:400});
   revalidateTag("map-case-index-v1",{expire:0});revalidateTag("map-area:"+areaId,{expire:0});revalidatePath("/us/id/"+areaId,"layout");revalidatePath("/");

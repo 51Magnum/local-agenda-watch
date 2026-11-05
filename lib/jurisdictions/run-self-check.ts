@@ -35,9 +35,7 @@ export async function runSelfCheck(areaId:string,options:{dryRun?:boolean;snapsh
  }
  if(!options.dryRun){await persistSelfCheck(snapshot,report);
   if(process.env.VERCEL_ENV==="production"){
-   await(await import("../areas/registry")).visibleAreas();
-   const published=await(await import("./self-check-store")).readPublished(areaId);
-   if(published)await(await import("../maps/store")).saveMapSnapshot((await import("./resident-records")).stagedMapSnapshot(d,published));
+   await(await import("./publication-projection")).refreshPublicationProjection(areaId);
   }
   if(!report.goLive&&(report.queue.length>0||report.coverage.some(c=>c.status!=="pass"))&&process.env.VERCEL_ENV==="production"){
    try{await(await import("../email/jobs")).queueCorrectionReceived({id:"self-check-"+areaId+"-"+report.snapshotHash,project:areaId,message:`Jurisdiction self-check needs attention: ${(report.passRate*100).toFixed(2)}% pass; ${report.queue.length} exceptions. No new records are being published. Review /admin/review.`,email:null});}catch{console.error("[self-check] Internal alert queue unavailable; exceptions remain in /admin/review");}
