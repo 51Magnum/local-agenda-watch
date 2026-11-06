@@ -337,6 +337,7 @@ export default function ProjectPane({
             >
               Report an error
             </a>
+            {data.documentNotice&&<p>{data.documentNotice}</p>}
             {!!data.documents?.length && <section><h2>Source documents</h2><ul>{data.documents.map(d=><li key={d.url}><a href={d.url} target="_blank" rel="noreferrer">{d.label}</a></li>)}</ul></section>}
             {!!data.relatedCases?.filter(c => c.areaId !== data.area.id || c.caseId !== item.id).length && <section aria-label="Also on this site">
               <h2>Also on this site</h2>

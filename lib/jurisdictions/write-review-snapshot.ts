@@ -1,3 +1,4 @@
+import {verifiedDocumentSnapshot} from "./verified-documents";
 import {residentMapCase} from "../resident-content-policy";
 import {verificationUrl,sourceRecordId} from "./record-links";
 import {mkdir,writeFile} from "node:fs/promises";
@@ -31,8 +32,9 @@ export function scrubReview<T>(value:T,names:string[]=[],dataUrls:string[]=[]):T
 export async function writeReviewSnapshot(d:JurisdictionDefinition,snapshot:StagingSnapshot,report:SelfCheckReport){
  if(!snapshot.boundary)throw Error("A verified boundary is required to create a review snapshot");
  const names=snapshot.applications.flatMap(a=>Object.entries(a.sourceFields).filter(([key,value])=>/applicant|owner|contact|planner|staff|assigned/i.test(key)&&individualApplicant(value)).map(([,value])=>String(value)));
- const apps=applicationScope(d,snapshot.applications,snapshot.meetings).map(a=>{const r=report.records.find(r=>r.recordId===a.recordId);return {...a,selfCheckTitle:r?.title,hiddenDocuments:a.hiddenDocuments||r?.checks.some(c=>c.check==="privacy"&&c.status!=="pass")};});
- const input={...snapshot,applications:apps,visuals:undefined,aiSamples:[]},records:ReviewSnapshot["records"]=[];
+ const safeSnapshot=verifiedDocumentSnapshot(snapshot,report);
+ const apps=applicationScope(d,safeSnapshot.applications,safeSnapshot.meetings).map(a=>{const r=report.records.find(r=>r.recordId===a.recordId);return {...a,selfCheckTitle:r?.title,hiddenDocuments:a.hiddenDocuments||r?.checks.some(c=>c.check==="privacy"&&c.status!=="pass")};});
+ const input={...safeSnapshot,applications:apps,visuals:undefined,aiSamples:[]},records:ReviewSnapshot["records"]=[];
  const dataUrls=apps.filter(a=>report.records.find(r=>r.recordId===a.recordId)?.checks.find(c=>c.check==="link-resolves-to-case")?.status==="pass").flatMap(a=>verificationUrl(d,sourceRecordId(d,a))??[]);
  const base=`/${d.area.country}/${d.state}/${d.id}`;
  for(const app of apps){

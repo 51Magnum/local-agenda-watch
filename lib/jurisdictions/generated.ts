@@ -26,6 +26,7 @@ export const registryBoundaries=Object.fromEntries([["ada-county:boundary",bound
 export const municipalIds=["kuna","star","middleton","eagle"] as const;
 export const municipalSources={"kuna":entry4.legacyMunicipal,"star":entry9.legacyMunicipal,"middleton":entry6.legacyMunicipal,"eagle":entry3.legacyMunicipal};
 import review0 from "../../data/review/ada-county.json";
-import review1 from "../../data/review/sample-escribe.json";
-export const reviewSnapshots={"ada-county":review0,"sample-escribe":review1};
+import review1 from "../../data/review/boise.json";
+import review2 from "../../data/review/sample-escribe.json";
+export const reviewSnapshots={"ada-county":review0,"boise":review1,"sample-escribe":review2};
 export const siteReviewAreaIds:readonly string[]=[];

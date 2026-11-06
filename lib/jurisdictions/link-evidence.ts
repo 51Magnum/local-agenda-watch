@@ -1,7 +1,8 @@
+import {contentHash} from "./snapshot-hash";
 import {createHash} from "node:crypto";
 import {getDocumentProxy} from "unpdf";
 import {filenameIdentifies,officialDocument} from "./record-links";
-import {attachmentKind} from "./adapters/common";
+import {caseNumbers,attachmentKind} from "./adapters/common";
 import {projectNumber} from "./agenda-projects";
 import type {SourceHttp} from "./http";
 import type {JurisdictionDefinition} from "./types";
@@ -18,6 +19,10 @@ export async function pdfIdentity(bytes:Uint8Array,deadline:number){
 export function linkReader(d:JurisdictionDefinition,snapshot:StagingSnapshot,http:SourceHttp,deadline:number){
  return async(url:string):Promise<LinkEvidence>=>{
   if(Date.now()>deadline)throw Error("Source verification deferred to next refresh");
+  if(d.recordLinks?.availabilityMethod==="HEAD"&&snapshot.applications.some(a=>!a.agendaOnly&&a.recordUrl===url)){
+   const head=await http.request(url,{method:"HEAD"},undefined,true);
+   return {status:head.health.status===304?200:head.health.status??0,text:"",redirectUrl:head.verifiedRedirect,evidenceHash:createHash("sha256").update(JSON.stringify([url,head.verifiedRedirect??head.health.url])).digest("hex")};
+  }
   const refs=snapshot.meetings.flatMap(m=>m.items.flatMap(i=>i.attachments.filter(a=>a.url===url).map(a=>({a,i}))));
   const ids=refs.flatMap(({i})=>i.caseNumbers.map(id=>projectNumber(d,id)??id));
   if(refs.length&&officialDocument(d,url)&&filenameIdentifies(d,url,ids)&&refs.every(({a})=>d.documents.countyAuthoredKinds?.includes(attachmentKind(a.title,a.url)))){
@@ -32,6 +37,7 @@ export function linkReader(d:JurisdictionDefinition,snapshot:StagingSnapshot,htt
    try{text=await pdfIdentity(data.bytes,Math.min(deadline,Date.now()+15000));if(!text.trim())return {status:200,text:"",documentHash,readable:false,reason:"Could not read the first three PDF pages; retry next refresh, no owner action required."};}
    catch{return {status:200,text:"",documentHash,readable:false,reason:"Could not read the PDF; retry next refresh, no owner action required."};}
   }
-  return {status:data.health.status===304?200:data.health.status??0,text,documentHash};
+  const evidenceHash=d.recordLinks?.availabilityMethod==="HEAD"&&!documentHash&&(/text\/html/i.test(data.headers["content-type"]??"")||/^\s*<(?:!doctype|html)/i.test(text))?contentHash([url,caseNumbers(d,text).sort()]):undefined;
+  return {status:data.health.status===304?200:data.health.status??0,text,documentHash,evidenceHash};
  };
 }

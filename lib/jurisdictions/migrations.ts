@@ -4,7 +4,7 @@ import path from "node:path";
 import type {PoolClient} from "pg";
 import {requireProductionMutation} from "../runtime-environment";
 import {jurisdictionDb} from "./store";
-const files=["20261027_jurisdiction_onboarding.up.sql","20261028_onboarding_constraints.up.sql","20261031_self_check.up.sql","20261105_collection_progress.up.sql"];
+const files=["20261027_jurisdiction_onboarding.up.sql","20261028_onboarding_constraints.up.sql","20261031_self_check.up.sql","20261105_collection_progress.up.sql","20261106_source_evidence.up.sql"];
 /** Reuses the existing SQL migration files, atomically, under one database lock. */
 export async function applyOnboardingMigrations(client:Pick<PoolClient,"query">){
  await client.query("BEGIN");

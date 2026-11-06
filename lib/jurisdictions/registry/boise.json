@@ -97,7 +97,7 @@
       "where": "StatusCategory = 'Application in Review'",
       "fields": {
         "id": "RecordID",
-        "name": "RecordName",
+        "name": "RecordID",
         "status": "Status",
         "type": "ProjectType",
         "description": "Description",
@@ -121,7 +121,17 @@
           "street": "StName",
           "suffix": "StSuffix"
         }
-      }
+      },
+      "publicFields": [
+        "RecordID",
+        "Status",
+        "ProjectType",
+        "Description",
+        "FullAddress",
+        "ChildRecords",
+        "ReviewAuthority",
+        "ReviewAuthorityFromType"
+      ]
     },
     "recordUrlTemplate": "https://permits.cityofboise.org/CitizenAccess/Cap/GlobalSearchResults.aspx?QueryText={recordId}"
   },
@@ -285,5 +295,39 @@
       ]
     },
     "sources": {}
+  },
+  "recordLinks": {
+    "kind": "jsApp",
+    "availabilityMethod": "HEAD",
+    "redirects": [
+      {
+        "host": "permits.cityofboise.org",
+        "fromPath": "/CitizenAccess/Cap/GlobalSearchResults.aspx",
+        "toPath": "/CitizenAccess/Cap/CapDetail.aspx",
+        "requiredQuery": [
+          "capID1",
+          "capID2",
+          "capID3",
+          "agencyCode"
+        ],
+        "query": {
+          "agencyCode": "BOISE"
+        }
+      }
+    ],
+    "verifyUrlTemplate": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0/query?where=RecordID%3D%27{recordId}%27&outFields=RecordID,Status,ProjectType,Description,ChildRecords&returnGeometry=false&f=json",
+    "idField": "RecordID",
+    "dataFields": [
+      "RecordID",
+      "Status",
+      "ProjectType",
+      "Description",
+      "ChildRecords"
+    ],
+    "dataLabel": "City records (data)"
+  },
+  "selfCheck": {
+    "minPassRate": 0.95,
+    "documentPolicy": "verified-only"
   }
 }
