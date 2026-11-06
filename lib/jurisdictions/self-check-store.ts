@@ -1,3 +1,4 @@
+import {verifiedDocumentSnapshot} from "./verified-documents";
 import {randomUUID} from "node:crypto";
 import {databaseUrl,requireOnboardingMutation} from "../runtime-environment";
 import {jurisdictionDb,jurisdictionTransaction,type StagingSnapshot,type QaReport} from "./store";
@@ -6,6 +7,7 @@ import type {ExceptionDecision,SelfCheckReport} from "./self-check";
 import {redactSelfCheck} from "./self-check";
 import {readReviewSnapshot,snapshotDrift} from "./review-snapshot";
 export function publicationSnapshot(snapshot:StagingSnapshot,report:SelfCheckReport,previous?:StagingSnapshot){
+ snapshot=verifiedDocumentSnapshot(snapshot,report);
  const oldIds=new Set(previous?.applications.map(a=>a.recordId)??[]),permitted=new Map(report.records.filter(r=>r.publish&&(report.goLive||oldIds.has(r.recordId))).map(r=>[r.recordId,r]));
  const applications=snapshot.applications.filter(a=>permitted.has(a.recordId)).map(a=>{const r=permitted.get(a.recordId)!;return {...a,selfCheckTitle:r.title,aiTitle:!!r.proposal?.title&&r.title===r.proposal.title,hiddenDocuments:!!r.proposal?.hideDocuments};});
  const cases=new Set(applications.flatMap(a=>[a.recordId,...a.relatedCaseNumbers]));

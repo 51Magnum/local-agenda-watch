@@ -56,8 +56,7 @@ jobs:
             # Collection and self-check each have a separate server budget below 300s.
             # Continue to other areas when one official source is unavailable.
             for command in collect check; do
-              attempts=1
-              if [ "$command" = collect ]; then attempts=4; fi
+              attempts=4
               phase_ok=0
               for attempt in $(seq 1 "$attempts"); do
                 if ! curl --fail-with-body --silent --show-error --connect-timeout 15 --max-time 270 \
@@ -66,13 +65,17 @@ jobs:
                   cat result.json
                   break
                 fi
-                jq '{areaId,complete,passRate,goLive,applications:(.applications // []|length),queue:(.queue // []|length),collectionProgress}' result.json
+                jq '{areaId,complete,passRate,goLive,applications:(.applications // []|length),queue:(.queue // []|length),verificationPending,documentsPending,collectionProgress}' result.json
                 if [ "$command" = collect ] && [ "$(jq -r '.complete' result.json)" != true ]; then
                   if jq -e 'any(.health[]?; .state == "blocked")' result.json >/dev/null; then
                     echo "::warning::$area official source is blocked; no immediate retry or bypass"
                     break
                   fi
                   echo "$area collection is unfinished; private progress retained (pass $attempt/$attempts)"
+                  continue
+                fi
+                if [ "$command" = check ] && { [ "$(jq -r '.verificationPending // 0' result.json)" -gt 0 ] || { [ "$attempt" -lt "$attempts" ] && [ "$(jq -r '.documentsPending // 0' result.json)" -gt 0 ]; }; }; then
+                  echo "$area source verification is unfinished; verified evidence retained (pass $attempt/$attempts)"
                   continue
                 fi
                 phase_ok=1

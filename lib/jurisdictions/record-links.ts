@@ -10,8 +10,8 @@ export function restrictedRecordData(d:JurisdictionDefinition,url:string,text:st
  }catch{return false;}
 }
 export function recordDataIssue(text:string,id:string){
- try{const rows=JSON.parse(text).features;if(Array.isArray(rows)&&rows.length!==1){const fields=[...new Set(rows.flatMap(r=>Object.keys(r.attributes??{})))].filter(key=>new Set(rows.map(r=>JSON.stringify(r.attributes?.[key]))).size>1);return `The county query returned ${rows.length} distinct source rows for ${id}; exactly one is required.${fields.length?" Public rows disagree on "+fields.join(", ")+".":""} Review the county record; LAW has not selected a conflicting row for publication.`;}}catch{}
- return "Restricted data query must return exactly one matching APPFILE with only configured public fields.";
+ try{const rows=JSON.parse(text).features;if(Array.isArray(rows)&&rows.length!==1){const fields=[...new Set(rows.flatMap(r=>Object.keys(r.attributes??{})))].filter(key=>new Set(rows.map(r=>JSON.stringify(r.attributes?.[key]))).size>1);return `The official query returned ${rows.length} distinct source rows for ${id}; exactly one is required.${fields.length?" Public rows disagree on "+fields.join(", ")+".":""} Review the official record; LAW has not selected a conflicting row for publication.`;}}catch{}
+ return "Restricted data query must return exactly one matching configured case ID with only configured public fields.";
 }
 export function officialDocument(d:JurisdictionDefinition,url:string){
  try{const u=new URL(url);return u.protocol==="https:"&&!u.username&&!u.password&&(d.documents.officialPaths??[]).some(p=>u.hostname===p.host&&u.pathname.toLowerCase()===p.pathname.toLowerCase()&&Object.entries(p.query??{}).every(([k,v])=>u.searchParams.get(k)===v));}catch{return false;}

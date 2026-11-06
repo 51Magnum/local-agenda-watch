@@ -1,16 +1,17 @@
+import {officialRedirect,type OfficialRedirect} from "./official-redirect";
 import {createHash} from "node:crypto";
 import {mkdir,readFile,writeFile} from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import type {SourceHealth} from "./adapters/types";
 export class SourceFailure extends Error {constructor(public health:SourceHealth){super(health.state+": "+health.url+" — "+health.reason);}}
-export type HttpData={bytes:Uint8Array;health:SourceHealth;headers:Record<string,string>};
+export type HttpData={verifiedRedirect?:string;bytes:Uint8Array;health:SourceHealth;headers:Record<string,string>};
 type Cache={etag?:string;lastModified?:string;headers:Record<string,string>;data:string;at:string};
-const queues=new Map<string,Promise<unknown>>();
+const queues=new Map<string,Promise<unknown>>(),lanes=new Map<string,number>();
 export class SourceHttp {
  readonly checks:SourceHealth[]=[];
- constructor(private options:{fetch?:typeof fetch;cacheDir?:string;maxBytes?:number;delayMs?:number;timeoutMs?:number;deadline?:number;allowedHosts?:string[]}={}){}
- private async work(url:string,init:RequestInit={},maxBytes=this.options.maxBytes??45000000):Promise<HttpData>{
+ constructor(private options:{fetch?:typeof fetch;cacheDir?:string;maxBytes?:number;delayMs?:number;concurrency?:number;timeoutMs?:number;deadline?:number;allowedHosts?:string[];redirects?:OfficialRedirect[]}={}){}
+ private async work(url:string,init:RequestInit={},maxBytes=this.options.maxBytes??45000000,redirectCount=0,stopAtVerifiedRedirect=false):Promise<HttpData>{
   const start=Date.now(),now=new Date().toISOString(),u=new URL(url);
   if(u.protocol!=="https:"||u.username||u.password||/^(localhost|127\.|10\.|192\.168\.|169\.254\.|\[)/i.test(u.hostname)||this.options.allowedHosts&&!this.options.allowedHosts.includes(u.hostname))throw Error("Source URL is outside the configured official hosts");
   const cacheDir=this.options.cacheDir??(process.env.VERCEL?path.join(os.tmpdir(),"law-jurisdiction-http"):path.join(process.cwd(),".data","jurisdiction-http")),hash=createHash("sha256").update(url+JSON.stringify([init.method??"GET",init.body??""])).digest("hex"),file=path.join(cacheDir,hash+".json");
@@ -23,6 +24,12 @@ export class SourceHttp {
    try{
     const r=await(this.options.fetch??fetch)(url,{...init,headers,redirect:"manual",signal:AbortSignal.timeout(Math.max(1,Math.min(this.options.timeoutMs??20000,remaining)))});
     if(r.status===304&&cached){const bytes=new Uint8Array(Buffer.from(cached.data,"base64"));if(bytes.length>maxBytes)throw new SourceFailure(finish("skipped",304,bytes.length,"Cached attachment exceeds byte cap"));return{bytes,health:finish("ok",304,bytes.length),headers:cached.headers};}
+    if(r.status>=300&&r.status<400&&redirectCount<3&&r.headers.get("location")){
+     const target=new URL(r.headers.get("location")!,url);
+     if(officialRedirect(url,target.href,this.options.redirects)){
+      await r.body?.cancel();if(stopAtVerifiedRedirect)return {bytes:new Uint8Array(),health:finish("ok",r.status,0,"Verified configured official redirect"),headers:Object.fromEntries(r.headers),verifiedRedirect:target.href};return this.work(target.href,init,maxBytes,redirectCount+1);
+     }
+    }
     if(r.status>=300&&r.status<400)throw new SourceFailure(finish("unavailable",r.status,0,"Redirect requires verification of the destination: "+(r.headers.get("location")??"")));
     if(Number(r.headers.get("content-length"))>maxBytes){await r.body?.cancel();throw new SourceFailure(finish("skipped",r.status,0,"Attachment exceeds byte cap"));}
     const chunks:Uint8Array[]=[];let length=0;
@@ -35,7 +42,7 @@ export class SourceHttp {
   }
   throw Error("Source retry exhausted");
  }
- async request(url:string,init:RequestInit={},maxBytes?:number){if(Date.now()>=(this.options.deadline??Infinity)){const health:SourceHealth={url,state:"unavailable",latencyMs:0,reason:"Collection time budget exhausted; retry on the next refresh",checkedAt:new Date().toISOString()};this.checks.push(health);throw new SourceFailure(health);}const host=new URL(url).hostname,previous=queues.get(host)??Promise.resolve();const task=previous.catch(()=>{}).then(()=>this.work(url,init,maxBytes));queues.set(host,task.finally(()=>new Promise(resolve=>setTimeout(resolve,this.options.delayMs??250))).catch(()=>{}));return task;}
+ async request(url:string,init:RequestInit={},maxBytes?:number,stopAtVerifiedRedirect=false){if(Date.now()>=(this.options.deadline??Infinity)){const health:SourceHealth={url,state:"unavailable",latencyMs:0,reason:"Collection time budget exhausted; retry on the next refresh",checkedAt:new Date().toISOString()};this.checks.push(health);throw new SourceFailure(health);}const hostname=new URL(url).hostname,count=Math.max(1,Math.min(2,this.options.concurrency??1)),lane=(lanes.get(hostname)??0)%count;lanes.set(hostname,lane+1);const host=hostname+":"+lane,previous=queues.get(host)??Promise.resolve();const task=previous.catch(()=>{}).then(()=>this.work(url,init,maxBytes,0,stopAtVerifiedRedirect));queues.set(host,task.finally(()=>new Promise(resolve=>setTimeout(resolve,this.options.delayMs??250))).catch(()=>{}));return task;}
  async text(url:string,init:RequestInit={},maxBytes?:number){return new TextDecoder().decode((await this.request(url,init,maxBytes)).bytes);}
  async json<T=Record<string,unknown>>(url:string,init:RequestInit={}){return JSON.parse(await this.text(url,init)) as T;}
 }

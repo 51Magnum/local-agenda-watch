@@ -15,6 +15,7 @@ export type PaneData = {
   noHearing?:{message:string;sources:{label:string;url:string}[]};
   aiSummaryPending?:boolean;
   summarySource?:string;
+  documentNotice?:string;
   documents?: {label:string;url:string;hash?:string}[];
   parcels?: string[];
   officialRecords?: { label: string; url: string }[];
