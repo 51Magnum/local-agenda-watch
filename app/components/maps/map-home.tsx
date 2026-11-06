@@ -129,6 +129,7 @@ export default function MapHome() {
     [layers, setLayers] = useState(false),
     [legend, setLegend] = useState(false);
   const changeLayers=useCallback((open:boolean)=>{setLayers(open);if(open)setLegend(false);},[]),changeLegend=useCallback((open:boolean)=>{setLegend(open);if(open)setLayers(false);},[]);
+  const boundaryRevision=useRef("");
   const layersMenu=useMapMenu(layers,changeLayers),legendMenu=useMapMenu(legend,changeLegend);
   const {notice,showNotice,dismissNotice}=useMapNotice();
   const getMap=useCallback(()=>map.current,[]);
@@ -742,7 +743,8 @@ export default function MapHome() {
       setLoading(true);
       const boundaryRequest=loadAreaBoundaries();
       void boundaryRequest.then((d) => {
-        if (current === generation.current && !destroyed.current) {
+        if (current === generation.current && !destroyed.current && boundaryRevision.current!==d.version) {
+          boundaryRevision.current=d.version;
           setBoundaryAreas(d.polygons.features.map(f=>f.properties));
           (m.getSource("law-boundaries") as GeoJSONSource)?.setData(d.polygons);
           (m.getSource("law-area-labels") as GeoJSONSource)?.setData(d.labels);

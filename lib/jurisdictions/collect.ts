@@ -1,6 +1,7 @@
+import {normalizeBoundaryGeometry} from "../maps/boundary-geometry";
 import {verifyBoundarySource,collectionCoverage} from "./boundary-source";
 import {retainRecentOrHeard} from "./collection-window";
-import {difference,feature,featureCollection,simplify} from "@turf/turf";
+import {difference,feature,featureCollection} from "@turf/turf";
 import {jurisdiction} from "./registry";
 import {SourceHttp,SourceFailure} from "./http";
 import {arcgisAdapter,applicationAdapter} from "./adapters/arcgis";
@@ -45,8 +46,8 @@ async function collectWithProgress(areaId:string,options:CollectOptions,lease?:A
  for(const source of d.agenda)if(source.params.hearingsUrl&&source.params.scheduleYear&&source.params.scheduleTables){try{const url=String(source.params.hearingsUrl);snapshot.calendarHints=parseTentativeTable(await http.text(url),url,Number(source.params.scheduleYear),source.params.scheduleTables as {index:number;body:string}[]);}catch{snapshot.complete=false;}}
  await discoverStagingLibraries(snapshot,Math.min(deadline-20000,Date.now()+30000));
  for(const m of snapshot.meetings)for(const a of [...m.attachments,...m.items.flatMap(i=>i.attachments)])if(!allowedAttachment(a,d))snapshot.skipped.push({url:a.url,reason:a.kind==="packet"?"Compiled meeting packet excluded from AI":nativeSampleAllowed(a,d)?"Large report queued for bounded native/page-image sample; remaining pages deferred":a.sizeBytes&&a.sizeBytes>d.documents.maxBytes?"Attachment exceeds native download cap":"Private attendance material excluded",bytes:a.sizeBytes});
- try{const gis=arcgisAdapter(http),boundaryData=await gis.query(d.boundary.url,d.boundary.where);verifyBoundarySource(d.boundary,boundaryData);const boundary=combinePolygons(boundaryData.features);if(!boundary)throw Error("Boundary source has no polygons");snapshot.boundary=simplify(feature(boundary),{tolerance:.00005,highQuality:true}).geometry;
-  if(d.clipRule){const cities=(await gis.query(d.clipRule.layer.url,d.clipRule.layer.where)).features.filter(f=>polygonGeometry(f.geometry)).map(f=>simplify(feature(f.geometry as CaseGeometry),{tolerance:.00005,highQuality:true}));const clipped=difference(featureCollection([feature(snapshot.boundary),...cities]));if(!clipped)throw Error("County clipping produced no coverage");snapshot.coverageBoundary=clipped.geometry;}
+ try{const gis=arcgisAdapter(http),boundaryData=await gis.query(d.boundary.url,d.boundary.where);verifyBoundarySource(d.boundary,boundaryData);const boundary=combinePolygons(boundaryData.features);if(!boundary)throw Error("Boundary source has no polygons");snapshot.boundary=normalizeBoundaryGeometry(boundary,null);
+  if(d.clipRule){const cities=(await gis.query(d.clipRule.layer.url,d.clipRule.layer.where)).features.filter(f=>polygonGeometry(f.geometry)).map(f=>feature(normalizeBoundaryGeometry(f.geometry as CaseGeometry,null)));const clipped=difference(featureCollection([feature(snapshot.boundary),...cities]));if(!clipped)throw Error("County clipping produced no coverage");snapshot.coverageBoundary=normalizeBoundaryGeometry(clipped.geometry,null);}
   snapshot.boundarySource={url:d.boundary.url,where:d.boundary.where};
   if(d.gis.impactAreas)snapshot.impactAreas=await gis.query(d.gis.impactAreas);
  }catch(e){snapshot.complete=false;snapshot.boundary=old?.boundary;snapshot.coverageBoundary=old?.coverageBoundary;snapshot.boundarySource=old?.boundarySource;if(!(e instanceof SourceFailure))snapshot.skipped.push({url:d.boundary.url,reason:String(e)});}
