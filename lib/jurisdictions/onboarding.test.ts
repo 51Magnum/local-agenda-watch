@@ -29,7 +29,7 @@ it("validates every definition and keeps staging areas out of the public registr
  const entries=structuredClone(registryEntries);const boise=entries.find(e=>e.id==="boise")!;boise.launchStatus="public";
  expect(()=>validateJurisdictions(entries)).toThrow("recorded approval");
 });
-it("preserves the original seven area definitions and ordering",()=>{
+it("preserves the seven area configurations and ordering with recorded boundary refreshes",()=>{
  expect(typeof JURISDICTIONS.nampa.recordClient?.getPlan).toBe("function");
  const expected=JSON.parse(fixture("legacy-area-manifest.json"));
  const canonical=(v:unknown):unknown=>Array.isArray(v)?v.map(canonical):v&&typeof v==="object"?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,canonical(v)])):v;

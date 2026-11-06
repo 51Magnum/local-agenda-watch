@@ -1,0 +1,12 @@
+{
+  "source": "https://utility.arcgis.com/usrsvcs/servers/3543690ae3bf41a1a77b9b9b2bc477ca/rest/services/Public/NampaOpenData/MapServer/6",
+  "location": "East Amity Avenue / East Railroad Street, Nampa",
+  "probe": [
+    -116.53215294532967,
+    43.555749944494835
+  ],
+  "officialEdge": [
+    -116.5315810736268,
+    43.55575114127701
+  ]
+}

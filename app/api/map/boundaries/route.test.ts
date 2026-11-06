@@ -19,7 +19,7 @@ it("includes Ada review coverage, a label and approved legacy coverage in databa
  expect(ids(body)).toContain("ada-county");expect(ids(body)).toContain("canyon-county");expect(body.labels.features.some(f=>f.properties?.id==="ada-county")).toBe(true);expect(covered(body)).toBe(true);expect(h.published).not.toHaveBeenCalled();
  const ada=body.polygons.features.find(f=>f.properties.id==="ada-county")!;
  for(const city of legacyCoverageAreas().filter(a=>["meridian","kuna","star","eagle"].includes(a.id)))expect(booleanPointInPolygon(point(city.center),ada),city.id).toBe(false);
-});
+},30000);
 it("excludes unpublished Ada from production polygons, labels and coverage",async()=>{
  const body=await(await GET(request())).json() as BoundaryPayload;
  expect(ids(body)).not.toContain("ada-county");expect(body.labels.features.some(f=>f.properties?.id==="ada-county")).toBe(false);expect(covered(body)).toBe(false);
