@@ -62,3 +62,14 @@ it("serves the prepared archive through bounded range reads, preserving the Brae
   expect(reads.every((r) => r.length < file.length)).toBe(true);
   expect(reads.reduce((n, r) => n + r.length, 0)).toBeLessThan(200000);
 });
+
+it("includes Boise's official Downtown Mixed Use designation and provenance without county double shading",async()=>{
+ const file=await readFile("public"+manifest.url),archive=new PMTiles({getKey:()=>manifest.hash,getBytes:async(offset,length)=>{const bytes=file.subarray(offset,offset+length);return {data:bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength) as ArrayBuffer};}});
+ const lng=-116.2023,lat=43.615,z=12,x=Math.floor((lng+180)/360*2**z),y=Math.floor((1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2*2**z),tile=await archive.getZxy(z,x,y);expect(tile).toBeDefined();
+ const layer=new VectorTile(new PbfReader(new Uint8Array(tile!.data))).layers.flum,matches=[];for(let i=0;i<layer.length;i++){const f=layer.feature(i),g=f.toGeoJSON(x,y,z);if(booleanPointInPolygon(point([lng,lat]),g.geometry as Polygon|MultiPolygon))matches.push(f.properties);}
+ expect(matches).toHaveLength(1);expect(matches[0]).toMatchObject({area:"boise",category:"Downtown Mixed Use",group:"Mixed use",plan:"Blueprint Boise · Future Land Use",jurisdiction:"City of Boise"});expect(matches[0].source).toContain("FutureLandUse/FeatureServer/0");expect(manifest.sourceDates).toHaveProperty("boise");
+});
+
+it("ships client tile metadata without jurisdiction IDs and binds it to the same archive",async()=>{
+ const client=JSON.parse(await readFile("public/flum/client-manifest.json","utf8"));expect(client.hash).toBe(manifest.hash);expect(client.url).toBe(manifest.url);expect(client.legend).toEqual(manifest.legend);expect(client).not.toHaveProperty("sourceDates");expect(JSON.stringify(client)).not.toMatch(/boise|ada-county/);
+});

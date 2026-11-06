@@ -63,6 +63,7 @@ async function loadFlum(id:string):Promise<FlumCache|undefined>{const db=databas
 const cachedFlum=unstable_cache(loadFlum,["flum-storage-v2"],{revalidate:604800,tags:["map-flum"]});
 /** Bounded, authenticated offline export; public map views never call this. */
 export async function exportFlumPage(id:string,offset:number){
+ if(!isPreview()){const data=(await import("./prepared-flum")).preparedFlumSnapshot(id);if(data){const features=data.geojson.features.slice(offset,offset+250);return {updatedAt:data.updatedAt,legend:data.legend,features,nextOffset:offset+features.length<data.geojson.features.length?offset+features.length:undefined};}}
  if(!databaseUrl()){const data=await readFlumSnapshot(id);const features=data?.geojson.features.slice(offset,offset+250)??[];return{updatedAt:data?.updatedAt,legend:data?.legend??[],features,nextOffset:data&&offset+features.length<data.geojson.features.length?offset+features.length:undefined};}
  const db=database();await initialized;
  const result=await db.query(`SELECT snapshot->>'updatedAt' AS "updatedAt",snapshot->'legend' AS legend,jsonb_array_length(snapshot->'geojson'->'features') AS total,
@@ -73,6 +74,7 @@ export async function exportFlumPage(id:string,offset:number){
  return{updatedAt:row.updatedAt,legend:row.legend,features:row.features,nextOffset:offset+row.features.length<row.total?offset+row.features.length:undefined};
 }
 export async function readFlumSnapshot(id:string,options?:{bounds:readonly number[]}){
+ const prepared=(await import("./prepared-flum")).preparedFlumSnapshot(id);if(prepared)return prepared;
  if(isPreview())return undefined;
  if(isSiteReviewArea(id)){const config=(await import("./jurisdictions")).getJurisdiction(id);return config?(await import("./refresh")).fetchFlum(config):undefined;}
  if(!databaseUrl())return(await readMapSnapshot(id))?.flum;

@@ -139,7 +139,7 @@
     "cityLimits": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/Geopolitical/Geopolitical/MapServer/3",
     "impactAreas": "https://gisprodapi.adacounty.id.gov/arcgis/rest/services/LandUse/LandUse/MapServer/20",
     "zoning": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/18",
-    "futureLandUse": "https://gismap.cityofboise.org/arcgis/rest/services/Integration/Accela/MapServer/14",
+    "futureLandUse": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/FutureLandUse/FeatureServer/0",
     "parcels": "https://gismap.cityofboise.org/arcgis/rest/services/Layers/Parcels/MapServer/18"
   },
   "hearingBodies": [
@@ -294,7 +294,9 @@
         }
       ]
     },
-    "sources": {}
+    "sources": {
+      "flum": "https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/FutureLandUse/FeatureServer/0"
+    }
   },
   "recordLinks": {
     "kind": "jsApp",
@@ -330,5 +332,10 @@
   "selfCheck": {
     "minPassRate": 0.95,
     "documentPolicy": "verified-only"
+  },
+  "flum": {
+    "planName": "Blueprint Boise",
+    "label": "Blueprint Boise · Future Land Use",
+    "categoryField": "LandUse"
   }
 }
