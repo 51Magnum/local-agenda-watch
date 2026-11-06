@@ -71,6 +71,7 @@ try{
    await page.evaluate(()=>window.__lawTestMap.jumpTo({center:[-116.2023,43.615],zoom:13}));
    const layer=view==="home"?"law-flum":"flum-fill";
    await page.waitForFunction(id=>{const m=window.__lawTestMap;if(!m.getLayer(id))return false;return m.queryRenderedFeatures(m.project([-116.2023,43.615]),{layers:[id]}).some(f=>(f.properties.category??f.properties.LandUse)==="Downtown Mixed Use");},layer).catch(async e=>{console.log(JSON.stringify(await page.evaluate(id=>{const m=window.__lawTestMap;return {center:m.getCenter().toArray(),zoom:m.getZoom(),loaded:m.loaded(),layer:m.getStyle().layers.find(l=>l.id===id),sources:Object.keys(m.getStyle().sources),features:m.getLayer(id)?m.queryRenderedFeatures({layers:[id]}).slice(0,5).map(f=>f.properties):[]};},layer)));throw e;});
+   if(view==="home"){await page.getByRole("checkbox",{name:"Project markers",exact:true}).uncheck();await page.waitForFunction(()=>["law-clusters","law-dots","law-cluster-count","law-summary-dots","law-summary-count"].every(id=>window.__lawTestMap.getLayoutProperty(id,"visibility")==="none"));}
    const before=await page.evaluate(id=>{const m=window.__lawTestMap;return {center:m.getCenter().toArray(),zoom:m.getZoom(),time:performance.timeOrigin,layer:m.getStyle().layers.find(l=>l.id===id)};},layer);
    const group=page.getByRole("group",{name:"Basemap",exact:true});await group.getByRole("button",{name:"Satellite",exact:true}).click();
    await page.waitForFunction(()=>window.__lawTestMap.getLayoutProperty("law-satellite-basemap","visibility")==="visible");
