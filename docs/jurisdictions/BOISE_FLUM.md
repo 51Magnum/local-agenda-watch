@@ -1,0 +1,9 @@
+# Boise future land use
+
+Blueprint Boise's official public layer is https://services1.arcgis.com/WHM6qC35aMtyAAlN/ArcGIS/rest/services/FutureLandUse/FeatureServer/0. The category field is LandUse. The source has 458 rows: 457 polygon features and one null geometry, which is omitted. LAW retains the city's category labels, including Downtown Mixed Use. No adoption date is inferred from a GIS edit timestamp.
+
+The offline preparation job selects areas listed in the production resident metadata, fetches their official planning layers and builds one PMTiles archive. City planning extents are retained outside city limits, clipped out of other city limits, and removed from overlapping county shading. Raw prepared snapshots for published configured jurisdictions supply the project, area and location maps, including zero-database Preview. They contain only land-use categories and geometry. Server and client manifests reference the same immutable archive; the client manifest omits the jurisdiction directory.
+
+The existing weekly Git workflow updates these artifacts without database exports, credentials, paid services or resident-triggered source downloads. The previous archive is retained for maps already open. Snapshot-based project publication and its pause switch are unchanged.
+
+Validation: 982 JavaScript tests, one offline geometry test, and eight desktop/mobile browser checks. The browser checks render Boise's official downtown designation on home, project, area and location maps, switch between Map and Satellite without moving the viewport, retain one attribution control and turn FLUM off. The archive regression retains Nampa's Braeburn designation and checks that county shading does not cover downtown Boise. Typecheck, lint and production/zero-DB Preview builds are checked before release.

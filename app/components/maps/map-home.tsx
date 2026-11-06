@@ -9,7 +9,7 @@ import {projectPolygonFeature} from "@/lib/maps/project-feature";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import { PROJECT_FILL_OPACITY, PROJECT_POLYGON_LAYERS } from "@/lib/maps/project-style";
-import FLUM_TILES from "@/public/flum/manifest.json";
+import FLUM_TILES from "@/public/flum/client-manifest.json";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map as LibreMap, GeoJSONSource } from "maplibre-gl";

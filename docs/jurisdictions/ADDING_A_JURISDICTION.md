@@ -9,3 +9,5 @@
 No preview database, database roles, manual migrations, new Vercel variables or bypass secrets are needed. Local review: build and start with `VERCEL_ENV=preview`; no database variables. The disabled `sample-escribe` entry proves the same command using recorded eSCRIBE fixtures; it stays disabled in production.
 
 Snapshots contain resident projections and redacted self-checks, never raw application fields. Unverified links, private contacts and documents held by the privacy check are omitted. Review visibility does not override production eligibility.
+
+For an optional future land use layer, set `gis.futureLandUse` to its official public polygon layer and `flum` to the plan name, label and category field. The existing weekly preparation job discovers published areas, reads official public layers and commits prepared tiles and server snapshots through Git. No database setup or new credentials are required; review-only or disabled jurisdictions are excluded.

@@ -6,9 +6,10 @@ import { gzipSync } from "node:zlib";
 import { GeoJSONVT } from "@maplibre/geojson-vt";
 import { fromGeojsonVt } from "@maplibre/vt-pbf";
 import { bbox } from "@turf/turf";
-import { AREAS } from "../lib/areas/registry";
+import { publishedFlumAreas } from "../lib/maps/flum-areas";
+import { fetchFlum } from "../lib/maps/refresh";
+import { jurisdiction } from "../lib/jurisdictions/registry";
 import { getJurisdiction } from "../lib/maps/jurisdictions";
-import { readFlumSnapshot } from "../lib/maps/store";
 import { COMMON_FLUM, flumGroup } from "../lib/maps/radius";
 import type { FlumCache } from "../lib/maps/types";
 import type { FeatureCollection } from "geojson";
@@ -26,43 +27,21 @@ function python(...args: string[]) {
       "Offline FLUM preparation failed; keep the last published archive. Install scripts/flum-requirements.txt first.",
     );
 }
-async function source(id: string): Promise<FlumCache | undefined> {
-  if (!process.env.FLUM_EXPORT_URL) return readFlumSnapshot(id);
-  const base = new URL(process.env.FLUM_EXPORT_URL);
-  if (
-    base.protocol !== "https:" ||
-    base.hostname !== "www.localagendawatch.com" ||
-    !process.env.CRON_SECRET
-  )
-    throw Error("Use the official authenticated FLUM export endpoint");
-  let offset = 0;
-  let result: FlumCache | undefined;
-  do {
-    const url = new URL(base);
-    url.searchParams.set("area", id);
-    url.searchParams.set("offset", String(offset));
-    const response = await fetch(url, {
-      headers: { Authorization: "Bearer " + process.env.CRON_SECRET },
-      signal: AbortSignal.timeout(120000),
-    });
-    if (!response.ok) throw Error(id + " FLUM export HTTP " + response.status);
-    const page = await response.json();
-    result ??= {
-      updatedAt: page.updatedAt,
-      legend: page.legend,
-      geojson: { type: "FeatureCollection", features: [] },
-    };
-    result.geojson.features.push(...page.features);
-    offset = page.nextOffset ?? 0;
-  } while (offset);
-  return result;
+async function source(id:string):Promise<FlumCache>{
+ const config=getJurisdiction(id);if(!config?.flum.layerUrl)throw Error("No official FLUM source for "+id);
+ return fetchFlum(config);
 }
 async function main() {
   await mkdir(work, { recursive: true });
   await mkdir(destination, { recursive: true });
+  const response=await fetch("https://www.localagendawatch.com/api/map/meta",{cache:"no-store",signal:AbortSignal.timeout(30000)});
+  if(!response.ok)throw Error("Published area metadata unavailable; preserve existing tiles");
+  const metadata=await response.json();
+  if(!Array.isArray(metadata.areas)||!metadata.areas.length)throw Error("Published area metadata is empty");
+  const preparedSnapshots:Record<string,FlumCache>={};
   const areas = [],
     dates: Record<string, string> = {};
-  for (const area of Object.values(AREAS).filter((a) => a.status === "live")) {
+  for (const area of publishedFlumAreas(metadata.areas.map((a:{id:string})=>a.id)).filter((a) => a.status === "live")) {
     const config = getJurisdiction(area.id);
     if (!config?.flum.layerUrl) continue;
     const data = await source(area.id);
@@ -73,6 +52,7 @@ async function main() {
           "; preserve the previous published map",
       );
     dates[area.id] = data.updatedAt;
+    if(!jurisdiction(area.id)?.legacyPublic)preparedSnapshots[area.id]=data;
     areas.push({
       id: area.id,
       type: area.type,
@@ -198,6 +178,12 @@ async function main() {
     join(destination, "manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n",
   );
+  // Client maps need tile/style metadata, never the jurisdiction directory.
+  await writeFile(join(destination,"client-manifest.json"),JSON.stringify(Object.fromEntries(Object.entries(manifest).filter(([key])=>key!=="sourceDates")),null,2)+"\n");
+  // Server maps and zero-DB previews use the same verified public source as the tiles.
+  await mkdir("data/flum",{recursive:true});
+  for(const [id,data] of Object.entries(preparedSnapshots))await writeFile("data/flum/"+id+".json",JSON.stringify(data)+"\n");
+  await writeFile("lib/maps/prepared-flum.ts",'import "server-only";\nimport type {FlumCache} from "./types";\n'+Object.keys(preparedSnapshots).map((id,i)=>'import source'+i+' from "../../data/flum/'+id+'.json";').join("\n")+'\nconst snapshots:Record<string,FlumCache>={'+Object.keys(preparedSnapshots).map((id,i)=>JSON.stringify(id)+':source'+i+' as FlumCache').join(',')+'};\nexport function preparedFlumSnapshot(id:string):FlumCache|undefined{return snapshots[id]?structuredClone(snapshots[id]):undefined;}\n');
   // Retain the previous archive for maps already open during an update.
   // Only remove older generated archives in this exact output directory.
   for (const name of await readdir(destination))
