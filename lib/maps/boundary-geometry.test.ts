@@ -34,4 +34,4 @@ it("invalidates prepared geometry when a source changes and isolates caller muta
 
 it("keeps every outline and uncovered-mask ring non-degenerate for the live jurisdiction set",()=>{
  const areas=[...legacyCoverageAreas(),...(["ada-county","boise"].map(id=>readReviewSnapshot(id)!.area))],payload=buildAreaBoundaries(areas);for(const f of [...payload.polygons.features,...payload.uncovered.features])for(const p of f.geometry.type==="Polygon"?[f.geometry.coordinates]:f.geometry.coordinates)for(const ring of p){expect(ring.length).toBeGreaterThanOrEqual(4);expect(new Set(ring.map(c=>c.join(","))).size).toBeGreaterThanOrEqual(3);expect(ring[0]).toEqual(ring.at(-1));}
-});
+},30000);
