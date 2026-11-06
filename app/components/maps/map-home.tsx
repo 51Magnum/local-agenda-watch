@@ -111,6 +111,7 @@ export default function MapHome() {
     [flumLoading, setFlumLoading] = useState(false),
     [flumOn, setFlumOn] = useState(false),
     [boundariesOn, setBoundariesOn] = useState(true),
+    [projectMarkersOn, setProjectMarkersOn] = useState(true),
     [menu, setMenu] = useState(false),
     [dialog, setDialog] = useState<"watch" | "coverage">(),
     [image, setImage] = useState<MapVisual>(),
@@ -127,6 +128,7 @@ export default function MapHome() {
   const {notice,showNotice,dismissNotice}=useMapNotice();
   const getMap=useCallback(()=>map.current,[]);
   useEffect(()=>{if(new URLSearchParams(window.location.search).get("savedPins")==="1"){queueMicrotask(()=>setLayers(true));}},[]);
+  useEffect(()=>{try{if(sessionStorage.getItem("law:project-markers")==="hidden")queueMicrotask(()=>setProjectMarkersOn(false));}catch{}},[]);
   const filterRef = useRef(filter),
     flumRef = useRef(flumOn);
   useEffect(() => {
@@ -828,6 +830,11 @@ export default function MapHome() {
       }
     };
   }, [showNotice]);
+  useEffect(()=>{
+    const m=map.current;if(!ready||!m)return;
+    for(const id of ["law-clusters","law-dots","law-cluster-count","law-summary-dots","law-summary-count"])m.setLayoutProperty(id,"visibility",projectMarkersOn?"visible":"none");
+    if(!projectMarkersOn){if(tooltip.current)tooltip.current.hidden=true;lastTooltip.current="";m.getCanvas().style.cursor="";}
+  },[ready,projectMarkersOn]);
   useEffect(() => {
     const m = map.current;
     if (!ready || !m) return;
@@ -1122,6 +1129,9 @@ export default function MapHome() {
         )}
         <section id="map-layer-options" className="law-layer-panel" aria-label="Map layers" hidden={!layers} style={{display:layers?undefined:"none"}}>
             <BasemapSwitch/>
+            <label>
+              <input type="checkbox" checked={projectMarkersOn} onChange={e=>{const shown=e.target.checked;setProjectMarkersOn(shown);try{sessionStorage.setItem("law:project-markers",shown?"visible":"hidden");}catch{}}}/> Project markers
+            </label>
             <label>
               <input
                 type="checkbox"

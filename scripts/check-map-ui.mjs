@@ -16,6 +16,7 @@ fs.mkdirSync(out,{recursive:true});
 const records = JSON.parse(fs.readFileSync("tests/fixtures/nampa-map-clicks.json","utf8"));
 const boundaries = JSON.parse(fs.readFileSync("public/map-data/boundaries.json","utf8"));
 const item = records[0].map, project = records[0].project;
+const markerToggleCheck=process.argv.includes("--marker-toggle");
 const markerCheck=process.argv.includes("--markers");
 const publicationCheck=process.argv.includes("--publication-cache");
 const adaCases=JSON.parse(fs.readFileSync("data/review/ada-county.json","utf8")).map.cases;
@@ -67,7 +68,7 @@ try{
    return route.continue();
   });
   const prefix=mobile?"mobile":"desktop";
-  for(const view of ((publicationCheck||markerCheck)?["home"]:["home","project","area","coverage","admin"])){
+  for(const view of ((publicationCheck||markerCheck||markerToggleCheck)?["home"]:["home","project","area","coverage","admin"])){
    console.log(prefix+": checking "+view);
    await page.goto(origin+"/"+view);await page.locator(".law-map-attribution").waitFor();
    const attribution=page.locator(".maplibregl-ctrl-attrib"),toggle=attribution.locator("summary");
@@ -79,6 +80,26 @@ try{
    for(const credit of ["OpenFreeMap","OpenMapTiles","OpenStreetMap"])await attribution.getByRole("link",{name:credit,exact:true}).waitFor();
    if(mobile)await toggle.tap();else await toggle.click();assert.equal(await attribution.getAttribute("open"),null);
    passed.push(prefix+": "+view+" has one collapsed attribution, one icon, and expandable provider links");
+   if(markerToggleCheck){
+    await page.waitForFunction(()=>window.__lawTestMap?.getLayer("law-summary-count")&&window.__lawTestMap.loaded());
+    await page.getByRole("button",{name:"Layers",exact:true}).click();
+    const checkbox=page.getByRole("checkbox",{name:"Project markers",exact:true}),ids=["law-clusters","law-dots","law-cluster-count","law-summary-dots","law-summary-count"];
+    assert(await checkbox.isChecked());await checkbox.uncheck();
+    for(const zoom of [8,10,13]){
+     await page.evaluate(zoom=>window.__lawTestMap.jumpTo({zoom}),zoom);
+     await page.waitForFunction(ids=>ids.every(id=>window.__lawTestMap.getLayoutProperty(id,"visibility")==="none"),ids);
+     assert.equal(await page.evaluate(ids=>window.__lawTestMap.queryRenderedFeatures({layers:ids}).length,ids),0);
+    }
+    const before=await page.evaluate(()=>{const m=window.__lawTestMap;return {center:m.getCenter().toArray(),zoom:m.getZoom(),time:performance.timeOrigin};});
+    await page.getByRole("button",{name:"Satellite",exact:true}).click();
+    await page.waitForFunction(()=>window.__lawTestMap.getLayoutProperty("law-satellite-basemap","visibility")==="visible");
+    assert(await page.evaluate(ids=>ids.every(id=>window.__lawTestMap.getLayoutProperty(id,"visibility")==="none"),ids));
+    assert.deepEqual(await page.evaluate(()=>{const m=window.__lawTestMap;return {center:m.getCenter().toArray(),zoom:m.getZoom(),time:performance.timeOrigin};}),before);
+    await page.reload();await page.locator(".law-map-attribution").waitFor();await page.getByRole("button",{name:"Layers",exact:true}).click();assert(!(await checkbox.isChecked()));
+    await page.waitForFunction(ids=>ids.every(id=>window.__lawTestMap.getLayoutProperty(id,"visibility")==="none"),ids);
+    await checkbox.check();await page.waitForFunction(ids=>ids.every(id=>window.__lawTestMap.getLayoutProperty(id,"visibility")==="visible"),ids);
+    passed.push(prefix+": marker switch hides circles and counts at overview and close zooms, preserves Satellite and viewport, remembers the session, and restores markers");continue;
+   }
    if(markerCheck){
     await page.waitForFunction(()=>window.__lawTestMap?.getStyle().sources["law-points"]?.data.features.length===1);
     await page.evaluate(center=>window.__lawTestMap.jumpTo({center,zoom:10}),item.centroid);
@@ -167,7 +188,7 @@ try{
     passed.push(prefix+": project-pane share uses the shared dismissible notice");
    }
   }
-  if(publicationCheck||markerCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
+  if(publicationCheck||markerCheck||markerToggleCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
   await page.goto(origin+"/notices");await page.getByRole("button",{name:"Show notice",exact:true}).click();
   const notice=page.locator(".law-map-notice"),close=notice.getByRole("button",{name:"Dismiss message"});
   await close.focus();await page.waitForTimeout(4300);assert.equal(await notice.count(),1);
