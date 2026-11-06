@@ -1,3 +1,4 @@
+import {SourceFailure} from "./http";
 import {createHash} from "node:crypto";
 import {caseNumbers} from "./adapters/common";
 import {contentHash,snapshotHash} from "./snapshot-hash";
@@ -11,10 +12,11 @@ export type EvidenceCache={read:(cycle:string)=>Promise<Record<string,LinkEviden
 export function cachedEvidence(d:JurisdictionDefinition,snapshot:StagingSnapshot,read:(url:string)=>Promise<LinkEvidence>,cache:EvidenceCache){
  const cycle=contentHash([snapshotHash(snapshot),snapshot.checkedAt,d.recordLinks,d.applications.params.publicFields,"source-evidence-v1"]),ready=cache.read(cycle);
  return async(url:string)=>{
-  const saved=await ready;if(saved[url])return saved[url];const proof=await read(url);
+  const saved=await ready;if(saved[url])return saved[url];let proof:LinkEvidence;
+  try{proof=await read(url);}catch(error){if(!(error instanceof SourceFailure))throw error;proof={status:error.health.status??0,text:"",reason:error.health.state==="blocked"?"Official source access is blocked; no challenge was bypassed.":"Official source could not be verified."};}
   if(![200,302,403].includes(proof.status))return proof;
   const app=snapshot.applications.find(a=>verificationUrl(d,sourceRecordId(d,a))===url);
-  if(app&&!restrictedRecordData(d,url,proof.text,sourceRecordId(d,app)))return proof;
+  if(app&&proof.status===200&&!restrictedRecordData(d,url,proof.text,sourceRecordId(d,app)))return proof;
   if(proof.status===302&&(!proof.redirectUrl||!officialRedirect(url,proof.redirectUrl,d.recordLinks?.redirects)))return proof;
   const minimal:LinkEvidence={...proof,evidenceHash:proof.evidenceHash??createHash("sha256").update(proof.text).digest("hex"),text:app?proof.text:caseNumbers(d,proof.text).join(" ")};
   if(minimal.text.length<=256000){await cache.write(cycle,url,minimal);saved[url]=minimal;}

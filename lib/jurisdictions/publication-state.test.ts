@@ -6,7 +6,7 @@ const h=vi.hoisted(()=>({db:undefined as unknown as PGlite,drift:true}));
 vi.mock("./store",()=>({jurisdictionDb:async()=>h.db,jurisdictionTransaction:async(work:(db:PGlite)=>Promise<unknown>)=>h.db.transaction(tx=>work(tx as unknown as PGlite))}));
 vi.mock("../runtime-environment",async original=>({...await original<typeof import("../runtime-environment")>(),databaseUrl:()=>"fixture"}));
 vi.mock("./review-snapshot",()=>({readReviewSnapshot:()=>undefined,snapshotDrift:()=>({pass:h.drift,reason:"Reviewed snapshot mismatch"})}));
-import {publicationState,publicationRecordIds,resumeJurisdiction} from "./publication-state";
+import {checkDiagnostics,publicationState,publicationRecordIds,resumeJurisdiction} from "./publication-state";
 import {persistSelfCheck,pauseJurisdiction,readPublished} from "./self-check-store";
 import {selfCheck} from "./self-check";
 import {jurisdiction} from "./registry";
@@ -53,4 +53,9 @@ it("does not publish missing, review-only, unauthorized or Preview records",asyn
  await expect(resumeJurisdiction(d.id,"admin")).rejects.toThrow("Only a paused");
  await expect(resumeJurisdiction(d.id," ")).rejects.toThrow("Authenticated reviewer");
  vi.stubEnv("VERCEL_ENV","preview");await expect(resumeJurisdiction(d.id,"admin")).rejects.toThrow("disabled");
+});
+
+it("reports aggregate failures without private source prose or query strings",async()=>{
+ const report=await selfCheck(d,snapshot,{links:async()=>({status:403,text:""})});report.records[0].checks=[{check:"link-resolves-to-case",status:"fail",sourceUrl:"https://official.test/?email=resident@example.test",reason:"Access blocked for resident@example.test"}];
+ const result=checkDiagnostics(report),text=JSON.stringify(result);expect(result?.failures).toEqual({"link-resolves-to-case | official.test | access-blocked":1});expect(text).not.toContain("resident");expect(text).not.toContain("https:");expect(text).not.toContain(description);
 });

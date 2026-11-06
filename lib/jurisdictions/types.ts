@@ -10,7 +10,7 @@ export type JurisdictionDefinition = {
  boundary:LayerSource;impactArea?:LayerSource;clipRule?:{operation:"subtractCityLimits";layer:LayerSource};
  agenda:AgendaSource[];
  applications:{adapter:"arcgisFeatureLayer"|"accelaAca"|"none";params:Record<string,unknown>;recordUrlTemplate?:string};
- recordLinks?:{availabilityMethod?:"HEAD";redirects?:import("./official-redirect").OfficialRedirect[];kind:"jsApp";verifyUrlTemplate:string;idField:string;dataFields:string[];dataLabel:string};
+ recordLinks?:{primaryLabel?:string;availabilityMethod?:"HEAD";redirects?:import("./official-redirect").OfficialRedirect[];kind:"jsApp";verifyUrlTemplate:string;idField:string;dataFields:string[];dataLabel:string};
  gis:Partial<Record<"parcels"|"zoning"|"futureLandUse"|"cityLimits"|"impactAreas"|"countyBoundary",string>>;
  hearingBodies:HearingBody[];caseNumberPatterns:string[];
  participation:{hearingsUrl?:string;legalNoticesUrl?:string;testimonySignupUrl?:string;signupUrlRule?:string;signupEventsUrl?:string;writtenCommentEmails?:Record<string,string[]>;deadlineRules:DeadlineRule[]};
