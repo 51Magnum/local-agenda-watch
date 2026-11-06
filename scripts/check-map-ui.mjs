@@ -16,6 +16,7 @@ fs.mkdirSync(out,{recursive:true});
 const records = JSON.parse(fs.readFileSync("tests/fixtures/nampa-map-clicks.json","utf8"));
 const boundaries = JSON.parse(fs.readFileSync("public/map-data/boundaries.json","utf8"));
 const item = records[0].map, project = records[0].project;
+const menuCheck=process.argv.includes("--menus");
 const boundaryColorCheck=process.argv.includes("--boundary-colors");
 const markerToggleCheck=process.argv.includes("--marker-toggle");
 const markerCheck=process.argv.includes("--markers");
@@ -69,7 +70,7 @@ try{
    return route.continue();
   });
   const prefix=mobile?"mobile":"desktop";
-  for(const view of (boundaryColorCheck?["home","project","area","coverage"]:(publicationCheck||markerCheck||markerToggleCheck)?["home"]:["home","project","area","coverage","admin"])){
+  for(const view of ((boundaryColorCheck||menuCheck)?["home","project","area","coverage"]:(publicationCheck||markerCheck||markerToggleCheck)?["home"]:["home","project","area","coverage","admin"])){
    console.log(prefix+": checking "+view);
    await page.goto(origin+"/"+view);await page.locator(".law-map-attribution").waitFor();
    const attribution=page.locator(".maplibregl-ctrl-attrib"),toggle=attribution.locator("summary");
@@ -81,6 +82,20 @@ try{
    for(const credit of ["OpenFreeMap","OpenMapTiles","OpenStreetMap"])await attribution.getByRole("link",{name:credit,exact:true}).waitFor();
    if(mobile)await toggle.tap();else await toggle.click();assert.equal(await attribution.getAttribute("open"),null);
    passed.push(prefix+": "+view+" has one collapsed attribution, one icon, and expandable provider links");
+   if(menuCheck){
+    const trigger=view==="home"?page.getByRole("button",{name:"Layers",exact:true}):page.locator(".law-basemap-layers>summary"),panel=view==="home"?page.locator("#map-layer-options"):page.locator(".law-basemap-options");
+    const outside=async()=>{const size=page.viewportSize();if(mobile)await page.touchscreen.tap(size.width-2,size.height-2);else await page.mouse.move(size.width-2,size.height-2);await panel.waitFor({state:"hidden"});};
+    const open=async()=>{if(mobile)await trigger.tap();else await trigger.hover();await panel.waitFor({state:"visible"});};
+    await open();await panel.getByRole("button",{name:"Satellite",exact:true}).click();assert(await panel.isVisible());await outside();
+    if(view==="home"){
+     const legendTrigger=page.getByRole("button",{name:"Legend",exact:true}),legendPanel=page.locator("#map-progress-legend");if(mobile)await legendTrigger.tap();else await legendTrigger.hover();await legendPanel.waitFor({state:"visible"});if(mobile)await page.touchscreen.tap(2,2);else await page.mouse.move(2,2);await legendPanel.waitFor({state:"hidden"});
+     await open();const saved=page.getByRole("checkbox",{name:/Show saved pins/});await saved.uncheck();assert(await panel.isVisible());await page.waitForFunction(()=>document.querySelectorAll(".law-saved-pin-marker").length===0);assert.equal(await page.evaluate(()=>localStorage.getItem("law:saved-pins-visible")),"false");
+     await page.reload();await page.locator(".law-map-attribution").waitFor();await open();assert(!(await saved.isChecked()));assert.equal(await page.locator(".law-saved-pin-marker").count(),0);await saved.check();await page.waitForFunction(()=>document.querySelectorAll(".law-saved-pin-marker").length===5);await outside();
+     passed.push(prefix+": saved-pin visibility survives reload and restores markers when enabled");
+    }
+    if(!mobile){await trigger.focus();await trigger.press("Enter");await panel.waitFor({state:"visible"});await page.waitForFunction(()=>{const active=document.activeElement;return !!active.closest("#map-layer-options,.law-basemap-options");});await page.keyboard.press("Escape");await panel.waitFor({state:"hidden"});assert(await trigger.evaluate(e=>e===document.activeElement));}
+    passed.push(prefix+": "+view+" opens on hover/tap, stays open for menu actions, and dismisses when leaving/outside tapping");continue;
+   }
    if(boundaryColorCheck){
     const source=view==="home"?"law-boundaries":view==="coverage"?"coverage":"boundaries",layer=view==="home"?"law-boundaries":view==="coverage"?"coverage-city-border":"city-limits";
     await page.waitForFunction(source=>window.__lawTestMap?.getStyle().sources[source]?.data.features.length>1,source);
@@ -202,7 +217,7 @@ try{
     passed.push(prefix+": project-pane share uses the shared dismissible notice");
    }
   }
-  if(publicationCheck||markerCheck||markerToggleCheck||boundaryColorCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
+  if(publicationCheck||markerCheck||markerToggleCheck||boundaryColorCheck||menuCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
   await page.goto(origin+"/notices");await page.getByRole("button",{name:"Show notice",exact:true}).click();
   const notice=page.locator(".law-map-notice"),close=notice.getByRole("button",{name:"Dismiss message"});
   await close.focus();await page.waitForTimeout(4300);assert.equal(await notice.count(),1);

@@ -10,6 +10,8 @@ export default function SavedPinsLayer({open,ready,getMap,selectedId,onSelect,on
  const {notice,showNotice,dismissNotice}=useMapNotice();
  const requested=useRef(false),callbacks=useRef({onSelect,onRefreshSelected,onHide});
  useEffect(()=>{callbacks.current={onSelect,onRefreshSelected,onHide};});
+ useEffect(()=>{try{if(localStorage.getItem("law:saved-pins-visible")==="false")queueMicrotask(()=>{setEnabled(false);callbacks.current.onHide();});}catch{}},[]);
+ function changeEnabled(value:boolean){setEnabled(value);try{localStorage.setItem("law:saved-pins-visible",String(value));}catch{}if(!value)callbacks.current.onHide();}
  useEffect(()=>{
   if(!open&&!requested.current)return;
   requested.current=true;const abort=new AbortController();let serial=0;
@@ -48,8 +50,8 @@ export default function SavedPinsLayer({open,ready,getMap,selectedId,onSelect,on
   {status==="anonymous"&&<p><Link href="/sign-in?next=%2F%3FsavedPins%3D1">Sign in to show your saved pins</Link></p>}
   {status==="preview"&&<p>Saved pins are not available in preview.</p>}
   {status==="error"&&<>{notice&&<MapNotice key={notice.id} {...notice} onDismiss={dismissNotice}/>}<button onClick={()=>setRetry(n=>n+1)}>Try again</button></>}
-  {status==="ready"&&<><label><input type="checkbox" checked={enabled} disabled={!pins.length} onChange={e=>{setEnabled(e.target.checked);if(!e.target.checked)onHide();}}/>Show saved pins{pins.length?` (${pins.length})`:""}</label>
-   {!pins.length?<p>No active saved pins yet.</p>:<ol>{pins.map((pin,index)=><li key={pin.id}><button className="law-saved-pin-choice" aria-pressed={pin.id===selectedId} onClick={()=>{setEnabled(true);onSelect(pin);}}><span>{index+1}. {pin.label}</span><small>{pin.radiusMiles} {pin.radiusMiles===1?"mile":"miles"} · Alerts {pin.alertsEnabled?"on":"off"}</small></button></li>)}</ol>}
+  {status==="ready"&&<><label><input type="checkbox" checked={enabled} disabled={!pins.length} onChange={e=>changeEnabled(e.target.checked)}/>Show saved pins{pins.length?` (${pins.length})`:""}</label>
+   {!pins.length?<p>No active saved pins yet.</p>:<ol>{pins.map((pin,index)=><li key={pin.id}><button className="law-saved-pin-choice" aria-pressed={pin.id===selectedId} onClick={()=>{changeEnabled(true);onSelect(pin);}}><span>{index+1}. {pin.label}</span><small>{pin.radiusMiles} {pin.radiusMiles===1?"mile":"miles"} · Alerts {pin.alertsEnabled?"on":"off"}</small></button></li>)}</ol>}
    <Link href="/pins">Manage saved pins</Link></>}
  </fieldset>;
 }

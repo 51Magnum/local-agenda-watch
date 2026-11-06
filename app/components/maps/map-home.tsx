@@ -1,4 +1,5 @@
 "use client";
+import {useMapMenu} from "./use-map-menu";
 import BasemapSwitch from "./basemap-switch";
 import MapNotice, {useMapNotice} from "./map-notice";
 import {installBasemap} from "@/lib/maps/basemap";
@@ -127,6 +128,8 @@ export default function MapHome() {
     [zoom, setZoom] = useState(10),
     [layers, setLayers] = useState(false),
     [legend, setLegend] = useState(false);
+  const changeLayers=useCallback((open:boolean)=>{setLayers(open);if(open)setLegend(false);},[]),changeLegend=useCallback((open:boolean)=>{setLegend(open);if(open)setLayers(false);},[]);
+  const layersMenu=useMapMenu(layers,changeLayers),legendMenu=useMapMenu(legend,changeLegend);
   const {notice,showNotice,dismissNotice}=useMapNotice();
   const getMap=useCallback(()=>map.current,[]);
   useEffect(()=>{if(new URLSearchParams(window.location.search).get("savedPins")==="1"){queueMicrotask(()=>setLayers(true));}},[]);
@@ -1099,10 +1102,10 @@ export default function MapHome() {
             setDroppingPin(!droppingPin);
             showNotice(droppingPin ? "" : "Click or tap the map to place a pin, then choose a radius and watch this area.");
           }}>{droppingPin ? "Cancel pin" : "Drop a pin"}</button>
-          <button aria-expanded={legend} aria-controls="map-progress-legend" onClick={() => { setLegend(!legend); setLayers(false); }}>
+          <button aria-expanded={legend} aria-controls="map-progress-legend" {...legendMenu.triggerProps}>
             Legend
           </button>
-          <button aria-expanded={layers} aria-controls="map-layer-options" onClick={() => { setLayers(!layers); setLegend(false); }}>
+          <button aria-expanded={layers} aria-controls="map-layer-options" {...layersMenu.triggerProps}>
             Layers
           </button>
           <button aria-label="Use my location" onClick={locate}>
@@ -1111,7 +1114,7 @@ export default function MapHome() {
         </div>
         {place && <button className="law-clear-place" onClick={clearPlace}>Clear pin &amp; circle</button>}
         {legend && (
-          <section id="map-progress-legend" className="law-map-legend" aria-label="Map legend">
+          <section {...legendMenu.panelProps} id="map-progress-legend" className="law-map-legend" aria-label="Map legend">
             <strong>Project progress</strong>
             {MAP_STAGES.map((stage) => (
               <p key={stage}>
@@ -1133,7 +1136,7 @@ export default function MapHome() {
             )}
           </section>
         )}
-        <section id="map-layer-options" className="law-layer-panel" aria-label="Map layers" hidden={!layers} style={{display:layers?undefined:"none"}}>
+        <section {...layersMenu.panelProps} id="map-layer-options" className="law-layer-panel" aria-label="Map layers" hidden={!layers} style={{display:layers?undefined:"none"}}>
             <BasemapSwitch/>
             <label>
               <input type="checkbox" checked={projectMarkersOn} onChange={e=>{const shown=e.target.checked;setProjectMarkersOn(shown);try{sessionStorage.setItem("law:project-markers",shown?"visible":"hidden");}catch{}}}/> Project markers
