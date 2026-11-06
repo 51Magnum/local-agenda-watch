@@ -1,10 +1,12 @@
+import {withJurisdictionColors} from "../lib/areas/jurisdiction-colors.mjs";
 import {readdir,writeFile,readFile} from "node:fs/promises";
 import path from "node:path";
 const dir=path.resolve("lib/jurisdictions/registry");
 const files=(await readdir(dir)).filter(f=>f.endsWith(".json")).sort();
 if(!files.length)throw Error("No jurisdiction definitions found");
-const entries=[];
+let entries=[];
 for(const f of files){const j=JSON.parse(await readFile(path.join(dir,f),"utf8"));if(f!==j.id+".json")throw Error("Registry filename must match id: "+f);entries.push(j);}
+entries=withJurisdictionColors(entries);
 const imports=[],boundaries=[];
 const snapshotDir=path.resolve("data/review"),snapshotFiles=(await readdir(snapshotDir).catch(()=>[])).filter(f=>f.endsWith(".json")).sort(),snapshots=[];
 for(const file of snapshotFiles){const value=JSON.parse(await readFile(path.join(snapshotDir,file),"utf8"));if(file!==value.areaId+".json"||value.version!==1||value.status!=="review"||!entries.some(j=>j.id===value.areaId))throw Error("Invalid review snapshot: "+file);snapshots.push(value);}

@@ -1,3 +1,4 @@
+import {withJurisdictionColors} from "../areas/jurisdiction-colors.mjs";
 import type {JurisdictionDefinition} from "./types";
 const platforms=new Set(["primegov","iqm2","escribe","adaFileBrowse","municipalClerk","countyLandHearings","civicplusArchive","municodePublishPage","sanityNotices","granicusPublisher"]);
 function assert(value:unknown,message:string):asserts value {if(!value)throw Error("Jurisdiction config: "+message);}
@@ -7,12 +8,12 @@ export function contrastWithWhite(hex:string) {
 }
 export function validateJurisdictions(input:unknown[],recordedApprovals:ReadonlySet<string>=new Set()):JurisdictionDefinition[] {
  const ids=new Set<string>(),colors=new Set<string>();
- return input.map(raw=>{
+ return withJurisdictionColors(input as JurisdictionDefinition[]).map(raw=>{
   const d=raw as JurisdictionDefinition;
   assert(d&&/^[a-z]+(?:-[a-z]+)*$/.test(d.id),"invalid id");assert(!ids.has(d.id),"duplicate id "+d.id);ids.add(d.id);
   assert(d.name&&["city","county"].includes(d.type)&&/^[a-z]{2}$/.test(d.state),d.id+" identity");
   assert(d.timezone==="America/Boise",d.id+" timezone must be America/Boise");
-  assert(/^#[a-f0-9]{6}$/i.test(d.color)&&!colors.has(d.color),d.id+" distinct color");colors.add(d.color);
+  assert(/^#[a-f0-9]{6}$/i.test(d.color)&&!colors.has(d.color.toLowerCase()),d.id+" distinct color");colors.add(d.color.toLowerCase());
   // Existing approved colors are unchanged; new text/badge colors must meet WCAG AA.
   assert(d.legacyPublic||contrastWithWhite(d.color)>=4.5,d.id+" color must contrast with white >=4.5");
   assert(Number.isInteger(d.mapOrder)&&d.mapOrder>0&&(d.type!=="city"||d.mapOrder>=100),d.id+" map order");
