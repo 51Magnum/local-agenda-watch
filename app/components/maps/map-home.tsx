@@ -7,6 +7,7 @@ import "@/app/components/maps/attribution.css";
 import {residentDateText} from "@/lib/areas/format";
 import {projectPolygonFeature} from "@/lib/maps/project-feature";
 import {resolveProjectHit} from "@/lib/maps/project-hit";
+import type {BoundaryArea} from "@/lib/maps/boundary-types";
 import {loadAreaBoundaries} from "@/lib/maps/boundary-client";
 import { PROJECT_FILL_OPACITY, PROJECT_POLYGON_LAYERS } from "@/lib/maps/project-style";
 import FLUM_TILES from "@/public/flum/client-manifest.json";
@@ -111,6 +112,7 @@ export default function MapHome() {
     [flumLoading, setFlumLoading] = useState(false),
     [flumOn, setFlumOn] = useState(false),
     [boundariesOn, setBoundariesOn] = useState(true),
+    [boundaryAreas,setBoundaryAreas]=useState<BoundaryArea[]>([]),
     [projectMarkersOn, setProjectMarkersOn] = useState(true),
     [menu, setMenu] = useState(false),
     [dialog, setDialog] = useState<"watch" | "coverage">(),
@@ -365,14 +367,15 @@ export default function MapHome() {
             type: "geojson",
             data: { type: "FeatureCollection", features: [] },
           });
+          m.addLayer({id:"law-boundary-halo",type:"line",source:"law-boundaries",paint:{"line-color":"#fff","line-opacity":.85,"line-width":5}});
           m.addLayer({
             id: "law-boundaries",
             type: "line",
             source: "law-boundaries",
             paint: {
-              "line-color": "#0f766e",
-              "line-opacity": 0.35,
-              "line-width": 1.2,
+              "line-color": ["coalesce",["get","color"],"#64748b"],
+              "line-opacity": .9,
+              "line-width": 2,
             },
           });
           m.addSource("law-area-labels", {
@@ -391,7 +394,7 @@ export default function MapHome() {
               "text-font": ["Noto Sans Regular"],
             },
             paint: {
-              "text-color": "#0f766e",
+              "text-color": ["coalesce",["get","color"],"#475569"],
               "text-halo-color": "#ffffff",
               "text-halo-width": 2,
             },
@@ -737,6 +740,7 @@ export default function MapHome() {
       const boundaryRequest=loadAreaBoundaries();
       void boundaryRequest.then((d) => {
         if (current === generation.current && !destroyed.current) {
+          setBoundaryAreas(d.polygons.features.map(f=>f.properties));
           (m.getSource("law-boundaries") as GeoJSONSource)?.setData(d.polygons);
           (m.getSource("law-area-labels") as GeoJSONSource)?.setData(d.labels);
           (m.getSource("law-uncovered") as GeoJSONSource)?.setData(d.uncovered);
@@ -849,6 +853,7 @@ export default function MapHome() {
         m.addSource("law-flum", { type: "vector", url: "pmtiles://" + new URL(FLUM_TILES.url, window.location.origin).href });
         m.addLayer({ id: "law-flum", type: "fill", source: "law-flum", "source-layer": FLUM_TILES.sourceLayer, minzoom: FLUM_TILES.minZoom,
           paint: { "fill-color": ["get", "color"], "fill-opacity": 0.35 } }, "law-ring");
+        for(const id of ["law-boundary-halo","law-boundaries","law-area-labels"])m.moveLayer(id,"law-ring");
       }).catch(() => { if (!cancelled) { setFlumLoading(false); showNotice("Future land use could not load. Try again.","error"); } });
     } else if (m.getLayer("law-flum")) {
       m.setLayoutProperty("law-flum", "visibility", showFlum ? "visible" : "none");
@@ -861,7 +866,7 @@ export default function MapHome() {
       "fill-opacity",
       flumOn ? 0 : PROJECT_FILL_OPACITY,
     );
-    for (const id of ["law-boundaries", "law-area-labels"])
+    for (const id of ["law-boundary-halo","law-boundaries", "law-area-labels"])
       m.setLayoutProperty(id, "visibility", boundariesOn ? "visible" : "none");
     return () => { cancelled = true; };
   }, [ready, flumOn, boundariesOn, zoom, showNotice]);
@@ -1114,6 +1119,7 @@ export default function MapHome() {
                 {commonStageLabel(stage)}
               </p>
             ))}
+            {boundariesOn&&boundaryAreas.length>0&&<><strong>Jurisdiction boundaries</strong>{boundaryAreas.map(area=><p key={area.id}><span style={{background:area.color}}/>{area.type==="county"?"Unincorporated ":""}{area.name}</p>)}</>}
             {flumOn && (
               <>
                 <strong>Future land use</strong>

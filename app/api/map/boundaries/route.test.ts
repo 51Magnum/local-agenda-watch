@@ -42,3 +42,10 @@ it("serves compressed JSON with the same version and revalidates publication aut
  const body=JSON.parse(gunzipSync(new Uint8Array(await response.arrayBuffer())).toString()) as BoundaryPayload;
  expect(body.version).toBe(response.headers.get("X-LAW-Boundary-Version"));expect(ids(body)).toContain("ada-county");
 });
+
+it("builds distinct jurisdiction colors shared by outlines, labels and the coverage key",async()=>{
+ const boise=(await import("@/data/review/boise.json")).default,{buildAreaBoundaries}=await import("@/lib/maps/area-boundaries"),{jurisdiction}=await import("@/lib/jurisdictions/registry");
+ const body=buildAreaBoundaries([...legacyCoverageAreas(),{...review.area,color:jurisdiction("ada-county").color},{...boise.area,color:jurisdiction("boise").color}] as import("@/lib/areas/registry").AreaDefinition[]);
+ expect(ids(body)).toContain("boise");expect(ids(body)).toContain("ada-county");expect(new Set(body.polygons.features.map(f=>f.properties.color)).size).toBe(body.polygons.features.length);
+ for(const f of body.polygons.features)expect(body.labels.features.find(l=>l.properties?.id===f.properties.id)?.properties?.color).toBe(f.properties.color);
+});

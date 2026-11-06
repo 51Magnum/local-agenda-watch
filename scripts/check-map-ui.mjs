@@ -16,6 +16,7 @@ fs.mkdirSync(out,{recursive:true});
 const records = JSON.parse(fs.readFileSync("tests/fixtures/nampa-map-clicks.json","utf8"));
 const boundaries = JSON.parse(fs.readFileSync("public/map-data/boundaries.json","utf8"));
 const item = records[0].map, project = records[0].project;
+const boundaryColorCheck=process.argv.includes("--boundary-colors");
 const markerToggleCheck=process.argv.includes("--marker-toggle");
 const markerCheck=process.argv.includes("--markers");
 const publicationCheck=process.argv.includes("--publication-cache");
@@ -68,7 +69,7 @@ try{
    return route.continue();
   });
   const prefix=mobile?"mobile":"desktop";
-  for(const view of ((publicationCheck||markerCheck||markerToggleCheck)?["home"]:["home","project","area","coverage","admin"])){
+  for(const view of (boundaryColorCheck?["home","project","area","coverage"]:(publicationCheck||markerCheck||markerToggleCheck)?["home"]:["home","project","area","coverage","admin"])){
    console.log(prefix+": checking "+view);
    await page.goto(origin+"/"+view);await page.locator(".law-map-attribution").waitFor();
    const attribution=page.locator(".maplibregl-ctrl-attrib"),toggle=attribution.locator("summary");
@@ -80,6 +81,19 @@ try{
    for(const credit of ["OpenFreeMap","OpenMapTiles","OpenStreetMap"])await attribution.getByRole("link",{name:credit,exact:true}).waitFor();
    if(mobile)await toggle.tap();else await toggle.click();assert.equal(await attribution.getAttribute("open"),null);
    passed.push(prefix+": "+view+" has one collapsed attribution, one icon, and expandable provider links");
+   if(boundaryColorCheck){
+    const source=view==="home"?"law-boundaries":view==="coverage"?"coverage":"boundaries",layer=view==="home"?"law-boundaries":view==="coverage"?"coverage-city-border":"city-limits";
+    await page.waitForFunction(source=>window.__lawTestMap?.getStyle().sources[source]?.data.features.length>1,source);
+    const before=await page.evaluate(({source,layer})=>{const m=window.__lawTestMap;return {paint:m.getPaintProperty(layer,"line-color"),colors:m.getStyle().sources[source].data.features.map(f=>f.properties.color)};},{source,layer});
+    assert(JSON.stringify(before.paint).includes('"get","color"'));assert.equal(new Set(before.colors).size,before.colors.length);
+    if(view==="home"){
+     await page.getByRole("button",{name:"Layers",exact:true}).click();const check=page.getByRole("checkbox",{name:"Jurisdiction boundaries",exact:true});await check.uncheck();await page.waitForFunction(()=>["law-boundaries","law-boundary-halo","law-area-labels"].every(id=>window.__lawTestMap.getLayoutProperty(id,"visibility")==="none"));await check.check();
+    }else await page.locator(".law-basemap-layers>summary").click();
+    await page.getByRole("button",{name:"Satellite",exact:true}).click();await page.waitForFunction(()=>window.__lawTestMap.getLayoutProperty("law-satellite-basemap","visibility")==="visible");
+    assert.deepEqual(await page.evaluate(({source,layer})=>{const m=window.__lawTestMap;return {paint:m.getPaintProperty(layer,"line-color"),colors:m.getStyle().sources[source].data.features.map(f=>f.properties.color)};},{source,layer}),before);
+    if(view==="home"){await page.getByRole("button",{name:"Legend",exact:true}).click();await page.locator("#map-progress-legend").getByText("Jurisdiction boundaries",{exact:true}).waitFor();for(const name of ["Nampa","Unincorporated Canyon County"])await page.locator("#map-progress-legend").getByText(name,{exact:true}).waitFor();}
+    passed.push(prefix+": "+view+" uses distinct jurisdiction colors across Map/Satellite with matching boundary key and toggle");continue;
+   }
    if(markerToggleCheck){
     await page.waitForFunction(()=>window.__lawTestMap?.getLayer("law-summary-count")&&window.__lawTestMap.loaded());
     await page.getByRole("button",{name:"Layers",exact:true}).click();
@@ -188,7 +202,7 @@ try{
     passed.push(prefix+": project-pane share uses the shared dismissible notice");
    }
   }
-  if(publicationCheck||markerCheck||markerToggleCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
+  if(publicationCheck||markerCheck||markerToggleCheck||boundaryColorCheck){assert.deepEqual(errors,[],"Browser errors");await context.close();continue;}
   await page.goto(origin+"/notices");await page.getByRole("button",{name:"Show notice",exact:true}).click();
   const notice=page.locator(".law-map-notice"),close=notice.getByRole("button",{name:"Dismiss message"});
   await close.focus();await page.waitForTimeout(4300);assert.equal(await notice.count(),1);

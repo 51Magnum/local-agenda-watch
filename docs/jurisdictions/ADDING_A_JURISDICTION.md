@@ -11,3 +11,5 @@ No preview database, database roles, manual migrations, new Vercel variables or 
 Snapshots contain resident projections and redacted self-checks, never raw application fields. Unverified links, private contacts and documents held by the privacy check are omitted. Review visibility does not override production eligibility.
 
 For an optional future land use layer, set `gis.futureLandUse` to its official public polygon layer and `flum` to the plan name, label and category field. The existing weekly preparation job discovers published areas, reads official public layers and commits prepared tiles and server snapshots through Git. No database setup or new credentials are required; review-only or disabled jurisdictions are excluded.
+
+Jurisdiction colors are automatic when `color` is omitted. The registry and client metadata use the same deterministic, contrast-checked assignment and avoid existing colors; no AI call or color picker is needed. Existing configured colors remain stable. Boundaries, labels and map keys use the assigned color consistently.
