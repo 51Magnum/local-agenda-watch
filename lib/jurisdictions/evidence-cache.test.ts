@@ -30,3 +30,8 @@ it("retains attempted blocked/unreadable documents within this cycle instead of 
   const reader=vi.fn(async()=>proof),cache=memory(),s=snapshot();await cachedEvidence(d,s,reader,cache)(url);await cachedEvidence(d,s,reader,cache)(url);expect(reader).toHaveBeenCalledOnce();
  }
 });
+
+it("retains thrown access failures without converting them into successful evidence",async()=>{
+ const {SourceFailure}=await import("./http"),reader=vi.fn(async()=>{throw new SourceFailure({state:"blocked",status:403,url,reason:"Access denied",latencyMs:0,checkedAt:"2026-11-06T00:00:00Z"});}),cache=memory(),s=snapshot();
+ const read=cachedEvidence(d,s,reader,cache);expect((await read(url)).status).toBe(403);expect((await read(url)).status).toBe(403);expect(reader).toHaveBeenCalledOnce();expect((await selfCheck(d,s,{links:read})).goLive).toBe(false);
+});

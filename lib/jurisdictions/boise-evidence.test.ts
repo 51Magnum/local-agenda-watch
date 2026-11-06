@@ -8,7 +8,7 @@ import {applicationFromFeature} from "./adapters/arcgis";
 import {SourceHttp} from "./http";
 import type {Application} from "./adapters/types";
 import type {StagingSnapshot} from "./store";
-const d=jurisdiction("boise"),id="PLN26-00001",description="Construct a commercial warehouse.";
+const configured=jurisdiction("boise"),d={...configured,applications:{...configured.applications,recordUrlTemplate:"https://permits.cityofboise.org/CitizenAccess/Cap/GlobalSearchResults.aspx?QueryText={recordId}"}},id="PLN26-00001",description="Construct a commercial warehouse.";
 const app=():Application=>({recordId:id,relatedCaseNumbers:[],name:id,type:"Conditional Use",status:"In review",address:"",parcel:[],description,recordUrl:applicationRecordUrl(d,id),sourceUrl:applicationRecordUrl(d,id),sourceFields:{RecordID:id,ProjectType:"Conditional Use",Description:description}});
 const snapshot=(a:Application):StagingSnapshot=>({areaId:d.id,launchStatus:"admin_only",checkedAt:"2026-11-05",range:{start:"2026-08-01",end:"2026-12-20"},applications:[a],meetings:[],complete:true,health:[],skipped:[]});
 const target="https://permits.cityofboise.org/CitizenAccess/Cap/CapDetail.aspx?capID1=26CAP&capID2=00000&capID3=00001&agencyCode=BOISE";
@@ -45,4 +45,9 @@ it("bounds parallel evidence requests to two per official host",async()=>{
 
 it("checks published status/type values for contacts even with a safe source-field projection",async()=>{
  for(const key of ["status","type"] as const){const a=app();a[key]="Contact planner@example.test";expect((await selfCheck(d,snapshot(a),{links:links(a)})).counts.privacy.fail).toBe(1);}
+});
+
+it("uses an accessible official public record view with a separately restricted exact data query",async()=>{
+ const primary=applicationRecordUrl(configured,id);expect(primary).toContain("services1.arcgis.com/");expect(primary).toContain("f=html");expect(primary.replace("f=html","f=json")).toBe(verificationUrl(configured,id));
+ const a=app();a.recordUrl=primary;a.sourceUrl=primary;const r=await selfCheck(configured,snapshot(a),{links:async url=>url===primary?{status:200,text:id}:{status:200,text:JSON.stringify({features:[{attributes:{RecordID:id,Description:a.description}}]})}});expect(r.goLive).toBe(true);
 });

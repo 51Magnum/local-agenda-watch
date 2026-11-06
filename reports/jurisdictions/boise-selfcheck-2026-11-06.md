@@ -1,6 +1,6 @@
 # boise self-check
 
-As of 2026-11-06T03:36:46.206Z. Pass rate: 99.67%. Queue: 53. AI cost: $0.000000.
+As of 2026-11-06T04:30:22.783Z. Pass rate: 99.67%. Queue: 18. AI cost: $0.000000.
 
 Automatic publication approved; Git preview remains preview until merge.
 
@@ -28,7 +28,7 @@ Automatic publication approved; Git preview remains preview until merge.
 ## Exclusions
 
 ## Exceptions
-- PLN25-00608: location-in-boundary — Location checked against the jurisdiction coverage using the point/majority rule. [Source](https://permits.cityofboise.org/CitizenAccess/Cap/GlobalSearchResults.aspx?QueryText=PLN25-00608)
+- PLN25-00608: location-in-boundary — Location checked against the jurisdiction coverage using the point/majority rule. [Source](https://services1.arcgis.com/WHM6qC35aMtyAAlN/arcgis/rest/services/PDS_Zoning_Activities/FeatureServer/0/query?where=RecordID%3D%27PLN25-00608%27&outFields=RecordID,Status,ProjectType,Description,ChildRecords&returnGeometry=false&f=html)
 - PLN24-00457: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=954)
 - PLN24-00457: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=955)
 - PLN24-00457: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=956)
@@ -46,38 +46,3 @@ Automatic publication approved; Git preview remains preview until merge.
 - PLN25-00809: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=1001)
 - PLN25-00832: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=1003)
 - PLN25-00930: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=757)
-- PLN25-01116: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42532)
-- PLN25-01116: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42533)
-- PLN25-01116: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42534)
-- PLN25-01116: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42300)
-- PLN25-01116: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42421)
-- PLN25-01116: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42429)
-- PLN26-00096: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42303)
-- PLN26-00130: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=738)
-- PLN26-00130: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=739)
-- PLN26-00160: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=973)
-- PLN26-00222: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=972)
-- PLN26-00301: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42036)
-- PLN26-00333: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=714)
-- PLN26-00335: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=740)
-- PLN26-00335: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=741)
-- PLN26-00422: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=998)
-- PLN26-00465: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42481)
-- PLN26-00465: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42307)
-- PLN26-00518: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=802)
-- PLN26-00518: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=803)
-- PLN26-00531: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=974)
-- PLN26-00544: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42438)
-- PLN26-00544: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42308)
-- PLN26-00544: document-verification — Document case identity is not established; its link is withheld. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42296)
-- PLN26-00544: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42298)
-- PLN26-00801: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=1000)
-- PLN26-00816: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=958)
-- PLN26-00816: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=959)
-- PLN26-00816: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=716)
-- CUP26-00030: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=999)
-- CAR26-00013: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=957)
-- DRH26-00249: document-verification — Official document is unavailable or access-blocked; its link is withheld. [Source](https://pub-cityofboise.escribemeetings.com/FileStream.ashx?DocumentId=804)
-- CAR25-00003: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42218)
-- CAR25-00003: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42219)
-- CAR25-00003: document-verification — Document could not be read; its link is withheld pending verification. [Source](https://boisecityid.iqm2.com/Citizens/FileOpen.aspx?Type=4&ID=42428)

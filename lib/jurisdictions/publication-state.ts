@@ -15,13 +15,24 @@ function resumeBlocker(areaId:string,row:Row){
  if(hash!==row.snapshot_hash||hash!==row.qa?.snapshotHash)return "Staging changed after approval. Run the normal refresh and self-check again.";
  const drift=snapshotDrift(readReviewSnapshot(areaId),report);if(!drift.pass)return drift.reason;
 }
+/** Only aggregate failure categories and official hostnames; never source prose or URLs. */
+export function checkDiagnostics(report?:SelfCheckReport){
+ if(!report)return undefined;
+ const failures:Record<string,number>={};
+ for(const record of report.records)for(const check of record.checks.filter(c=>c.status!=="pass")){
+  let host="unknown";try{host=new URL(check.sourceUrl).hostname;}catch{}
+  const category=/blocked|403|challenge/i.test(check.reason)?"access-blocked":check.retry?"deferred":/identity|identif|matching|case/i.test(check.reason)?"identity":check.status;
+  const key=[check.check,host,category].join(" | ");failures[key]=(failures[key]??0)+1;
+ }
+ return {records:report.records.length,eligible:report.records.filter(r=>r.publish).length,passRate:report.passRate,goLive:report.goLive,verificationPending:report.verificationPending??0,documentsPending:report.documentsPending??0,counts:report.counts,coverage:report.coverage.map(c=>({check:c.check,status:c.status})),failures};
+}
 /** Private operational metadata only; no record prose, credentials or personal details. */
 export async function publicationState(areaId:string){
  const row:Row|undefined=databaseUrl()?(await(await jurisdictionDb()).query(query,[areaId])).rows[0]:undefined;
  if(!row)return {areaId,status:"missing" as const,publiclyVisible:false,checksPassed:false,canResume:false,publishedRecords:0,reason:"No stored publication exists yet."};
  const publiclyVisible=row.status==="public"&&!!row.approval_id&&!!row.qa_passed&&!!row.data.boundary;
  const blocker=resumeBlocker(areaId,row);
- return {areaId,status:row.status,publiclyVisible,checksPassed:!!row.data.selfCheck?.goLive,canResume:row.status==="paused"&&!blocker,publishedRecords:row.data.applications.length,passRate:row.data.selfCheck?.passRate,checkedAt:row.data.checkedAt,reason:row.status==="paused"?(blocker??"Checks pass, but publication is paused. An explicit Resume publication action is required."):publiclyVisible?"Publication is enabled.":blocker??"Publication remains in review."};
+ return {diagnostics:checkDiagnostics(row.data.selfCheck),areaId,status:row.status,publiclyVisible,checksPassed:!!row.data.selfCheck?.goLive,canResume:row.status==="paused"&&!blocker,publishedRecords:row.data.applications.length,passRate:row.data.selfCheck?.passRate,checkedAt:row.data.checkedAt,reason:row.status==="paused"?(blocker??"Checks pass, but publication is paused. An explicit Resume publication action is required."):publiclyVisible?"Publication is enabled.":blocker??"Publication remains in review."};
 }
 /** IDs only, including previously public aliases, for expiring resident-page caches. */
 export async function publicationRecordIds(areaId:string):Promise<string[]>{
