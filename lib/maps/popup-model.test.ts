@@ -52,3 +52,14 @@ it("distinguishes a recorded denial from a generic completed status without gues
  const complete=buildPopupModel({...item,stage:"Decided"},AREAS.nampa,{appStatus:"Complete",meetings:[]} as unknown as Hearing,[],now);
  expect(complete.progress.at(-1)?.label).toBe("Decided; outcome not specified in city record");
 });
+
+it("uses the official map status when hearing history is absent",()=>{
+ const model=buildPopupModel({...item,title:"Apex Northwest No. 6",stage:"Decided",recordStatus:"Approved",decisionDate:"2025-05-20"},AREAS.meridian,undefined,[],now);
+ expect(model.progress.at(-1)?.label).toBe("Approved — city record");
+ expect(JSON.stringify(model)).not.toContain("outcome not specified");
+});
+
+it("keeps a known hearing-record outcome when the GIS status is only generic",()=>{
+ const model=buildPopupModel({...item,stage:"Decided",recordStatus:"Complete"},AREAS.meridian,{appStatus:"Approved",meetings:[]} as unknown as Hearing,[],now);
+ expect(model.progress.at(-1)?.label).toBe("Approved — city record");
+});

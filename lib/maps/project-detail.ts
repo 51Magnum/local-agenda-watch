@@ -1,3 +1,4 @@
+import { reconcileDecisionHistory } from "./project-status";
 import {residentMapCase} from "../resident-content-policy";
 import {latestSuccessfulCheck} from "./record-freshness";
 import {jurisdiction} from "../jurisdictions/registry";
@@ -201,7 +202,7 @@ async function detail(
     where: item.citywide
       ? "Citywide change — " + area.name
       : agenda?.where ?? await projectLocation(item,area.name,project?.location ?? (areaId==="nampa"?CASE_EVIDENCE[caseId]?.address:undefined) ?? record?.address),
-    history: [
+    history: reconcileDecisionHistory(item, [
       ...continuances.map(row=>({...row,source:residentPaneHref(area,row.source)})),
       ...progress
         .filter((p) => (p.state === "done" || p.state === "past" || p.state === "current" && ["Decided","Recorded"].includes(item.stage)) && (!continuances.length || !/continued|continuance/i.test(p.label)))
@@ -210,7 +211,7 @@ async function detail(
         ...row,
         source: residentPaneHref(area, row.source),
       })),
-    ],
+    ]),
     next:
       next && !["Decided", "Recorded"].includes(item.stage)
         ? {

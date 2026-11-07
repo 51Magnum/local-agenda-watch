@@ -72,7 +72,7 @@ it("requires confirmation, hashes confirmation tokens, supports unsubscribe, and
     // Durable end-to-end batch: one person has 251 watches, another has one.
     // A mail failure must leave every failed watch untouched and allow the next person through.
     await state.db.exec("CREATE TABLE law_map_cases(area_id text,data jsonb)");
-    const current=emailProject(project).snapshot,old={...current,headline:"Previous proposal"};
+    const current=emailProject(project).snapshot,old={...current,headline:"Previous proposal",status:"Filed"};
     for(let i=0;i<252;i++)await state.db.query("INSERT INTO law_alert_subscriptions(id,scope,email,target,confirm_hash,confirm_expires,unsubscribe_token,confirmed_at,state) VALUES($1,'production',$2,$3,'hash',now()+interval '1 day',$4,now(),$5)",[randomUUID(),i<251?"batch-fail@example.test":"batch-ok@example.test",JSON.stringify({kind:"project",areaId:"nampa",caseId:"ANN-"+(90000+i)+"-2026"}),randomUUID(),JSON.stringify({version:2,projects:{[current.key]:old}})]);
     send.mockImplementation(async(_url:string,options:{body:string})=>{if(JSON.parse(options.body).to[0]==="batch-fail@example.test")throw Error("Simulated provider outage");return Response.json({id:"sent"});});
     expect(await sendDigests()).toMatchObject({sent:1,checked:2,failures:1});

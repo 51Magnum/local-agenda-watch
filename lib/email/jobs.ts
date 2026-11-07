@@ -5,17 +5,17 @@ import type { MapCase } from "../maps/types";
 import { AREAS, areaPath } from "../areas/registry";
 import { booleanIntersects, circle, feature } from "@turf/turf";
 import { SITE_ORIGIN } from "../site-config";
-import { dedupeProjects, emailProject, isReminderDue, localDay, snapshotFingerprint, type EmailProject, type WatchState, type ProjectSnapshot } from "./project";
+import { dedupeProjects, emailProject, isClosedProject, isReminderDue, localDay, snapshotFingerprint, type EmailProject, type WatchState, type ProjectSnapshot } from "./project";
 import { announcementTemplate, correctionTemplate, recipientDigest, type EmailLinks, type RenderedEmail } from "./templates";
 
 const hash=(value:string)=>createHash("sha256").update(value).digest("hex");
 type States=Record<string,WatchState>;
-export type Delivery={id:string;email:string;kind:string;payload:{messages:RenderedEmail[];unsubscribe:string;projects?:ProjectSnapshot[];renderedAt?:string};states:States|null;status:string;sent_parts:number;attempts:number;next_attempt:string};
+export type Delivery={id:string;email:string;kind:string;payload:{messages:RenderedEmail[];unsubscribe:string;projects?:ProjectSnapshot[];renderedAt?:string;alertPolicyVersion?:number};states:States|null;status:string;sent_parts:number;attempts:number;next_attempt:string};
 export function subscriptionLinks(token:string):EmailLinks{return {mailingAddress:process.env.ALERTS_MAILING_ADDRESS!,unsubscribe:SITE_ORIGIN+"/api/alerts/unsubscribe?token="+token,manage:SITE_ORIGIN+"/api/alerts/manage?token="+token};}
 async function queue(id:string,email:string,kind:string,messages:RenderedEmail[],unsubscribe:string,states:States|null,projects:EmailProject[]=[]){
  const db=await alertsDb();
  if(kind!=="digest")id+="/"+hash(JSON.stringify(messages)).slice(0,16);
- const result=await db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload,states) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,states=excluded.states,status='pending',attempts=0,next_attempt=now(),last_error=NULL WHERE law_alert_deliveries.status='cancelled' AND law_alert_deliveries.sent_parts=0 RETURNING *",[id,alertScope(),email,kind,JSON.stringify({messages,unsubscribe,projects:projects.map(p=>p.snapshot),renderedAt:new Date().toISOString()}),states?JSON.stringify(states):null]);
+ const result=await db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload,states) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,states=excluded.states,status='pending',attempts=0,next_attempt=now(),last_error=NULL WHERE law_alert_deliveries.status='cancelled' AND law_alert_deliveries.sent_parts=0 RETURNING *",[id,alertScope(),email,kind,JSON.stringify({messages,unsubscribe,projects:projects.map(p=>p.snapshot),renderedAt:new Date().toISOString(),alertPolicyVersion:2}),states?JSON.stringify(states):null]);
  return (result.rows[0]??(await db.query("SELECT * FROM law_alert_deliveries WHERE id=$1",[id])).rows[0]) as Delivery;
 }
 /** Persist stable payload and per-part progress before retrying a recipient. */
@@ -24,6 +24,10 @@ export async function deliverQueued(row:Delivery,now=new Date()){
  if(row.status!=="pending"||row.attempts>0&&Date.parse(row.next_attempt)>now.getTime())return false;
  const db=await alertsDb();
  try{
+  // Rebuild unsent digests rendered under the former wording-based policy.
+  if(row.kind==="digest"&&row.sent_parts===0&&row.payload.alertPolicyVersion!==2){
+   await db.query("UPDATE law_alert_deliveries SET status='cancelled',last_error='Alert policy changed; rebuild from current data' WHERE id=$1",[row.id]);row.status="cancelled";return false;
+  }
   for(const snapshot of row.payload.projects??[]){
    const data=await projectDetail(snapshot.areaId,snapshot.caseId);if(!data)throw Error("Current project data unavailable");
    const current=emailProject(data,undefined,undefined,now);
@@ -65,7 +69,7 @@ export async function loadWatchProjects(sub:Subscription,rows:MapCase[],load:typ
   const detail=await load(match.areaId,match.id);if(!detail)throw Error("A watched project could not be verified; keep its previous state");
   const current=emailProject(detail,undefined,target.kind==="place"?target:undefined,now),previous=previousState(sub)?.projects[current.snapshot.key];
   const item=emailProject(detail,previous,target.kind==="place"?target:undefined,now);
-  if(previousState(sub)&&!previous)item.changes=["New project in your watched area: "+item.snapshot.headline+"."];
+  if(previousState(sub)&&!previous&&!isClosedProject(item.snapshot.status)&&!["Decided","Recorded"].includes(item.data.item.stage))item.changes=["New project in your watched area: "+item.snapshot.headline+"."];
   projects.push(item);
  }
  return dedupeProjects(projects);

@@ -11,7 +11,7 @@ import {subscribeAlert,confirmAlert} from "./alerts";
 import {residentPins,saveResidentPin,removeResidentPin,residentPlan} from "./resident-account";
 import {PAID_PIN_LIMIT,pinLimit,validatePlanRadius} from "./plan-policy";
 import {applyResidentSchema} from "./resident-schema";
-import {sendScheduledAlerts} from "./email/jobs";
+import {deliverQueued,sendScheduledAlerts,type Delivery} from "./email/jobs";
 import {emailProject} from "./email/project";
 import {recipientDigest} from "./email/templates";
 import ResidentPins from "../app/components/resident-pins";
@@ -93,14 +93,14 @@ it("matches every paid pin at its own radius, dedupes overlaps, and sends one em
  const data=project(),far=project();far.item={...far.item,id:"ANN-00400-2026",href:"/us/id/nampa/plan/ANN-00400-2026",centroid:[-116.45,43.6],popup:{projectName:"Second subdivision",headline:"Other homes",progress:[]}};far.caseIds=[far.item.id];
  h.detail.mockImplementation(async(_area:string,id:string)=>id===data.item.id?data:far);
  for(const d of [data,far]){const [x,y]=d.item.centroid!;d.item.geometry={type:"Polygon",coordinates:[[[x-.0001,y-.0001],[x+.0001,y-.0001],[x+.0001,y+.0001],[x-.0001,y+.0001],[x-.0001,y-.0001]]]};await h.db.query("INSERT INTO law_map_cases VALUES('nampa',$1)",[JSON.stringify(d.item)]);}
- const old=[data,far].map(d=>{const s=emailProject(d).snapshot;return {...s,headline:"Old proposal"};});
+ const old=[data,far].map(d=>{const s=emailProject(d).snapshot;return {...s,status:"Filed"};});
  await h.db.query("UPDATE law_alert_subscriptions SET state=$1",[JSON.stringify({version:2,projects:Object.fromEntries(old.map(s=>[s.key,s]))})]);
  const result=await sendScheduledAlerts();expect(result).toMatchObject({sent:1,checked:1,failures:0});expect(h.send).toHaveBeenCalledTimes(1);
  const delivery=(await h.db.query<{states:Record<string,{projects:Record<string,unknown>}>;payload:{projects:unknown[]}}>("SELECT states,payload FROM law_alert_deliveries")).rows[0];
  expect(delivery.payload.projects).toHaveLength(2);expect(Object.values(delivery.states).map(s=>Object.keys(s.projects).length).sort()).toEqual([1,2]);
  expect((await sendScheduledAlerts()).sent).toBe(0);expect(h.send).toHaveBeenCalledTimes(1);
  await saveResidentPin(owner,{...pin,label:"Third",radiusMiles:5},undefined,"saved",true);
- data.item.popup!.headline="A further proposal change";
+ data.item.recordStatus="Approved";data.item.stage="Decided";
  expect((await sendScheduledAlerts()).sent).toBe(0);expect(h.send).toHaveBeenCalledTimes(1);
  expect((await h.db.query("SELECT id FROM law_alert_deliveries WHERE kind='digest'")).rows).toHaveLength(1);
 });
@@ -123,3 +123,25 @@ it("migrates old saved and confirmed single pins once, leaves pending/stopped wa
   await db.exec(await readFile("migrations/20261103_profile_plan_tiers.down.sql","utf8"));expect((await db.query("SELECT * FROM law_resident_pins")).rows).toHaveLength(3);
  }finally{await db.close();}
 },15000);
+
+it("baselines wording changes without sending, then delivers a real official status change",async()=>{
+ await saveResidentPin(owner,pin,undefined,"saved",true);
+ const d=project();d.item.geometry={type:"Polygon",coordinates:[[[-116.401,43.599],[-116.399,43.599],[-116.399,43.601],[-116.401,43.601],[-116.401,43.599]]]};
+ h.detail.mockResolvedValue(d);await h.db.query("INSERT INTO law_map_cases VALUES('nampa',$1)",[JSON.stringify(d.item)]);
+ d.item.stage="Decided";d.item.recordStatus="Approved";d.item.decisionDate="2025-05-20";
+ const old=emailProject(d).snapshot;
+ await h.db.query("UPDATE law_alert_subscriptions SET state=$1",[JSON.stringify({version:2,projects:{[old.key]:old}})]);
+ d.item.popup!.headline="Clearer project description";d.history=[{label:"Decided; outcome not specified in city record"}];
+ expect(await sendScheduledAlerts()).toMatchObject({sent:0,failures:0});expect(h.send).not.toHaveBeenCalled();
+ const saved=(await h.db.query<{state:{projects:Record<string,{headline:string}>}}>("SELECT state FROM law_alert_subscriptions")).rows[0];
+ expect(saved.state.projects[old.key].headline).toBe("Clearer project description");
+ await h.db.query("UPDATE law_alert_subscriptions SET last_sent=current_date-2");
+ d.item.recordStatus="Denied";
+ expect(await sendScheduledAlerts()).toMatchObject({sent:1,failures:0});expect(h.send).toHaveBeenCalledTimes(1);
+});
+it("cancels an unsent digest rendered by the old alert policy before calling the mail provider",async()=>{
+ await h.db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload) VALUES('old-policy','production',$1,'digest',$2)",[owner.email,JSON.stringify({messages:[{subject:"Old misleading update",html:"old",text:"old",preheader:"old"}],unsubscribe:"https://example.test/remove"})]);
+ const row=(await h.db.query<Delivery>("SELECT * FROM law_alert_deliveries WHERE id='old-policy'")).rows[0];
+ expect(await deliverQueued(row)).toBe(false);expect(h.send).not.toHaveBeenCalled();
+ expect((await h.db.query<{status:string}>("SELECT status FROM law_alert_deliveries WHERE id='old-policy'")).rows[0].status).toBe("cancelled");
+});
