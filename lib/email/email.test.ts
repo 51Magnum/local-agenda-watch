@@ -71,3 +71,45 @@ it("blocks live mail before approval even with credentials and blocks preview li
  const fetch=vi.fn();vi.stubGlobal("fetch",fetch);vi.stubEnv("RESEND_API_KEY","configured");vi.stubEnv("ALERTS_MAILING_ADDRESS","123 Example St");vi.stubEnv("ALERTS_DELIVERY_ENABLED","false");vi.stubEnv("VERCEL_ENV","production");expect(alertReadiness().deliveryEnabled).toBe(false);expect((await sendDigests()).sent).toBe(0);await expect(sendAlertMail({to:"person@example.test",subject:"test",html:"<p>test</p>",text:"test",key:"test",unsubscribe:"https://example.test/remove"})).rejects.toThrow("paused");vi.stubEnv("ALERTS_DELIVERY_ENABLED","true");vi.stubEnv("VERCEL_ENV","preview");expect(alertReadiness().deliveryEnabled).toBe(false);expect(fetch).not.toHaveBeenCalled();
 });
 it("fails readiness on an empty mailing address",()=>{vi.stubEnv("RESEND_API_KEY","configured");vi.stubEnv("ALERTS_MAILING_ADDRESS","  ");expect(alertReadiness().ready).toBe(false);});
+
+it("does not email presentation changes or an unknown-outcome fallback for an old approval",()=>{
+ const d=data();d.item.stage="Decided";d.item.recordStatus="Approved";d.item.decisionDate="2025-05-20";d.next=undefined;
+ const before=emailProject(d,undefined,undefined,now).snapshot;
+ const after={...before,status:" APPROVED ",headline:"A clearer project title",where:"Near Example Road",history:["Filed", "Decided; outcome not specified in city record"],commentInstructions:"New wording"};
+ expect(projectDiff(before,after,now)).toEqual([]);
+ expect(projectDiff(before,{...after,status:"Decided"},now)).toEqual([]);
+});
+it("ignores document renaming but retains new documents, content revisions and actual decisions",()=>{
+ const before=emailProject(data(),undefined,undefined,now).snapshot;
+ before.documents=[{label:"Report",url:"https://official.test/report.pdf",hash:"one"}];
+ expect(projectDiff(before,{...before,documents:[{...before.documents[0],label:"Staff report"}]},now)).toEqual([]);
+ expect(projectDiff(before,{...before,documents:[{...before.documents[0],hash:"two"}]},now)).toContain("Official document updated: Report.");
+ expect(projectDiff(before,{...before,status:"Approved",decisionDate:"2026-10-26"},now)).toContain("Official record updated: Approved Oct 26, 2026.");
+ expect(projectDiff({...before,status:"Approved"},{...before,status:"Denied"},now)).toContain("Official record updated: Denied.");
+});
+it("places an old approval in history and never in next steps or the subject",()=>{
+ const d=data();d.item.title="Apex Northwest No. 6";d.item.stage="Decided";d.item.recordStatus="Approved";d.item.decisionDate="2025-05-20";
+ d.history=[{label:"Decided; outcome not specified in city record"}];
+ const p=emailProject(d,undefined,undefined,now),message=digestTemplates([p],links,undefined,false,now)[0];
+ expect(p.snapshot.history.join(" ")).toContain("Approved");
+ expect(message.text).not.toContain("outcome not specified");expect(message.html).not.toContain("outcome not specified");
+ expect(message.text).toContain("Approved May 20, 2025");
+ const next=message.text.split("What’s next?")[1].split("How it affects me")[0];
+ expect(next).toContain("No upcoming hearing is verified");expect(next).not.toContain("Approved");expect(next).not.toContain("2025");
+ expect(message.subject).not.toContain("2025");
+});
+it("silently baselines newly discovered closed cases but still announces active nearby projects",async()=>{
+ const d=data(),sub={id:"one",target:{kind:"place",label:"Test1",coordinates:[-116.4,43.6],radiusMiles:1},state:{version:2,projects:{}}} as Subscription;
+ const rows=[{areaId:"meridian",id:d.item.id,geometry:{type:"Polygon",coordinates:[[[-116.401,43.599],[-116.399,43.599],[-116.399,43.601],[-116.401,43.601],[-116.401,43.599]]]}}] as Parameters<typeof loadWatchProjects>[1];
+ const load=vi.fn().mockResolvedValue(d);
+ expect((await loadWatchProjects(sub,rows,load,now))[0].changes[0]).toContain("New project in your watched area");
+ d.item.stage="Decided";d.item.recordStatus="Approved";d.item.decisionDate="2025-05-20";
+ expect((await loadWatchProjects(sub,rows,load,now))[0].changes).toEqual([]);
+});
+it("does not claim a record changed just because a hearing aged out",()=>{
+ const before=emailProject(data(),undefined,undefined,now).snapshot;
+ expect(projectDiff(before,{...before,next:undefined},new Date("2026-11-07T14:00:00Z"))).toEqual([]);
+ expect(projectDiff(before,{...before,next:undefined},now)).toContain("The previously listed hearing is no longer upcoming. Check the official record for the current schedule or outcome.");
+ const after={...before,next:{...before.next!,deadline:"2026-10-27T19:00:00Z"}};
+ expect(projectDiff(before,after,now).join(" ")).toContain("Comment deadline updated");
+});

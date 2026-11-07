@@ -69,7 +69,7 @@ export function buildPopupModel(item: MapCase, area: PopupArea, hearing?: Hearin
   if (outcome && /^(approved|denied|withdrawn)\b/i.test(outcome)) {
     progress.push({ label: outcome.charAt(0).toUpperCase() + outcome.slice(1).toLowerCase() + " by " + area.bodies.decision.shortLabel + (finalDate ? ", " + shortDate(finalDate, area) : ""), state: "current" });
   } else if (item.stage === "Decided" || item.stage === "Recorded") {
-    const recordOutcome = hearing?.appStatus.trim().match(/^(approved|denied|withdrawn)\b/i)?.[0];
+    const recordOutcome = item.recordStatus?.trim().match(/^(approved|denied|withdrawn)\b/i)?.[0] ?? hearing?.appStatus?.trim().match(/^(approved|denied|withdrawn)\b/i)?.[0];
     const label = recordOutcome ? recordOutcome.charAt(0).toUpperCase() + recordOutcome.slice(1).toLowerCase() + " — "+area.type+" record" + (item.stage === "Recorded" ? " · Recorded" : "") : item.stage === "Recorded" ? "Recorded" : "Decided; outcome not specified in "+area.type+" record";
     progress.push({ label, state: "current" });
   } else {

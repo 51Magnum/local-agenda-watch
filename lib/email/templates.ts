@@ -21,8 +21,9 @@ export function projectBlock(project:EmailProject,now=new Date()){
  const {snapshot:s,data:d}=project;
  const heading=(title:string)=>`<h3 style="font-size:15px;margin:22px 0 6px">${e(title)}</h3>`;
  const where=s.where+(s.where.includes(s.jurisdiction)?"":" · "+s.jurisdiction)+(project.distance?` · ${project.distance.miles.toFixed(1)} miles from ${project.distance.label}`:"");
- const changed=project.changes.length?project.changes:s.history.length?["Current verified history: "+s.history.at(-1)]:["No new change is claimed in this preview. Check the official record for the latest history."];
- const next=s.next?`${d.next?.meeting_body??s.next.body} · ${hearingDateTime(s.next.startsAt,s.timezone)}\n${s.next.location??"Meeting place not yet published"}\n${s.next.role}`:`${statusCopy(s.status)}${s.decisionDate?" "+dateOnly(s.decisionDate,s.timezone):""}. No upcoming hearing is verified.`;
+ const currentStatus=`${statusCopy(s.status)}${s.decisionDate?" "+dateOnly(s.decisionDate,s.timezone):""}`;
+ const changed=["Current status: "+currentStatus,...(project.changes.length?project.changes:s.history.filter(h=>!/^Filed\b/.test(h)).slice(-2))];
+ const next=s.next?`${d.next?.meeting_body??s.next.body} · ${hearingDateTime(s.next.startsAt,s.timezone)}\n${s.next.location??"Meeting place not yet published"}\n${s.next.role}`:"No upcoming hearing is verified. Any further steps must be confirmed in the official record.";
  const impacts=d.item.residentialPrivacy?[]:d.impacts.slice(0,2);
  const affected=impacts.length?impacts.map(i=>`${i.label}: ${i.value}`).join("\n"):"Specific impacts have not been verified in the available public records.";
  const deadlineSource=publicMeetingUrl(s.next?.deadlineSource??d.next?.commentSourceUrl);
