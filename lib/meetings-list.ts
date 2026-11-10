@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import { getLocality } from "./localities";
 import { caseCatalog } from "./case-catalog";
 import { AREAS } from "./areas/registry";

@@ -1,4 +1,4 @@
-import {unstable_cache} from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import { cache } from "react";
 import { getEvidenceStore } from "./store";
 import { emptyEvidenceState, publicFields, type EvidenceField, type EvidenceState, type FieldKey } from "./types";

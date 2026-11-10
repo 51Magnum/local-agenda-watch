@@ -20,7 +20,7 @@ export function officialProjectRecords(
 ) {
   const links = new Map<string, { label: string; url: string }>();
   const readable = (urls: (string | null | undefined)[]) => {
-    urls = urls.map((url) => residentPaneHref(area, url));
+    urls = urls.map((url) => residentPaneHref(area, url)).map(url=>url?caseSpecificRecordUrl(url,hearings.map(h=>h.appId)):undefined);
     return area.recordPage ? area.recordPage({ urls }) : urls.find(Boolean);
   };
   for (const hearing of hearings) {
@@ -36,7 +36,7 @@ export function officialProjectRecords(
         ...hearing.meetings.flatMap((m) => [m.agendaUrl, m.sourceUrl]),
       ]);
     const url =
-      specific ?? residentPaneHref(area, area.residentAccess?.archiveUrl);
+      specific;
     if (!url || !residentHref(url)) continue;
     const target = new URL(url, "https://local.invalid");
     const kind =
@@ -60,4 +60,16 @@ export function officialProjectRecords(
     });
   }
   return [...links.values()];
+}
+
+/** A landing page cannot serve as a case record unless its URL identifies the case. */
+export function caseSpecificRecordUrl(value:string,caseIds:string[]) {
+  try {
+    const url=new URL(value,"https://local.invalid");
+    if(/\/rest\/services\/|\/query(?:[?#]|$)|[?&]f=(?:pjson|json)(?:[&#]|$)/i.test(value))return;
+    if(caseIds.some(id=>decodeURIComponent(url.search+url.hash).toUpperCase().includes(id.toUpperCase())))return value;
+    if(url.hostname==="experience.arcgis.com" || /\/public\/portal\/?$/i.test(url.pathname) || /\/(?:Upcoming-Public-Hearings|public-hearing-notices)\/?$/i.test(url.pathname))return;
+    if(/^\/$|\/(?:Landing|calendar|agendas|portal)\/?$/i.test(url.pathname))return;
+    return value;
+  } catch { /* Invalid or generic URL is not a case record. */ }
 }

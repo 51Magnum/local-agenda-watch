@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import {readSourceFeed,saveSourceFeed} from "./source-cache";
 import { canyonCounty, collectCountyEvents, composeCountyFeed, fetchCountyFeatures, countyFromFeature, type CountyCase, type CountyEvent } from "@/lib/sources/canyon-county";
 import type { HearingFeed } from "./types";

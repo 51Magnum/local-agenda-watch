@@ -159,7 +159,7 @@ export default function CaseMap({ jurisdiction, caseIds, compact = false, fullPa
       function showProject(item: MapCase) {
         if (!item.geometry || !data) return;
         popupProject=item;
-        show(popupContent(item, setExpandedImage, data.jurisdiction.id, data.cases), item.centroid ?? geometryCentroid(item.geometry), true);
+        show(popupContent(item, setExpandedImage, data.jurisdiction.id), item.centroid ?? geometryCentroid(item.geometry), true);
       }
       openProject.current = (id) => {
         const item = data.cases.find((c) => c.id === id); if (!item?.geometry || !instance) return;

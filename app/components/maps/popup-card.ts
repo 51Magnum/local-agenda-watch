@@ -5,7 +5,7 @@ import { buildPopupModel, popupProjectName } from "@/lib/maps/popup-model";
 
 export const popupDisposers = new WeakMap<HTMLElement, () => void>();
 // Use text nodes, rather than HTML strings, for all city-supplied content.
-export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jurisdiction: string, catalog: MapCase[]): HTMLElement {
+export function popupContent(item: MapCase, onEnlarge: (visual: MapVisual) => void, jurisdiction: string): HTMLElement {
   const card = document.createElement("article"); card.className = "law-project-popup";
   const area = getArea(item.areaId ?? jurisdiction);
   const model = item.popup ?? (area ? buildPopupModel(item, area) : { headline: popupProjectName(item.title), projectName: popupProjectName(item.title), progress: [] });

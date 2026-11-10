@@ -1,3 +1,4 @@
+import { createLinkChecker, verifyProjectLinks } from "./links";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { alertReadiness, alertScope, alertsDb, sendAlertMail, watchMatches, type Subscription } from "../alerts";
 import { projectDetail } from "../maps/project-detail";
@@ -5,17 +6,17 @@ import type { MapCase } from "../maps/types";
 import { AREAS, areaPath } from "../areas/registry";
 import { booleanIntersects, circle, feature } from "@turf/turf";
 import { SITE_ORIGIN } from "../site-config";
-import { dedupeProjects, emailProject, isClosedProject, isReminderDue, localDay, snapshotFingerprint, type EmailProject, type WatchState, type ProjectSnapshot } from "./project";
+import { alertSourceVersion, snapshotClosed, dedupeProjects, emailProject, isReminderDue, localDay, snapshotFingerprint, type EmailProject, type WatchState, type ProjectSnapshot } from "./project";
 import { announcementTemplate, correctionTemplate, recipientDigest, type EmailLinks, type RenderedEmail } from "./templates";
 
 const hash=(value:string)=>createHash("sha256").update(value).digest("hex");
 type States=Record<string,WatchState>;
-export type Delivery={id:string;email:string;kind:string;payload:{messages:RenderedEmail[];unsubscribe:string;projects?:ProjectSnapshot[];renderedAt?:string;alertPolicyVersion?:number};states:States|null;status:string;sent_parts:number;attempts:number;next_attempt:string};
+export type Delivery={id:string;email:string;kind:string;payload:{messages:RenderedEmail[];unsubscribe:string;projects?:ProjectSnapshot[];renderedAt?:string;alertPolicyVersion?:number;linkChecks?:EmailProject["linkChecks"]};states:States|null;status:string;sent_parts:number;attempts:number;next_attempt:string};
 export function subscriptionLinks(token:string):EmailLinks{return {mailingAddress:process.env.ALERTS_MAILING_ADDRESS!,unsubscribe:SITE_ORIGIN+"/api/alerts/unsubscribe?token="+token,manage:SITE_ORIGIN+"/api/alerts/manage?token="+token};}
 async function queue(id:string,email:string,kind:string,messages:RenderedEmail[],unsubscribe:string,states:States|null,projects:EmailProject[]=[]){
  const db=await alertsDb();
  if(kind!=="digest")id+="/"+hash(JSON.stringify(messages)).slice(0,16);
- const result=await db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload,states) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,states=excluded.states,status='pending',attempts=0,next_attempt=now(),last_error=NULL WHERE law_alert_deliveries.status='cancelled' AND law_alert_deliveries.sent_parts=0 RETURNING *",[id,alertScope(),email,kind,JSON.stringify({messages,unsubscribe,projects:projects.map(p=>p.snapshot),renderedAt:new Date().toISOString(),alertPolicyVersion:2}),states?JSON.stringify(states):null]);
+ const result=await db.query("INSERT INTO law_alert_deliveries(id,scope,email,kind,payload,states) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,states=excluded.states,status='pending',attempts=0,next_attempt=now(),last_error=NULL WHERE law_alert_deliveries.status='cancelled' AND law_alert_deliveries.sent_parts=0 RETURNING *",[id,alertScope(),email,kind,JSON.stringify({messages,unsubscribe,projects:projects.map(p=>p.snapshot),renderedAt:new Date().toISOString(),alertPolicyVersion:3,linkChecks:Object.assign({},...projects.map(p=>p.linkChecks??{}))}),states?JSON.stringify(states):null]);
  return (result.rows[0]??(await db.query("SELECT * FROM law_alert_deliveries WHERE id=$1",[id])).rows[0]) as Delivery;
 }
 /** Persist stable payload and per-part progress before retrying a recipient. */
@@ -25,12 +26,17 @@ export async function deliverQueued(row:Delivery,now=new Date()){
  const db=await alertsDb();
  try{
   // Rebuild unsent digests rendered under the former wording-based policy.
-  if(row.kind==="digest"&&row.sent_parts===0&&row.payload.alertPolicyVersion!==2){
+  if(row.kind==="digest"&&row.sent_parts===0&&row.payload.alertPolicyVersion!==3){
    await db.query("UPDATE law_alert_deliveries SET status='cancelled',last_error='Alert policy changed; rebuild from current data' WHERE id=$1",[row.id]);row.status="cancelled";return false;
   }
+  const checkLinks=createLinkChecker();
   for(const snapshot of row.payload.projects??[]){
    const data=await projectDetail(snapshot.areaId,snapshot.caseId);if(!data)throw Error("Current project data unavailable");
    const current=emailProject(data,undefined,undefined,now);
+   const verified=await verifyProjectLinks(current,checkLinks);
+   if(row.sent_parts===0&&JSON.stringify(verified.linkChecks)!==JSON.stringify(Object.fromEntries(Object.keys(verified.linkChecks??{}).map(url=>[url,row.payload.linkChecks?.[url]])))) {
+    await db.query("UPDATE law_alert_deliveries SET status='cancelled',last_error='Official link availability changed; rebuild email' WHERE id=$1",[row.id]);row.status="cancelled";return false;
+   }
    const deadline=snapshot.next?.deadline;
    const expired=(at:Date)=>!!deadline&&(deadline.length===10?deadline<localDay(at,snapshot.timezone):Date.parse(deadline)<=at.getTime());
    if(snapshotFingerprint(current.snapshot)!==snapshotFingerprint(snapshot)||(row.kind==="reminder"&&!isReminderDue(current,now))||(expired(now)&&!expired(new Date(row.payload.renderedAt??now)))){
@@ -69,7 +75,10 @@ export async function loadWatchProjects(sub:Subscription,rows:MapCase[],load:typ
   const detail=await load(match.areaId,match.id);if(!detail)throw Error("A watched project could not be verified; keep its previous state");
   const current=emailProject(detail,undefined,target.kind==="place"?target:undefined,now),previous=previousState(sub)?.projects[current.snapshot.key];
   const item=emailProject(detail,previous,target.kind==="place"?target:undefined,now);
-  if(previousState(sub)&&!previous&&!isClosedProject(item.snapshot.status)&&!["Decided","Recorded"].includes(item.data.item.stage))item.changes=["New project in your watched area: "+item.snapshot.headline+"."];
+  const state=previousState(sub),source=state?.sourceVersions?.[item.snapshot.areaId];
+  const changedSource=source!==undefined&&source!==alertSourceVersion(item.snapshot.areaId);
+  if(changedSource)item.changes=[];
+  if(state&&!previous&&source!==undefined&&!changedSource&&!snapshotClosed(item.snapshot)&&!["Decided","Recorded"].includes(item.data.item.stage))item.changes=["New project in your watched area: "+item.snapshot.headline+"."];
   projects.push(item);
  }
  return dedupeProjects(projects);
@@ -82,6 +91,7 @@ export async function sendScheduledAlerts(now=new Date()){
  // LIMIT applies to people, never subscription rows. Fetch ALL watches below.
  const recipients=(await db.query(`SELECT r.email FROM (SELECT DISTINCT lower(email) AS email FROM law_alert_subscriptions WHERE scope=$1 AND confirmed_at IS NOT NULL AND target->>'kind'<>'pending' AND unsubscribed_at IS NULL) r LEFT JOIN law_alert_recipient_checks c ON c.scope=$1 AND c.email=r.email WHERE NOT EXISTS(SELECT 1 FROM law_alert_deliveries d WHERE d.scope=$1 AND d.email=r.email AND d.kind='digest' AND d.status='pending' AND d.next_attempt>now()) ORDER BY c.last_checked NULLS FIRST,r.email LIMIT 250`,[scope])).rows as {email:string}[];
  const rows=(await db.query(`SELECT area_id AS "areaId",data-'visual'-'popup' AS data FROM law_map_cases WHERE area_id=ANY($1::text[])`,[Object.values(AREAS).filter(a=>a.status==="live").map(a=>a.id)])).rows.map(r=>({...r.data,areaId:r.areaId})) as MapCase[];
+ const checkLinks=createLinkChecker();
  const cache=new Map<string,ReturnType<typeof projectDetail>>();
  const load:typeof projectDetail=(area,id)=>{const key=area+":"+id;if(!cache.has(key))cache.set(key,projectDetail(area,id));return cache.get(key)!;};
  let sent=0;
@@ -96,11 +106,12 @@ export async function sendScheduledAlerts(now=new Date()){
    else await db.query("UPDATE law_alert_deliveries SET status='cancelled' WHERE id=$1",[pending.id]);
   }
   const all:EmailProject[]=[],changed:EmailProject[]=[],states:States={};
-  for(const sub of subs){const projects=await loadWatchProjects(sub,rows,load,now);all.push(...projects);changed.push(...projects.filter(p=>p.changes.length));states[sub.id]={version:2,projects:Object.fromEntries(projects.map(p=>[p.snapshot.key,p.snapshot]))};}
+  for(const sub of subs){const projects=await loadWatchProjects(sub,rows,load,now);all.push(...projects);changed.push(...projects.filter(p=>p.changes.length));states[sub.id]={version:2,sourceVersions:Object.fromEntries(Object.values(AREAS).filter(a=>a.status==="live").map(a=>[a.id,alertSourceVersion(a.id)])),projects:Object.fromEntries(projects.map(p=>[p.snapshot.key,p.snapshot]))};}
   const reminders=dedupeProjects(all).filter(p=>isReminderDue(p,now)).map(p=>({...p,changes:[...p.changes,"A verified hearing for this watched project is two calendar days away."]}));
   const unique=dedupeProjects([...changed,...reminders]),links=subscriptionLinks(subs[0].unsubscribe_token),labels=[...new Set(subs.flatMap(s=>s.target.kind==="place"?[s.target.label]:[]))],label=labels.length===1?labels[0]:undefined;
   if(unique.length&&!alreadyToday){
-   const queued=await queue("digest/"+hash(scope+email+day),email,"digest",recipientDigest(unique,links,label,now),links.unsubscribe,states,unique);
+   const verified=await Promise.all(unique.map(p=>verifyProjectLinks(p,checkLinks)));
+   const queued=await queue("digest/"+hash(scope+email+day),email,"digest",recipientDigest(verified,links,label,now),links.unsubscribe,states,verified);
    if(await deliverQueued(queued,now))sent+=queued.payload.messages.length;
   }else if(!alreadyToday){
    // First-run or legacy hashes establish a structured baseline, without claiming a change.
@@ -130,6 +141,6 @@ export async function queueCorrectionReceived(report:{id:string;project:string;m
  const internal=(await db.query("SELECT unsubscribe_token,unsubscribed_at FROM law_alert_subscriptions WHERE scope=$1 AND email=$2 AND target=$3::jsonb",[alertScope(),"corrections@localagendawatch.com",target])).rows[0];
  if(internal.unsubscribed_at)return;
  const links:EmailLinks=subscriptionLinks(internal.unsubscribe_token);
- const message=correctionTemplate({id:report.id,message:report.message,replyEmail:report.email??undefined,project:data?emailProject(data):undefined,projectReference:report.project},links);
+ const message=correctionTemplate({id:report.id,message:report.message,replyEmail:report.email??undefined,project:data?await verifyProjectLinks(emailProject(data)):undefined,projectReference:report.project},links);
  await queue("correction/"+report.id,"corrections@localagendawatch.com","correction",[message],links.unsubscribe,null);
 }

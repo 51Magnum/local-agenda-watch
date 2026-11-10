@@ -1,4 +1,4 @@
-import {unstable_cache} from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import type {MapCase} from "./types";
 import {geometryCentroid} from "./spatial";
 import {readableLocation} from "@/lib/resident-copy";
@@ -12,7 +12,7 @@ export async function lookupIntersection(lng:number,lat:number){
 }
 export const nearestIntersection=unstable_cache(lookupIntersection,["project-intersection-v1"],{revalidate:30*86400});
 export async function projectLocation(item:MapCase,areaName:string,official?:string,intersection=nearestIntersection){
- const known=readableLocation(official);if(known&&!/^0\s/.test(official??""))return known;
+ const known=readableLocation(official);if(known&&!/^0\s/.test(official??"")&&!/\(-?\d+\.\d+,\s*-?\d+\.\d+\)/.test(known))return known;
  const center=item.centroid??(item.geometry?geometryCentroid(item.geometry):null);if(!center)return known;
  const cross=await intersection(Number(center[0].toFixed(5)),Number(center[1].toFixed(5)));
  return cross?"Near "+cross+", "+areaName:known??"Mapped project area in "+areaName+" ("+center[1].toFixed(3)+", "+center[0].toFixed(3)+")";

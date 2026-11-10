@@ -1,3 +1,4 @@
+import { scheduledContinuations } from "./continuances";
 import{areaPath,FEATURED_AREA_ID,getArea}from"./areas/public-registry";
 import type { HearingFeed } from "@/lib/localities/types";
 import type { HearingMeetingFields } from "./hearings/types";
@@ -7,6 +8,7 @@ export const HEARINGS_URL = "https://www.cityofnampa.us/1433/Upcoming-Public-Hea
 export const PROJECT_STAGES = ["Submitted", "Under review", "P&Z hearing", "Council hearing", "Decided"] as const;
 export type ProjectStage = typeof PROJECT_STAGES[number];
 export type ProjectHearing = HearingMeetingFields & {
+  continuationFrom?: string;
   agendaUrl?: string;
   packetUrl?: string;
   startsAt: string;
@@ -87,7 +89,8 @@ export function projectHearings(project: Project, feed?: HearingFeed) {
 export function getProjectNextHearing(project: Project, feed?: HearingFeed, now = new Date()): ProjectHearing | undefined {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Denver", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
   const hearings = projectHearings(project, feed);
-  const scheduled = hearings.flatMap((h) => h.meetings)
+  if (hearings.length && hearings.every(h=>h.decisionRecorded || feed?.completed.some(c=>c.appId===h.appId))) return;
+  const scheduled = scheduledContinuations(hearings.flatMap((h) => h.meetings))
     .filter((m) => !m.continuedNote && m.date >= today)
     .sort((a, b) => a.date.localeCompare(b.date))[0];
   const known = project.nextHearing && new Date(project.nextHearing.startsAt) >= now ? project.nextHearing : undefined;
@@ -97,8 +100,9 @@ export function getProjectNextHearing(project: Project, feed?: HearingFeed, now 
     if (known && known.startsAt.slice(0, 10) === scheduled.date && known.body === scheduled.body) return { ...known, agendaUrl: scheduled.agendaUrl, packetUrl: scheduled.packetUrl };
     return {
       startsAt: scheduled.date,
+      continuationFrom: scheduled.continuationFrom,
       body: scheduled.bodyLabel,
-      location: "Nampa City Hall, Council Chambers, 411 3rd St S, Nampa, ID",
+      location: scheduled.location ?? "Location not confirmed — check the official notice.",
       sourceUrl: scheduled.sourceUrl,
     };
   }

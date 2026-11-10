@@ -11,5 +11,6 @@ export function cleanResidentProse(value:string){return value.replace(/\b(?:ACTI
 export function readableLocation(value?:string){
  if(!value)return undefined;const s=cleanResidentProse(value);
  if(!s||/^(?:0[,\s]*)+$/.test(s)||/^(?:parcel|APN|tax lot|R\d{6,})\b/i.test(s)||/^(?:[A-Z]?\d{8,}[-,;\s]*)+$/.test(s)||/location.*(?:not confirmed|unknown)/i.test(s)||(/\b(?:parcel|APN|[A-Z]\d{6,})\b/i.test(s)&&!/(?:street|road|avenue|lane|blvd|drive|\brd\b|\bave\b|\bst\b|\bln\b)/i.test(s)))return undefined;
- return s.replace(/^0\s+(?=[A-Za-z])/,'');
+ const location = s.replace(/^0\s+(?=[A-Za-z])/,'');
+ return location.charAt(0).toUpperCase()+location.slice(1);
 }

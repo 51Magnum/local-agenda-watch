@@ -1,5 +1,5 @@
 import {sourceIsStale,sourceFailureCode} from "./source-freshness";
-import {unstable_cache}from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import {geoQuery}from "@/lib/maps/gis";
 import {readSourceFeed,saveSourceFeed}from "./source-cache";
 import {composeMeridianFeed,meridianHtml,parseMeridianNotices,parseMeridianMeetings,parseMeridianAgenda,MERIDIAN_CASES,MERIDIAN_WHERE,MERIDIAN_NOTICES,MERIDIAN_PORTALS,type MeridianCase,type MeridianNotice}from "@/lib/sources/meridian";

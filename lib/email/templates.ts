@@ -1,7 +1,8 @@
+import { residentialOnly } from "../project-overview";
 import { SITE_ORIGIN } from "../site-config";
 import { hearingDateTime } from "../areas/format";
 import { hearingDeadlines, hearingWithinDays, meetingAction, publicMeetingUrl } from "../hearings/presentation";
-import { dateOnly, dedupeProjects, digestSubject, localDay, statusCopy, type EmailProject, type StoredWatchTarget } from "./project";
+import { snapshotClosed, isClosedProject, normalizedStatusCopy, residentPlaceLabel, rankProjects, dateOnly, dedupeProjects, digestSubject, localDay, type EmailProject, type StoredWatchTarget } from "./project";
 
 export type RenderedEmail={subject:string;preheader:string;html:string;text:string};
 export type EmailLinks={mailingAddress:string;unsubscribe:string;manage:string;test?:boolean};
@@ -17,39 +18,46 @@ export function renderDocument(subject:string,preheader:string,html:string,text:
  if(Buffer.byteLength(document,"utf8")+Buffer.byteLength(plain,"utf8")>=68000)throw Error("Email exceeds the 100 KB size limit");
  return {subject,preheader,html:document,text:plain};
 }
+const emailButton=button;
 export function projectBlock(project:EmailProject,now=new Date()){
  const {snapshot:s,data:d}=project;
+ const allowed=(url:string)=>!project.linkChecks || !/^https?:/i.test(url) || new URL(url).hostname===new URL(SITE_ORIGIN).hostname || project.linkChecks[url]?.ok===true;
+ const link=(label:string,url:string)=>allowed(url)?`<a href="${e(safeUrl(url))}" style="color:#006d69;text-decoration:underline">${e(label)}</a>`:"";
+ const button=(label:string,url:string)=>allowed(url)?emailButton(label,url):"";
+ const externalText=(label:string,url?:string)=>url&&allowed(url)?label+": "+safeUrl(url):"";
  const heading=(title:string)=>`<h3 style="font-size:15px;margin:22px 0 6px">${e(title)}</h3>`;
- const where=s.where+(s.where.includes(s.jurisdiction)?"":" · "+s.jurisdiction)+(project.distance?` · ${project.distance.miles.toFixed(1)} miles from ${project.distance.label}`:"");
- const currentStatus=`${statusCopy(s.status)}${s.decisionDate?" "+dateOnly(s.decisionDate,s.timezone):""}`;
+ const where=s.where+(s.where.includes(s.jurisdiction)?"":" · "+s.jurisdiction)+(project.distance?` · ${project.distance.miles.toFixed(1)} miles from ${residentPlaceLabel(project.distance.label)}`:"");
+ const currentStatus=`${normalizedStatusCopy(s)}${s.decisionDate?" "+dateOnly(s.decisionDate,s.timezone):""}`;
  const changed=["Current status: "+currentStatus,...(project.changes.length?project.changes:s.history.filter(h=>!/^Filed\b/.test(h)).slice(-2))];
- const next=s.next?`${d.next?.meeting_body??s.next.body} · ${hearingDateTime(s.next.startsAt,s.timezone)}\n${s.next.location??"Meeting place not yet published"}\n${s.next.role}`:"No upcoming hearing is verified. Any further steps must be confirmed in the official record.";
- const impacts=d.item.residentialPrivacy?[]:d.impacts.slice(0,2);
+ const next=s.next?`${d.next?.meeting_body??s.next.body} · ${hearingDateTime(s.next.startsAt,s.timezone)}\n${s.next.location??"Meeting place not yet published"}`:"No upcoming hearing is verified. Any further steps must be confirmed in the official record.";
+ const impacts=d.item.residentialPrivacy?[]:d.impacts.filter(i=>(!project.linkChecks||!!i.url&&allowed(i.url))&&(!/density|homes\/acre/i.test(i.label+" "+i.value)||residentialOnly(s.headline+" "+d.item.summary+" "+(d.item.popup?.explanation??""),d.item.uses))).slice(0,2);
  const affected=impacts.length?impacts.map(i=>`${i.label}: ${i.value}`).join("\n"):"Specific impacts have not been verified in the available public records.";
- const deadlineSource=publicMeetingUrl(s.next?.deadlineSource??d.next?.commentSourceUrl);
+ const source=s.next?publicMeetingUrl(s.next.deadlineSource??d.next?.commentSourceUrl):undefined;
+ const deadlineSource=source&&allowed(source)?source:undefined;
  const deadline=deadlineSource?(s.next?.deadline??d.next?.commentDeadline):undefined;
  const meetingNext=s.next&&d.next&&hearingWithinDays(d.next,s.timezone,now)?d.next:undefined;
  const meeting=meetingNext?meetingAction(meetingNext):undefined;
- const deadlines=meetingNext?hearingDeadlines(meetingNext):[];
+ const deadlines=meetingNext?hearingDeadlines(meetingNext).filter(d=>allowed(d.source)&&(d.at.length===10?d.at>=localDay(now,"America/Denver"):Date.parse(d.at)>now.getTime())):[];
  const meetingHtml=meetingNext?`${meeting?.url?button(meeting.label,meeting.url):""}${meeting?.packet?`<p>${link("Staff report / packet",meeting.packet)}</p>`:""}${meetingNext.agenda_item_number?`<p>Agenda item ${e(meetingNext.agenda_item_number)}</p>`:""}${!meeting?.agendaPublished&&meetingNext.agenda_expected_at&&publicMeetingUrl(meetingNext.agenda_expected_source_url)?`<p>Agenda expected about ${e(dateOnly(meetingNext.agenda_expected_at,s.timezone))}. ${link("Posting guidance",meetingNext.agenda_expected_source_url!)}</p>`:""}${deadlines.map(deadline=>`<p><strong>${e(deadline.label)}:</strong> ${e(hearingDateTime(deadline.at,s.timezone))}<br>${link("Deadline source",deadline.source)}</p>`).join("")}`:"";
- const meetingText=meetingNext?[meeting?.url?meeting.label+": "+meeting.url:"",meeting?.packet?"Staff report / packet: "+meeting.packet:"",meetingNext.agenda_item_number?"Agenda item: "+meetingNext.agenda_item_number:"",...deadlines.flatMap(deadline=>[deadline.label+": "+hearingDateTime(deadline.at,s.timezone),"Deadline source: "+deadline.source])].filter(Boolean).join("\n"):"";
+ const meetingText=meetingNext?[meeting?.url?externalText(meeting.label,meeting.url):"",meeting?.packet?externalText("Staff report / packet",meeting.packet):"",meetingNext.agenda_item_number?"Agenda item: "+meetingNext.agenda_item_number:"",...deadlines.flatMap(deadline=>[deadline.label+": "+hearingDateTime(deadline.at,s.timezone),externalText("Deadline source",deadline.source)])].filter(Boolean).join("\n"):"";
  const passed=!!d.expiredDeadlineMessage||!!deadline&&(deadline.length===10?deadline<localDay(now,s.timezone):Date.parse(deadline)<=now.getTime());
- const hearingPassed=!!d.next&&(d.next.startsAt.length===10?d.next.startsAt<localDay(now,s.timezone):Date.parse(d.next.startsAt)<=now.getTime());
- const closed=d.participationClosed||/withdrawn|denied|cancelled|canceled/i.test(s.status)||["Decided","Recorded"].includes(d.item.stage);
- const action=closed?"The case is closed. Read the official decision and any published appeal information.":hearingPassed?"The listed hearing has passed. Check the official record for results or a new hearing before submitting comments.":passed?d.expiredDeadlineMessage??"The posted comment deadline has passed. Contact the hearing body’s staff about any remaining participation options.":deadline?"Comment deadline: "+hearingDateTime(deadline,s.timezone)+". "+(d.commentInstructions??"Check the official notice for how to submit."):"No verified comment deadline is published. "+(d.commentInstructions??"Check the official notice for submission options and deadlines.");
- const official=d.officialRecords?.[0]?.url;
+ const hearingPassed=s.normalizedStatus==="hearing_passed_decision_pending" || !!d.next&&(d.next.startsAt.length===10?d.next.startsAt<localDay(now,"America/Denver"):Date.parse(d.next.startsAt)<=now.getTime());
+ const closed=d.participationClosed||snapshotClosed(s)||["Decided","Recorded"].includes(d.item.stage);
+ const action=closed?"The case is closed. Read the official decision and any published appeal information.":hearingPassed||s.normalizedStatus==="hearing_passed_decision_pending"?"The listed hearing has passed. Check the official record for results or a new hearing before submitting comments.":passed?d.expiredDeadlineMessage??"The posted comment deadline has passed. Contact the hearing body’s staff about any remaining participation options.":deadline?"Comment deadline: "+hearingDateTime(deadline,s.timezone)+". "+(d.commentInstructions??"Check the official notice for how to submit."):"No verified comment deadline is published. "+(d.commentInstructions??"Check the official notice for submission options and deadlines.");
+ const official=s.officialRecordUrl??d.officialRecords?.[0]?.url;
+ const explanation=(d.item.popup?.explanation??"").replace(isClosedProject(s.status)?/(?:is being considered|is under consideration)/gi:/$^/,"has a recorded outcome");
  const aiLabel=[d.item.aiTitle?"AI-generated title":undefined,d.item.popup?.aiGenerated?"AI-generated summary":undefined].filter(Boolean).join("; ");
- const image=d.item.residentialPrivacy||d.item.visual?.approval?.generated==="gis-boundary-v1"?undefined:d.item.visual;
+ const image=d.item.residentialPrivacy||d.item.visual&&!allowed(d.item.visual.sourceUrl)||d.item.visual?.approval?.generated==="gis-boundary-v1"?undefined:d.item.visual;
  const photo=image?`<a href="${e(s.key)}"><img src="${e(safeUrl(image.src))}" alt="${e(image.alt)}" width="528" style="display:block;width:100%;max-width:528px;height:auto;border:0;border-radius:6px"></a><p class="email-muted" style="font-size:12px;color:#475569">${e(image.label)}${image.kind==="context"?" · Location/context, not a proposed layout":""} · ${link("Official image source",image.sourceUrl)}</p>`:!d.item.residentialPrivacy&&d.item.geometry?`<a href="${e(s.key)}"><img src="${e(SITE_ORIGIN+"/api/og/project?"+new URLSearchParams({area:s.areaId,case:s.caseId}))}" alt="Project summary and actual mapped boundary; not a proposed layout" width="528" style="display:block;width:100%;max-width:528px;height:auto;border:0"></a>`:"";
- const html=`<section style="border-top:3px solid #007c78;margin-top:28px;padding-top:18px"><h2 style="font-size:23px;line-height:1.3;margin:0 0 12px">${e(s.name)}</h2>${aiLabel?`<p class="email-muted">${e(aiLabel)}; check the linked official record.</p>`:""}${heading("What is it?")}<p style="font-weight:bold;font-size:18px">${e(s.headline)}</p>${d.item.popup?.explanation?`<p>${e(d.item.popup.explanation)}</p>`:""}${photo}${heading("Where is it?")}<p>${e(where)}</p>${heading("What’s happened / WHAT CHANGED")}<div class="email-panel" style="background:#edf6f5;padding:12px 16px;border-left:3px solid #007c78">${changed.map(c=>`<p style="margin:4px 0">${e(c)}</p>`).join("")}</div>${heading("What’s next?")}<p>${e(next).replace(/\n/g,"<br>")}</p>${meetingHtml}${heading("How it affects me")}<p>${e(affected).replace(/\n/g,"<br>")}</p>${impacts.flatMap(i=>i.url?[link(i.label+" source",i.url)]:[]).join(" · ")}${heading("How can I act?")}<p>${e(action)}</p>${deadline&&deadlineSource?`<p>${link("Comment deadline source",deadlineSource)}</p>`:""}${!closed&&!hearingPassed&&!passed&&d.commentUrl?`<p>${link("Official comment and submission instructions",d.commentUrl)}</p>`:""}${button("View project",s.key)}<p>${s.next&&d.calendarHref?link("Add to calendar (.ics)",d.calendarHref)+"<br>":""}${official?link("Official record",official):"Official project record link not yet verified."}</p></section>`;
- const text=[s.name,aiLabel,"What is it?",s.headline,d.item.popup?.explanation??"","Where is it?",where,"What’s happened / WHAT CHANGED",...changed,"What’s next?",next,meetingText,"How it affects me",affected,...impacts.flatMap(i=>i.url?[i.label+" source: "+safeUrl(i.url)]:[]),"How can I act?",action,deadline&&deadlineSource?"Comment deadline source: "+deadlineSource:"",!closed&&!hearingPassed&&!passed&&d.commentUrl?"Comment information: "+safeUrl(d.commentUrl):"","View project: "+s.key,s.next&&d.calendarHref?"Add to calendar (.ics): "+safeUrl(d.calendarHref):"",official?"Official record: "+safeUrl(official):""].filter(Boolean).join("\n");
+ const html=`<section style="border-top:3px solid #007c78;margin-top:28px;padding-top:18px"><h2 style="font-size:23px;line-height:1.3;margin:0 0 12px">${e(s.name)}</h2><p><strong>Case:</strong> ${e((s.caseNumbers??[s.caseId]).join(", "))}</p>${aiLabel?`<p class="email-muted">${e(aiLabel)}; check the linked official record.</p>`:""}${heading("What is it?")}<p style="font-weight:bold;font-size:18px">${e(s.headline)}</p>${explanation?`<p>${e(explanation)}</p>`:""}${photo}${heading("Where is it?")}<p>${e(where)}</p>${heading("What’s happened")}<div class="email-panel" style="background:#edf6f5;padding:12px 16px;border-left:3px solid #007c78">${changed.map(c=>`<p style="margin:4px 0">${e(c)}</p>`).join("")}</div>${heading("What’s next?")}<p>${e(next).replace(/\n/g,"<br>")}</p>${meetingHtml}${heading("How it affects me")}<p>${e(affected).replace(/\n/g,"<br>")}</p>${impacts.flatMap(i=>i.url?[link(i.label+" source",i.url)]:[]).join(" · ")}${heading("How can I act?")}<p>Reference case ${(s.caseNumbers??[s.caseId]).map(e).join(", ")}.</p><p>${e(action)}</p>${deadline&&deadlineSource?`<p>${link("Comment deadline source",deadlineSource)}</p>`:""}${!closed&&!hearingPassed&&!passed&&d.commentUrl?`<p>${link("Official comment and submission instructions",d.commentUrl)}</p>`:""}${button("View project",s.key)}<p>${s.next&&d.calendarHref?link("Add to calendar (.ics)",d.calendarHref)+"<br>":""}${official?link("Official record",official):"Official project record link not yet verified."}</p></section>`;
+ const text=[s.name,"Case: "+(s.caseNumbers??[s.caseId]).join(", "),aiLabel,"What is it?",s.headline,explanation,"Where is it?",where,"What’s happened",...changed,"What’s next?",next,meetingText,"How it affects me",affected,...impacts.flatMap(i=>i.url?[externalText(i.label+" source",i.url)]:[]),"How can I act?","Reference case "+(s.caseNumbers??[s.caseId]).join(", ")+".",action,deadline&&deadlineSource?externalText("Comment deadline source",deadlineSource):"",!closed&&!hearingPassed&&!passed&&d.commentUrl?externalText("Comment information",d.commentUrl):"","View project: "+s.key,s.next&&d.calendarHref?"Add to calendar (.ics): "+safeUrl(d.calendarHref):"",official?externalText("Official record",official):""].filter(Boolean).join("\n");
  return {html,text};
 }
 export function confirmationTemplate(target:StoredWatchTarget,url:string,links:EmailLinks,project?:EmailProject,reconsent=false):RenderedEmail{
  if(target.kind==="project"&&!project)throw Error("A project confirmation requires current project data");
- const name=target.kind==="project"?project!.snapshot.name:target.label;
+ const name=target.kind==="project"?project!.snapshot.name:residentPlaceLabel(target.label);
  const title=target.kind==="pending"||reconsent?"Would you still like local project updates?":"One more step: confirm your alerts";
- const description=target.kind==="place"?`Projects within ${target.radiusMiles} ${target.radiusMiles===1?"mile":"miles"} of ${target.label}`:target.kind==="project"?`Updates about ${name} and its related cases.`:`You previously joined the interest list for ${target.label}. Please confirm whether you still want project updates.`;
+ const description=target.kind==="place"?`Projects within ${target.radiusMiles} ${target.radiusMiles===1?"mile":"miles"} of ${residentPlaceLabel(target.label)}`:target.kind==="project"?`Updates about ${name} and its related cases.`:`You previously joined the interest list for ${residentPlaceLabel(target.label)}. Please confirm whether you still want project updates.`;
  const next=target.kind==="pending"?"After confirming, choose a project or address on the map to start alerts. You are not subscribed to any project yet.":"After confirmation, we’ll send a digest when tracked projects change, plus a reminder two days before a verified upcoming hearing. No changes means no daily digest.";
  const instructions="Select the button below, then select “Confirm alerts” on the page that opens. No alerts start until you complete both steps.";
  const body=project?projectBlock(project):{html:"",text:""};
@@ -58,9 +66,10 @@ export function confirmationTemplate(target:StoredWatchTarget,url:string,links:E
  return renderDocument(`Confirm ${target.kind==="pending"||reconsent?"your interest in ":"alerts for "}${name}`,`Confirm updates for ${name}. No alerts start until you confirm.`,html,`${title}\n\n${consent}\n${description}\n\n${instructions}\n${url}\n\n${next}\n\nThis link expires in 48 hours. If you didn’t request this, ignore this email.\n\n${body.text}`,target.kind==="pending"||reconsent?"You previously registered interest in local alerts. This asks for fresh consent.":"You requested email updates and need to confirm your address.",links);
 }
 export function digestTemplates(input:EmailProject[],links:EmailLinks,placeLabel?:string,reminder=false,now=new Date()):RenderedEmail[]{
- const projects=dedupeProjects(input),groups:EmailProject[][]=[];let group:EmailProject[]=[];
+ if(placeLabel)placeLabel=residentPlaceLabel(placeLabel);
+ const projects=rankProjects(dedupeProjects(input),now),groups:EmailProject[][]=[];let group:EmailProject[]=[];
  const build=(items:EmailProject[])=>{
-  const title=reminder?(links.test?"Hearing reminder preview":"Hearing in two days"):"Updates to the projects you follow",subject=reminder?`${items[0].snapshot.name}: ${links.test?"hearing reminder preview":"hearing in two days"}` : digestSubject(items,placeLabel);
+  const title=reminder?(links.test?"Hearing reminder preview":"Hearing in two days"):"Updates to the projects you follow",subject=reminder?`${items[0].snapshot.name}: ${links.test?"hearing reminder preview":"hearing in two days"}` : digestSubject(items,placeLabel,now);
   const blocks=items.map(p=>projectBlock(p,now));
   return renderDocument(subject,reminder?"Review the hearing, deadline, and official participation options.":`${items.length} verified project update${items.length===1?"":"s"}${placeLabel?" near "+placeLabel:""}.`,`<h1 style="font-size:28px;line-height:1.25">${title}</h1><p>${links.test?"Preview of current records. No new change is asserted. Reminders are sent only two calendar days before a verified hearing.":reminder?"A verified hearing for a project you watch is two calendar days away. Confirm details with the official notice.":"Here is what changed and what you can do next."}</p>`+blocks.map(b=>b.html).join(""),title+"\n\n"+blocks.map(b=>b.text).join("\n\n---\n\n"),placeLabel?`You confirmed updates about projects near ${placeLabel}.`:"You confirmed updates about these projects.",links);
  };
@@ -70,7 +79,7 @@ export function digestTemplates(input:EmailProject[],links:EmailLinks,placeLabel
 }
 /** A recipient gets one combined message even when several pins match many projects. */
 export function recipientDigest(input:EmailProject[],links:EmailLinks,placeLabel?:string,now=new Date()):RenderedEmail[] {
- const projects=dedupeProjects(input),full=digestTemplates(projects,links,placeLabel,false,now);
+ const projects=rankProjects(dedupeProjects(input),now),full=digestTemplates(projects,links,placeLabel,false,now);
  if(full.length<=1)return full;
  // Keep large recipient digests below the transport limit, without sending extra parts.
  const listed=projects.slice(0,50),more=projects.length-listed.length;

@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { emailProject, dedupeProjects, projectDiff, isReminderDue } from "./project";
+import { alertSourceVersion, emailProject, dedupeProjects, projectDiff, isReminderDue } from "./project";
 import { announcementTemplate, confirmationTemplate, correctionTemplate, digestTemplates, type EmailLinks } from "./templates";
 import { alertReadiness, sendAlertMail, sendDigests } from "../alerts";
 import { processRecipients, loadWatchProjects } from "./jobs";
@@ -23,7 +23,7 @@ it("deduplicates city/county or alias records by the loader's canonical lead URL
 it("matches subject counts to actual blocks and uses canonical project links",()=>{
  const a=emailProject(data(),undefined,undefined,now),b={...a,snapshot:{...a.snapshot,key:"https://www.localagendawatch.com/us/id/canyon-county/plan/CR2024-0010",name:"County project"}},c={...a,snapshot:{...a.snapshot,key:"https://www.localagendawatch.com/us/id/nampa/braeburn-creek",name:"Braeburn Creek"}};
  const message=digestTemplates([a,b,c],links,"Home")[0];expect(message.subject).toBe("3 updates near Home: Thruston Choi Farms and 2 more");expect((message.html.match(/<section style=/g)||[])).toHaveLength(3);expect(message.html).not.toContain('/?project=');
- const headings=["What is it?","Where is it?","What’s happened / WHAT CHANGED","What’s next?","How it affects me","How can I act?"];
+ const headings=["What is it?","Where is it?","What’s happened","What’s next?","How it affects me","How can I act?"];
  let index=-1;for(const heading of headings){const next=message.text.indexOf(heading,index+1);expect(next).toBeGreaterThan(index);index=next;}
  expect(message.text).toContain("Add to calendar (.ics)");expect(message.text).toContain("Official record:");
  const ai=data();ai.item.aiTitle=true;ai.item.privacyPolicy="staff-individual";ai.item.popup!.aiGenerated=true;const labeled=digestTemplates([emailProject(ai,undefined,undefined,now)],links)[0];expect(labeled.html).toContain("AI-generated title; AI-generated summary");expect(labeled.text).toContain("AI-generated title; AI-generated summary");ai.item.privacyPolicy=undefined;expect(digestTemplates([emailProject(ai,undefined,undefined,now)],links)[0].html).toContain("AI-generated summary");
@@ -99,7 +99,7 @@ it("places an old approval in history and never in next steps or the subject",()
  expect(message.subject).not.toContain("2025");
 });
 it("silently baselines newly discovered closed cases but still announces active nearby projects",async()=>{
- const d=data(),sub={id:"one",target:{kind:"place",label:"Test1",coordinates:[-116.4,43.6],radiusMiles:1},state:{version:2,projects:{}}} as Subscription;
+ const d=data(),sub={id:"one",email:"preview@example.invalid",unsubscribe_token:"inactive",target:{kind:"place",label:"Test1",coordinates:[-116.4,43.6],radiusMiles:1},state:{version:2,sourceVersions:{meridian:alertSourceVersion("meridian")},projects:{}}} as Subscription;
  const rows=[{areaId:"meridian",id:d.item.id,geometry:{type:"Polygon",coordinates:[[[-116.401,43.599],[-116.399,43.599],[-116.399,43.601],[-116.401,43.601],[-116.401,43.599]]]}}] as Parameters<typeof loadWatchProjects>[1];
  const load=vi.fn().mockResolvedValue(d);
  expect((await loadWatchProjects(sub,rows,load,now))[0].changes[0]).toContain("New project in your watched area");

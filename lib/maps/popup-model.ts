@@ -1,3 +1,5 @@
+import { scheduledContinuations } from "../continuances";
+import { terminalCaseState } from "../case-state";
 import {hearingDateTime} from "@/lib/areas/format";
 import {cleanResidentTitle,cleanResidentProse} from "@/lib/resident-copy";
 import { caseProjectName } from "@/lib/case-details";
@@ -50,9 +52,14 @@ export function buildPopupModel(item: MapCase, area: PopupArea, hearing?: Hearin
     : /conditional use/i.test(item.typeLabel) ? "A request for a use that needs specific approval under the zoning rules. Check the official record for the activity and proposed conditions."
     : /variance/i.test(item.typeLabel) ? "A request for an exception to a zoning requirement. Check the official proposal for the rule and requested exception."
     : `A ${item.typeLabel?.toLowerCase() || "planning"} request is being considered. The official record describes the proposal.`;
-  const headline = copy.headline ?? projectName, explanation = copy.explanation ? cleanResidentProse(copy.explanation) : fallbackExplanation;
+  const headline = copy.headline ?? projectName;
+  const sourceSummary = hearing?.summary || hearing?.description || item.summary;
+  const closed = terminalCaseState(item.recordStatus ?? hearing?.appStatus) || ["Decided","Recorded"].includes(item.stage);
+  const proposedExplanation = copy.explanation ?? (sourceSummary && !/request is being considered/i.test(sourceSummary) ? sourceSummary : undefined);
+  const explanation = cleanResidentProse(proposedExplanation ?? (closed ? "The official record describes this application and its recorded status." : fallbackExplanation))
+    .replace(closed ? /(?:is being considered|is under consideration)/gi : /$^/, "has a recorded outcome");
   const progress: NonNullable<MapCase["popup"]>["progress"] = [];
-  const meetings = [...(hearing?.meetings ?? [])].sort((a,b) => a.date.localeCompare(b.date));
+  const meetings = scheduledContinuations(hearing?.meetings ?? []).sort((a,b) => a.date.localeCompare(b.date));
   const latestDecisionMeeting = [...meetings].reverse().find(m => (m.body === area.bodies.decision.id || /council|commissioners/i.test(m.body)) && m.result);
   const decisionMeeting = /^(approved|denied|withdrawn)\b/i.test(latestDecisionMeeting?.result ?? "") ? latestDecisionMeeting : undefined;
   const decision = newest("councilDecision"), decisionDate = newest("decisionDate")?.value;
@@ -76,6 +83,7 @@ export function buildPopupModel(item: MapCase, area: PopupArea, hearing?: Hearin
     const upcoming = meetings.find(m => m.date >= today && !m.continuedNote);
     if (upcoming) progress.push({ label: meetingLabel(upcoming, area), state: "current" });
     else if (item.nextHearing) progress.push({ label: item.nextHearing.body + " · " + hearingDateTime(item.nextHearing.date, area.timezone), state: "current" });
+    else if (meetings.some(m=>!m.continuedNote&&m.date<today)) progress.push({label:"Hearing passed; decision not yet recorded",state:"current"});
     else progress.push({ label: "Under review, no hearing set yet", state: "current" });
     progress.push({ label: "Decision", state: "future" });
   }

@@ -37,7 +37,7 @@ export function caseProjectOverview(hearing: Hearing, plan: EnerGovPlan | null, 
   const residential = /\b(?:single.family|residential|homes|dwellings?|apartments?)\b/i.test(context + " " + (units?.quote ?? ""));
   const industrial = /\b(?:industrial|warehouse|manufacturing|commercial|retail)\b/i.test(context) || /^(?:IL|IH|BC|GB)/.test(overview.zoning?.value ?? "");
   if (citywide) { overview.homes = undefined; overview.acres = undefined; overview.zoning = undefined; }
-  else if (units && residential) overview.variant = "residential";
+  else if (units && residential) overview.variant = industrial ? "mixed-use" : "residential";
   else if (units && /plat|subdivision/i.test(type)) overview.variant = "subdivision";
   else { overview.homes = undefined; if (industrial) overview.variant = "nonresidential"; }
   const title = caseDisplayTitle(hearing, plan, attachments);

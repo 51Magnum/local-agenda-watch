@@ -1,3 +1,5 @@
+import { withRelatedHearings } from "../related-hearings";
+import { residentialOnly } from "../project-overview";
 import { reconcileDecisionHistory } from "./project-status";
 import {residentMapCase} from "../resident-content-policy";
 import {latestSuccessfulCheck} from "./record-freshness";
@@ -8,7 +10,7 @@ import {projectLocation} from "./project-location";
 import {residentialCase,redactResidence,protectMapCase,privateResidentialDocument} from "@/lib/residential-privacy";
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { officialProjectRecords, residentPaneHref } from "./project-records";
-import { unstable_cache } from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import { getJurisdiction } from "./jurisdictions";
 import { readMapSnapshot } from "./store";
 import { enrichMapPopups } from "./popup-data";
@@ -70,7 +72,7 @@ async function detail(
       readTimelineState(ids, areaId),
     ]),
     item = items[0],
-    hearing = caseCatalog(feed).find((h) => h.appId === caseId),
+    hearing = (() => { const h = caseCatalog(feed).find((h) => h.appId === caseId); return h ? withRelatedHearings(h, feed) : undefined; })(),
     record =
       hearing && !item.citywide && !project?.location
         ? await config.recordForCase?.(hearing)
@@ -152,6 +154,7 @@ async function detail(
     homes > 0 &&
     acres > 0 &&
     !item.citywide &&
+    residentialOnly([item.summary,item.popup?.headline,item.popup?.explanation,overview.zoning?.value].filter(Boolean).join(" "),item.uses) &&
     overview.homes?.url === overview.acres?.url
   )
     impacts.push({
@@ -181,6 +184,7 @@ async function detail(
   const sensitive=residentialCase(areaId,caseId,{hearing,record,item},await privacyOverrides());
   const continuances=continuanceHistory(record?.events ?? (hearing?.meetings??[]).map(m=>({...m,note:m.continuedNote??undefined})),next?.startsAt.slice(0,10));
   const result:PaneData = {
+    lastHearing: (hearing?.meetings ?? []).filter(m=>!m.continuedNote && m.date <= new Intl.DateTimeFormat("en-CA",{timeZone:"America/Denver"}).format(new Date())).map(m=>m.date).sort().at(-1),
     item,
     officialRecords,
     summarySource:agenda?residentPaneHref(area,agenda.sourceUrl):content?.source?residentPaneHref(area,content.source.url+"#page="+content.source.page):undefined,
@@ -198,7 +202,7 @@ async function detail(
       planningBody: area.bodies.planning.label,
       decisionBody: area.bodies.decision.label,
     },
-    caseIds: ids,
+    caseIds: [...new Set([...ids,...(hearing?.relatedCaseIds??[])])],
     where: item.citywide
       ? "Citywide change — " + area.name
       : agenda?.where ?? await projectLocation(item,area.name,project?.location ?? (areaId==="nampa"?CASE_EVIDENCE[caseId]?.address:undefined) ?? record?.address),
@@ -251,7 +255,7 @@ async function detail(
 }
 export async function projectDetail(areaId:string,caseId:string){
  if(jurisdiction(areaId)&&!jurisdiction(areaId).legacyPublic)return detail(areaId,caseId);
- const data=await unstable_cache(detail,["map-project-questions-v17-record-freshness-policy"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);if(!data)return null;
+ const data=await unstable_cache(detail,["map-project-questions-v18-continuations"],{revalidate:86400,tags:["map-area:"+areaId,TIMELINE_CACHE_TAG,"residential-privacy-v1"]})(areaId,caseId);if(!data)return null;
  // Fresh check metadata and agenda publication are independent of the long-lived project copy cache.
  const next=data.next?{...await resolveHearingMeeting(areaId,caseId,data.next),role:data.next.role}:undefined;
  const latest=latestSuccessfulCheck({areaId,caseIds:data.caseIds,state:await readTimelineState(data.caseIds,areaId),schedule:await readSchedule(),hearing:next});

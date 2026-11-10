@@ -10,6 +10,7 @@
     "test": "vitest run",
     "check:links": "node --conditions=react-server --import tsx scripts/check-resident-links.ts",
     "test:watch": "vitest",
+    "alerts:dry-run": "node --conditions=react-server --import tsx --env-file-if-exists=.env.local scripts/preview-alerts.ts",
     "timeline:sync": "node --conditions=react-server --import tsx --env-file-if-exists=.env.local scripts/sync-case-timeline.ts",
     "maps:sync": "node --conditions=react-server --import tsx --env-file-if-exists=.env.local scripts/refresh-maps.ts",
     "prebuild": "node scripts/generate-jurisdictions.mjs && node scripts/prepare-map-assets.mjs",

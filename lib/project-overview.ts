@@ -42,6 +42,7 @@ export function projectOverview(data: TimelineData, editorial: ProjectOverview =
 }
 export function numericFact(fact?: SourcedFact) { const number = fact && Number(fact.value.replace(/,/g, "").match(/\d+(?:\.\d+)?/)?.[0]); return number && Number.isFinite(number) ? number : undefined; }
 export function projectDensity(overview: ProjectOverview): string | undefined {
+  if (["mixed-use","nonresidential","subdivision","zoning"].includes(overview.variant??"") || /commercial|industrial|mixed[ -]use/i.test([overview.summary,overview.zoning?.value,overview.use?.value].join(" "))) return;
   const homes = numericFact(overview.homes), acres = numericFact(overview.acres);
   return homes && acres ? "~" + (homes / acres).toFixed(1) + " homes/acre" : undefined;
 }
@@ -62,4 +63,11 @@ export function isPortalInventoryUrl(value: string): boolean {
     const url = new URL(value);
     return /(^|\.)tylerhost\.net$/i.test(url.hostname) && /#\/plan\//i.test(url.hash);
   } catch { return false; }
+}
+
+/** Total site acreage cannot establish residential density in a mixed-use proposal. */
+export function residentialOnly(description:string,uses?:string[]):boolean {
+  return !/commercial|industrial|retail|office|mixed[ -]use|business park/i.test(description)
+    && !(uses?.some(use=>use!=="homes"))
+    && (uses?.includes("homes")===true || /homes|single.family|residential|dwellings/i.test(description));
 }
