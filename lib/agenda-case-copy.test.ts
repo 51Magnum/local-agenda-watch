@@ -12,7 +12,7 @@ it("uses Quarry Village's exact agenda request instead of the older Costco GIS n
   expect(copy.name).toBe("Quarry Village");
   expect(copy.headline).toContain("5-year development agreement extension to July 19, 2031");
   expect(copy.explanation).toContain("by 5 years");
-  expect(copy.where).toBe("the north side of Hill Road between State Highway 55 and North Horseshoe Bend Road");
+  expect(copy.where).toBe("The north side of Hill Road between State Highway 55 and North Horseshoe Bend Road");
   expect(JSON.stringify(copy)).not.toMatch(/Costco|zoning rules/);
   expect(copy.sourceUrl).toBe(meeting.sourceUrl);
 });

@@ -1,4 +1,4 @@
-import {unstable_cache} from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import {createHash} from "node:crypto";
 import {extractText} from "unpdf";
 import {geoQuery} from "@/lib/maps/gis";

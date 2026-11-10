@@ -20,7 +20,7 @@ import { caseCatalog } from "@/lib/case-catalog";
 import { getCaseNextHearing } from "@/lib/case-details";
 import type {PublicCaseRecord,RecordEvent} from "@/lib/localities/record-types";
 import { areaPath, getArea } from "./registry";
-import { areaDate, areaTime, hearingDateTime } from "./format";
+import { areaDate, hearingDateTime } from "./format";
 import { readMapSnapshot } from "@/lib/maps/store";
 import { hearingCalendar } from "@/lib/projects";
 type RecordCase=Hearing&{record:PublicCaseRecord};

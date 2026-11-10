@@ -1,3 +1,4 @@
+import { scheduledContinuations } from "../continuances";
 import type {AreaDefinition} from "@/lib/areas/registry";
 import type {HearingFeed} from "@/lib/localities/types";
 import type {EvidenceState} from "./types";
@@ -46,7 +47,7 @@ export function mergeMeetingIndex(state:ScheduleState,feeds:Record<string,Hearin
    const id=[areaId,body,date].join(":"),old=meetings.get(id);
    meetings.set(id,{id,areaId,body,date,caseIds:[...new Set([...(old?.caseIds??[]),...ids])],resolvedCaseIds:old?.resolvedCaseIds??[],lastChecked:old?.lastChecked});
   };
-  for(const h of [...feed.active,...feed.completed,...(feed.upcomingOnly??[])])for(const m of h.meetings)add(m.body,m.date,[h.appId]);
+  for(const h of [...feed.active,...feed.completed,...(feed.upcomingOnly??[])])for(const m of scheduledContinuations(h.meetings))add(m.body,m.date,[h.appId]);
   for(const m of feed.agendaMeetings??[])add(m.body,m.date,m.items.flatMap(i=>i.caseIds));
  }
  return [...meetings.values()];

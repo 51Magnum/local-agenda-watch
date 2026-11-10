@@ -1,4 +1,4 @@
-import {databaseUrl} from "../runtime-environment";
+import {databaseUrl,isReadOnly} from "../runtime-environment";
 import {trackedRows} from "@/lib/db-transfer";
 import { Pool } from "../database-pool";
 import {mkdir,readFile,writeFile,rename} from "node:fs/promises";
@@ -14,6 +14,7 @@ export async function readSourceFeed(area:string,options:{omitPdfCache?:boolean}
  try{return JSON.parse(await readFile(file(area),"utf8"));}catch(e){if((e as NodeJS.ErrnoException).code!=="ENOENT")throw e;}
 }
 export async function saveSourceFeed(area:string,feed:HearingFeed){
+ if(isReadOnly())return;
  if(databaseUrl()){const db=database();await initialized;await db.query("INSERT INTO law_source_cache (area,snapshot) VALUES ($1,$2::jsonb) ON CONFLICT (area) DO UPDATE SET snapshot=excluded.snapshot",[area,JSON.stringify(feed)]);return;}
  if(process.env.VERCEL)return;
  await mkdir(path.dirname(file(area)),{recursive:true});const temp=file(area)+"."+randomUUID()+".tmp";await writeFile(temp,JSON.stringify(feed));await rename(temp,file(area));

@@ -1,7 +1,7 @@
 import {databaseUrl} from "./runtime-environment";
 import {requireProductionMutation} from "./runtime-environment";
 import {Pool} from "./database-pool";
-import {unstable_cache} from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import {PRIVACY_TAG,residentialCase,type PrivacyOverrides} from "./residential-privacy";
 let pool:Pool,ready:Promise<unknown>|undefined;
 async function db(){pool??=new Pool({connectionString:databaseUrl(),max:1,connectionTimeoutMillis:10000});ready??=pool.query("CREATE TABLE IF NOT EXISTS law_residential_privacy(area_id text NOT NULL,case_id text NOT NULL,mode text NOT NULL,reason text NOT NULL,updated_at timestamptz NOT NULL DEFAULT now(),PRIMARY KEY(area_id,case_id))").catch(e=>{ready=undefined;throw e;});await ready;return pool;}

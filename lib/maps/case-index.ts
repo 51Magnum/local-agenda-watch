@@ -13,7 +13,8 @@ import {residentialCase,protectMapCase,residentialPublicTitle,PRIVACY_TAG} from 
 import {privacyOverrides} from "@/lib/residential-privacy-store";
 import { Pool } from "../database-pool";
 import { bbox, simplify, feature } from "@turf/turf";
-import { unstable_cache, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import { getArea, canonicalAreaHref } from "@/lib/areas/registry";
 import { readMapSnapshot } from "./store";
 import { combineRadiusCases } from "./radius";

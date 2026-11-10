@@ -68,6 +68,7 @@ export type AgendaMeeting = {
 };
 
 export type ScheduledMeeting = {
+  continuationFrom?: string;
   /** Published case-specific deadline; a date alone does not imply a time. */
   commentDeadline?: string;
   minutesUrl?: string;
@@ -95,6 +96,8 @@ export type ScheduledMeeting = {
 };
 
 export type Hearing = {
+  /** Officially associated case numbers, never inferred from proximity or name. */
+  relatedCaseIds?: string[];
   aiTitle?:boolean;
   residentialPrivacy?:boolean;privacyPolicy?:"staff-individual";
   /** Provider-authored short title and neutral summary, when available. */

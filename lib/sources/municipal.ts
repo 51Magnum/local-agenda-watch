@@ -1,3 +1,4 @@
+import { withRelatedHearings } from "../related-hearings";
 import {load} from "cheerio";
 import type {Feature} from "geojson";
 import type {Hearing,HearingFeed,AgendaMeeting} from "@/lib/localities/types";
@@ -96,6 +97,8 @@ export function addAgendaCases(area:MunicipalId,cases:Map<string,MunicipalCase>,
 export function composeMunicipalFeed(cases:MunicipalCase[],meetings:AgendaMeeting[],now=new Date()):HearingFeed{
  for(const h of cases){for(const hearing of h.meetings){const meeting=meetings.find(m=>m.body===hearing.body&&m.date===hearing.date);if(meeting){hearing.time=meeting.localStartTime??hearing.time;hearing.agendaUrl=meeting.agendaUrl??hearing.agendaUrl;hearing.minutesUrl=meeting.minutesUrl??hearing.minutesUrl;}}
  const stage=municipalStage(h,now);h.appPhaseRaw=stage;h.appPhase=stage==="P&Z"?"PZ Commission":stage==="Council/Board"?"City Council":"Review";h.displayTitle=municipalTitle(h);h.summary=municipalSummary(h);h.meetings.sort((a,b)=>a.date.localeCompare(b.date));}
+ const relatedFeed={active:cases,completed:[]};
+ cases=cases.map(c=>({...c,...withRelatedHearings(c,relatedFeed)}));
  return {active:cases.filter(c=>!c.decisionRecorded),completed:cases.filter(c=>c.decisionRecorded),agendaMeetings:meetings,refreshedAt:now.toISOString()};
 }
 export function municipalRecord(h:Hearing):PublicCaseRecord{

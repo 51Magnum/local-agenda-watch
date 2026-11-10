@@ -1,5 +1,6 @@
+import { scheduledContinuations } from "../continuances";
 import { getNampaPrimeGovMeetings } from "@/lib/sources/primegov";
-import { unstable_cache } from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 import { createEnerGovClient } from "@/lib/sources/energov";
 import { queryFeatures, type ArcGISLayerConfig } from "@/lib/sources/arcgis";
 import {
@@ -136,8 +137,8 @@ export function indexScheduledMeetings(
     });
     byAppId.set(r.appId, list);
   }
-  for (const list of byAppId.values()) {
-    list.sort((a, b) => a.date.localeCompare(b.date));
+  for (const [appId,list] of byAppId) {
+    byAppId.set(appId,scheduledContinuations(list).sort((a, b) => a.date.localeCompare(b.date)));
   }
   return byAppId;
 }
@@ -276,7 +277,7 @@ export const nampa: Locality = {
   ],
   // Cache the snapshot and its timestamp together; underlying requests bypass
   // their own cache so a new timestamp always represents a fresh retrieval.
-  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v5"], {
+  getHearings: unstable_cache(getNampaHearings, ["nampa:hearing-feed:v6-continuations"], {
     revalidate: 1800,
     tags: ["nampa:pz:active", "nampa:pz:completed", "nampa:scheduled", "nampa:primegov"],
   }),

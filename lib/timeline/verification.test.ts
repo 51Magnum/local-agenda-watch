@@ -1,4 +1,4 @@
-import { expect, it, vi } from "vitest";
+import { expect, it } from "vitest";
 import { emptyEvidenceState, EXTRACTED_KEYS, publicFields, type EvidenceField, type StoredDocument } from "./types";
 import { bodyLabel, caseMatchesQuote, canAutoApprove, correctedKey, countSpeakers, reconcileFields, verifyCandidate } from "./verification";
 import { accuracyStats, reviewBatch, undoBatch } from "./review";

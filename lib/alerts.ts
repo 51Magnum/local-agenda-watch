@@ -1,4 +1,5 @@
-import {databaseUrl} from "./runtime-environment";
+import { verifyProjectLinks } from "./email/links";
+import {databaseUrl,isReadOnly} from "./runtime-environment";
 import {getProjectForCase} from "./projects";
 import { Pool } from "./database-pool";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
@@ -91,7 +92,7 @@ export function parseWatchTarget(value: unknown): WatchTarget {
   throw Error("Choose a valid project or a place with a 0.25–10 mile radius");
 }
 export function alertReadiness() {
-  const deliveryEnabled=process.env.ALERTS_DELIVERY_ENABLED === "true" && process.env.VERCEL_ENV === "production";
+  const deliveryEnabled=!isReadOnly()&&process.env.ALERTS_DELIVERY_ENABLED === "true" && process.env.VERCEL_ENV === "production";
   return {
     ready: !!(process.env.RESEND_API_KEY?.trim() && process.env.ALERTS_MAILING_ADDRESS?.trim()),
     deliveryEnabled,
@@ -116,6 +117,7 @@ export async function sendAlertMail({
   unsubscribe: string;
   mode?: "live" | "test" | "internal" | "signin";
 }) {
+  if(isReadOnly())throw Error("Email delivery is disabled in read-only mode");
   if(mode==="signin"&&process.env.VERCEL_ENV!=="production")throw Error("Sign-in delivery is disabled outside production");
   if(mode!=="test"&&mode!=="signin"&&!alertReadiness().deliveryEnabled)throw Error("Live email delivery is paused pending owner approval");
   if(mode==="internal"&&to!=="corrections@localagendawatch.com")throw Error("Internal corrections mail has a fixed recipient");
@@ -200,7 +202,7 @@ export async function subscribeAlert(
   try {
     await sendAlertMail({
       to: email,
-      ...confirmationTemplate(target,url,{mailingAddress:process.env.ALERTS_MAILING_ADDRESS!,unsubscribe:remove,manage:origin+"/api/alerts/manage?token="+unsubscribe},detail?emailProject(detail):undefined,options.reconsent),
+      ...confirmationTemplate(target,url,{mailingAddress:process.env.ALERTS_MAILING_ADDRESS!,unsubscribe:remove,manage:origin+"/api/alerts/manage?token="+unsubscribe},detail?await verifyProjectLinks(emailProject(detail)):undefined,options.reconsent),
       key: "confirm/" + id + "/" + hash(token),
       unsubscribe: remove,
     });

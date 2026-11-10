@@ -1,7 +1,7 @@
 import {enabledPlanningAreas} from "./flum-areas";
 import manifest from "@/public/flum/manifest.json";
 import {visibleAreas} from "@/lib/areas/registry";
-import { unstable_cache } from "next/cache";
+import { readCache as unstable_cache } from "@/lib/read-cache";
 
 import { getJurisdiction } from "./jurisdictions";
 import { readFlumSnapshot } from "./store";

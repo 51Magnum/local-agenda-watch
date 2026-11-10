@@ -29,17 +29,14 @@ it("uses a county agenda for an agenda-only case and never exposes a raw GIS que
   });
   expect(
     officialProjectRecords(AREAS["canyon-county"], [hearing(raw)])[0],
-  ).toMatchObject({
-    url: "https://landhearingsagenda.canyoncounty.id.gov/Landing",
-    label: expect.stringContaining("archive — search case"),
-  });
+  ).toBeUndefined();
 });
 it("deduplicates a shared official folder across linked cases", () => {
   const url =
     "https://weblink.meridiancity.org/WebLink/Browse.aspx?dbid=0&startid=123";
   const first = hearing(url),
     second = { ...hearing(url), appId: "LINKED" };
-  const links = officialProjectRecords(AREAS.meridian, [first, second]);
+  const links = officialProjectRecords({...AREAS.meridian,residentAccess:undefined}, [first, second]);
   expect(links).toHaveLength(1);
   expect(links[0].label).toContain("EXAMPLE · LINKED");
 });
@@ -61,16 +58,15 @@ it("labels a broad Meridian fallback as an archive instead of pretending it is a
   const [link] = officialProjectRecords(AREAS.meridian, [
     hearing("https://weblink.meridiancity.org/WebLink/Browse.aspx?id=123"),
   ]);
-  expect(link.url).toContain("meetings.municode.com/");
-  expect(link.label).toContain("archive — search case");
+  expect(link).toBeUndefined();
 });
 
 it("distinguishes a jurisdiction project map and an agenda PDF from a direct project record", () => {
   expect(
     officialProjectRecords(AREAS.eagle, [
       hearing("https://experience.arcgis.com/experience/example"),
-    ])[0].label,
-  ).toContain("project map — search case");
+    ])[0],
+  ).toBeUndefined();
   expect(
     officialProjectRecords(AREAS.star, [
       hearing(

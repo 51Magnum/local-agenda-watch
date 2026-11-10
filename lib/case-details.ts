@@ -1,3 +1,4 @@
+import { withRelatedHearings } from "./related-hearings";
 import{FEATURED_AREA_ID}from"./areas/public-registry";
 import{displayArea}from"./areas/format";
 import { CASE_EVIDENCE } from "@/lib/case-evidence";
@@ -27,6 +28,7 @@ export function denverInstant(date: string, time: string,timezone=displayArea().
 
 export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = new Date(),areaId=FEATURED_AREA_ID): ProjectHearing | undefined {
   const area=displayArea(areaId);
+  hearing = withRelatedHearings(hearing, feed);
   if (getCaseStage(hearing, false, now) === "Decided") return undefined;
   const project = getProjectForCase(hearing.appId,areaId);
   if (project) {
@@ -43,15 +45,16 @@ export function getCaseNextHearing(hearing: Hearing, feed?: HearingFeed, now = n
   // Nampa's published hearing schedule specifies 6 p.m. for Council and P&Z.
   // Use an explicitly published hearing time before a general meeting's start.
   const isCityHearing = !!area.sources.hearingsSchedule&&next.sourceUrl.startsWith(area.sources.hearingsSchedule);
-  const time = next.time ?? (isCityHearing ? area.meetingRules.defaultHearingTime : agendaMeeting?.localStartTime);
+  const time = next.continuationFrom ? undefined : next.time ?? (isCityHearing ? area.meetingRules.defaultHearingTime : agendaMeeting?.localStartTime);
   return {
     startsAt: time ? denverInstant(next.date, time,area.timezone) : next.date,
+    continuationFrom: next.continuationFrom,
     body: next.bodyLabel,
     location: next.location || agendaMeeting?.location || (area.meetingRules.location??"Location not confirmed — check the official agenda."),
     sourceUrl: next.sourceUrl,
     agendaUrl: next.agendaUrl ?? agendaMeeting?.agendaUrl,
     packetUrl: next.packetUrl ?? agendaMeeting?.packetUrl,
-    ...(next.commentDeadline ? {commentDeadline:next.commentDeadline,commentSourceUrl:next.sourceUrl} : council&&area.meetingRules.decisionCommentDeadlineHour!=null ? { commentDeadline: denverInstant(next.date, String(area.meetingRules.decisionCommentDeadlineHour).padStart(2,"0")+":00",area.timezone), commentSourceUrl: area.commentInstructionsUrl } : {}),
+    ...(!next.continuationFrom && next.commentDeadline ? {commentDeadline:next.commentDeadline,commentSourceUrl:next.sourceUrl} : !next.continuationFrom&&council&&area.meetingRules.decisionCommentDeadlineHour!=null ? { commentDeadline: denverInstant(next.date, String(area.meetingRules.decisionCommentDeadlineHour).padStart(2,"0")+":00",area.timezone), commentSourceUrl: area.commentInstructionsUrl } : {}),
   };
 }
 

@@ -1,3 +1,5 @@
+import { withRelatedHearings } from "../related-hearings";
+import { terminalCaseState } from "../case-state";
 import {readProjectContent} from "@/lib/project-content-store";
 import { agendaCaseCopy } from "@/lib/agenda-case-copy";
 import { cleanResidentTitle } from "@/lib/resident-copy";
@@ -28,14 +30,15 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
     const ids = project?.caseIds ?? [item.id];
     const fields = publicFields(state, ids, config.id);
     let hearing = catalog.get(item.id);
+    if (hearing) hearing = withRelatedHearings(hearing, feed);
     if (hearing && project?.nextHearing) {
       const known = project.nextHearing;
-      hearing = { ...hearing, meetings: [...hearing.meetings.filter(m => !(m.date === known.startsAt.slice(0,10) && m.body === known.body)), {
+      hearing = { ...hearing, meetings: [...hearing.meetings, ...(!hearing.meetings.some(m => m.date === known.startsAt.slice(0,10) && m.body === known.body) ? [{
         date: known.startsAt.slice(0,10), time: known.startsAt.slice(11,16), body: known.body, bodyLabel: known.body, dateLabel: known.startsAt.slice(0,10), sourceUrl: known.sourceUrl, continuedNote: null,
-      }] };
+      }] : [])] };
     }
     if (hearing && project?.pastHearings) hearing = { ...hearing, meetings: [...hearing.meetings, ...project.pastHearings.filter(p => !hearing!.meetings.some(m => m.date === p.date && /planning|P&Z/i.test(m.body))).map(p => ({ date: p.date, dateLabel: p.date, body: config.area!.bodies.planning.id, bodyLabel: config.area!.bodies.planning.label, sourceUrl: p.sourceUrl, continuedNote: null }))] };
-    if(hearing && (hearing.decisionRecorded || !item.nextHearing && /^(approved|denied|withdrawn)\b/i.test(hearing.appStatus))) item={...item,stage:item.stage==="Recorded"?"Recorded":"Decided",recordStatus:hearing.appStatus,nextHearing:undefined};
+    if(hearing && (hearing.decisionRecorded || terminalCaseState(hearing.appStatus) && !hearing.meetings.some(m=>!m.continuedNote&&m.date>=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Denver"}).format(new Date())))) item={...item,stage:item.stage==="Recorded"?"Recorded":"Decided",recordStatus:hearing.appStatus,nextHearing:undefined};
     const popup = buildPopupModel(item, config.area!, hearing, fields);
     // A verified authored project uses its latest application figures, never the older neighborhood notice.
     if (project) {
@@ -71,6 +74,7 @@ export async function enrichMapPopups(config: JurisdictionConfig, cases: MapCase
       popup.projectName=agenda.name;popup.headline=agenda.headline;popup.explanation=agenda.explanation;popup.aiGenerated=false;
       item={...item,title:agenda.name,summary:agenda.explanation};
     }
+    if (terminalCaseState(item.recordStatus??hearing?.appStatus)) popup.explanation=popup.explanation?.replace(/is being considered|is under consideration/gi,"has a recorded outcome");
     return protectMapCase(config.id,{...item,popup,visual,residentialPrivacy:residentialCase(config.id,item.id,{item,hearing},overrides)},overrides);
   });
 }
