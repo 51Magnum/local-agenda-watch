@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "hash": "ac5fbcf8ca1fc1ad",
-  "url": "/flum/flum-ac5fbcf8ca1fc1ad.pmtiles",
+  "hash": "886040c7278ae7f4",
+  "url": "/flum/flum-886040c7278ae7f4.pmtiles",
   "sourceLayer": "flum",
   "bounds": [
     -117.031575,
@@ -11,10 +11,10 @@
   ],
   "minZoom": 5,
   "maxZoom": 14,
-  "updatedAt": "2026-11-08T19:51:13.226Z",
+  "updatedAt": "2026-11-15T20:28:36.608Z",
   "features": 12739,
   "tiles": 1820,
-  "maxTileBytes": 107537,
+  "maxTileBytes": 107536,
   "legend": [
     {
       "value": "Residential low",
