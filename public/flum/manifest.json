@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "hash": "886040c7278ae7f4",
-  "url": "/flum/flum-886040c7278ae7f4.pmtiles",
+  "hash": "278c73b20366b1e0",
+  "url": "/flum/flum-278c73b20366b1e0.pmtiles",
   "sourceLayer": "flum",
   "bounds": [
     -117.031575,
@@ -11,19 +11,19 @@
   ],
   "minZoom": 5,
   "maxZoom": 14,
-  "updatedAt": "2026-11-15T20:28:36.608Z",
+  "updatedAt": "2026-11-22T21:09:05.075Z",
   "sourceDates": {
-    "ada-county": "2026-11-15T20:28:36.608Z",
-    "boise": "2026-11-15T20:28:37.134Z",
-    "canyon-county": "2026-11-15T20:28:37.982Z",
-    "eagle": "2026-11-15T20:28:38.323Z",
-    "kuna": "2026-11-15T20:28:42.245Z",
-    "meridian": "2026-11-15T20:28:42.654Z",
-    "nampa": "2026-11-15T20:28:43.458Z"
+    "ada-county": "2026-11-22T21:09:05.075Z",
+    "boise": "2026-11-22T21:09:05.645Z",
+    "canyon-county": "2026-11-22T21:09:06.444Z",
+    "eagle": "2026-11-22T21:09:06.968Z",
+    "kuna": "2026-11-22T21:09:10.860Z",
+    "meridian": "2026-11-22T21:09:11.252Z",
+    "nampa": "2026-11-22T21:09:11.796Z"
   },
   "features": 12739,
   "tiles": 1820,
-  "maxTileBytes": 107536,
+  "maxTileBytes": 107537,
   "legend": [
     {
       "value": "Residential low",
